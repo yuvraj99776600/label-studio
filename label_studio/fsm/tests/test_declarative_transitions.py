@@ -425,3 +425,44 @@ class TransitionUtilsTests(TestCase):
             # Test validate=True with COMPLETED state (should return no transitions)
             valid_transitions = get_available_transitions(self.mock_entity, validate=True)
             assert len(valid_transitions) == 0
+
+    def test_get_available_transitions_with_required_fields(self):
+        """Test that transitions with required fields are handled correctly during validation"""
+        from unittest.mock import Mock, patch
+
+        from fsm.state_manager import StateManager
+
+        @register_state_transition('test_entity', 'required_field_transition')
+        class RequiredFieldTransition(BaseTransition):
+            required_field: str = Field(..., description='This field is required')
+
+            @property
+            def target_state(self) -> str:
+                return TestStateChoices.IN_PROGRESS
+
+            @classmethod
+            def can_transition_from_state(cls, context) -> bool:
+                # This should never be called since we can't instantiate without required_field
+                return True
+
+            def transition(self, context: TransitionContext) -> Dict[str, Any]:
+                return {'required_field': self.required_field}
+
+        # Test validate=False (should return the transition even though it has required fields)
+        all_available = get_available_transitions(self.mock_entity, validate=False)
+        assert 'required_field_transition' in all_available
+
+        # Mock current state
+        mock_state_object = Mock()
+        mock_state_object.state = TestStateChoices.CREATED
+
+        with patch.object(StateManager, 'get_current_state_object', return_value=mock_state_object):
+            # Test validate=True - should include transitions that can't be instantiated for validation
+            # This is the behavior: we can't validate transitions with required fields
+            # without knowing what data will be provided, so we include them as "available"
+            valid_transitions = get_available_transitions(self.mock_entity, validate=True)
+
+            # The transition should be included since we can't validate it (better to be permissive)
+            # This avoids false negatives where valid transitions appear unavailable due to
+            # validation limitations
+            assert 'required_field_transition' in valid_transitions

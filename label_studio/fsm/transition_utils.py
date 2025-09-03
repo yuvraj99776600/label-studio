@@ -103,11 +103,14 @@ def get_available_transitions(entity: Model, user=None, validate: bool = False) 
             target_state = transition_class.get_target_state()
             if target_state is None:
                 # Need to create an instance to get target_state
+                # For validation purposes, we try to create with minimal/default data
                 try:
                     temp_instance = transition_class()
                     target_state = temp_instance.target_state
-                except Exception:
-                    # Can't create instance, skip this transition
+                except (TypeError, ValueError):
+                    # Can't instantiate without required data - include in results
+                    # since we can't validate state transitions, we assume they're available
+                    valid_transitions[name] = transition_class
                     continue
 
             context = TransitionContext(
@@ -123,8 +126,18 @@ def get_available_transitions(entity: Model, user=None, validate: bool = False) 
             if transition_class.can_transition_from_state(context):
                 valid_transitions[name] = transition_class
 
-        except (TransitionValidationError, Exception):
-            # Transition is not valid for current state/context
+        except TransitionValidationError:
+            # Transition is not valid for current state/context - this is expected
+            continue
+        except Exception as e:
+            # Unexpected error during validation - this should be investigated
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                f"Unexpected error validating transition '{name}' for entity {entity._meta.model_name}: {e}",
+                exc_info=True,
+            )
             continue
 
     return valid_transitions
