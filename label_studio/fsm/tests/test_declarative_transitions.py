@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import Any, Dict
 from unittest.mock import Mock
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.test import TestCase
@@ -80,9 +81,9 @@ class CoreFrameworkTests(TestCase):
 
         # Test instantiation
         transition = TestTransition(test_field='test_value')
-        self.assertEqual(transition.test_field, 'test_value')
-        self.assertEqual(transition.target_state, TestStateChoices.IN_PROGRESS)
-        self.assertEqual(transition.transition_name, 'test_transition')
+        assert transition.test_field == 'test_value'
+        assert transition.target_state == TestStateChoices.IN_PROGRESS
+        assert transition.transition_name == 'test_transition'
 
     def test_transition_context(self):
         """Test TransitionContext functionality"""
@@ -94,19 +95,19 @@ class CoreFrameworkTests(TestCase):
             current_user=self.user,
         )
 
-        self.assertEqual(context.entity, self.mock_entity)
-        self.assertEqual(context.current_state, TestStateChoices.CREATED)
-        self.assertEqual(context.target_state, TestStateChoices.IN_PROGRESS)
-        self.assertEqual(context.current_user, self.user)
-        self.assertTrue(context.has_current_state)
-        self.assertFalse(context.is_initial_transition)
+        assert context.entity == self.mock_entity
+        assert context.current_state == TestStateChoices.CREATED
+        assert context.target_state == TestStateChoices.IN_PROGRESS
+        assert context.current_user == self.user
+        assert context.has_current_state
+        assert not context.is_initial_transition
 
     def test_transition_context_properties(self):
         """Test TransitionContext computed properties"""
         # Test initial transition
         context = TransitionContext(entity=self.mock_entity, current_state=None, target_state=TestStateChoices.CREATED)
-        self.assertTrue(context.is_initial_transition)
-        self.assertFalse(context.has_current_state)
+        assert context.is_initial_transition
+        assert not context.has_current_state
 
         # Test with current state
         context_with_state = TransitionContext(
@@ -114,8 +115,8 @@ class CoreFrameworkTests(TestCase):
             current_state=TestStateChoices.CREATED,
             target_state=TestStateChoices.IN_PROGRESS,
         )
-        self.assertFalse(context_with_state.is_initial_transition)
-        self.assertTrue(context_with_state.has_current_state)
+        assert not context_with_state.is_initial_transition
+        assert context_with_state.has_current_state
 
     def test_transition_registry(self):
         """Test transition registration and retrieval"""
@@ -131,12 +132,12 @@ class CoreFrameworkTests(TestCase):
 
         # Test registration
         retrieved = transition_registry.get_transition('test_entity', 'test_transition')
-        self.assertEqual(retrieved, TestTransition)
+        assert retrieved == TestTransition
 
         # Test entity transitions
         entity_transitions = transition_registry.get_transitions_for_entity('test_entity')
-        self.assertIn('test_transition', entity_transitions)
-        self.assertEqual(entity_transitions['test_transition'], TestTransition)
+        assert 'test_transition' in entity_transitions
+        assert entity_transitions['test_transition'] == TestTransition
 
     def test_pydantic_validation(self):
         """Test Pydantic validation in transitions"""
@@ -155,11 +156,11 @@ class CoreFrameworkTests(TestCase):
 
         # Test valid instantiation
         transition = ValidatedTransition(required_field='test')
-        self.assertEqual(transition.required_field, 'test')
-        self.assertEqual(transition.optional_field, 42)
+        assert transition.required_field == 'test'
+        assert transition.optional_field == 42
 
         # Test validation error
-        with self.assertRaises(ValidationError):
+        with pytest.raises(ValidationError):
             ValidatedTransition()  # Missing required field
 
     def test_transition_execution(self):
@@ -192,13 +193,13 @@ class CoreFrameworkTests(TestCase):
         )
 
         # Test validation
-        self.assertTrue(transition.validate_transition(context))
+        assert transition.validate_transition(context)
 
         # Test execution
         result = transition.transition(context)
-        self.assertEqual(result['value'], 'execution_test')
-        self.assertEqual(result['entity_id'], self.mock_entity.pk)
-        self.assertIn('timestamp', result)
+        assert result['value'] == 'execution_test'
+        assert result['entity_id'] == self.mock_entity.pk
+        assert 'timestamp' in result
 
     def test_validation_error_handling(self):
         """Test transition validation error handling"""
@@ -227,12 +228,12 @@ class CoreFrameworkTests(TestCase):
         )
 
         # Test validation error
-        with self.assertRaises(TransitionValidationError) as cm:
+        with pytest.raises(TransitionValidationError) as cm:
             transition.validate_transition(invalid_context)
 
-        error = cm.exception
-        self.assertIn('Can only complete from IN_PROGRESS state', str(error))
-        self.assertIn('current_state', error.context)
+        error = cm.value
+        assert 'Can only complete from IN_PROGRESS state' in str(error)
+        assert 'current_state' in error.context
 
     def test_transition_builder_basic(self):
         """Test TransitionBuilder basic functionality"""
@@ -250,14 +251,14 @@ class CoreFrameworkTests(TestCase):
 
         # Test builder creation
         builder = TransitionBuilder(self.mock_entity)
-        self.assertEqual(builder.entity, self.mock_entity)
+        assert builder.entity == self.mock_entity
 
         # Test method chaining
         builder = builder.transition('builder_test').with_data(value='builder_test_value').by_user(self.user)
 
         # Validate the builder state
         validation_errors = builder.validate()
-        self.assertEqual(len(validation_errors), 0)
+        assert len(validation_errors) == 0
 
     def test_get_available_transitions(self):
         """Test get_available_transitions utility"""
@@ -272,8 +273,8 @@ class CoreFrameworkTests(TestCase):
                 return {}
 
         available = get_available_transitions(self.mock_entity)
-        self.assertIn('available_test', available)
-        self.assertEqual(available['available_test'], AvailableTestTransition)
+        assert 'available_test' in available
+        assert available['available_test'] == AvailableTestTransition
 
     def test_transition_hooks(self):
         """Test pre and post transition hooks"""
@@ -308,7 +309,7 @@ class CoreFrameworkTests(TestCase):
         transition.transition(context)
         transition.post_transition_hook(context, Mock())
 
-        self.assertEqual(hook_calls, ['pre', 'transition', 'post'])
+        assert hook_calls == ['pre', 'transition', 'post']
 
 
 class TransitionUtilsTests(TestCase):
@@ -346,12 +347,12 @@ class TransitionUtilsTests(TestCase):
                 return {}
 
         available = get_available_transitions(self.mock_entity)
-        self.assertEqual(len(available), 2)
-        self.assertIn('util_test_1', available)
-        self.assertIn('util_test_2', available)
+        assert len(available) == 2
+        assert 'util_test_1' in available
+        assert 'util_test_2' in available
 
         # Test with non-existent entity
         mock_other = MockEntity()
         mock_other._meta.model_name = 'other_entity'
         other_available = get_available_transitions(mock_other)
-        self.assertEqual(len(other_available), 0)
+        assert len(other_available) == 0

@@ -135,16 +135,16 @@ class PerformanceTests(TestCase):
         result = transition.validate_transition(context)
         validation_time = time.perf_counter() - start_time
 
-        self.assertTrue(result)
-        self.assertLess(validation_time, 0.001)  # Should be under 1ms
+        assert result
+        assert validation_time < 0.001  # Should be under 1ms
 
         # Measure transition execution performance
         start_time = time.perf_counter()
         transition_data = transition.transition(context)
         execution_time = time.perf_counter() - start_time
 
-        self.assertIsInstance(transition_data, dict)
-        self.assertLess(execution_time, 0.001)  # Should be under 1ms
+        assert isinstance(transition_data, dict)
+        assert execution_time < 0.001  # Should be under 1ms
 
         # Measure total workflow performance
         start_time = time.perf_counter()
@@ -153,7 +153,7 @@ class PerformanceTests(TestCase):
         transition.transition(context)
         total_time = time.perf_counter() - start_time
 
-        self.assertLess(total_time, 0.005)  # Total should be under 5ms
+        assert total_time < 0.005  # Total should be under 5ms
 
     def test_batch_transition_performance(self):
         """
@@ -175,8 +175,8 @@ class PerformanceTests(TestCase):
         creation_time = time.perf_counter() - start_time
         creation_time_per_item = creation_time / batch_size
 
-        self.assertEqual(len(transitions), batch_size)
-        self.assertLess(creation_time_per_item, 0.001)  # Under 1ms per transition
+        assert len(transitions) == batch_size
+        assert creation_time_per_item < 0.001  # Under 1ms per transition
 
         # Test batch validation performance
         context = TransitionContext(
@@ -193,9 +193,9 @@ class PerformanceTests(TestCase):
         validation_time = time.perf_counter() - start_time
         validation_time_per_item = validation_time / batch_size
 
-        self.assertTrue(all(validation_results))
-        self.assertLess(validation_time_per_item, 0.001)  # Under 1ms per validation
-        self.assertLess(validation_time, 0.5)  # Total batch under 500ms
+        assert all(validation_results)
+        assert validation_time_per_item < 0.001  # Under 1ms per validation
+        assert validation_time < 0.5  # Total batch under 500ms
 
     def test_registry_performance(self):
         """
@@ -215,8 +215,8 @@ class PerformanceTests(TestCase):
         lookup_time = time.perf_counter() - start_time
         lookup_time_per_operation = lookup_time / lookup_count
 
-        self.assertEqual(retrieved_class, PerformanceTestTransition)
-        self.assertLess(lookup_time_per_operation, 0.0001)  # Under 0.1ms per lookup
+        assert retrieved_class == PerformanceTestTransition
+        assert lookup_time_per_operation < 0.0001  # Under 0.1ms per lookup
 
         # Test registry registration performance
         registration_count = 1000
@@ -231,11 +231,11 @@ class PerformanceTests(TestCase):
         registration_time = time.perf_counter() - start_time
         registration_time_per_operation = registration_time / registration_count
 
-        self.assertLess(registration_time_per_operation, 0.001)  # Under 1ms per registration
+        assert registration_time_per_operation < 0.001  # Under 1ms per registration
 
         # Verify registrations worked
         test_class = transition_registry.get_transition('entity_500', 'transition_500')
-        self.assertEqual(test_class, PerformanceTestTransition)
+        assert test_class == PerformanceTestTransition
 
     def test_pydantic_validation_performance(self):
         """
@@ -256,7 +256,7 @@ class PerformanceTests(TestCase):
         validation_time = time.perf_counter() - start_time
         validation_time_per_item = validation_time / validation_count
 
-        self.assertLess(validation_time_per_item, 0.001)  # Under 1ms per validation
+        assert validation_time_per_item < 0.001  # Under 1ms per validation
 
         # Test validation error performance
         invalid_data = {'operation_id': 'invalid', 'data_size': -1}
@@ -274,8 +274,8 @@ class PerformanceTests(TestCase):
         error_time = time.perf_counter() - start_time
         error_time_per_item = error_time / error_count
 
-        self.assertEqual(len(errors), error_count)
-        self.assertLess(error_time_per_item, 0.01)  # Under 10ms per error (errors are slower)
+        assert len(errors) == error_count
+        assert error_time_per_item < 0.01  # Under 10ms per error (errors are slower)
 
     def test_memory_usage_patterns(self):
         """
@@ -313,14 +313,14 @@ class PerformanceTests(TestCase):
 
         # Memory usage should be reasonable
         memory_overhead = complex_size - base_size
-        self.assertLess(memory_overhead, 10000)  # Under 10KB overhead per transition
+        assert memory_overhead < 10000  # Under 10KB overhead per transition
 
         # Clean up contexts to test garbage collection
         for transition in complex_transitions:
             transition.context = None
 
         # Verify memory can be reclaimed (simplified test)
-        self.assertIsNone(complex_transitions[0].context)
+        assert complex_transitions[0].context is None
 
 
 class ConcurrencyTests(TransactionTestCase):
@@ -380,17 +380,17 @@ class ConcurrencyTests(TransactionTestCase):
 
         # Validate results
         total_expected = thread_count * transitions_per_thread
-        self.assertEqual(len(all_transitions), total_expected)
+        assert len(all_transitions) == total_expected
 
         # Check thread separation
         thread_ids = [t.thread_id for t in all_transitions]
         unique_threads = set(thread_ids)
-        self.assertEqual(len(unique_threads), thread_count)
+        assert len(unique_threads) == thread_count
 
         # Validate each thread created correct number of transitions
         for thread_id in range(thread_count):
             thread_transitions = [t for t in all_transitions if t.thread_id == thread_id]
-            self.assertEqual(len(thread_transitions), transitions_per_thread)
+            assert len(thread_transitions) == transitions_per_thread
 
     def test_concurrent_transition_execution(self):
         """
@@ -442,17 +442,17 @@ class ConcurrencyTests(TransactionTestCase):
                 execution_results.append(result)
 
         # Validate results
-        self.assertEqual(len(execution_results), thread_count)
+        assert len(execution_results) == thread_count
 
         for result in execution_results:
-            self.assertTrue(result['validation_result'])
-            self.assertIn('thread_id', result['transition_data'])
-            self.assertIsInstance(result['execution_order'], list)
-            self.assertGreater(len(result['execution_order']), 0)
+            assert result['validation_result']
+            assert 'thread_id' in result['transition_data']
+            assert isinstance(result['execution_order'], list)
+            assert len(result['execution_order']) > 0
 
         # Check thread isolation
         thread_ids = [r['transition_data']['thread_id'] for r in execution_results]
-        self.assertEqual(set(thread_ids), set(range(thread_count)))
+        assert set(thread_ids) == set(range(thread_count))
 
     def test_registry_thread_safety(self):
         """
@@ -514,12 +514,12 @@ class ConcurrencyTests(TransactionTestCase):
         total_operations = sum(operation_counts)
         expected_minimum = thread_count * operations_per_thread * 0.9  # Allow some variance
 
-        self.assertGreater(total_operations, expected_minimum)
+        assert total_operations > expected_minimum
 
         # Registry should be in consistent state
         entities = transition_registry.list_entities()
-        self.assertIsInstance(entities, list)
-        self.assertGreater(len(entities), thread_count)  # Should have entities from all threads
+        assert isinstance(entities, list)
+        assert len(entities) > thread_count  # Should have entities from all threads
 
     def test_context_isolation(self):
         """
@@ -586,7 +586,7 @@ class ConcurrencyTests(TransactionTestCase):
                 context_data.append(result)
 
         # Validate context isolation
-        self.assertEqual(len(context_data), thread_count)
+        assert len(context_data) == thread_count
 
         for result in context_data:
             thread_id = result['thread_id']
@@ -594,17 +594,17 @@ class ConcurrencyTests(TransactionTestCase):
             retrieved_metadata = result['retrieved_metadata']
 
             # Context should match exactly what was set for this thread
-            self.assertEqual(original_metadata['thread_specific_id'], thread_id)
-            self.assertEqual(retrieved_metadata['thread_specific_id'], thread_id)
-            self.assertEqual(original_metadata['random_data'], retrieved_metadata['random_data'])
-            self.assertEqual(original_metadata['test_counter'], thread_id * 1000)
+            assert original_metadata['thread_specific_id'] == thread_id
+            assert retrieved_metadata['thread_specific_id'] == thread_id
+            assert original_metadata['random_data'] == retrieved_metadata['random_data']
+            assert original_metadata['test_counter'] == thread_id * 1000
 
             # Should not have data from other threads
             for other_result in context_data:
                 if other_result['thread_id'] != thread_id:
-                    self.assertNotEqual(
-                        retrieved_metadata['thread_specific_id'],
-                        other_result['original_metadata']['thread_specific_id'],
+                    assert (
+                        retrieved_metadata['thread_specific_id']
+                        != other_result['original_metadata']['thread_specific_id']
                     )
 
     def test_stress_test_mixed_operations(self):
@@ -712,14 +712,14 @@ class ConcurrencyTests(TransactionTestCase):
         )
 
         # Should have performed substantial work
-        self.assertGreater(total_operations, thread_count * 10)
+        assert total_operations > thread_count * 10
 
         # Error rate should be very low (< 1%)
         error_rate = stats['errors_encountered'] / max(total_operations, 1)
-        self.assertLess(error_rate, 0.01)
+        assert error_rate < 0.01
 
         # All operation types should have been performed
-        self.assertGreater(stats['transitions_created'], 0)
-        self.assertGreater(stats['validations_performed'], 0)
-        self.assertGreater(stats['transitions_executed'], 0)
-        self.assertGreater(stats['registry_lookups'], 0)
+        assert stats['transitions_created'] > 0
+        assert stats['validations_performed'] > 0
+        assert stats['transitions_executed'] > 0
+        assert stats['registry_lookups'] > 0
