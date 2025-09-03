@@ -224,7 +224,7 @@ class DjangoModelIntegrationTests(TestCase):
             )
 
             # Validate and execute creation
-            assert create_transition.validate_transition(context) == True
+            assert create_transition.validate_transition(context) is True
             creation_data = create_transition.transition(context)
 
             assert creation_data['created_by_id'] == 100
@@ -248,12 +248,12 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=assign_transition.target_state,
         )
 
-        assert assign_transition.validate_transition(context) == True
+        assert assign_transition.validate_transition(context) is True
         assignment_data = assign_transition.transition(context)
 
         assert assignment_data['assignee_id'] == 200
         assert assignment_data['estimated_hours'] == 4.5
-        assert assignment_data['work_started'] == True
+        assert assignment_data['work_started'] is True
 
         # Step 3: Complete task
         mock_current_state.context_data = assignment_data
@@ -271,7 +271,7 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=complete_transition.target_state,
         )
 
-        assert complete_transition.validate_transition(context) == True
+        assert complete_transition.validate_transition(context) is True
         completion_data = complete_transition.transition(context)
 
         assert completion_data['quality_score'] == 0.85
@@ -395,12 +395,12 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=submit_transition.target_state,
         )
 
-        assert submit_transition.validate_transition(context) == True
+        assert submit_transition.validate_transition(context) is True
         submit_data = submit_transition.transition(context)
 
         assert submit_data['annotator_confidence'] == 0.9
         assert submit_data['annotation_time_seconds'] == 300
-        assert submit_data['review_requested'] == True
+        assert submit_data['review_requested'] is True
         assert submit_data['annotation_complexity'] == 1  # Based on mock result
 
         # Step 2: Review and approve
@@ -422,7 +422,7 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=review_transition.target_state,
         )
 
-        assert review_transition.validate_transition(context) == True
+        assert review_transition.validate_transition(context) is True
         assert review_transition.target_state == AnnotationStateChoices.COMPLETED
 
         review_data = review_transition.transition(context)
@@ -450,6 +450,7 @@ class DjangoModelIntegrationTests(TestCase):
         )
 
         import pytest
+
         with pytest.raises(TransitionValidationError) as cm:
             invalid_review.validate_transition(context)
 
@@ -504,7 +505,7 @@ class DjangoModelIntegrationTests(TestCase):
 
         # Test StateManager.execute_transition
         from fsm.state_manager import StateManager
-        
+
         result = StateManager.execute_transition(
             entity=self.task,
             transition_name='bulk_update_status',
@@ -516,7 +517,7 @@ class DjangoModelIntegrationTests(TestCase):
             },
             user=self.user,
             project_update=True,
-            notification_level='high'
+            notification_level='high',
         )
 
         # Verify the call
@@ -532,11 +533,11 @@ class DjangoModelIntegrationTests(TestCase):
         transition_data = call_kwargs['transition_data']
         assert transition_data['new_status'] == TaskStateChoices.IN_PROGRESS
         assert transition_data['update_reason'] == 'Project priority change'
-        assert transition_data['updated_by_system'] == True
+        assert transition_data['updated_by_system'] is True
         assert transition_data['batch_id'] == 'batch_2024_001'
 
         # Check context
-        assert call_kwargs['project_update'] == True
+        assert call_kwargs['project_update'] is True
         assert call_kwargs['notification_level'] == 'high'
 
         # Check return value
@@ -626,7 +627,7 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=valid_transition.target_state,
         )
 
-        assert valid_transition.validate_transition(context) == True
+        assert valid_transition.validate_transition(context) is True
 
         # Test multiple validation errors
         invalid_transition = AssignTaskWithConstraints(
@@ -636,6 +637,7 @@ class DjangoModelIntegrationTests(TestCase):
         )
 
         import pytest
+
         with pytest.raises(TransitionValidationError) as cm:
             invalid_transition.validate_transition(context)
 
@@ -661,6 +663,7 @@ class DjangoModelIntegrationTests(TestCase):
         )
 
         import pytest
+
         with pytest.raises(TransitionValidationError) as cm:
             valid_transition.validate_transition(context_no_user)
 

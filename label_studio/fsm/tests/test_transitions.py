@@ -7,13 +7,13 @@ patterns to serve as both tests and documentation.
 """
 
 from datetime import datetime, timedelta
-from django.utils import timezone
 from typing import Any, Dict
 from unittest.mock import Mock, patch
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 from fsm.registry import register_state_transition, transition_registry
 from fsm.transition_utils import get_available_transitions
 from fsm.transitions import (
