@@ -121,10 +121,10 @@ class ProcessOrderTransition(BaseTransition):
 ### 5. Execute Transitions
 
 ```python
-from fsm.transition_utils import execute_transition
+from fsm.state_manager import StateManager
 
-# Execute transition
-result = execute_transition(
+# Execute transition - this is the only way to execute transitions
+result = StateManager.execute_transition(
     entity=order,
     transition_name='process_order',
     transition_data={'processor_id': 123, 'priority': 'high'},
@@ -284,16 +284,15 @@ if context.has_current_state:
 ### Transition Utilities
 
 ```python
+from fsm.state_manager import StateManager
 from fsm.transition_utils import (
-    execute_transition,
     get_available_transitions,
     get_transition_schema,
     validate_transition_data,
-    TransitionBuilder,
 )
 
-# Execute a registered transition
-result = execute_transition(
+# Execute a transition - the only way to execute transitions
+result = StateManager.execute_transition(
     entity=task,
     transition_name='start_task',
     transition_data={'assigned_user_id': 123},
@@ -308,17 +307,6 @@ schema = get_transition_schema(StartTaskTransition)
 
 # Validate transition data before execution
 errors = validate_transition_data(StartTaskTransition, data)
-
-# Use TransitionBuilder for fluent API
-builder = (TransitionBuilder(task)
-    .transition('start_task')
-    .with_data(assigned_user_id=123)
-    .by_user(user)
-    .with_context(source='api'))
-
-errors = builder.validate()
-if not errors:
-    state = builder.execute()
 ```
 
 ## Extension Points

@@ -13,7 +13,6 @@ from django.test import TestCase
 from fsm.models import TaskState
 from fsm.registry import register_state_transition, transition_registry
 from fsm.state_choices import AnnotationStateChoices, TaskStateChoices
-from fsm.transition_utils import TransitionBuilder
 from fsm.transitions import BaseTransition, TransitionContext, TransitionValidationError
 from pydantic import Field
 
@@ -225,12 +224,12 @@ class DjangoModelIntegrationTests(TestCase):
             )
 
             # Validate and execute creation
-            self.assertTrue(create_transition.validate_transition(context))
+            assert create_transition.validate_transition(context) == True
             creation_data = create_transition.transition(context)
 
-            self.assertEqual(creation_data['created_by_id'], 100)
-            self.assertEqual(creation_data['initial_priority'], 'high')
-            self.assertEqual(creation_data['creation_method'], 'declarative_transition')
+            assert creation_data['created_by_id'] == 100
+            assert creation_data['initial_priority'] == 'high'
+            assert creation_data['creation_method'] == 'declarative_transition'
 
         # Step 2: Assign and start task
         mock_current_state = Mock()
@@ -249,12 +248,12 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=assign_transition.target_state,
         )
 
-        self.assertTrue(assign_transition.validate_transition(context))
+        assert assign_transition.validate_transition(context) == True
         assignment_data = assign_transition.transition(context)
 
-        self.assertEqual(assignment_data['assignee_id'], 200)
-        self.assertEqual(assignment_data['estimated_hours'], 4.5)
-        self.assertTrue(assignment_data['work_started'])
+        assert assignment_data['assignee_id'] == 200
+        assert assignment_data['estimated_hours'] == 4.5
+        assert assignment_data['work_started'] == True
 
         # Step 3: Complete task
         mock_current_state.context_data = assignment_data
@@ -272,20 +271,20 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=complete_transition.target_state,
         )
 
-        self.assertTrue(complete_transition.validate_transition(context))
+        assert complete_transition.validate_transition(context) == True
         completion_data = complete_transition.transition(context)
 
-        self.assertEqual(completion_data['quality_score'], 0.85)
-        self.assertEqual(completion_data['actual_hours'], 5.2)
-        self.assertAlmostEqual(completion_data['efficiency_ratio'], 4.5 / 5.2, places=2)
+        assert completion_data['quality_score'] == 0.85
+        assert completion_data['actual_hours'] == 5.2
+        assert abs(completion_data['efficiency_ratio'] - (4.5 / 5.2)) < 0.01
 
         # Test post-hook
         mock_state_record = Mock()
         complete_transition.post_transition_hook(context, mock_state_record)
-        self.assertEqual(len(complete_transition._notifications), 1)
+        assert len(complete_transition._notifications) == 1
 
         # Verify StateManager calls
-        self.assertEqual(mock_transition_state.call_count, 0)  # Not called in our test setup
+        assert mock_transition_state.call_count == 0  # Not called in our test setup
 
     def test_annotation_review_workflow_integration(self):
         """
@@ -396,13 +395,13 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=submit_transition.target_state,
         )
 
-        self.assertTrue(submit_transition.validate_transition(context))
+        assert submit_transition.validate_transition(context) == True
         submit_data = submit_transition.transition(context)
 
-        self.assertEqual(submit_data['annotator_confidence'], 0.9)
-        self.assertEqual(submit_data['annotation_time_seconds'], 300)
-        self.assertTrue(submit_data['review_requested'])
-        self.assertEqual(submit_data['annotation_complexity'], 1)  # Based on mock result
+        assert submit_data['annotator_confidence'] == 0.9
+        assert submit_data['annotation_time_seconds'] == 300
+        assert submit_data['review_requested'] == True
+        assert submit_data['annotation_complexity'] == 1  # Based on mock result
 
         # Step 2: Review and approve
         mock_submission_state = Mock()
@@ -423,15 +422,15 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=review_transition.target_state,
         )
 
-        self.assertTrue(review_transition.validate_transition(context))
-        self.assertEqual(review_transition.target_state, AnnotationStateChoices.COMPLETED)
+        assert review_transition.validate_transition(context) == True
+        assert review_transition.target_state == AnnotationStateChoices.COMPLETED
 
         review_data = review_transition.transition(context)
 
-        self.assertEqual(review_data['reviewer_decision'], 'approve')
-        self.assertEqual(review_data['quality_score'], 0.85)
-        self.assertEqual(review_data['original_confidence'], 0.9)
-        self.assertAlmostEqual(review_data['confidence_vs_quality_diff'], 0.05, places=2)
+        assert review_data['reviewer_decision'] == 'approve'
+        assert review_data['quality_score'] == 0.85
+        assert review_data['original_confidence'] == 0.9
+        assert abs(review_data['confidence_vs_quality_diff'] - 0.05) < 0.01
 
         # Test rejection scenario
         reject_transition = ReviewAndApproveAnnotation(
@@ -441,7 +440,7 @@ class DjangoModelIntegrationTests(TestCase):
             corrections_made=False,
         )
 
-        self.assertEqual(reject_transition.target_state, AnnotationStateChoices.SUBMITTED)
+        assert reject_transition.target_state == AnnotationStateChoices.SUBMITTED
 
         # Test validation failure
         invalid_review = ReviewAndApproveAnnotation(
@@ -450,16 +449,17 @@ class DjangoModelIntegrationTests(TestCase):
             review_comments='Test',
         )
 
-        with self.assertRaises(TransitionValidationError) as cm:
+        import pytest
+        with pytest.raises(TransitionValidationError) as cm:
             invalid_review.validate_transition(context)
 
-        self.assertIn('Cannot approve annotation with low quality score', str(cm.exception))
+        assert 'Cannot approve annotation with low quality score' in str(cm.value)
 
-    @patch('fsm.transition_utils.execute_transition')
-    def test_transition_builder_with_django_models(self, mock_execute):
+    @patch('fsm.state_manager.StateManager.execute_transition')
+    def test_state_manager_bulk_update_integration(self, mock_execute):
         """
-        INTEGRATION TEST: TransitionBuilder with Django model integration
-        Shows how to use the fluent TransitionBuilder interface with
+        INTEGRATION TEST: StateManager bulk update with Django model integration
+        Shows how to use the StateManager to execute transitions with
         real Django models and complex business logic.
         """
 
@@ -502,19 +502,21 @@ class DjangoModelIntegrationTests(TestCase):
         mock_state_record.id = 'mock-uuid'
         mock_execute.return_value = mock_state_record
 
-        # Test fluent interface
-        result = (
-            TransitionBuilder(self.task)
-            .transition('bulk_update_status')
-            .with_data(
-                new_status=TaskStateChoices.IN_PROGRESS,
-                update_reason='Project priority change',
-                updated_by_system=True,
-                batch_id='batch_2024_001',
-            )
-            .by_user(self.user)
-            .with_context(project_update=True, notification_level='high')
-            .execute()
+        # Test StateManager.execute_transition
+        from fsm.state_manager import StateManager
+        
+        result = StateManager.execute_transition(
+            entity=self.task,
+            transition_name='bulk_update_status',
+            transition_data={
+                'new_status': TaskStateChoices.IN_PROGRESS,
+                'update_reason': 'Project priority change',
+                'updated_by_system': True,
+                'batch_id': 'batch_2024_001',
+            },
+            user=self.user,
+            project_update=True,
+            notification_level='high'
         )
 
         # Verify the call
@@ -522,23 +524,23 @@ class DjangoModelIntegrationTests(TestCase):
         call_args, call_kwargs = mock_execute.call_args
 
         # Check call parameters
-        self.assertEqual(call_kwargs['entity'], self.task)
-        self.assertEqual(call_kwargs['transition_name'], 'bulk_update_status')
-        self.assertEqual(call_kwargs['user'], self.user)
+        assert call_kwargs['entity'] == self.task
+        assert call_kwargs['transition_name'] == 'bulk_update_status'
+        assert call_kwargs['user'] == self.user
 
         # Check transition data
         transition_data = call_kwargs['transition_data']
-        self.assertEqual(transition_data['new_status'], TaskStateChoices.IN_PROGRESS)
-        self.assertEqual(transition_data['update_reason'], 'Project priority change')
-        self.assertTrue(transition_data['updated_by_system'])
-        self.assertEqual(transition_data['batch_id'], 'batch_2024_001')
+        assert transition_data['new_status'] == TaskStateChoices.IN_PROGRESS
+        assert transition_data['update_reason'] == 'Project priority change'
+        assert transition_data['updated_by_system'] == True
+        assert transition_data['batch_id'] == 'batch_2024_001'
 
         # Check context
-        self.assertTrue(call_kwargs['project_update'])
-        self.assertEqual(call_kwargs['notification_level'], 'high')
+        assert call_kwargs['project_update'] == True
+        assert call_kwargs['notification_level'] == 'high'
 
         # Check return value
-        self.assertEqual(result, mock_state_record)
+        assert result == mock_state_record
 
     def test_error_handling_with_django_models(self):
         """
@@ -624,7 +626,7 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=valid_transition.target_state,
         )
 
-        self.assertTrue(valid_transition.validate_transition(context))
+        assert valid_transition.validate_transition(context) == True
 
         # Test multiple validation errors
         invalid_transition = AssignTaskWithConstraints(
@@ -633,21 +635,22 @@ class DjangoModelIntegrationTests(TestCase):
             skill_requirements=['nonexistent_skill'],  # Missing skill
         )
 
-        with self.assertRaises(TransitionValidationError) as cm:
+        import pytest
+        with pytest.raises(TransitionValidationError) as cm:
             invalid_transition.validate_transition(context)
 
-        error = cm.exception
+        error = cm.value
         error_msg = str(error)
 
         # Check all validation errors are included
-        self.assertIn('Invalid user ID', error_msg)
-        self.assertIn('Max concurrent tasks must be at least 1', error_msg)
-        self.assertIn('Missing required skills', error_msg)
+        assert 'Invalid user ID' in error_msg
+        assert 'Max concurrent tasks must be at least 1' in error_msg
+        assert 'Missing required skills' in error_msg
 
         # Check error context
-        self.assertIn('validation_errors', error.context)
-        self.assertEqual(len(error.context['validation_errors']), 3)
-        self.assertEqual(error.context['assignee_id'], -1)
+        assert 'validation_errors' in error.context
+        assert len(error.context['validation_errors']) == 3
+        assert error.context['assignee_id'] == -1
 
         # Test authentication requirement
         context_no_user = TransitionContext(
@@ -657,7 +660,8 @@ class DjangoModelIntegrationTests(TestCase):
             target_state=valid_transition.target_state,
         )
 
-        with self.assertRaises(TransitionValidationError) as cm:
+        import pytest
+        with pytest.raises(TransitionValidationError) as cm:
             valid_transition.validate_transition(context_no_user)
 
-        self.assertIn('User authentication required', str(cm.exception))
+        assert 'User authentication required' in str(cm.value)

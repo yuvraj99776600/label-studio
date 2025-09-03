@@ -212,9 +212,9 @@ class StateManager:
                     **denormalized_fields,
                 )
 
-                # Update cache with new state
+                # Update cache with new state after transaction commits
                 cache_key = cls.get_cache_key(entity)
-                cache.set(cache_key, new_state, cls.CACHE_TTL)
+                transaction.on_commit(lambda: cache.set(cache_key, new_state, cls.CACHE_TTL))
 
                 logger.info(
                     f'State transition successful: {entity._meta.label_lower} {entity.pk} '
@@ -282,7 +282,7 @@ class StateManager:
     @classmethod
     def warm_cache(cls, entities: List[Model]):
         """
-        invalidate_cacheWarm cache with current states for a list of entities.
+        Warm cache with current states for a list of entities.
 
         Basic implementation that can be optimized by Enterprise with
         bulk queries and advanced caching strategies.
@@ -361,6 +361,43 @@ class StateManager:
                 f'{current_state} → {transition.target_state}: {e}'
             )
             raise
+
+    @classmethod
+    def execute_transition(
+        cls, entity: Model, transition_name: str, transition_data: Dict[str, Any] = None, user=None, **context_kwargs
+    ) -> BaseState:
+        """
+        Execute a registered transition by name.
+
+        This is the unified entry point for all state transitions using the declarative system.
+
+        Args:
+            entity: The entity to transition
+            transition_name: Name of the registered transition
+            transition_data: Data for the transition (validated by Pydantic)
+            user: User executing the transition
+            **context_kwargs: Additional context data
+
+        Returns:
+            The newly created state record
+
+        Raises:
+            ValueError: If transition is not found
+            TransitionValidationError: If transition validation fails
+        """
+        from .registry import transition_registry
+
+        entity_name = entity._meta.model_name.lower()
+        transition_data = transition_data or {}
+
+        return transition_registry.execute_transition(
+            entity_name=entity_name,
+            transition_name=transition_name,
+            entity=entity,
+            transition_data=transition_data,
+            user=user,
+            **context_kwargs,
+        )
 
 
 # Allow runtime configuration of which StateManager to use

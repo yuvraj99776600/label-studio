@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 from unittest.mock import Mock
 
+import pytest
 from django.test import TestCase
 from fsm.registry import register_state_transition, transition_registry
 from fsm.transition_utils import (
@@ -130,7 +131,7 @@ class APIIntegrationExampleTests(TestCase):
             )
 
             # Validate
-            self.assertTrue(transition.validate_transition(context))
+            assert transition.validate_transition(context)
 
             # Execute
             result_data = transition.transition(context)
@@ -148,10 +149,10 @@ class APIIntegrationExampleTests(TestCase):
             }
 
             # Validate API response
-            self.assertTrue(api_response['success'])
-            self.assertEqual(api_response['data']['new_state'], 'ASSIGNED')
-            self.assertEqual(api_response['data']['assignment_details']['assignee_id'], 123)
-            self.assertEqual(api_response['data']['assignment_details']['priority'], 'high')
+            assert api_response['success']
+            assert api_response['data']['new_state'] == 'ASSIGNED'
+            assert api_response['data']['assignment_details']['assignee_id'] == 123
+            assert api_response['data']['assignment_details']['priority'] == 'high'
 
         except ValueError as e:
             # Handle Pydantic validation errors
@@ -179,7 +180,7 @@ class APIIntegrationExampleTests(TestCase):
             'deadline': '2020-01-01T00:00:00',  # Past deadline
         }
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             APITaskAssignmentTransition(**invalid_request)
 
     def test_json_schema_generation_for_api_docs(self):
@@ -228,43 +229,43 @@ class APIIntegrationExampleTests(TestCase):
         schema = get_transition_schema(APIAnnotationSubmissionTransition)
 
         # Validate schema structure
-        self.assertIn('properties', schema)
-        self.assertIn('required', schema)
+        assert 'properties' in schema
+        assert 'required' in schema
 
         # Check specific field schemas
         properties = schema['properties']
 
         # confidence_score should have min/max constraints
         confidence_schema = properties['confidence_score']
-        self.assertEqual(confidence_schema['type'], 'number')
-        self.assertEqual(confidence_schema['minimum'], 0.0)
-        self.assertEqual(confidence_schema['maximum'], 1.0)
-        self.assertIn("Annotator's confidence", confidence_schema['description'])
+        assert confidence_schema['type'] == 'number'
+        assert confidence_schema['minimum'] == 0.0
+        assert confidence_schema['maximum'] == 1.0
+        assert "Annotator's confidence" in confidence_schema['description']
 
         # annotation_quality should have pattern constraint
         quality_schema = properties['annotation_quality']
-        self.assertEqual(quality_schema['type'], 'string')
-        self.assertIn('pattern', quality_schema)
+        assert quality_schema['type'] == 'string'
+        assert 'pattern' in quality_schema
 
         # time_spent_seconds should have minimum constraint
         time_schema = properties['time_spent_seconds']
-        self.assertEqual(time_schema['type'], 'integer')
-        self.assertEqual(time_schema['minimum'], 1)
+        assert time_schema['type'] == 'integer'
+        assert time_schema['minimum'] == 1
 
         # tags should be array type
         tags_schema = properties['tags']
-        self.assertEqual(tags_schema['type'], 'array')
-        self.assertEqual(tags_schema['items']['type'], 'string')
+        assert tags_schema['type'] == 'array'
+        assert tags_schema['items']['type'] == 'string'
 
         # metadata should be object type
         metadata_schema = properties['metadata']
-        self.assertEqual(metadata_schema['type'], 'object')
+        assert metadata_schema['type'] == 'object'
 
         # Required fields
         required_fields = schema['required']
-        self.assertIn('confidence_score', required_fields)
-        self.assertIn('time_spent_seconds', required_fields)
-        self.assertNotIn('tags', required_fields)  # Optional field
+        assert 'confidence_score' in required_fields
+        assert 'time_spent_seconds' in required_fields
+        assert 'tags' not in required_fields  # Optional field
 
         # Test schema-driven validation
         valid_data = {
@@ -278,13 +279,13 @@ class APIIntegrationExampleTests(TestCase):
         }
 
         transition = APIAnnotationSubmissionTransition(**valid_data)
-        self.assertEqual(transition.confidence_score, 0.85)
-        self.assertEqual(len(transition.tags), 2)
+        assert transition.confidence_score == 0.85
+        assert len(transition.tags) == 2
 
         # Print schema for documentation (would be used in API docs)
         schema_json = json.dumps(schema, indent=2)
-        self.assertIsInstance(schema_json, str)
-        self.assertIn('confidence_score', schema_json)
+        assert isinstance(schema_json, str)
+        assert 'confidence_score' in schema_json
 
     def test_bulk_operations_api_pattern(self):
         """
@@ -387,18 +388,18 @@ class APIIntegrationExampleTests(TestCase):
         }
 
         # Validate bulk results
-        self.assertEqual(api_response['total_requested'], 5)
-        self.assertGreater(api_response['successful_updates'], 0)
+        assert api_response['total_requested'] == 5
+        assert api_response['successful_updates'] > 0
 
         # Some tasks should succeed, some might fail due to state validation
         total_processed = api_response['successful_updates'] + api_response['failed_updates']
-        self.assertEqual(total_processed, 5)
+        assert total_processed == 5
 
         # Check individual results
         for result in batch_results:
-            self.assertTrue(result['success'])
-            self.assertEqual(result['result']['new_status'], 'IN_PROGRESS')
-            self.assertEqual(result['result']['batch_id'], 'batch_2024_001')
+            assert result['success']
+            assert result['result']['new_status'] == 'IN_PROGRESS'
+            assert result['result']['batch_id'] == 'batch_2024_001'
 
     def test_webhook_integration_pattern(self):
         """
@@ -485,7 +486,7 @@ class APIIntegrationExampleTests(TestCase):
         )
 
         # Validate and execute
-        self.assertTrue(transition.validate_transition(context))
+        assert transition.validate_transition(context)
         transition.transition(context)
 
         # Simulate state record creation
@@ -496,19 +497,19 @@ class APIIntegrationExampleTests(TestCase):
         transition.post_transition_hook(context, mock_state_record)
 
         # Validate webhook responses
-        self.assertEqual(len(transition.webhook_responses), 2)
+        assert len(transition.webhook_responses) == 2
 
         for response in transition.webhook_responses:
-            self.assertIn('url', response)
-            self.assertIn('payload', response)
-            self.assertEqual(response['status'], 'sent')
+            assert 'url' in response
+            assert 'payload' in response
+            assert response['status'] == 'sent'
 
             # Validate webhook payload structure
             payload = response['payload']
-            self.assertEqual(payload['event'], 'task.completed')
-            self.assertEqual(payload['task_id'], self.mock_entity.pk)
-            self.assertEqual(payload['completion_data']['quality'], 0.95)
-            self.assertEqual(payload['custom_data']['project_id'], 123)
+            assert payload['event'] == 'task.completed'
+            assert payload['task_id'] == self.mock_entity.pk
+            assert payload['completion_data']['quality'] == 0.95
+            assert payload['custom_data']['project_id'] == 123
 
     def test_api_error_handling_patterns(self):
         """
@@ -654,9 +655,9 @@ class APIIntegrationExampleTests(TestCase):
 
         # Test successful request
         response = simulate_api_endpoint(valid_request)
-        self.assertEqual(response['status_code'], 200)
-        self.assertTrue(response['success'])
-        self.assertIn('update_details', response['data'])
+        assert response['status_code'] == 200
+        assert response['success']
+        assert 'update_details' in response['data']
 
         # Test Pydantic validation error (invalid severity level)
         invalid_request = {
@@ -666,9 +667,9 @@ class APIIntegrationExampleTests(TestCase):
         }
 
         response = simulate_api_endpoint(invalid_request)
-        self.assertEqual(response['status_code'], 400)
-        self.assertFalse(response['success'])
-        self.assertEqual(response['error'], 'Bad Request')
+        assert response['status_code'] == 400
+        assert not response['success']
+        assert response['error'] == 'Bad Request'
 
         # Test business logic validation error
         business_logic_error_request = {
@@ -679,18 +680,18 @@ class APIIntegrationExampleTests(TestCase):
         }
 
         response = simulate_api_endpoint(business_logic_error_request)
-        self.assertEqual(response['status_code'], 422)
-        self.assertFalse(response['success'])
-        self.assertEqual(response['error'], 'Validation Failed')
-        self.assertIn('validation_errors', response)
-        self.assertGreater(len(response['validation_errors']), 0)
+        assert response['status_code'] == 422
+        assert not response['success']
+        assert response['error'] == 'Validation Failed'
+        assert 'validation_errors' in response
+        assert len(response['validation_errors']) > 0
 
         # Test state validation error
         response = simulate_api_endpoint(valid_request, current_state='COMPLETED')
-        self.assertEqual(response['status_code'], 422)
+        assert response['status_code'] == 422
         # The error message is in validation_errors list, not the main message
         validation_errors = response.get('validation_errors', [])
-        self.assertTrue(any('completed tasks' in error for error in validation_errors))
+        assert any('completed tasks' in error for error in validation_errors)
 
     def test_api_versioning_and_backward_compatibility(self):
         """
@@ -754,9 +755,9 @@ class APIIntegrationExampleTests(TestCase):
         )
 
         v1_result = v1_transition.transition(context)
-        self.assertEqual(v1_result['api_version'], 'v1')
-        self.assertEqual(v1_result['status'], 'IN_PROGRESS')
-        self.assertNotIn('priority', v1_result)  # V1 doesn't have priority
+        assert v1_result['api_version'] == 'v1'
+        assert v1_result['status'] == 'IN_PROGRESS'
+        assert 'priority' not in v1_result  # V1 doesn't have priority
 
         # Test V2 API with enhanced features
         v2_request = {
@@ -771,12 +772,12 @@ class APIIntegrationExampleTests(TestCase):
         v2_transition = UpdateTaskV2Transition(**v2_request)
         v2_result = v2_transition.transition(context)
 
-        self.assertEqual(v2_result['api_version'], 'v2')
-        self.assertEqual(v2_result['status'], 'IN_PROGRESS')  # Inherited from V1
-        self.assertEqual(v2_result['priority'], 'high')  # V2 feature
-        self.assertEqual(len(v2_result['tags']), 2)  # V2 feature
-        self.assertEqual(v2_result['estimated_hours'], 4.5)  # V2 feature
-        self.assertIn('client_id', v2_result['metadata'])  # V2 feature
+        assert v2_result['api_version'] == 'v2'
+        assert v2_result['status'] == 'IN_PROGRESS'  # Inherited from V1
+        assert v2_result['priority'] == 'high'  # V2 feature
+        assert len(v2_result['tags']) == 2  # V2 feature
+        assert v2_result['estimated_hours'] == 4.5  # V2 feature
+        assert 'client_id' in v2_result['metadata']  # V2 feature
 
         # Test V2 API with minimal data (backward compatible)
         v2_minimal_request = {'status': 'COMPLETED', 'notes': 'Task finished'}
@@ -784,9 +785,9 @@ class APIIntegrationExampleTests(TestCase):
         v2_minimal_transition = UpdateTaskV2Transition(**v2_minimal_request)
         v2_minimal_result = v2_minimal_transition.transition(context)
 
-        self.assertEqual(v2_minimal_result['api_version'], 'v2')
-        self.assertEqual(v2_minimal_result['status'], 'COMPLETED')
-        self.assertIsNone(v2_minimal_result['priority'])  # Optional field
-        self.assertEqual(v2_minimal_result['tags'], [])  # Default value
-        self.assertIsNone(v2_minimal_result['estimated_hours'])  # Optional field
-        self.assertEqual(v2_minimal_result['metadata'], {})  # Default value
+        assert v2_minimal_result['api_version'] == 'v2'
+        assert v2_minimal_result['status'] == 'COMPLETED'
+        assert v2_minimal_result['priority'] is None  # Optional field
+        assert v2_minimal_result['tags'] == []  # Default value
+        assert v2_minimal_result['estimated_hours'] is None  # Optional field
+        assert v2_minimal_result['metadata'] == {}  # Default value

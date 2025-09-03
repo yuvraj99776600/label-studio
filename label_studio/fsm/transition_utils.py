@@ -5,95 +5,32 @@ This module provides helper functions to make it easier to integrate
 the new Pydantic-based transition system with existing Label Studio code.
 """
 
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Type
 
 from django.db.models import Model
-from fsm.models import BaseState
 from fsm.registry import transition_registry
 from fsm.state_manager import StateManager
 from fsm.transitions import BaseTransition, TransitionValidationError
 
 
-def execute_transition(
-    entity: Model, transition_name: str, transition_data: Dict[str, Any], user=None, **context_kwargs
-) -> BaseState:
+def get_available_transitions(entity: Model, user=None, validate: bool = False) -> Dict[str, Type[BaseTransition]]:
     """
-    Execute a named transition on an entity.
-
-    This is a convenience function that looks up the transition class
-    and executes it with the provided data.
-
-    Args:
-        entity: The entity to transition
-        transition_name: Name of the registered transition
-        transition_data: Data for the transition (validated by Pydantic)
-        user: User executing the transition
-        **context_kwargs: Additional context data
-
-    Returns:
-        The newly created state record
-
-    Raises:
-        ValueError: If transition is not found
-        TransitionValidationError: If transition validation fails
-    """
-    entity_name = entity._meta.model_name.lower()
-    return transition_registry.execute_transition(
-        entity_name=entity_name,
-        transition_name=transition_name,
-        entity=entity,
-        transition_data=transition_data,
-        user=user,
-        **context_kwargs,
-    )
-
-
-def execute_transition_instance(entity: Model, transition: BaseTransition, user=None, **context_kwargs) -> BaseState:
-    """
-    Execute a pre-created transition instance.
-
-    Args:
-        entity: The entity to transition
-        transition: Instance of a transition class
-        user: User executing the transition
-        **context_kwargs: Additional context data
-
-    Returns:
-        The newly created state record
-    """
-    return StateManager.execute_declarative_transition(
-        transition=transition, entity=entity, user=user, **context_kwargs
-    )
-
-
-def get_available_transitions(entity: Model) -> Dict[str, Type[BaseTransition]]:
-    """
-    Get all available transitions for an entity.
+    Get available transitions for an entity.
 
     Args:
         entity: The entity to get transitions for
+        user: User context for validation (only used when validate=True)
+        validate: Whether to validate each transition against current state.
+                 When False, returns all registered transitions for the entity type.
+                 When True, filters to only transitions valid from current state (may be expensive).
 
     Returns:
-        Dictionary mapping transition names to transition classes
+        Dictionary mapping transition names to transition classes.
+        When validate=False: All registered transitions for the entity type.
+        When validate=True: Only transitions valid for the current state.
     """
     entity_name = entity._meta.model_name.lower()
-    return transition_registry.get_transitions_for_entity(entity_name)
-
-
-def get_valid_transitions(entity: Model, user=None, validate: bool = True) -> Dict[str, Type[BaseTransition]]:
-    """
-    Get transitions that are valid for the entity's current state.
-
-    Args:
-        entity: The entity to check transitions for
-        user: User context for validation
-        validate: Whether to validate each transition (may be expensive)
-
-    Returns:
-        Dictionary mapping transition names to transition classes
-        that are valid for the current state
-    """
-    available = get_available_transitions(entity)
+    available = transition_registry.get_transitions_for_entity(entity_name)
 
     if not validate:
         return available
@@ -109,12 +46,26 @@ def get_valid_transitions(entity: Model, user=None, validate: bool = True) -> Di
             # Build minimal context for validation
             from .transitions import TransitionContext
 
+            # Get target state from class or instance
+            target_state = transition_class.get_target_state()
+            if target_state is None:
+                # Need to create an instance to get target_state
+                # For validation purposes, we try to create with minimal/default data
+                try:
+                    temp_instance = transition_class()
+                    target_state = temp_instance.target_state
+                except (TypeError, ValueError):
+                    # Can't instantiate without required data - include in results
+                    # since we can't validate state transitions, we assume they're available
+                    valid_transitions[name] = transition_class
+                    continue
+
             context = TransitionContext(
                 entity=entity,
                 current_user=user,
                 current_state_object=current_state_object,
                 current_state=current_state,
-                target_state=transition_class.get_target_state(),
+                target_state=target_state,
                 organization_id=getattr(entity, 'organization_id', None),
             )
 
@@ -122,8 +73,18 @@ def get_valid_transitions(entity: Model, user=None, validate: bool = True) -> Di
             if transition_class.can_transition_from_state(context):
                 valid_transitions[name] = transition_class
 
-        except (TransitionValidationError, Exception):
-            # Transition is not valid for current state/context
+        except TransitionValidationError:
+            # Transition is not valid for current state/context - this is expected
+            continue
+        except Exception as e:
+            # Unexpected error during validation - this should be investigated
+            import logging
+
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                f"Unexpected error validating transition '{name}' for entity {entity._meta.model_name}: {e}",
+                exc_info=True,
+            )
             continue
 
     return valid_transitions
@@ -233,84 +194,3 @@ def get_entity_state_flow(entity: Model) -> List[Dict[str, Any]]:
             continue
 
     return flows
-
-
-# Backward compatibility helpers
-
-
-def transition_state_declarative(entity: Model, transition_name: str, user=None, **transition_data) -> BaseState:
-    """
-    Backward-compatible helper for transitioning state declaratively.
-
-    This provides a similar interface to StateManager.transition_state
-    but uses the declarative system.
-    """
-    return execute_transition(
-        entity=entity, transition_name=transition_name, transition_data=transition_data, user=user
-    )
-
-
-class TransitionBuilder:
-    """
-    Builder class for constructing and executing transitions fluently.
-
-    Example usage:
-        result = (TransitionBuilder(entity)
-                  .transition('start_task')
-                  .with_data(assigned_user_id=123, priority='high')
-                  .by_user(request.user)
-                  .execute())
-    """
-
-    def __init__(self, entity: Model):
-        self.entity = entity
-        self._transition_name: Optional[str] = None
-        self._transition_data: Dict[str, Any] = {}
-        self._user = None
-        self._context_data: Dict[str, Any] = {}
-
-    def transition(self, name: str) -> 'TransitionBuilder':
-        """Set the transition name"""
-        self._transition_name = name
-        return self
-
-    def with_data(self, **data) -> 'TransitionBuilder':
-        """Add transition data"""
-        self._transition_data.update(data)
-        return self
-
-    def by_user(self, user) -> 'TransitionBuilder':
-        """Set the executing user"""
-        self._user = user
-        return self
-
-    def with_context(self, **context) -> 'TransitionBuilder':
-        """Add context data"""
-        self._context_data.update(context)
-        return self
-
-    def execute(self) -> BaseState:
-        """Execute the configured transition"""
-        if not self._transition_name:
-            raise ValueError('Transition name not specified')
-
-        return execute_transition(
-            entity=self.entity,
-            transition_name=self._transition_name,
-            transition_data=self._transition_data,
-            user=self._user,
-            **self._context_data,
-        )
-
-    def validate(self) -> Dict[str, List[str]]:
-        """Validate the configured transition without executing"""
-        if not self._transition_name:
-            raise ValueError('Transition name not specified')
-
-        entity_name = self.entity._meta.model_name.lower()
-        transition_class = transition_registry.get_transition(entity_name, self._transition_name)
-
-        if not transition_class:
-            raise ValueError(f"Transition '{self._transition_name}' not found for entity '{entity_name}'")
-
-        return validate_transition_data(transition_class, self._transition_data)
