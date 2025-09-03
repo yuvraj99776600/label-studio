@@ -205,7 +205,7 @@ poetry run python label_studio/manage.py runserver
 ```bash
 conda create --name label-studio
 conda activate label-studio
-conda install psycopg2  # required for LS 1.7.2 only
+conda install psycopg  # PostgreSQL adapter for Python
 pip install label-studio
 ```
 

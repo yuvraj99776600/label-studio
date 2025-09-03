@@ -112,7 +112,7 @@ label-studio
 ```bash
 conda create --name label-studio
 conda activate label-studio
-conda install psycopg2
+conda install psycopg
 pip install label-studio
 ```
 
