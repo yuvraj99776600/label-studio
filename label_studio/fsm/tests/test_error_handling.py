@@ -16,7 +16,6 @@ from unittest.mock import Mock
 import pytest
 from django.test import TestCase
 from fsm.registry import transition_registry
-from fsm.transition_utils import TransitionBuilder
 from fsm.transitions import BaseTransition, TransitionContext, TransitionValidationError
 from pydantic import Field, ValidationError
 
@@ -523,56 +522,27 @@ class EdgeCasesAndErrorHandlingTests(TestCase):
         assert empty_context.has_current_state
         assert not empty_context.is_initial_transition
 
-    def test_transition_builder_edge_cases(self):
+    def test_state_manager_edge_cases(self):
         """
-        EDGE CASE: TransitionBuilder edge cases
+        EDGE CASE: StateManager edge cases
 
         Tests unusual usage patterns and edge cases
-        with the fluent TransitionBuilder interface.
+        with the StateManager transition execution.
         """
 
-        builder = TransitionBuilder(self.mock_entity)
+        # Test with nonexistent transition in registry
+        from fsm.registry import transition_registry
 
-        # Test validation without setting transition name
-        with pytest.raises(ValueError) as cm:
-            builder.validate()
-        assert 'Transition name not specified' in str(cm.value)
+        result = transition_registry.get_transition('test_entity', 'nonexistent_transition')
+        assert result is None  # Should return None for nonexistent transition
 
-        # Test execution without setting transition name
-        with pytest.raises(ValueError) as cm:
-            builder.execute()
-        assert 'Transition name not specified' in str(cm.value)
+        # Test execution with valid transition (test at registry level)
+        transition_class = transition_registry.get_transition('test_entity', 'edge_case')
+        assert transition_class is not None
 
-        # Test with nonexistent transition
-        builder.transition('nonexistent_transition')
-
-        with pytest.raises(ValueError) as cm:
-            builder.validate()
-        assert 'not found' in str(cm.value)
-
-        # Test method chaining edge cases
-        builder = (
-            TransitionBuilder(self.mock_entity)
-            .transition('edge_case')
-            .with_data()  # Empty data
-            .by_user(None)  # No user
-            .with_context()
-        )  # Empty context
-
-        # Should not raise errors for empty data
-        errors = builder.validate()
-        assert errors == {}  # EdgeCaseTransition has no required fields
-
-        # Test data overwriting
-        builder = (
-            TransitionBuilder(self.mock_entity)
-            .transition('edge_case')
-            .with_data(edge_case_data='first')
-            .with_data(edge_case_data='second')
-        )  # Should overwrite
-
-        errors = builder.validate()
-        assert errors == {}
+        # Should be able to create instance with defaults
+        transition = transition_class()
+        assert transition.edge_case_data is None  # Uses default None value
 
     def test_concurrent_error_scenarios(self):
         """
