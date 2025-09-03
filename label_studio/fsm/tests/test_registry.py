@@ -5,14 +5,11 @@ Tests registry management, state model registration, transition registration,
 and related error handling scenarios.
 """
 
-import pytest
-from typing import Any, Dict
 from unittest.mock import Mock, patch
 
+import pytest
 from django.test import TestCase
 from fsm.registry import (
-    StateModelRegistry,
-    TransitionRegistry,
     register_state_model,
     register_state_transition,
     state_choices_registry,
@@ -44,7 +41,7 @@ class RegistryTests(TestCase):
         state_choices_registry.clear()
         state_model_registry.clear()
         transition_registry.clear()
-        
+
         self.entity = MockEntity()
 
     def test_registry_execute_transition_integration(self):
@@ -53,8 +50,8 @@ class RegistryTests(TestCase):
         class SimpleTransition(BaseTransition):
             """Simple transition for testing"""
 
-            message: str = Field(default="test")
-            
+            message: str = Field(default='test')
+
             @property
             def target_state(self) -> str:
                 return 'COMPLETED'
@@ -91,7 +88,7 @@ class RegistryTests(TestCase):
 
         mock_state_model = Mock()
         mock_state_model.__name__ = 'MockStateModel'
-        
+
         def test_denormalizer(entity):
             return {'custom_field': f'denormalized_{entity.pk}'}
 
@@ -101,7 +98,7 @@ class RegistryTests(TestCase):
         # Check denormalizer was stored
         denormalizer = state_model_registry.get_denormalizer('testentity')
         assert denormalizer is not None
-        
+
         result = denormalizer(self.entity)
         assert result == {'custom_field': 'denormalized_1'}
 
@@ -110,9 +107,9 @@ class RegistryTests(TestCase):
 
         mock_state_model = Mock()
         mock_state_model.__name__ = 'MockStateModel'
-        
+
         def failing_denormalizer(entity):
-            raise RuntimeError("Denormalizer failed")
+            raise RuntimeError('Denormalizer failed')
 
         state_model_registry.register_model('testentity', mock_state_model, failing_denormalizer)
 
@@ -133,10 +130,9 @@ class RegistryTests(TestCase):
         state_model_registry.register_model('testentity', mock_state_model1)
 
         # Register second model (should warn about overwrite)
-        import logging
         with patch('fsm.registry.logger') as mock_logger:
             state_model_registry.register_model('testentity', mock_state_model2)
-            
+
             # Should have logged warning about overwrite
             mock_logger.warning.assert_called_once()
             warning_msg = mock_logger.warning.call_args[0][0]
@@ -152,12 +148,12 @@ class RegistryTests(TestCase):
         mock_state_model = Mock()
         mock_state_model.__name__ = 'MockStateModel'
         state_model_registry.register_model('testentity', mock_state_model)
-        
+
         class TestTransition(BaseTransition):
             @property
             def target_state(self) -> str:
                 return 'TEST'
-            
+
             def transition(self, context):
                 return {}
 
@@ -192,7 +188,7 @@ class RegistryTests(TestCase):
             @property
             def target_state(self) -> str:
                 return 'DECORATED'
-            
+
             def transition(self, context):
                 return {}
 
