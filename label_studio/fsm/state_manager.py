@@ -282,7 +282,7 @@ class StateManager:
     @classmethod
     def warm_cache(cls, entities: List[Model]):
         """
-        invalidate_cacheWarm cache with current states for a list of entities.
+        Warm cache with current states for a list of entities.
 
         Basic implementation that can be optimized by Enterprise with
         bulk queries and advanced caching strategies.
