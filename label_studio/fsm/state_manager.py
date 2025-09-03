@@ -212,9 +212,9 @@ class StateManager:
                     **denormalized_fields,
                 )
 
-                # Update cache with new state
+                # Update cache with new state after transaction commits
                 cache_key = cls.get_cache_key(entity)
-                cache.set(cache_key, new_state, cls.CACHE_TTL)
+                transaction.on_commit(lambda: cache.set(cache_key, new_state, cls.CACHE_TTL))
 
                 logger.info(
                     f'State transition successful: {entity._meta.label_lower} {entity.pk} '
