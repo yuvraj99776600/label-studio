@@ -66,34 +66,24 @@ def execute_transition_instance(entity: Model, transition: BaseTransition, user=
     )
 
 
-def get_available_transitions(entity: Model) -> Dict[str, Type[BaseTransition]]:
+def get_available_transitions(entity: Model, user=None, validate: bool = False) -> Dict[str, Type[BaseTransition]]:
     """
-    Get all available transitions for an entity.
+    Get available transitions for an entity.
 
     Args:
         entity: The entity to get transitions for
+        user: User context for validation (only used when validate=True)
+        validate: Whether to validate each transition against current state.
+                 When False, returns all registered transitions for the entity type.
+                 When True, filters to only transitions valid from current state (may be expensive).
 
     Returns:
-        Dictionary mapping transition names to transition classes
+        Dictionary mapping transition names to transition classes.
+        When validate=False: All registered transitions for the entity type.
+        When validate=True: Only transitions valid for the current state.
     """
     entity_name = entity._meta.model_name.lower()
-    return transition_registry.get_transitions_for_entity(entity_name)
-
-
-def get_valid_transitions(entity: Model, user=None, validate: bool = True) -> Dict[str, Type[BaseTransition]]:
-    """
-    Get transitions that are valid for the entity's current state.
-
-    Args:
-        entity: The entity to check transitions for
-        user: User context for validation
-        validate: Whether to validate each transition (may be expensive)
-
-    Returns:
-        Dictionary mapping transition names to transition classes
-        that are valid for the current state
-    """
-    available = get_available_transitions(entity)
+    available = transition_registry.get_transitions_for_entity(entity_name)
 
     if not validate:
         return available
@@ -109,12 +99,23 @@ def get_valid_transitions(entity: Model, user=None, validate: bool = True) -> Di
             # Build minimal context for validation
             from .transitions import TransitionContext
 
+            # Get target state from class or instance
+            target_state = transition_class.get_target_state()
+            if target_state is None:
+                # Need to create an instance to get target_state
+                try:
+                    temp_instance = transition_class()
+                    target_state = temp_instance.target_state
+                except Exception:
+                    # Can't create instance, skip this transition
+                    continue
+
             context = TransitionContext(
                 entity=entity,
                 current_user=user,
                 current_state_object=current_state_object,
                 current_state=current_state,
-                target_state=transition_class.get_target_state(),
+                target_state=target_state,
                 organization_id=getattr(entity, 'organization_id', None),
             )
 

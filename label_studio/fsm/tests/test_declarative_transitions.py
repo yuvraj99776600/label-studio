@@ -356,3 +356,72 @@ class TransitionUtilsTests(TestCase):
         mock_other._meta.model_name = 'other_entity'
         other_available = get_available_transitions(mock_other)
         assert len(other_available) == 0
+
+    def test_get_available_transitions_with_validation(self):
+        """Test the validation behavior of get_available_transitions"""
+        from unittest.mock import Mock, patch
+
+        from fsm.state_manager import StateManager
+
+        @register_state_transition('test_entity', 'validation_test_1')
+        class ValidationTestTransition1(BaseTransition):
+            @property
+            def target_state(self) -> str:
+                return TestStateChoices.IN_PROGRESS
+
+            @classmethod
+            def can_transition_from_state(cls, context) -> bool:
+                # Only allow from CREATED state
+                return context.current_state == TestStateChoices.CREATED
+
+            def transition(self, context: TransitionContext) -> Dict[str, Any]:
+                return {}
+
+        @register_state_transition('test_entity', 'validation_test_2')
+        class ValidationTestTransition2(BaseTransition):
+            @property
+            def target_state(self) -> str:
+                return TestStateChoices.COMPLETED
+
+            @classmethod
+            def can_transition_from_state(cls, context) -> bool:
+                # Only allow from IN_PROGRESS state
+                return context.current_state == TestStateChoices.IN_PROGRESS
+
+            def transition(self, context: TransitionContext) -> Dict[str, Any]:
+                return {}
+
+        # Test validate=False (should return all registered transitions)
+        all_available = get_available_transitions(self.mock_entity, validate=False)
+        assert len(all_available) == 2
+        assert 'validation_test_1' in all_available
+        assert 'validation_test_2' in all_available
+
+        # Mock current state as CREATED
+        mock_state_object = Mock()
+        mock_state_object.state = TestStateChoices.CREATED
+
+        with patch.object(StateManager, 'get_current_state_object', return_value=mock_state_object):
+            # Test validate=True with CREATED state (should only return validation_test_1)
+            valid_transitions = get_available_transitions(self.mock_entity, validate=True)
+            assert len(valid_transitions) == 1
+            assert 'validation_test_1' in valid_transitions
+            assert 'validation_test_2' not in valid_transitions
+
+        # Mock current state as IN_PROGRESS
+        mock_state_object.state = TestStateChoices.IN_PROGRESS
+
+        with patch.object(StateManager, 'get_current_state_object', return_value=mock_state_object):
+            # Test validate=True with IN_PROGRESS state (should only return validation_test_2)
+            valid_transitions = get_available_transitions(self.mock_entity, validate=True)
+            assert len(valid_transitions) == 1
+            assert 'validation_test_2' in valid_transitions
+            assert 'validation_test_1' not in valid_transitions
+
+        # Mock current state as COMPLETED
+        mock_state_object.state = TestStateChoices.COMPLETED
+
+        with patch.object(StateManager, 'get_current_state_object', return_value=mock_state_object):
+            # Test validate=True with COMPLETED state (should return no transitions)
+            valid_transitions = get_available_transitions(self.mock_entity, validate=True)
+            assert len(valid_transitions) == 0
