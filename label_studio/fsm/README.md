@@ -144,10 +144,6 @@ current_state = StateManager.get_current_state(order)
 
 # Get state history
 history = StateManager.get_state_history(order, limit=10)
-
-# Bulk operations for performance
-orders = Order.objects.all()[:1000]
-states = StateManager.bulk_get_current_states(orders)
 ```
 
 ## Key Features
