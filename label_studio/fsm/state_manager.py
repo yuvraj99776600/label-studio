@@ -58,7 +58,7 @@ class StateManager:
         return f'{cls.CACHE_PREFIX}:{entity._meta.label_lower}:{entity.pk}'
 
     @classmethod
-    def get_current_state(cls, entity: Model) -> Optional[str]:
+    def get_current_state_value(cls, entity: Model) -> Optional[str]:
         """
         Get current state with basic caching.
 
@@ -72,7 +72,7 @@ class StateManager:
 
         Example:
             task = Task.objects.get(id=123)
-            current_state = StateManager.get_current_state(task)
+            current_state = StateManager.get_current_state_value(task)
             if current_state == 'COMPLETED':
                 # Task is finished
                 pass
@@ -96,17 +96,10 @@ class StateManager:
         # Query database using state model registry
         state_model = get_state_model_for_entity(entity)
         if not state_model:
-            logger.error(
-                'No state model found',
-                extra={
-                    'event': 'fsm.state_model_not_found',
-                    'entity_type': entity._meta.model_name,
-                },
-            )
             raise StateManagerError(f'No state model found for {entity._meta.model_name} when getting current state')
 
         try:
-            current_state = state_model.get_current_state(entity)
+            current_state = state_model.get_current_state_value(entity)
 
             # Cache result
             if current_state is not None:
@@ -133,7 +126,7 @@ class StateManager:
                 },
                 exc_info=True,
             )
-            return None
+            raise StateManagerError(f'Error getting current state: {e}') from e
 
     @classmethod
     def get_current_state_object(cls, entity: Model) -> BaseState:
