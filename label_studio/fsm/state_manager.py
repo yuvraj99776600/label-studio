@@ -7,7 +7,7 @@ that can be extended by Label Studio Enterprise with additional features.
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
 from django.conf import settings
 from django.core.cache import cache
@@ -15,10 +15,6 @@ from django.db import transaction
 from django.db.models import Model, QuerySet
 from fsm.models import BaseState
 from fsm.registry import get_state_model_for_entity
-
-# Avoid circular import
-if TYPE_CHECKING:
-    from fsm.transitions import BaseTransition
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +66,9 @@ class StateManager:
             entity: The entity to get current state for
 
         Returns:
-            Current state string or None if no states exist
+            Current state string
+        Raises:
+            StateManagerError: If no state model found
 
         Example:
             task = Task.objects.get(id=123)
@@ -84,37 +82,54 @@ class StateManager:
         # Try cache first
         cached_state = cache.get(cache_key)
         if cached_state is not None:
-            logger.debug(f'Cache hit for {entity._meta.label_lower} {entity.pk}: {cached_state}')
+            logger.info(
+                'FSM cache hit',
+                extra={
+                    'event': 'fsm.cache_hit',
+                    'entity_type': entity._meta.label_lower,
+                    'entity_id': entity.pk,
+                    'state': cached_state,
+                },
+            )
             return cached_state
 
         # Query database using state model registry
         state_model = get_state_model_for_entity(entity)
         if not state_model:
-            logger.warning(f'No state model found for {entity._meta.model_name}')
-            return None
+            raise StateManagerError(f'No state model found for {entity._meta.model_name} when getting current state')
 
         try:
-            entity_field = f'{entity._meta.model_name}'
-            current_state = (
-                state_model.objects.filter(**{entity_field: entity})
-                .order_by('-id')  # UUID7 natural ordering
-                .values_list('state', flat=True)
-                .first()
-            )
+            current_state = state_model.get_current_state(entity)
 
             # Cache result
             if current_state is not None:
                 cache.set(cache_key, current_state, cls.CACHE_TTL)
+                logger.info(
+                    'FSM cache miss',
+                    extra={
+                        'event': 'fsm.cache_miss',
+                        'entity_type': entity._meta.label_lower,
+                        'entity_id': entity.pk,
+                    },
+                )
 
-            logger.debug(f'Database query for {entity._meta.label_lower} {entity.pk}: {current_state}')
             return current_state
 
         except Exception as e:
-            logger.error(f'Error getting current state for {entity._meta.label_lower} {entity.pk}: {e}')
+            logger.error(
+                'Error getting current state',
+                extra={
+                    'event': 'fsm.get_state_error',
+                    'entity_type': entity._meta.label_lower,
+                    'entity_id': entity.pk,
+                    'error': str(e),
+                },
+                exc_info=True,
+            )
             return None
 
     @classmethod
-    def get_current_state_object(cls, entity: Model) -> Optional[BaseState]:
+    def get_current_state_object(cls, entity: Model) -> BaseState:
         """
         Get current state object with full audit information.
 
@@ -122,14 +137,18 @@ class StateManager:
             entity: The entity to get current state object for
 
         Returns:
-            Latest BaseState instance or None if no states exist
+            Latest BaseState instance
+
+        Raises:
+            StateManagerError: If no state model found
         """
         state_model = get_state_model_for_entity(entity)
         if not state_model:
-            return None
+            raise StateManagerError(
+                f'No state model found for {entity._meta.model_name} when getting current state object'
+            )
 
-        entity_field = f'{entity._meta.model_name}'
-        return state_model.objects.filter(**{entity_field: entity}).order_by('-id').first()
+        return state_model.get_current_state()
 
     @classmethod
     def transition_state(
@@ -176,14 +195,9 @@ class StateManager:
         """
         state_model = get_state_model_for_entity(entity)
         if not state_model:
-            raise StateManagerError(f'No state model found for {entity._meta.model_name}')
+            raise StateManagerError(f'No state model found for {entity._meta.model_name} when transitioning state')
 
         current_state = cls.get_current_state(entity)
-
-        logger.info(
-            f'Transitioning {entity._meta.label_lower} {entity.pk}: '
-            f'{current_state} → {new_state} (transition: {transition_name})'
-        )
 
         try:
             with transaction.atomic():
@@ -191,11 +205,28 @@ class StateManager:
                 # Get denormalized fields from the state model class
                 denormalized_fields = state_model.get_denormalized_fields(entity)
 
-                # Get organization from user's active organization
-                organization_id = (
-                    user.active_organization.id
-                    if user and hasattr(user, 'active_organization') and user.active_organization
-                    else None
+                # Get organization from entity or denormalized fields, or user's active organization
+                organization_id = getattr(
+                    entity, 'organization_id', getattr(denormalized_fields, 'organization_id', None)
+                )
+
+                if not organization_id and user and hasattr(user, 'active_organization') and user.active_organization:
+                    organization_id = user.active_organization.id
+
+                logger.info(
+                    'State transition starting',
+                    extra={
+                        'event': 'fsm.transition_state_start',
+                        'entity_type': entity._meta.label_lower,
+                        'entity_id': entity.pk,
+                        'from_state': current_state,
+                        'to_state': new_state,
+                        'transition_name': transition_name,
+                        **{
+                            'user_id': user.id if user else None,
+                            'organization_id': organization_id if organization_id else None,
+                        },
+                    },
                 )
 
                 new_state_record = state_model.objects.create(
@@ -212,11 +243,37 @@ class StateManager:
 
                 # Update cache with new state after transaction commits
                 cache_key = cls.get_cache_key(entity)
-                transaction.on_commit(lambda: cache.set(cache_key, new_state, cls.CACHE_TTL))
+
+                def update_cache(key, state, user_id, org_id):
+                    cache.set(key, state, cls.CACHE_TTL)
+                    logger.info(
+                        'Cache updated for transition state',
+                        extra={
+                            'event': 'fsm.transition_state_cache_updated',
+                            'entity_type': entity._meta.label_lower,
+                            'entity_id': entity.pk,
+                            'state': state,
+                            **{'user_id': user_id if user_id else None, 'organization_id': org_id if org_id else None},
+                        },
+                    )
+
+                transaction.on_commit(
+                    lambda: update_cache(cache_key, new_state, user.id if user else None, organization_id)
+                )
 
                 logger.info(
-                    f'State transition successful: {entity._meta.label_lower} {entity.pk} '
-                    f'now in state {new_state} (record ID: {new_state_record.id})'
+                    'State transition successful',
+                    extra={
+                        'event': 'fsm.transition_state_success',
+                        'entity_type': entity._meta.label_lower,
+                        'entity_id': entity.pk,
+                        'state': new_state,
+                        'state_record_id': str(new_state_record.id),
+                        **{
+                            'user_id': user.id if user else None,
+                            'organization_id': organization_id if organization_id else None,
+                        },
+                    },
                 )
                 return True
 
@@ -225,8 +282,20 @@ class StateManager:
             cache_key = cls.get_cache_key(entity)
             cache.delete(cache_key)
             logger.error(
-                f'State transition failed for {entity._meta.label_lower} {entity.pk}: '
-                f'{current_state} → {new_state}: {e}'
+                'State transition failed',
+                extra={
+                    'event': 'fsm.transition_state_failed',
+                    'entity_type': entity._meta.label_lower,
+                    'entity_id': entity.pk,
+                    'from_state': current_state,
+                    'to_state': new_state,
+                    'error': str(e),
+                    **{
+                        'user_id': user.id if user else None,
+                        'organization_id': organization_id if organization_id else None,
+                    },
+                },
+                exc_info=True,
             )
             raise StateManagerError(f'Failed to transition state: {e}') from e
 
@@ -244,7 +313,9 @@ class StateManager:
         """
         state_model = get_state_model_for_entity(entity)
         if not state_model:
-            raise StateManagerError(f'No state model registered for {entity._meta.model_name}')
+            raise StateManagerError(
+                f'No state model registered for {entity._meta.model_name} when getting state history'
+            )
 
         return state_model.get_state_history(entity, limit)
 
@@ -265,7 +336,9 @@ class StateManager:
         """
         state_model = get_state_model_for_entity(entity)
         if not state_model:
-            raise StateManagerError(f'No state model registered for {entity._meta.model_name}')
+            raise StateManagerError(
+                f'No state model registered for {entity._meta.model_name} when getting states in time range'
+            )
 
         return state_model.get_states_in_range(entity, start_time, end_time or datetime.now())
 
@@ -274,7 +347,16 @@ class StateManager:
         """Invalidate cached state for an entity"""
         cache_key = cls.get_cache_key(entity)
         cache.delete(cache_key)
-        logger.debug(f'Invalidated cache for {entity._meta.label_lower} {entity.pk}')
+        organization_id = getattr(entity, 'organization_id', None)
+        logger.info(
+            'Cache invalidated',
+            extra={
+                'event': 'fsm.cache_invalidated',
+                'entity_type': entity._meta.label_lower,
+                'entity_id': entity.pk,
+                **{'organization_id': organization_id if organization_id else None},
+            },
+        )
 
     @classmethod
     def warm_cache(cls, entities: List[Model]):
@@ -285,7 +367,11 @@ class StateManager:
         bulk queries and advanced caching strategies.
         """
         cache_updates = {}
+        organization_id = None
         for entity in entities:
+            if organization_id is None:
+                if hasattr(entity, 'organization_id'):
+                    organization_id = entity.organization_id
             current_state = cls.get_current_state(entity)
             if current_state:
                 cache_key = cls.get_cache_key(entity)
@@ -293,71 +379,14 @@ class StateManager:
 
         if cache_updates:
             cache.set_many(cache_updates, cls.CACHE_TTL)
-            logger.debug(f'Warmed cache for {len(cache_updates)} entities')
-
-    @classmethod
-    def execute_declarative_transition(
-        cls, transition: 'BaseTransition', entity: Model, user=None, **context_kwargs
-    ) -> BaseState:
-        """
-        Execute a declarative Pydantic-based transition.
-
-        This method integrates the new declarative transition system with
-        the existing StateManager, providing a bridge between the two approaches.
-
-        Args:
-            transition: Instance of a BaseTransition subclass
-            entity: The entity to transition
-            user: User executing the transition
-            **context_kwargs: Additional context data
-
-        Returns:
-            The newly created state record
-
-        Raises:
-            TransitionValidationError: If transition validation fails
-            StateManagerError: If transition execution fails
-        """
-        from .transitions import TransitionContext
-
-        # Get current state information
-        current_state_object = cls.get_current_state_object(entity)
-        current_state = current_state_object.state if current_state_object else None
-
-        # Build transition context
-        context = TransitionContext(
-            entity=entity,
-            current_user=user,
-            current_state_object=current_state_object,
-            current_state=current_state,
-            target_state=transition.target_state,
-            organization_id=getattr(entity, 'organization_id', None),
-            **context_kwargs,
-        )
-
-        logger.info(
-            f'Executing declarative transition {transition.__class__.__name__} '
-            f'for {entity._meta.label_lower} {entity.pk}: '
-            f'{current_state} → {transition.target_state}'
-        )
-
-        try:
-            # Execute the transition through the declarative system
-            state_record = transition.execute(context)
-
             logger.info(
-                f'Declarative transition successful: {entity._meta.label_lower} {entity.pk} '
-                f'now in state {transition.target_state} (record ID: {state_record.id})'
+                'Cache warmed',
+                extra={
+                    'event': 'fsm.cache_warmed',
+                    'entity_count': len(cache_updates),
+                    **{'organization_id': organization_id if organization_id else None},
+                },
             )
-
-            return state_record
-
-        except Exception as e:
-            logger.error(
-                f'Declarative transition failed for {entity._meta.label_lower} {entity.pk}: '
-                f'{current_state} → {transition.target_state}: {e}'
-            )
-            raise
 
     @classmethod
     def execute_transition(

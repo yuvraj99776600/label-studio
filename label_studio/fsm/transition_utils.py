@@ -5,12 +5,15 @@ This module provides helper functions to make it easier to integrate
 the new Pydantic-based transition system with existing Label Studio code.
 """
 
+import logging
 from typing import Any, Dict, List, Type
 
 from django.db.models import Model
 from fsm.registry import transition_registry
 from fsm.state_manager import StateManager
 from fsm.transitions import BaseTransition, TransitionValidationError
+
+logger = logging.getLogger(__name__)
 
 
 def get_available_transitions(entity: Model, user=None, validate: bool = False) -> Dict[str, Type[BaseTransition]]:
@@ -78,11 +81,14 @@ def get_available_transitions(entity: Model, user=None, validate: bool = False) 
             continue
         except Exception as e:
             # Unexpected error during validation - this should be investigated
-            import logging
-
-            logger = logging.getLogger(__name__)
             logger.warning(
-                f"Unexpected error validating transition '{name}' for entity {entity._meta.model_name}: {e}",
+                'Unexpected error validating transition',
+                extra={
+                    'event': 'fsm.transition_validation_error',
+                    'transition_name': name,
+                    'entity_type': entity._meta.model_name,
+                    'error': str(e),
+                },
                 exc_info=True,
             )
             continue

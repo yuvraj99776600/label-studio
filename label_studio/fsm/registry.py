@@ -125,13 +125,25 @@ class StateModelRegistry:
         entity_key = entity_name.lower()
 
         if entity_key in self._models:
-            logger.warning(
-                f'Overwriting existing state model for {entity_key}. '
-                f'Previous: {self._models[entity_key]}, New: {state_model}'
+            logger.debug(
+                'Overwriting existing state model',
+                extra={
+                    'event': 'fsm.registry_overwrite',
+                    'entity_type': entity_key,
+                    'previous_model': self._models[entity_key].__name__,
+                    'new_model': state_model.__name__,
+                },
             )
 
         self._models[entity_key] = state_model
-        logger.debug(f'Registered state model for {entity_key}: {state_model.__name__}')
+        logger.debug(
+            'Registered state model',
+            extra={
+                'event': 'fsm.model_registered',
+                'entity_type': entity_key,
+                'model_name': state_model.__name__,
+            },
+        )
 
     def get_model(self, entity_name: str) -> Optional['BaseState']:
         """
@@ -152,7 +164,10 @@ class StateModelRegistry:
     def clear(self):
         """Clear all registered models (useful for testing)."""
         self._models.clear()
-        logger.debug('Cleared state model registry')
+        logger.debug(
+            'State model registry cleared',
+            extra={'event': 'fsm.registry_cleared'},
+        )
 
     def get_all_models(self) -> Dict[str, 'BaseState']:
         """Get all registered models."""
