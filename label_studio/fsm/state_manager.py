@@ -96,6 +96,13 @@ class StateManager:
         # Query database using state model registry
         state_model = get_state_model_for_entity(entity)
         if not state_model:
+            logger.error(
+                'No state model found',
+                extra={
+                    'event': 'fsm.state_model_not_found',
+                    'entity_type': entity._meta.model_name,
+                },
+            )
             raise StateManagerError(f'No state model found for {entity._meta.model_name} when getting current state')
 
         try:
@@ -148,7 +155,7 @@ class StateManager:
                 f'No state model found for {entity._meta.model_name} when getting current state object'
             )
 
-        return state_model.get_current_state()
+        return state_model.get_current_state(entity)
 
     @classmethod
     def transition_state(

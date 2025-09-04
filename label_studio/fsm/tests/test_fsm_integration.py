@@ -347,9 +347,9 @@ class TestStateManager(TestCase):
         # Verify transaction.on_commit was NOT called since transition failed
         assert mock_on_commit.call_count == 0
 
-        # Verify cache was not updated (should still be None)
-        current_state = self.StateManager.get_current_state(self.task)
-        assert current_state is None
+        # Verify cache was not updated (should raise exception)
+        with pytest.raises(Exception):  # Should raise StateManagerError
+            self.StateManager.get_current_state(self.task)
 
     @patch('django.db.transaction.on_commit')
     @patch('fsm.models.TaskState.objects.create')

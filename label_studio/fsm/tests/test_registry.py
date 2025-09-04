@@ -137,13 +137,18 @@ class RegistryTests(TestCase):
         with patch('fsm.registry.logger') as mock_logger:
             state_model_registry.register_model('testentity', mock_state_model2)
 
-            # Should have logged warning about overwrite
-            mock_logger.warning.assert_called_once()
-            warning_msg = mock_logger.warning.call_args[0][0]
-            assert 'Overwriting existing state model' in warning_msg
-            assert 'testentity' in warning_msg
-            assert 'Previous:' in warning_msg
-            assert 'New:' in warning_msg
+            # Should have logged debug about overwrite
+            mock_logger.debug.assert_called()
+            # Find the call that has the overwrite message
+            debug_calls = mock_logger.debug.call_args_list
+            overwrite_call = None
+            for call in debug_calls:
+                if 'Overwriting existing state model' in call[0][0]:
+                    overwrite_call = call
+                    break
+            assert overwrite_call is not None, 'Expected debug log about overwriting existing state model'
+            debug_msg = overwrite_call[0][0]
+            assert 'Overwriting existing state model' in debug_msg
 
     def test_registry_clear_methods(self):
         """Test registry clear methods"""

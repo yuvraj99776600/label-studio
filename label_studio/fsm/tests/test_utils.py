@@ -230,10 +230,7 @@ class TransitionUtilsTests(TestCase):
         transition_registry.register('testentity', 'broken_transition', BrokenTransition)
 
         # Should handle the error gracefully and log warning
-        import logging
-
-        mock_logger = Mock()
-        with patch.object(logging, 'getLogger', return_value=mock_logger):
+        with patch('fsm.transition_utils.logger') as mock_logger:
             result = get_available_transitions(self.entity, validate=True)
             # Should not include the broken transition
             assert 'broken_transition' not in result
