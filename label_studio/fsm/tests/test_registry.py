@@ -84,39 +84,43 @@ class RegistryTests(TestCase):
             assert result.state == 'COMPLETED'
 
     def test_registry_state_model_with_denormalizer(self):
-        """Test StateModelRegistry with denormalizer function"""
+        """Test StateModelRegistry with state model that has get_denormalized_fields"""
 
         mock_state_model = Mock()
         mock_state_model.__name__ = 'MockStateModel'
 
-        def test_denormalizer(entity):
-            return {'custom_field': f'denormalized_{entity.pk}'}
+        # Mock the get_denormalized_fields classmethod
+        mock_state_model.get_denormalized_fields = Mock(return_value={'custom_field': 'denormalized_1'})
 
-        # Register with denormalizer
-        state_model_registry.register_model('testentity', mock_state_model, test_denormalizer)
+        # Register the model (no denormalizer parameter anymore)
+        state_model_registry.register_model('testentity', mock_state_model)
 
-        # Check denormalizer was stored
-        denormalizer = state_model_registry.get_denormalizer('testentity')
-        assert denormalizer is not None
+        # Check model was registered
+        registered_model = state_model_registry.get_model('testentity')
+        assert registered_model is not None
+        assert registered_model == mock_state_model
 
-        result = denormalizer(self.entity)
+        # Test that get_denormalized_fields works on the model
+        result = mock_state_model.get_denormalized_fields(self.entity)
         assert result == {'custom_field': 'denormalized_1'}
 
     def test_registry_denormalizer_error_handling(self):
-        """Test denormalizer error handling in state model registry"""
+        """Test error handling when get_denormalized_fields raises an exception"""
 
         mock_state_model = Mock()
         mock_state_model.__name__ = 'MockStateModel'
 
-        def failing_denormalizer(entity):
-            raise RuntimeError('Denormalizer failed')
+        # Mock get_denormalized_fields to raise an error
+        mock_state_model.get_denormalized_fields = Mock(side_effect=RuntimeError('Denormalizer failed'))
 
-        state_model_registry.register_model('testentity', mock_state_model, failing_denormalizer)
+        # Register the model
+        state_model_registry.register_model('testentity', mock_state_model)
 
-        # Should handle denormalizer errors gracefully
-        denormalizer = state_model_registry.get_denormalizer('testentity')
-        with pytest.raises(RuntimeError):
-            denormalizer(self.entity)
+        # Test that the error is propagated correctly
+        with pytest.raises(RuntimeError) as exc_info:
+            mock_state_model.get_denormalized_fields(self.entity)
+
+        assert 'Denormalizer failed' in str(exc_info.value)
 
     def test_registry_overwrite_warning(self):
         """Test warning when overwriting existing registry entries"""
