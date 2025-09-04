@@ -129,6 +129,11 @@ class StateManager:
             raise StateManagerError(f'Error getting current state: {e}') from e
 
     @classmethod
+    def get_current_state(cls, entity: Model) -> Optional[str]:
+        """Backward compatibility method - calls get_current_state_value"""
+        return cls.get_current_state_value(entity)
+
+    @classmethod
     def get_current_state_object(cls, entity: Model) -> BaseState:
         """
         Get current state object with full audit information.
