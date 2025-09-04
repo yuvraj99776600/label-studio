@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Model
+from django.db.models import Model, QuerySet
 from fsm.models import BaseState
 from fsm.registry import get_state_model_for_entity
 
@@ -188,10 +188,8 @@ class StateManager:
         try:
             with transaction.atomic():
                 # INSERT-only approach - no UPDATE operations needed
-                # Get denormalized fields from the state model itself
-                denormalized_fields = {}
-                if hasattr(state_model, 'get_denormalized_fields'):
-                    denormalized_fields = state_model.get_denormalized_fields(entity)
+                # Get denormalized fields from the state model class
+                denormalized_fields = state_model.get_denormalized_fields(entity)
 
                 # Get organization from user's active organization
                 organization_id = (
@@ -233,7 +231,7 @@ class StateManager:
             raise StateManagerError(f'Failed to transition state: {e}') from e
 
     @classmethod
-    def get_state_history(cls, entity: Model, limit: int = 100) -> List[BaseState]:
+    def get_state_history(cls, entity: Model, limit: int = 100) -> QuerySet[BaseState]:
         """
         Get complete state history for an entity.
 
@@ -242,14 +240,13 @@ class StateManager:
             limit: Maximum number of state records to return
 
         Returns:
-            List of state records ordered by most recent first
+            QuerySet of state records ordered by most recent first
         """
         state_model = get_state_model_for_entity(entity)
         if not state_model:
-            return []
+            raise StateManagerError(f'No state model registered for {entity._meta.model_name}')
 
-        entity_field = f'{entity._meta.model_name}'
-        return list(state_model.objects.filter(**{entity_field: entity}).order_by('-id')[:limit])
+        return state_model.get_state_history(entity, limit)
 
     @classmethod
     def get_states_in_time_range(
@@ -268,9 +265,9 @@ class StateManager:
         """
         state_model = get_state_model_for_entity(entity)
         if not state_model:
-            return []
+            raise StateManagerError(f'No state model registered for {entity._meta.model_name}')
 
-        return list(state_model.get_states_in_range(entity, start_time, end_time or datetime.now()))
+        return state_model.get_states_in_range(entity, start_time, end_time or datetime.now())
 
     @classmethod
     def invalidate_cache(cls, entity: Model):

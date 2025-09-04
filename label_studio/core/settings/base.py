@@ -895,4 +895,3 @@ DM_MAX_USERS_TO_DISPLAY = int(get_env('DM_MAX_USERS_TO_DISPLAY', 10))
 
 # Base FSM (Finite State Machine) Configuration for Label Studio
 FSM_CACHE_TTL = 300  # Cache TTL in seconds (5 minutes)
-FSM_AUTO_CREATE_STATES = False

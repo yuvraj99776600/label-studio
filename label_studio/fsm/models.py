@@ -3,11 +3,11 @@ Core FSM models for Label Studio.
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from django.conf import settings
 from django.db import models
-from django.db.models import UUIDField
+from django.db.models import QuerySet, UUIDField
 from fsm.registry import register_state_model
 from fsm.state_choices import AnnotationStateChoices, ProjectStateChoices, TaskStateChoices
 from fsm.utils import UUID7Field, generate_uuid7, timestamp_from_uuid7
@@ -137,13 +137,13 @@ class BaseState(models.Model):
         return current_state.state if current_state else None
 
     @classmethod
-    def get_state_history(cls, entity, limit: int = 100):
+    def get_state_history(cls, entity, limit: int = 100) -> QuerySet['BaseState']:
         """Get complete state history for an entity"""
         entity_field = f'{cls._get_entity_field_name()}'
         return cls.objects.filter(**{entity_field: entity}).order_by('-id')[:limit]
 
     @classmethod
-    def get_states_in_range(cls, entity, start_time: datetime, end_time: datetime):
+    def get_states_in_range(cls, entity, start_time: datetime, end_time: datetime) -> QuerySet['BaseState']:
         """
         Efficient time-range queries using UUID7.
 
@@ -160,6 +160,34 @@ class BaseState(models.Model):
         entity_field = f'{cls._get_entity_field_name()}'
         queryset = cls.objects.filter(**{entity_field: entity})
         return UUID7Field.filter_since_time(queryset, since).order_by('id')
+
+    @classmethod
+    def get_denormalized_fields(cls, entity) -> Dict[str, Any]:
+        """
+        Get denormalized fields to include in the state record.
+
+        Override this method in subclasses to provide denormalized data
+        that should be stored with each state transition for performance
+        optimization and auditing purposes.
+
+        Args:
+            entity: The entity instance being transitioned
+
+        Returns:
+            Dictionary of field names to values that should be stored
+            in the state record
+
+        Example:
+            @classmethod
+            def get_denormalized_fields(cls, entity):
+                return {
+                    'project_id': entity.project_id,
+                    'organization_id': entity.project.organization_id,
+                    'task_type': entity.task_type,
+                    'priority': entity.priority
+                }
+        """
+        return {}
 
     @classmethod
     def _get_entity_field_name(cls) -> str:
