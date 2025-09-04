@@ -7,7 +7,7 @@ allowing the FSM to be decoupled from concrete implementations.
 
 import logging
 import typing
-from typing import Any, Callable, Dict, Optional, Type
+from typing import Any, Dict, Optional, Type
 
 from django.db.models import Model, TextChoices
 
@@ -113,21 +113,14 @@ class StateModelRegistry:
 
     def __init__(self):
         self._models: Dict[str, 'BaseState'] = {}
-        self._denormalizers: Dict[str, Callable[[Model], Dict[str, Any]]] = {}
 
-    def register_model(
-        self,
-        entity_name: str,
-        state_model: 'BaseState',
-        denormalizer: Optional[Callable[[Model], Dict[str, Any]]] = None,
-    ):
+    def register_model(self, entity_name: str, state_model: 'BaseState'):
         """
         Register a state model for an entity type.
 
         Args:
             entity_name: Name of the entity (e.g., 'task', 'annotation')
             state_model: The state model class for this entity
-            denormalizer: Optional function to extract denormalized fields
         """
         entity_key = entity_name.lower()
 
@@ -138,10 +131,6 @@ class StateModelRegistry:
             )
 
         self._models[entity_key] = state_model
-
-        if denormalizer:
-            self._denormalizers[entity_key] = denormalizer
-
         logger.debug(f'Registered state model for {entity_key}: {state_model.__name__}')
 
     def get_model(self, entity_name: str) -> Optional['BaseState']:
@@ -156,39 +145,6 @@ class StateModelRegistry:
         """
         return self._models.get(entity_name.lower())
 
-    def get_denormalizer(self, entity_name: str) -> Optional[Callable]:
-        """
-        Get the denormalization function for an entity type.
-
-        Args:
-            entity_name: Name of the entity
-
-        Returns:
-            Denormalizer function or None if not registered
-        """
-        return self._denormalizers.get(entity_name.lower())
-
-    def get_denormalized_fields(self, entity: Model) -> Dict[str, Any]:
-        """
-        Get denormalized fields for an entity.
-
-        Args:
-            entity: The entity instance
-
-        Returns:
-            Dictionary of denormalized fields
-        """
-        entity_name = entity._meta.model_name.lower()
-        denormalizer = self._denormalizers.get(entity_name)
-
-        if denormalizer:
-            try:
-                return denormalizer(entity)
-            except Exception as e:
-                logger.error(f'Error getting denormalized fields for {entity_name}: {e}')
-
-        return {}
-
     def is_registered(self, entity_name: str) -> bool:
         """Check if a model is registered for an entity type."""
         return entity_name.lower() in self._models
@@ -196,8 +152,6 @@ class StateModelRegistry:
     def clear(self):
         """Clear all registered models (useful for testing)."""
         self._models.clear()
-        self._denormalizers.clear()
-        self._initialized = False
         logger.debug('Cleared state model registry')
 
     def get_all_models(self) -> Dict[str, 'BaseState']:
@@ -209,39 +163,40 @@ class StateModelRegistry:
 state_model_registry = StateModelRegistry()
 
 
-def register_state_model(entity_name: str, denormalizer: Optional[Callable[[Model], Dict[str, Any]]] = None):
+def register_state_model(entity_name: str):
     """
     Decorator to register a state model.
 
     Args:
         entity_name: Name of the entity (e.g., 'task', 'annotation')
-        denormalizer: Optional function to extract denormalized fields
 
     Example:
         @register_state_model('task')
         class TaskState(BaseState):
-            # ... implementation
+            @classmethod
+            def get_denormalized_fields(cls, entity):
+                return {
+                    'project_id': entity.project_id,
+                    'priority': entity.priority
+                }
     """
 
     def decorator(state_model: 'BaseState') -> 'BaseState':
-        state_model_registry.register_model(entity_name, state_model, denormalizer)
+        state_model_registry.register_model(entity_name, state_model)
         return state_model
 
     return decorator
 
 
-def register_state_model_class(
-    entity_name: str, state_model: 'BaseState', denormalizer: Optional[Callable[[Model], Dict[str, Any]]] = None
-):
+def register_state_model_class(entity_name: str, state_model: 'BaseState'):
     """
     Convenience function to register a state model programmatically.
 
     Args:
         entity_name: Name of the entity (e.g., 'task', 'annotation')
         state_model: The state model class for this entity
-        denormalizer: Optional function to extract denormalized fields
     """
-    state_model_registry.register_model(entity_name, state_model, denormalizer)
+    state_model_registry.register_model(entity_name, state_model)
 
 
 def get_state_model(entity_name: str) -> Optional['BaseState']:
