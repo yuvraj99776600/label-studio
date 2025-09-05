@@ -1,44 +1,42 @@
 """
 Transition execution orchestrator for the FSM engine.
 
-This module serves as the top-level orchestrator for state transitions,
-importing from both state_manager and transitions to coordinate execution
-without creating circular dependencies.
-
-No other FSM modules should import from this module.
+This module handles the execution of state transitions, coordinating between
+the registry and transitions without importing StateManager to avoid circular dependencies.
+StateManager imports from this module and provides its methods as parameters.
 """
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Type
 
 from django.db.models import Model
 from fsm.models import BaseState
 from fsm.registry import get_state_model_for_entity, transition_registry
-from fsm.state_manager import StateManager
 from fsm.transitions import TransitionContext
 
 logger = logging.getLogger(__name__)
 
 
-def execute_transition(
+def execute_transition_with_state_manager(
     entity: Model,
     transition_name: str,
-    transition_data: Dict[str, Any] = None,
-    user=None,
+    transition_data: Dict[str, Any],
+    user,
+    state_manager_class: Type,
     **context_kwargs,
 ) -> BaseState:
     """
-    Execute a registered transition by name.
+    Execute a registered transition using StateManager methods passed as parameters.
 
-    This is the main entry point for executing state transitions in the FSM system.
-    It coordinates between the registry, transitions, and state manager without
-    creating circular dependencies.
+    This function is called by StateManager.execute_transition() to avoid circular imports.
+    StateManager imports this module and passes itself as a parameter.
 
     Args:
         entity: The entity to transition
         transition_name: Name of the registered transition
         transition_data: Data for the transition (validated by Pydantic)
         user: User executing the transition
+        state_manager_class: The StateManager class to use for state operations
         **context_kwargs: Additional context data
 
     Returns:
@@ -96,8 +94,8 @@ def execute_transition(
     # Phase 1: Prepare and validate the transition
     transition_context_data = transition.prepare_and_validate(context)
 
-    # Phase 2: Create the state record via StateManager
-    success = StateManager.transition_state(
+    # Phase 2: Create the state record via StateManager methods
+    success = state_manager_class.transition_state(
         entity=entity,
         new_state=transition.target_state,
         transition_name=transition.transition_name,
@@ -109,8 +107,8 @@ def execute_transition(
     if not success:
         raise ValueError(f'Failed to create state record for {transition_name}')
 
-    # Get the newly created state record
-    state_record = StateManager.get_current_state_object(entity)
+    # Get the newly created state record via StateManager
+    state_record = state_manager_class.get_current_state_object(entity)
 
     # Phase 3: Finalize the transition
     transition.finalize(context, state_record)
