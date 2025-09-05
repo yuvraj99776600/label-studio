@@ -16,9 +16,7 @@ from fsm.registry import (
     state_model_registry,
     transition_registry,
 )
-from fsm.state_manager import StateManager
 from fsm.transitions import BaseTransition
-from pydantic import Field
 
 
 class MockEntity:
