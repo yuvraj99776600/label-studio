@@ -322,29 +322,3 @@ class BaseTransition(BaseModel, ABC, Generic[EntityType, StateModelType]):
         finally:
             # Always clear context when done
             self.context = None
-
-    def execute(self, context: TransitionContext[EntityType, StateModelType]) -> StateModelType:
-        """
-        Execute the complete transition workflow.
-
-        NOTE: This method is provided for backward compatibility but should not be called
-        directly to avoid circular imports. Use TransitionExecutor.execute() instead.
-
-        The actual execution flow is:
-        1. TransitionExecutor calls prepare_and_validate()
-        2. TransitionExecutor creates the state record via StateManager
-        3. TransitionExecutor calls finalize()
-
-        Args:
-            context: The transition context
-
-        Returns:
-            The newly created state record
-
-        Raises:
-            NotImplementedError: This method should not be called directly
-        """
-        raise NotImplementedError(
-            'Direct execution of transitions is not supported to avoid circular imports. '
-            'Use TransitionExecutor.execute() or StateManager.execute_transition() instead.'
-        )
