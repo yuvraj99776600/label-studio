@@ -10,10 +10,12 @@ from typing import Any, Dict, List, Type
 
 from django.db.models import Model
 from fsm.registry import transition_registry
-from fsm.state_manager import StateManager
+from fsm.state_manager import get_state_manager
 from fsm.transitions import BaseTransition, TransitionValidationError
 
 logger = logging.getLogger(__name__)
+
+StateManager = get_state_manager()
 
 
 def get_available_transitions(entity: Model, user=None, validate: bool = False) -> Dict[str, Type[BaseTransition]]:
@@ -42,7 +44,7 @@ def get_available_transitions(entity: Model, user=None, validate: bool = False) 
 
     for name, transition_class in available.items():
         try:
-            # Get current state information
+            # Get current state information using potentially overridden StateManager
             current_state_object = StateManager.get_current_state_object(entity)
             current_state = current_state_object.state if current_state_object else None
 

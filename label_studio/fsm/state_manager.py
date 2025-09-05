@@ -15,6 +15,7 @@ from django.db import transaction
 from django.db.models import Model, QuerySet
 from fsm.models import BaseState
 from fsm.registry import get_state_model_for_entity
+from fsm.transition_executor import execute_transition_with_state_manager
 
 logger = logging.getLogger(__name__)
 
@@ -400,7 +401,8 @@ class StateManager:
         """
         Execute a registered transition by name.
 
-        This is the unified entry point for all state transitions using the declarative system.
+        This is the main entry point for all state transitions using the declarative system.
+        Enterprise implementations can override this method to add additional behavior.
 
         Args:
             entity: The entity to transition
@@ -416,17 +418,13 @@ class StateManager:
             ValueError: If transition is not found
             TransitionValidationError: If transition validation fails
         """
-        from .registry import transition_registry
-
-        entity_name = entity._meta.model_name.lower()
-        transition_data = transition_data or {}
-
-        return transition_registry.execute_transition(
-            entity_name=entity_name,
-            transition_name=transition_name,
+        # Delegate to transition executor, passing StateManager methods as parameters
+        return execute_transition_with_state_manager(
             entity=entity,
+            transition_name=transition_name,
             transition_data=transition_data,
             user=user,
+            state_manager_class=cls,
             **context_kwargs,
         )
 
@@ -434,6 +432,7 @@ class StateManager:
 # Allow runtime configuration of which StateManager to use
 # Enterprise can set this to their extended implementation
 DEFAULT_STATE_MANAGER = StateManager
+RESOLVED_STATE_MANAGER = None
 
 
 def get_state_manager() -> Type[StateManager]:
@@ -443,6 +442,10 @@ def get_state_manager() -> Type[StateManager]:
     Returns the StateManager class to use. Enterprise can override
     this by setting a different class in their configuration.
     """
+    # Resolve once
+    if RESOLVED_STATE_MANAGER is not None:
+        return RESOLVED_STATE_MANAGER
+
     # Check if enterprise has configured a custom state manager
     if hasattr(settings, 'FSM_STATE_MANAGER_CLASS'):
         manager_path = settings.FSM_STATE_MANAGER_CLASS
