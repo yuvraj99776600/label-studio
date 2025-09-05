@@ -258,27 +258,24 @@ class BaseTransition(BaseModel, ABC, Generic[EntityType, StateModelType]):
         user_info = f'by {context.current_user}' if context.current_user else 'automatically'
         return f'{self.__class__.__name__} executed {user_info}'
 
-    def execute(self, context: TransitionContext[EntityType, StateModelType]) -> StateModelType:
+    def prepare_and_validate(self, context: TransitionContext[EntityType, StateModelType]) -> Dict[str, Any]:
         """
-        Execute the complete transition workflow.
+        Prepare and validate the transition, returning the transition data.
 
-        This orchestrates the entire transition process:
+        This method handles the preparation phase of the transition:
         1. Set context on the transition instance
         2. Validate the transition
         3. Execute pre-transition hooks
-        4. Perform the actual transition
-        5. Create the state record
-        6. Execute post-transition hooks
+        4. Perform the actual transition logic
 
         Args:
             context: The transition context
 
         Returns:
-            The newly created state record
+            Dictionary of transition data to be stored with the state record
 
         Raises:
             TransitionValidationError: If validation fails
-            Exception: If transition execution fails
         """
         # Set context for access during transition
         self.context = context
@@ -300,30 +297,54 @@ class BaseTransition(BaseModel, ABC, Generic[EntityType, StateModelType]):
             # Execute the transition logic
             transition_data = self.transition(context)
 
-            # Create the state record through StateManager
-            from .state_manager import StateManager
-
-            success = StateManager.transition_state(
-                entity=context.entity,
-                new_state=self.target_state,
-                transition_name=self.transition_name,
-                user=context.current_user,
-                context=transition_data,
-                reason=self.get_reason(context),
-            )
-
-            if not success:
-                raise TransitionValidationError(f'Failed to create state record for {self.transition_name}')
-
-            # Get the newly created state record
-            state_record = StateManager.get_current_state_object(context.entity)
-
-            # Post-transition hook
-            self.post_transition_hook(context, state_record)
-
-            return state_record
+            return transition_data
 
         except Exception:
             # Clear context on error
             self.context = None
             raise
+
+    def finalize(self, context: TransitionContext[EntityType, StateModelType], state_record: StateModelType) -> None:
+        """
+        Finalize the transition after the state record has been created.
+
+        This method handles post-transition activities:
+        1. Execute post-transition hooks
+        2. Clear the context
+
+        Args:
+            context: The transition context
+            state_record: The newly created state record
+        """
+        try:
+            # Post-transition hook
+            self.post_transition_hook(context, state_record)
+        finally:
+            # Always clear context when done
+            self.context = None
+
+    def execute(self, context: TransitionContext[EntityType, StateModelType]) -> StateModelType:
+        """
+        Execute the complete transition workflow.
+
+        NOTE: This method is provided for backward compatibility but should not be called
+        directly to avoid circular imports. Use TransitionExecutor.execute() instead.
+
+        The actual execution flow is:
+        1. TransitionExecutor calls prepare_and_validate()
+        2. TransitionExecutor creates the state record via StateManager
+        3. TransitionExecutor calls finalize()
+
+        Args:
+            context: The transition context
+
+        Returns:
+            The newly created state record
+
+        Raises:
+            NotImplementedError: This method should not be called directly
+        """
+        raise NotImplementedError(
+            'Direct execution of transitions is not supported to avoid circular imports. '
+            'Use TransitionExecutor.execute() or StateManager.execute_transition() instead.'
+        )

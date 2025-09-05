@@ -7,13 +7,13 @@ allowing the FSM to be decoupled from concrete implementations.
 
 import logging
 import typing
-from typing import Any, Dict, Optional, Type
+from typing import Dict, Optional, Type
 
 from django.db.models import Model, TextChoices
 
 if typing.TYPE_CHECKING:
     from fsm.models import BaseState
-    from fsm.transitions import BaseTransition, User
+    from fsm.transitions import BaseTransition
 
 logger = logging.getLogger(__name__)
 
@@ -295,67 +295,12 @@ class TransitionRegistry:
         """
         self._transitions.clear()
 
-    def execute_transition(
-        self,
-        entity_name: str,
-        transition_name: str,
-        entity: Model,
-        transition_data: Dict[str, Any],
-        user: Optional['User'] = None,
-        **context_kwargs,
-    ) -> 'BaseState':
-        """
-        Execute a registered transition.
-
-        Args:
-            entity_name: Name of the entity type
-            transition_name: Name of the transition
-            entity: The entity instance to transition
-            transition_data: Data for the transition (will be validated by Pydantic)
-            user: User executing the transition
-            **context_kwargs: Additional context data
-
-        Returns:
-            The newly created state record
-
-        Raises:
-            ValueError: If transition is not found
-            TransitionValidationError: If transition validation fails
-        """
-        transition_class = self.get_transition(entity_name, transition_name)
-        if not transition_class:
-            raise ValueError(f"Transition '{transition_name}' not found for entity '{entity_name}'")
-
-        # Create transition instance with provided data
-        transition = transition_class(**transition_data)
-
-        # Get current state information
-        from fsm.state_manager import StateManager
-        from fsm.transitions import TransitionContext
-
-        current_state_object = StateManager.get_current_state_object(entity)
-        current_state = current_state_object.state if current_state_object else None
-
-        # Build transition context
-        context = TransitionContext(
-            entity=entity,
-            current_user=user,
-            current_state_object=current_state_object,
-            current_state=current_state,
-            target_state=transition.target_state,
-            organization_id=getattr(entity, 'organization_id', None),
-            **context_kwargs,
-        )
-
-        # Execute the transition
-        return transition.execute(context)
-
 
 # Global transition registry instance
 transition_registry = TransitionRegistry()
 
 
-def register_state_transition(entity_name: str, transition_name: str = None):
+def register_state_transition(entity_name: str, transition_name: str):
     """
     Decorator to register a state transition class.
 
@@ -370,21 +315,7 @@ def register_state_transition(entity_name: str, transition_name: str = None):
     """
 
     def decorator(transition_class: 'BaseTransition') -> 'BaseTransition':
-        name = transition_name
-        if name is None:
-            # Generate name from class name
-            class_name = transition_class.__name__
-            if class_name.endswith('Transition'):
-                class_name = class_name[:-10]  # Remove 'Transition' suffix
-
-            # Convert CamelCase to snake_case
-            name = ''
-            for i, char in enumerate(class_name):
-                if char.isupper() and i > 0:
-                    name += '_'
-                name += char.lower()
-
-        transition_registry.register(entity_name, name, transition_class)
+        transition_registry.register(entity_name, transition_name, transition_class)
         return transition_class
 
     return decorator

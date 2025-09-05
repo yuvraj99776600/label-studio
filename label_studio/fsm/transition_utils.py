@@ -11,9 +11,20 @@ from typing import Any, Dict, List, Type
 from django.db.models import Model
 from fsm.registry import transition_registry
 from fsm.state_manager import StateManager
+from fsm.transition_executor import execute_transition
 from fsm.transitions import BaseTransition, TransitionValidationError
 
 logger = logging.getLogger(__name__)
+
+# Re-export execute_transition for convenience
+__all__ = [
+    'execute_transition',
+    'get_available_transitions',
+    'create_transition_from_dict',
+    'get_transition_schema',
+    'validate_transition_data',
+    'get_entity_state_flow',
+]
 
 
 def get_available_transitions(entity: Model, user=None, validate: bool = False) -> Dict[str, Type[BaseTransition]]:
