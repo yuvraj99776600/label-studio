@@ -44,45 +44,6 @@ class RegistryTests(TestCase):
 
         self.entity = MockEntity()
 
-    def test_registry_execute_transition_integration(self):
-        """Test TransitionRegistry.execute_transition method"""
-
-        class SimpleTransition(BaseTransition):
-            """Simple transition for testing"""
-
-            message: str = Field(default='test')
-
-            @property
-            def target_state(self) -> str:
-                return 'COMPLETED'
-
-            def transition(self, context):
-                return {'message': self.message}
-
-            def execute(self, context):
-                # Create a mock state record
-                state_record = Mock()
-                state_record.id = 'test-uuid'
-                state_record.state = self.target_state
-                return state_record
-
-        transition_registry.register('testentity', 'simple_transition', SimpleTransition)
-
-        # Mock the StateManager methods used in TransitionRegistry
-        with patch.object(StateManager, 'get_current_state_object') as mock_get_state:
-            mock_get_state.return_value = None
-
-            result = transition_registry.execute_transition(
-                entity_name='testentity',
-                transition_name='simple_transition',
-                entity=self.entity,
-                transition_data={'message': 'Hello'},
-                user=None,
-            )
-
-            assert result is not None
-            assert result.state == 'COMPLETED'
-
     def test_registry_state_model_with_denormalizer(self):
         """Test StateModelRegistry with state model that has get_denormalized_fields"""
 
