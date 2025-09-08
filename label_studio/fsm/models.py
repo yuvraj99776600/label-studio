@@ -334,7 +334,7 @@ class ProjectState(BaseState):
     def get_denormalized_fields(cls, entity):
         """Get denormalized fields for ProjectState creation"""
         return {
-            'created_by_id': entity.created_by.id if entity.created_by else None,
+            'created_by_id': entity.created_by_id if entity.created_by_id else None,
         }
 
     @property
