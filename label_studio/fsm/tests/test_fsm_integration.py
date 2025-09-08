@@ -127,7 +127,7 @@ class TestStateManager(TestCase):
 
     def test_get_current_state_empty(self):
         """Test getting current state when no states exist"""
-        current_state = self.StateManager.get_current_state(self.task)
+        current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state is None
 
     @patch('django.db.transaction.on_commit')
@@ -157,7 +157,7 @@ class TestStateManager(TestCase):
         assert mock_on_commit.call_count == 1
 
         # Check current state - should work with mocked cache update
-        current_state = self.StateManager.get_current_state(self.task)
+        current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'CREATED'
 
         # Another transition
@@ -173,7 +173,7 @@ class TestStateManager(TestCase):
         # Verify transaction.on_commit was called again (total 2 times)
         assert mock_on_commit.call_count == 2
 
-        current_state = self.StateManager.get_current_state(self.task)
+        current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'IN_PROGRESS'
 
     @patch('django.db.transaction.on_commit')
@@ -305,7 +305,7 @@ class TestStateManager(TestCase):
         assert len(callbacks_executed) == 1
 
         # Verify the cache was properly updated by executing the callback
-        current_state = self.StateManager.get_current_state(self.task)
+        current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'CREATED'
 
         # Perform another successful transition
@@ -320,7 +320,7 @@ class TestStateManager(TestCase):
         assert mock_on_commit.call_count == 2
         assert len(callbacks_executed) == 2
 
-        current_state = self.StateManager.get_current_state(self.task)
+        current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'IN_PROGRESS'
 
     @patch('django.db.transaction.on_commit')
@@ -349,7 +349,7 @@ class TestStateManager(TestCase):
 
         # Verify cache was not updated (should raise exception)
         with pytest.raises(Exception):  # Should raise StateManagerError
-            self.StateManager.get_current_state(self.task)
+            self.StateManager.get_current_state_value(self.task)
 
     @patch('django.db.transaction.on_commit')
     @patch('fsm.models.TaskState.objects.create')
@@ -376,7 +376,7 @@ class TestStateManager(TestCase):
         assert mock_on_commit.call_count == 0
 
         # Verify cache was deleted due to failure (cache.delete should be called)
-        current_state = self.StateManager.get_current_state(self.task)
+        current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state is None
 
     @patch('django.db.transaction.on_commit')
@@ -412,6 +412,6 @@ class TestStateManager(TestCase):
         cached_state = cache.get(cache_key)
         assert cached_state == 'CREATED'
 
-        # Verify get_current_state uses the cached value
-        current_state = self.StateManager.get_current_state(self.task)
+        # Verify get_current_state_value uses the cached value
+        current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'CREATED'

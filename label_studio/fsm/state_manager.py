@@ -130,11 +130,6 @@ class StateManager:
             raise StateManagerError(f'Error getting current state: {e}') from e
 
     @classmethod
-    def get_current_state(cls, entity: Model) -> Optional[str]:
-        """Backward compatibility method - calls get_current_state_value"""
-        return cls.get_current_state_value(entity)
-
-    @classmethod
     def get_current_state_object(cls, entity: Model) -> BaseState:
         """
         Get current state object with full audit information.
@@ -203,7 +198,7 @@ class StateManager:
         if not state_model:
             raise StateManagerError(f'No state model found for {entity._meta.model_name} when transitioning state')
 
-        current_state = cls.get_current_state(entity)
+        current_state = cls.get_current_state_value(entity)
 
         try:
             with transaction.atomic():
@@ -378,7 +373,7 @@ class StateManager:
             if organization_id is None:
                 if hasattr(entity, 'organization_id'):
                     organization_id = entity.organization_id
-            current_state = cls.get_current_state(entity)
+            current_state = cls.get_current_state_value(entity)
             if current_state:
                 cache_key = cls.get_cache_key(entity)
                 cache_updates[cache_key] = current_state

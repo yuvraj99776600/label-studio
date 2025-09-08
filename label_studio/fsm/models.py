@@ -132,8 +132,14 @@ class BaseState(models.Model):
 
     @classmethod
     def get_current_state_value(cls, entity) -> Optional[str]:
-        """Get current state value as string"""
-        current_state = cls.get_current_state(entity)
+        """
+        Get current state value as string using UUID7 natural ordering.
+
+        Uses UUID7's natural time ordering to efficiently find the latest state
+        without requiring created_at indexes or complex queries.
+        """
+        entity_field = f'{cls._get_entity_field_name()}'
+        current_state = cls.objects.filter(**{entity_field: entity}).order_by('-id').first()
         return current_state.state if current_state else None
 
     @classmethod

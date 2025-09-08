@@ -213,7 +213,7 @@ class DjangoModelIntegrationTests(TestCase):
         create_transition = CreateTaskTransition(created_by_id=100, initial_priority='high')
 
         # Test with StateManager integration
-        with patch('fsm.state_manager.StateManager.get_current_state') as mock_get_current:
+        with patch('fsm.state_manager.StateManager.get_current_state_value') as mock_get_current:
             mock_get_current.return_value = None  # No current state
 
             context = TransitionContext(
