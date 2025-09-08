@@ -217,7 +217,7 @@ class TaskState(BaseState):
     """
 
     # Entity Relationship
-    task = models.ForeignKey('tasks.Task', related_name='fsm_states', on_delete=models.CASCADE, db_index=True)
+    task = models.ForeignKey('tasks.Task', related_name='fsm_states', on_delete=models.CASCADE)
 
     # Override state field to add choices constraint
     state = models.CharField(max_length=50, choices=TaskStateChoices.choices, db_index=True)
