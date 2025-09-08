@@ -8,23 +8,21 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 from fsm.models import AnnotationState, ProjectState, TaskState
 from fsm.state_manager import get_state_manager
-from projects.models import Project
-from tasks.models import Annotation, Task
-
-User = get_user_model()
+from projects.tests.factories import ProjectFactory
+from tasks.tests.factories import AnnotationFactory, TaskFactory
+from users.tests.factories import UserFactory
 
 
 class TestFSMModels(TestCase):
     """Test FSM model functionality"""
 
     def setUp(self):
-        self.user = User.objects.create_user(email='test@example.com', password='test123')
-        self.project = Project.objects.create(title='Test Project', created_by=self.user)
-        self.task = Task.objects.create(project=self.project, data={'text': 'test'})
+        self.user = UserFactory(email='test@example.com')
+        self.project = ProjectFactory(created_by=self.user)
+        self.task = TaskFactory(project=self.project, data={'text': 'test'})
 
         # Clear cache to ensure tests start with clean state
         from django.core.cache import cache
@@ -57,7 +55,7 @@ class TestFSMModels(TestCase):
 
     def test_annotation_state_creation(self):
         """Test AnnotationState creation and basic functionality"""
-        annotation = Annotation.objects.create(task=self.task, completed_by=self.user, result=[])
+        annotation = AnnotationFactory(task=self.task, completed_by=self.user, result=[])
 
         annotation_state = AnnotationState.objects.create(
             annotation=annotation,
@@ -108,9 +106,9 @@ class TestStateManager(TestCase):
     """Test StateManager functionality with mocked transaction support"""
 
     def setUp(self):
-        self.user = User.objects.create_user(email='test@example.com', password='test123')
-        self.project = Project.objects.create(title='Test Project', created_by=self.user)
-        self.task = Task.objects.create(project=self.project, data={'text': 'test'})
+        self.user = UserFactory(email='test@example.com')
+        self.project = ProjectFactory(created_by=self.user)
+        self.task = TaskFactory(project=self.project, data={'text': 'test'})
         self.StateManager = get_state_manager()
 
         # Clear cache to ensure tests start with clean state
