@@ -4,7 +4,7 @@ Tests the complete FSM functionality including models, state management,
 and API endpoints.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
@@ -256,7 +256,7 @@ class TestStateManager(TestCase):
 
         mock_on_commit.side_effect = execute_callback
 
-        before_time = datetime.now(timezone.utc)
+        before_time = datetime.now(timezone.utc) - timedelta(seconds=1)
 
         # Create some states
         self.StateManager.transition_state(entity=self.task, new_state='CREATED', user=self.user)
@@ -266,7 +266,7 @@ class TestStateManager(TestCase):
         assert mock_on_commit.call_count == 2
 
         # Record time after creating states
-        after_time = datetime.now(timezone.utc)
+        after_time = datetime.now(timezone.utc) + timedelta(seconds=1)
 
         # Query states in time range
         states_in_range = self.StateManager.get_states_in_time_range(self.task, before_time, after_time)
