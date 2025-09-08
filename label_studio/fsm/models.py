@@ -291,7 +291,7 @@ class AnnotationState(BaseState):
         return {
             'task_id': entity.task.id,
             'project_id': entity.task.project_id,
-            'completed_by_id': entity.completed_by.id if entity.completed_by else None,
+            'completed_by_id': entity.completed_by_id if entity.completed_by_id else None,
         }
 
     @property
