@@ -1,4 +1,4 @@
-import React, { type FC, useCallback, useEffect, useState, useMemo } from "react";
+import { type FC, useCallback, useEffect, useState, useMemo } from "react";
 import { observer } from "mobx-react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Box } from "@react-three/drei";
@@ -128,7 +128,7 @@ interface Object3DViewProps {
 const Object3DView: FC<Object3DViewProps> = observer(({ item }) => {
   return (
     <div className={styles.container}>
-      <Canvas>
+      <Canvas style={{ height: "100%" }}>
         <ambientLight />
         <pointLight position={[10, 10, 10]} />
         <Scene item={item} />
