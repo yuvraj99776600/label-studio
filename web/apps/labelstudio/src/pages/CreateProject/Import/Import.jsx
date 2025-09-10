@@ -467,8 +467,8 @@ export const ImportPage = ({
                       <dt>Structured data</dt>
                       <dd>{supportedExtensions.structuredData.join(", ")}</dd>
                       <dt>Object 3D Formats</dt>
-                  <dd>{supportedExtensions.object3d.join(", ")}</dd>
-                  <dt>PDF</dt>
+                      <dd>{supportedExtensions.object3d.join(", ")}</dd>
+                      <dt>PDF</dt>
                       <dd>{supportedExtensions.pdf.join(", ")}</dd>
                     </dl>
                     <div className="tips">
