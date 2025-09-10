@@ -1,3 +1,4 @@
+import { Tooltip } from "@humansignal/ui";
 import type Keymaster from "keymaster";
 import {
   type ButtonHTMLAttributes,
@@ -12,7 +13,6 @@ import { Hotkey } from "../../core/Hotkey";
 import { useHotkey } from "../../hooks/useHotkey";
 import { Block, type CNTagName, Elem } from "../../utils/bem";
 import { isDefined } from "../../utils/utilities";
-import { Tooltip } from "../Tooltip/Tooltip";
 import "./Button.scss";
 
 type HTMLButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "type">;
@@ -31,9 +31,14 @@ export interface ButtonProps extends HTMLButtonProps {
   danger?: boolean;
   style?: CSSProperties;
   hotkey?: keyof typeof Hotkey.keymap;
+  hotkeyScope?: string;
+  displayedHotkey?: keyof typeof Hotkey.keymap;
   tooltip?: string;
   tooltipTheme?: "light" | "dark";
   nopadding?: boolean;
+  // Block props
+  // @todo can be imported/infered from Block
+  mod?: Record<string, any>;
 }
 
 export interface ButtonGroupProps {
@@ -60,6 +65,8 @@ export const Button: ButtonType<ButtonProps> = forwardRef(
       primary,
       danger,
       hotkey,
+      hotkeyScope,
+      displayedHotkey,
       tooltip,
       tooltipTheme = "light",
       nopadding,
@@ -98,7 +105,7 @@ export const Button: ButtonType<ButtonProps> = forwardRef(
       }
     }, [icon, size]);
 
-    useHotkey(hotkey, rest.onClick as unknown as Keymaster.KeyHandler);
+    useHotkey(hotkey, rest.onClick as unknown as Keymaster.KeyHandler, hotkeyScope);
 
     const buttonBody = (
       <Block name="button" mod={mods} mix={className} ref={ref} tag={finalTag} type={type} {...rest}>
@@ -114,9 +121,12 @@ export const Button: ButtonType<ButtonProps> = forwardRef(
       </Block>
     );
 
-    if (hotkey && isDefined(Hotkey.keymap[hotkey])) {
+    if (
+      (hotkey && isDefined(Hotkey.keymap[hotkey])) ||
+      (displayedHotkey && isDefined(Hotkey.keymap[displayedHotkey]))
+    ) {
       return (
-        <Hotkey.Tooltip name={hotkey} title={tooltip}>
+        <Hotkey.Tooltip name={hotkey || displayedHotkey} title={tooltip}>
           {buttonBody}
         </Hotkey.Tooltip>
       );

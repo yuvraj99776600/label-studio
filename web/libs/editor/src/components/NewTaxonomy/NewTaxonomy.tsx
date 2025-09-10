@@ -2,16 +2,16 @@ import { TreeSelect } from "antd";
 import type React from "react";
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
-import { Tooltip } from "../../common/Tooltip/Tooltip";
+import { Tooltip } from "@humansignal/ui";
 
 import "./NewTaxonomy.scss";
 import { TaxonomySearch, type TaxonomySearchRef } from "./TaxonomySearch";
 
-type TaxonomyPath = string[];
+export type TaxonomyPath = string[];
 type onAddLabelCallback = (path: string[]) => any;
 type onDeleteLabelCallback = (path: string[]) => any;
 
-type TaxonomyItem = {
+export type TaxonomyItem = {
   label: string;
   path: TaxonomyPath;
   depth: number;
@@ -42,7 +42,7 @@ type TaxonomyOptions = {
   placeholder?: string;
 };
 
-type SelectedItem = {
+export type SelectedItem = {
   label: string;
   value: string;
 }[];
@@ -80,23 +80,20 @@ const convert = (
 
     if (!item.hint) return item.color ? color(item) : item.label;
 
-    return (
-      <Tooltip title={item.hint} mouseEnterDelay={500}>
-        {item.color ? color(item) : <span>{item.label}</span>}
-      </Tooltip>
-    );
+    return <Tooltip title={item.hint}>{item.color ? color(item) : <span>{item.label}</span>}</Tooltip>;
   };
 
   const convertItem = (item: TaxonomyItem): AntTaxonomyItem => {
     const value = item.path.join(options.pathSeparator);
-    const disabledNode = options.leafsOnly && (item.isLeaf === false || !!item.children);
+    const isLeaf = item.isLeaf !== false && !item.children?.length;
+    const disabledNode = options.leafsOnly && !isLeaf;
     const maxUsagesReached = options.maxUsagesReached && !selectedPaths.includes(value);
 
     return {
       title: enrich(item),
       value,
       key: value,
-      isLeaf: item.isLeaf !== false && !item.children,
+      isLeaf,
       disableCheckbox: disabledNode || maxUsagesReached,
       children: item.children?.map(convertItem),
     };
@@ -115,8 +112,7 @@ const NewTaxonomy = ({
   // onAddLabel,
   // onDeleteLabel,
   options,
-  // @todo implement readonly mode
-  // isEditable = true,
+  isEditable = true,
 }: TaxonomyProps) => {
   const refInput = useRef<TaxonomySearchRef>(null);
   const [treeData, setTreeData] = useState<AntTaxonomyItem[]>([]);
@@ -201,6 +197,8 @@ const NewTaxonomy = ({
       placeholder={options.placeholder || "Click to add..."}
       style={style}
       className="htx-taxonomy"
+      popupClassName="htx-taxonomy-dropdown"
+      disabled={!isEditable}
     />
   );
 };

@@ -1,6 +1,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { destroy, detach } from "mobx-state-tree";
-import { toCamelCase } from "strman";
+import camelCase from "lodash/camelCase";
+import snakeCase from "lodash/snakeCase";
 
 /**
  * Internal helper to check if parameter is a string
@@ -144,6 +145,16 @@ export function wrapArray(value: any[]) {
   return ([] as any[]).concat(...[value]);
 }
 
+/**
+ * If given one element, wrap it in an array. Removes missing items. Returns empty array for undefined.
+ * @template T
+ * @param {T | T[]} arg
+ * @returns {T[]}
+ **/
+export function toArray<T>(arg: undefined | T | (T | undefined)[]): T[] {
+  return (Array.isArray(arg) ? arg : [arg]).filter((v) => v !== undefined);
+}
+
 export function delay(ms = 0) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -209,9 +220,20 @@ export const camelizeKeys = (object: any): Record<string, unknown> => {
   return Object.fromEntries(
     Object.entries(object).map(([key, value]) => {
       if (Object.prototype.toString.call(value) === "[object Object]") {
-        return [toCamelCase(key), camelizeKeys(value)];
+        return [camelCase(key), camelizeKeys(value)];
       }
-      return [toCamelCase(key), value];
+      return [camelCase(key), value];
+    }),
+  );
+};
+
+export const snakeizeKeys = (object: any): Record<string, unknown> => {
+  return Object.fromEntries(
+    Object.entries(object).map(([key, value]) => {
+      if (Object.prototype.toString.call(value) === "[object Object]") {
+        return [snakeCase(key), snakeizeKeys(value)];
+      }
+      return [snakeCase(key), value];
     }),
   );
 };

@@ -12,9 +12,9 @@ try:
 except:  # noqa: E722
     import json
 
-from core.feature_flags import flag_set
 from django.conf import settings
 from django.db import models
+from django.utils.functional import cached_property
 from rest_framework.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
@@ -37,28 +37,26 @@ class FileUpload(models.Model):
         user.project = self.project  # link for activity log
         return self.project.has_permission(user)
 
-    @property
+    @cached_property
     def filepath(self):
         return self.file.name
 
+    @cached_property
+    def file_name(self):
+        return os.path.basename(self.file.name)
+
     @property
     def url(self):
-        if settings.HOSTNAME and settings.CLOUD_FILE_STORAGE_ENABLED:
-            if flag_set('ff_back_dev_2915_storage_nginx_proxy_26092022_short', self.project.organization.created_by):
-                return self.file.url
-            else:
-                return settings.HOSTNAME + self.file.url
-        elif settings.FORCE_SCRIPT_NAME:
+        if settings.FORCE_SCRIPT_NAME and not (settings.HOSTNAME and settings.CLOUD_FILE_STORAGE_ENABLED):
             return settings.FORCE_SCRIPT_NAME + '/' + self.file.url.lstrip('/')
         else:
             return self.file.url
 
     @property
     def format(self):
-        filepath = self.file.name
         file_format = None
         try:
-            file_format = os.path.splitext(filepath)[-1]
+            file_format = os.path.splitext(self.filepath)[-1]
         except:  # noqa: E722
             pass
         finally:
@@ -76,7 +74,7 @@ class FileUpload(models.Model):
         return body
 
     def read_tasks_list_from_csv(self, sep=','):
-        logger.debug('Read tasks list from CSV file {}'.format(self.file.name))
+        logger.debug('Read tasks list from CSV file {}'.format(self.filepath))
         tasks = pd.read_csv(self.file.open(), sep=sep).fillna('').to_dict('records')
         tasks = [{'data': task} for task in tasks]
         return tasks
@@ -85,13 +83,13 @@ class FileUpload(models.Model):
         return self.read_tasks_list_from_csv('\t')
 
     def read_tasks_list_from_txt(self):
-        logger.debug('Read tasks list from text file {}'.format(self.file.name))
+        logger.debug('Read tasks list from text file {}'.format(self.filepath))
         lines = self.content.splitlines()
         tasks = [{'data': {settings.DATA_UNDEFINED_NAME: line}} for line in lines]
         return tasks
 
     def read_tasks_list_from_json(self):
-        logger.debug('Read tasks list from JSON file {}'.format(self.file.name))
+        logger.debug('Read tasks list from JSON file {}'.format(self.filepath))
 
         raw_data = self.content
         # Python 3.5 compatibility fix https://docs.python.org/3/whatsnew/3.6.html#json
@@ -111,15 +109,15 @@ class FileUpload(models.Model):
         return tasks_formatted
 
     def read_task_from_hypertext_body(self):
-        logger.debug('Read 1 task from hypertext file {}'.format(self.file.name))
+        logger.debug('Read 1 task from hypertext file {}'.format(self.filepath))
         body = self.content
         tasks = [{'data': {settings.DATA_UNDEFINED_NAME: body}}]
         return tasks
 
     def read_task_from_uploaded_file(self):
-        logger.debug('Read 1 task from uploaded file {}'.format(self.file.name))
+        logger.debug('Read 1 task from uploaded file {}'.format(self.filepath))
         if settings.CLOUD_FILE_STORAGE_ENABLED:
-            tasks = [{'data': {settings.DATA_UNDEFINED_NAME: self.file.name}}]
+            tasks = [{'data': {settings.DATA_UNDEFINED_NAME: self.filepath}}]
         else:
             tasks = [{'data': {settings.DATA_UNDEFINED_NAME: self.url}}]
         return tasks
@@ -155,7 +153,7 @@ class FileUpload(models.Model):
                 tasks = self.read_task_from_uploaded_file()
 
         except Exception as exc:
-            raise ValidationError('Failed to parse input file ' + self.file.name + ': ' + str(exc))
+            raise ValidationError('Failed to parse input file ' + self.file_name + ': ' + str(exc))
         return tasks
 
     @classmethod
@@ -198,6 +196,63 @@ class FileUpload(models.Model):
                     break
 
         return tasks, dict(Counter(fileformats)), common_data_fields
+
+    @classmethod
+    def load_tasks_from_uploaded_files_streaming(
+        cls, project, file_upload_ids=None, formats=None, files_as_tasks_list=True, batch_size=5000
+    ):
+        """Stream tasks from uploaded files in batches to reduce memory usage"""
+        fileformats = []
+        common_data_fields = set()
+        batch = []
+        total_yielded = 0
+
+        # scan all files
+        file_uploads = FileUpload.objects.filter(project=project)
+        if file_upload_ids:
+            file_uploads = file_uploads.filter(id__in=file_upload_ids)
+
+        for file_upload in file_uploads:
+            file_format = file_upload.format
+            if formats and file_format not in formats:
+                continue
+
+            new_tasks = file_upload.read_tasks(files_as_tasks_list)
+            fileformats.append(file_format)
+
+            # Validate data fields consistency
+            if new_tasks:
+                new_data_fields = set(new_tasks[0]['data'].keys())
+                if not common_data_fields:
+                    common_data_fields = new_data_fields
+                elif not common_data_fields.intersection(new_data_fields):
+                    raise ValidationError(
+                        _old_vs_new_data_keys_inconsistency_message(
+                            new_data_fields, common_data_fields, file_upload.file.name
+                        )
+                    )
+                else:
+                    common_data_fields &= new_data_fields
+
+            # Add file_upload_id to tasks and batch them
+            for task in new_tasks:
+                task['file_upload_id'] = file_upload.id
+                batch.append(task)
+
+                # Yield batch when it reaches the size limit
+                if len(batch) >= batch_size:
+                    yield batch, dict(Counter(fileformats)), common_data_fields
+                    total_yielded += len(batch)
+                    batch = []
+
+        # Yield remaining tasks if any
+        if batch:
+            yield batch, dict(Counter(fileformats)), common_data_fields
+            total_yielded += len(batch)
+
+        # If no tasks were yielded, return empty batch with metadata
+        if total_yielded == 0:
+            yield [], dict(Counter(fileformats)), common_data_fields
 
 
 def _old_vs_new_data_keys_inconsistency_message(new_data_keys, old_data_keys, current_file):

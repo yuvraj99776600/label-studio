@@ -13,6 +13,12 @@ export const Relations = {
 
     return cy.wrap(relationList);
   },
+  get relationItems() {
+    return this.relations.find(".lsf-relations__item");
+  },
+  get relationRegions() {
+    return this.relationItems.find(".lsf-detailed-region");
+  },
   get hideAllRelationsButton() {
     return cy.get('[aria-label="Hide all"]');
   },
@@ -28,8 +34,16 @@ export const Relations = {
   get hiddenRelations() {
     return this.relations.should("be.visible").get(".lsf-relations__item_hidden .lsf-relations__content");
   },
+  get overlay() {
+    return cy.get(".relations-overlay");
+  },
+  get overlayItems() {
+    return this.overlay.find("g");
+  },
   hasRelations(count: number) {
-    cy.get(".lsf-details__section-head").should("have.text", `Relations (${count})`);
+    cy.get(".lsf-details__section-head")
+      .filter((index, element) => Cypress.$(element).next(".lsf-relation-controls").length > 0)
+      .should("have.text", `Relations (${count})`);
   },
   hasRelation(from: string, to: string) {
     cy.get(".lsf-relations").contains(from).closest(".lsf-relations").contains(to);
@@ -38,7 +52,7 @@ export const Relations = {
     this.hiddenRelations.should("have.length", count);
   },
   toggleCreation() {
-    cy.get(".lsf-region-actions__group_align_left > :nth-child(1) > .lsf-button__icon").click();
+    cy.get('button[aria-label="Create Relation"]').click();
   },
   toggleCreationWithHotkey() {
     // hotkey is alt + r

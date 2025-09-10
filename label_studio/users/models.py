@@ -13,10 +13,12 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from organizations.models import Organization
 from rest_framework.authtoken.models import Token
 from users.functions import hash_upload
+from users.functions.last_activity import get_user_last_activity, schedule_activity_sync, set_user_last_activity
 
 YEAR_START = 1980
 YEAR_CHOICES = []
@@ -65,8 +67,36 @@ class UserLastActivityMixin(models.Model):
     last_activity = models.DateTimeField(_('last activity'), default=timezone.now, editable=False)
 
     def update_last_activity(self):
-        self.last_activity = timezone.now()
-        self.save(update_fields=['last_activity'])
+        """Update user's last activity timestamp using Redis caching."""
+        current_time = timezone.now()
+
+        if flag_set('fflag_fix_back_plt_840_redis_last_activity_29072025_short', user='auto'):
+            redis_success = set_user_last_activity(self.id, current_time)
+
+            if not redis_success:
+                self.last_activity = current_time
+                self.save(update_fields=['last_activity'])
+            else:
+                schedule_activity_sync()
+        else:
+            self.last_activity = current_time
+            self.save(update_fields=['last_activity'])
+
+    def get_last_activity(self):
+        """Get user's last activity timestamp with Redis caching."""
+        # Try Redis first, fallback to database
+        cached_activity = get_user_last_activity(self.id)
+
+        if cached_activity is not None:
+            return cached_activity
+
+        # If not in Redis, return database value
+        return self.last_activity
+
+    @property
+    def last_activity_cached(self):
+        """Property for accessing cached last activity."""
+        return self.get_last_activity()
 
     class Meta:
         abstract = True
@@ -90,6 +120,13 @@ class User(UserMixin, AbstractBaseUser, PermissionsMixin, UserLastActivityMixin)
     last_name = models.CharField(_('last name'), max_length=256, blank=True)
     phone = models.CharField(_('phone'), max_length=256, blank=True)
     avatar = models.ImageField(upload_to=hash_upload, blank=True)
+    custom_hotkeys = models.JSONField(
+        _('custom hotkeys'),
+        default=dict,
+        blank=True,
+        null=True,
+        help_text=_('Custom keyboard shortcuts configuration for the user interface'),
+    )
 
     is_staff = models.BooleanField(
         _('staff status'), default=False, help_text=_('Designates whether the user can log into this admin site.')
@@ -131,7 +168,7 @@ class User(UserMixin, AbstractBaseUser, PermissionsMixin, UserLastActivityMixin)
             models.Index(fields=['date_joined']),
         ]
 
-    @property
+    @cached_property
     def avatar_url(self):
         if self.avatar:
             if settings.CLOUD_FILE_STORAGE_ENABLED:
@@ -149,11 +186,11 @@ class User(UserMixin, AbstractBaseUser, PermissionsMixin, UserLastActivityMixin)
         annotations = self.active_organization_annotations()
         return annotations.values_list('project').distinct().count()
 
-    @property
+    @cached_property
     def own_organization(self) -> Optional[Organization]:
         return fast_first(Organization.objects.filter(created_by=self))
 
-    @property
+    @cached_property
     def has_organization(self):
         return Organization.objects.filter(created_by=self).exists()
 
@@ -179,6 +216,9 @@ class User(UserMixin, AbstractBaseUser, PermissionsMixin, UserLastActivityMixin)
         """Return the short name for the user."""
         return self.first_name
 
+    def get_token(self) -> Token:
+        return Token.objects.filter(user=self).first()
+
     def reset_token(self) -> Token:
         Token.objects.filter(user=self).delete()
         return Token.objects.create(user=self)
@@ -186,7 +226,7 @@ class User(UserMixin, AbstractBaseUser, PermissionsMixin, UserLastActivityMixin)
     def get_initials(self, is_deleted=False):
         initials = '?'
 
-        if flag_set('fflag_feat_all_optic_114_soft_delete_for_churned_employees', user=self) and is_deleted:
+        if is_deleted:
             return 'DU'
 
         if not self.first_name and not self.last_name:

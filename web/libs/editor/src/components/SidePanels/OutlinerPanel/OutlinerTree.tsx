@@ -1,5 +1,7 @@
+import { IconArrow, IconChevronLeft, IconEyeClosed, IconEyeOpened, IconSparks, IconWarning } from "@humansignal/icons";
+import { Tooltip } from "@humansignal/ui";
 import chroma from "chroma-js";
-import { observer } from "mobx-react";
+import { inject, observer } from "mobx-react";
 import Tree from "rc-tree";
 import {
   createContext,
@@ -13,21 +15,19 @@ import {
   useRef,
   useState,
 } from "react";
-import { IconWarning, LsSparks } from "../../../assets/icons";
-import { IconChevronLeft, IconEyeClosed, IconEyeOpened } from "../../../assets/icons/timeline";
-import { IconArrow } from "../../../assets/icons/tree";
-import { Tooltip } from "../../../common/Tooltip/Tooltip";
 import Registry from "../../../core/Registry";
 import { PER_REGION_MODES } from "../../../mixins/PerRegionModes";
 import { Block, cn, Elem } from "../../../utils/bem";
-import { FF_DEV_2755, FF_DEV_3873, FF_OUTLINER_OPTIM, isFF } from "../../../utils/feature-flags";
+import { FF_DEV_2755, FF_DEV_3873, FF_PER_FIELD_COMMENTS, isFF } from "../../../utils/feature-flags";
 import { flatten, isDefined, isMacOS } from "../../../utils/utilities";
 import { NodeIcon } from "../../Node/Node";
 import { LockButton } from "../Components/LockButton";
+import { RegionContextMenu } from "../Components/RegionContextMenu";
 import { RegionControlButton } from "../Components/RegionControlButton";
 import "./TreeView.scss";
-import ResizeObserver from "../../../utils/resize-observer";
 import type { EventDataNode, Key } from "rc-tree/es/interface";
+import ResizeObserver from "../../../utils/resize-observer";
+import { RegionLabel } from "./RegionLabel";
 
 const { localStorage } = window;
 const localStoreName = "collapsed-label-pos";
@@ -110,8 +110,8 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
   const eventHandlers = useEventHandlers();
   const selectedKeys = regions.selection.keys;
   const rootClass = cn("tree");
-  let expandedKeys = undefined;
-  let onExpand = undefined;
+  let expandedKeys;
+  let onExpand;
   // It works only for 'label' mode yet.
   // To enable this feature at other group modes, it needs to set correct pos at regionsTree for these modes
   // It also doesn't work with nesting level more than 1
@@ -147,7 +147,7 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
       regionsTree.filter((item: any) => !collapsedPos.includes(item.pos)).map((item: any) => item.key) ?? [];
 
     onExpand = (
-      internalExpandedKeys: Key[],
+      _internalExpandedKeys: Key[],
       {
         node,
       }: {
@@ -155,6 +155,9 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
       },
     ): void => {
       const region = regionsTree.find((region: any) => region.key === node.key);
+
+      if (!region) return;
+
       // pos is equal to label name
       const pos = region.pos;
 
@@ -163,7 +166,7 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
   }
 
   return (
-    <Block name="outliner-tree" {...(isFF(FF_OUTLINER_OPTIM) ? { ref: setRef } : {})}>
+    <Block name="outliner-tree" ref={setRef}>
       {!!height && (
         <Tree
           key={regions.group}
@@ -179,13 +182,9 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
           selectedKeys={selectedKeys}
           icon={iconGetter}
           switcherIcon={switcherIconGetter}
-          {...(isFF(FF_OUTLINER_OPTIM)
-            ? {
-                virtual: true,
-                itemHeight: MIN_REGIONS_TREE_ROW_HEIGHT,
-                height,
-              }
-            : {})}
+          virtual
+          itemHeight={MIN_REGIONS_TREE_ROW_HEIGHT}
+          height={height}
           {...eventHandlers}
           {...(isPersistCollapseEnabled
             ? {
@@ -201,50 +200,12 @@ const OutlinerInnerTreeComponent: FC<OutlinerInnerTreeProps> = observer(({ regio
 
 const useDataTree = ({ regions, rootClass, footer }: any) => {
   const processor = useCallback((item: any, idx, _false, _null, _onClick) => {
-    const { id, type, hidden, isDrawing } = item ?? {};
+    const { id, type, hidden, isDrawing, locked, incomplete } = item ?? {};
     const style = item?.background ?? item?.getOneColor?.();
     const color = chroma(style ?? "#666").alpha(1);
-    const mods: Record<string, any> = { hidden, type, isDrawing };
+    const mods: Record<string, any> = { hidden, type, isDrawing: isDrawing || incomplete };
 
-    const label = (() => {
-      if (!type) {
-        return "No Label";
-      }
-      if (type.includes("label")) {
-        return item.value;
-      }
-      if (type.includes("region") || type.includes("range")) {
-        const labelsInResults = item.labelings.map((result: any) => result.selectedLabels || []);
-
-        const labels: any[] = [].concat(...labelsInResults);
-
-        return (
-          <Block name="labels-list">
-            {labels.map((label, index) => {
-              const color = label.background || "#000000";
-
-              return [
-                index ? ", " : null,
-                <Elem key={label.id} style={{ color }}>
-                  {label.value || "No label"}
-                </Elem>,
-              ];
-            })}
-          </Block>
-        );
-      }
-      if (type.includes("tool")) {
-        return item.value;
-      }
-    })();
-
-    // The only source of truth for region indices is here, where they are coming from different
-    // RegionStore methods and just rendered a second later; so we store them in a region
-    // to render in other places as well, so indices will be consistent across the app.
-    // Also `item` here can be a tool or a label when we use groupping, so only add idx to regions.
-    // It can even be undefined for group titles in Labels mode.
-    // Later in this file we render (idx + 1), so we will set it as (idx + 1) to incapsulate this logic.
-    item?.setRegionIndex?.(idx + 1);
+    const label = <RegionLabel item={item} />;
 
     return {
       idx,
@@ -261,6 +222,7 @@ const useDataTree = ({ regions, rootClass, footer }: any) => {
       },
       className: rootClass.elem("node").mod(mods).toClassName(),
       title: (data: any) => <RootTitle {...data} />,
+      locked,
     };
   }, []);
 
@@ -291,6 +253,13 @@ const useEventHandlers = () => {
 
     if (multi) {
       annotation.toggleRegionSelection(self);
+      return;
+    }
+
+    if (isFF(FF_PER_FIELD_COMMENTS) && !self.isReadOnly() && annotation.isLinkingMode) {
+      annotation.addLinkedRegion(self);
+      annotation.stopLinkingMode();
+      annotation.regionStore.unselectAll();
       return;
     }
 
@@ -447,7 +416,7 @@ const RootTitle: FC<any> = observer(
           <Elem name="title">
             {label}
             {item?.text && <Elem name="text">{item.text.replace(/\\n/g, "\n")}</Elem>}
-            {item?.isDrawing && (
+            {(item?.isDrawing || item?.incomplete) && (
               <Elem tag="span" name="incomplete">
                 <Tooltip title={`Incomplete ${item.type?.replace("region", "") ?? "region"}`}>
                   <IconWarning />
@@ -455,18 +424,20 @@ const RootTitle: FC<any> = observer(
               </Elem>
             )}
           </Elem>
-          <RegionControls
-            hovered={hovered}
-            item={item}
-            entity={props.entity}
-            regions={props.children}
-            type={props.type}
-            collapsed={collapsed}
-            hasControls={hasControls && isArea}
-            toggleCollapsed={toggleCollapsed}
-          />
+          {item?.hideable !== false && (
+            <RegionControls
+              item={item}
+              entity={props.entity}
+              regions={props.children}
+              type={props.type}
+              collapsed={collapsed}
+              hasControls={hasControls && isArea}
+              toggleCollapsed={toggleCollapsed}
+            />
+          )}
         </Elem>
-        {hasControls && isArea && (
+
+        {!collapsed && hasControls && isArea && (
           <Elem name="ocr">
             <RegionItemDesc
               item={item}
@@ -493,8 +464,14 @@ interface RegionControlsProps {
   toggleCollapsed: (e: any) => void;
 }
 
-const RegionControls: FC<RegionControlsProps> = observer(
-  ({ hovered, item, entity, collapsed, regions, hasControls, type, toggleCollapsed }) => {
+const injector = inject(({ store }) => {
+  return {
+    store,
+  };
+});
+
+const RegionControls: FC<RegionControlsProps> = injector(
+  observer(({ hovered, item, entity, collapsed, regions, hasControls, type, toggleCollapsed, store }) => {
     const { regions: regionStore } = useContext(OutlinerContext);
 
     const hidden = useMemo(() => {
@@ -534,7 +511,7 @@ const RegionControls: FC<RegionControlsProps> = observer(
           <Tooltip title={"Confidence Score"}>
             <Elem name="control-wrapper">
               <Elem name="control" mod={{ type: "predict" }}>
-                {item?.origin === "prediction" && <LsSparks style={{ width: 18, height: 18 }} />}
+                {item?.origin === "prediction" && <IconSparks style={{ width: 18, height: 18 }} />}
               </Elem>
               <Elem name="control" mod={{ type: "score" }}>
                 {isDefined(item?.score) && item.score.toFixed(2)}
@@ -550,11 +527,16 @@ const RegionControls: FC<RegionControlsProps> = observer(
               {/* dirtyness is not implemented yet */}
             </Elem>
             <Elem name="control" mod={{ type: "predict" }}>
-              {item?.origin === "prediction" && <LsSparks style={{ width: 18, height: 18 }} />}
+              {item?.origin === "prediction" && <IconSparks style={{ width: 18, height: 18 }} />}
             </Elem>
           </>
         )}
         <Elem name={"wrapper"}>
+          {store.hasInterface("annotations:copy-link") && isDefined(item?.annotation?.pk) && (
+            <Elem name="control" mod={{ type: "menu" }}>
+              <RegionContextMenu item={item} />
+            </Elem>
+          )}
           <Elem name="control" mod={{ type: "lock" }}>
             <LockButton
               item={item}
@@ -562,22 +544,38 @@ const RegionControls: FC<RegionControlsProps> = observer(
               hovered={hovered}
               locked={item?.locked}
               onClick={onToggleLocked}
+              variant="neutral"
+              look="string"
+              tooltip={item?.locked ? "Unlock Region" : "Lock Region"}
             />
           </Elem>
           <Elem name="control" mod={{ type: "visibility" }}>
             {isFF(FF_DEV_3873) ? (
-              <RegionControlButton onClick={onToggleHidden} style={hidden ? undefined : { display: "none" }}>
-                {hidden ? <IconEyeClosed /> : <IconEyeOpened />}
+              <RegionControlButton
+                variant="neutral"
+                look="string"
+                onClick={onToggleHidden}
+                style={hidden ? undefined : { display: "none" }}
+              >
+                {hidden ? (
+                  <IconEyeClosed style={{ width: 20, height: 20 }} />
+                ) : (
+                  <IconEyeOpened style={{ width: 20, height: 20 }} />
+                )}
               </RegionControlButton>
             ) : (
-              <RegionControlButton onClick={onToggleHidden}>
-                {hidden ? <IconEyeClosed /> : <IconEyeOpened />}
+              <RegionControlButton variant="neutral" look="string" onClick={onToggleHidden}>
+                {hidden ? (
+                  <IconEyeClosed style={{ width: 20, height: 20 }} />
+                ) : (
+                  <IconEyeOpened style={{ width: 20, height: 20 }} />
+                )}
               </RegionControlButton>
             )}
           </Elem>
           {hasControls && (
             <Elem name="control" mod={{ type: "visibility" }}>
-              <RegionControlButton onClick={onToggleCollapsed}>
+              <RegionControlButton variant="neutral" look="string" onClick={onToggleCollapsed}>
                 <IconChevronLeft
                   style={{
                     transform: `rotate(${collapsed ? -90 : 90}deg)`,
@@ -589,7 +587,7 @@ const RegionControls: FC<RegionControlsProps> = observer(
         </Elem>
       </Elem>
     );
-  },
+  }),
 );
 
 interface RegionItemOCSProps {
@@ -636,6 +634,7 @@ const RegionItemDesc: FC<RegionItemOCSProps> = observer(({ item, collapsed, setC
               setCollapsed={setCollapsed}
               color={css}
               outliner
+              canDelete={false}
             />
           ) : null;
         })}

@@ -18,7 +18,7 @@ class TextareaHelper {
   }
 
   get rows() {
-    return this.root.find('[class^="row--"]');
+    return this.root.find(".lsf-row");
   }
 
   row(idx: number) {
@@ -34,7 +34,7 @@ class TextareaHelper {
   }
 
   rowInput(idx: number) {
-    return this.row(idx).find(".ant-input");
+    return this.row(idx).find(".ant-input, input, textarea");
   }
 
   rowType(idx: number, text: string) {

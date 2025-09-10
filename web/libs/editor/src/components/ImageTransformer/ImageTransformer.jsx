@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import { MIN_SIZE } from "../../tools/Base";
 import { getBoundingBoxAfterChanges } from "../../utils/image";
 import LSTransformer from "./LSTransformer";
@@ -194,7 +194,7 @@ export default class TransformerComponent extends Component {
           // borderStroke={"red"}
           boundBoxFunc={this.constrainSizes}
           anchorSize={8}
-          flipEnabled={false}
+          flipEnabled={true}
           zoomedIn={this.props.item.zoomScale > 1}
           onDragStart={(e) => {
             const {
@@ -242,7 +242,7 @@ export default class TransformerComponent extends Component {
           // borderStroke={"red"}
           boundBoxFunc={this.constrainSizes}
           anchorSize={8}
-          flipEnabled={false}
+          flipEnabled={true}
           zoomedIn={this.props.item.zoomScale > 1}
           onDragStart={(e) => {
             const {

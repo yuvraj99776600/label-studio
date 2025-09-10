@@ -1,4 +1,3 @@
-import React from "react";
 import { types } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { Input } from "antd";
@@ -58,6 +57,11 @@ const Model = types
   .views((self) => ({
     get toTag() {
       return self.annotation.names.get(self.toname);
+    },
+
+    // Indicates that it could exist without information about objects, taskData and regions
+    get isIndependent() {
+      return self.toTag?.isIndependent ?? false;
     },
   }))
   .actions((self) => ({

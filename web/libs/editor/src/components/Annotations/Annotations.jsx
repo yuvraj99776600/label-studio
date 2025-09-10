@@ -1,5 +1,7 @@
-import React, { Component } from "react";
-import { Badge, Button, Card, List, Popconfirm, Tooltip } from "antd";
+import { Component } from "react";
+import { Badge, Card, List, Popconfirm } from "antd";
+import { Button } from "@humansignal/ui";
+import { Tooltip } from "@humansignal/ui";
 import { observer } from "mobx-react";
 import {
   DeleteOutlined,
@@ -30,14 +32,13 @@ export const DraftPanel = observer(({ item }) => {
   }
   return (
     <div>
-      <Tooltip
-        placement="topLeft"
-        title={item.draftSelected ? "switch to submitted result" : "switch to current draft"}
+      <Button
+        look="string"
+        onClick={item.toggleDraft}
+        tooltip={item.draftSelected ? "switch to submitted result" : "switch to current draft"}
       >
-        <Button type="link" onClick={item.toggleDraft} className={styles.draftbtn}>
-          {item.draftSelected ? "draft" : "submitted"}
-        </Button>
-      </Tooltip>
+        {item.draftSelected ? "draft" : "submitted"}
+      </Button>
       {saved}
     </div>
   );
@@ -45,36 +46,35 @@ export const DraftPanel = observer(({ item }) => {
 
 const Annotation = observer(({ item, store }) => {
   const removeHoney = () => (
-    <Tooltip placement="topLeft" title="Unset this result as a ground truth">
-      <Button
-        size="small"
-        type="primary"
-        onClick={(ev) => {
-          ev.preventDefault();
-          item.setGroundTruth(false);
-        }}
-      >
-        <StarOutlined />
-      </Button>
-    </Tooltip>
+    <Button
+      size="small"
+      tooltip="Unset this result as a ground truth"
+      onClick={(ev) => {
+        ev.preventDefault();
+        item.setGroundTruth(false);
+      }}
+      aria-label="Unset ground truth"
+    >
+      <StarOutlined />
+    </Button>
   );
 
   const setHoney = () => {
     const title = item.ground_truth ? "Unset this result as a ground truth" : "Set this result as a ground truth";
 
     return (
-      <Tooltip placement="topLeft" title={title}>
-        <Button
-          size="small"
-          look="link"
-          onClick={(ev) => {
-            ev.preventDefault();
-            item.setGroundTruth(!item.ground_truth);
-          }}
-        >
-          {item.ground_truth ? <StarFilled /> : <StarOutlined />}
-        </Button>
-      </Tooltip>
+      <Button
+        size="small"
+        look="string"
+        tooltip={title}
+        onClick={(ev) => {
+          ev.preventDefault();
+          item.setGroundTruth(!item.ground_truth);
+        }}
+        aria-label={item.ground_truth ? "Unset ground truth" : "Set ground truth"}
+      >
+        {item.ground_truth ? <StarFilled /> : <StarOutlined />}
+      </Button>
     );
   };
 
@@ -157,7 +157,7 @@ const Annotation = observer(({ item, store }) => {
               okType="danger"
               cancelText="Cancel"
             >
-              <Button size="small" danger style={{ background: "transparent" }}>
+              <Button size="small" look="string" variant="negative" aria-label="Delete selected annotation">
                 <DeleteOutlined />
               </Button>
             </Popconfirm>
@@ -190,12 +190,17 @@ const Annotation = observer(({ item, store }) => {
         </div>
         {/* platform uses was_cancelled so check both */}
         {store.hasInterface("skip") && (item.skipped || item.was_cancelled) && (
-          <Tooltip placement="topLeft" title="Skipped annotation">
+          <Tooltip alignment="top-left" title="Skipped annotation">
             <StopOutlined className={styles.skipped} />
           </Tooltip>
         )}
         {store.annotationStore.viewingAll && (
-          <Button size="small" type="primary" ghost onClick={toggleVisibility}>
+          <Button
+            size="small"
+            look="outlined"
+            onClick={toggleVisibility}
+            aria-label="Toggle visibility of current annotation"
+          >
             {item.hidden ? <EyeInvisibleOutlined /> : <EyeOutlined />}
           </Button>
         )}
@@ -217,34 +222,33 @@ class Annotations extends Component {
 
         <div style={{ marginRight: "1px" }}>
           {store.hasInterface("annotations:add-new") && (
-            <Tooltip placement="topLeft" title="Create a new annotation">
-              <Button
-                size="small"
-                onClick={(ev) => {
-                  ev.preventDefault();
-                  const c = store.annotationStore.createAnnotation();
-
-                  store.annotationStore.selectAnnotation(c.id);
-                  // c.list.selectAnnotation(c);
-                }}
-              >
-                <PlusOutlined />
-              </Button>
-            </Tooltip>
-          )}
-          &nbsp;
-          <Tooltip placement="topLeft" title="View all annotations">
             <Button
               size="small"
-              type={store.annotationStore.viewingAll ? "primary" : ""}
+              tooltip="Create new annotation"
               onClick={(ev) => {
                 ev.preventDefault();
-                store.annotationStore.toggleViewingAllAnnotations();
+                const c = store.annotationStore.createAnnotation();
+
+                store.annotationStore.selectAnnotation(c.id);
               }}
+              aria-label="Create new annotation"
             >
-              <WindowsOutlined />
+              <PlusOutlined />
             </Button>
-          </Tooltip>
+          )}
+          &nbsp;
+          <Button
+            size="small"
+            tooltip="View all annotations"
+            look={store.annotationStore.viewingAll ? "filled" : "outlined"}
+            onClick={(ev) => {
+              ev.preventDefault();
+              store.annotationStore.toggleViewingAllAnnotations();
+            }}
+            aria-label="Toggle view of all annotations"
+          >
+            <WindowsOutlined />
+          </Button>
         </div>
       </div>
     );

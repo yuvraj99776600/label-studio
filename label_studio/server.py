@@ -14,11 +14,6 @@ from colorama import Fore, init
 if sys.platform == 'win32':
     init(convert=True)
 
-# on windows there will be problems with sqlite and json1 support, so fix it
-from label_studio.core.utils.windows_sqlite_fix import windows_dll_fix
-
-windows_dll_fix()
-
 from django.core.management import call_command
 from django.core.wsgi import get_wsgi_application
 from django.db import DEFAULT_DB_ALIAS, IntegrityError, connections
@@ -176,7 +171,9 @@ def _create_user(input_args, config):
     user = User.objects.get(email=username)
     org = Organization.objects.first()
     if not org:
-        org = Organization.create_organization(created_by=user, title='Label Studio')
+        org = Organization.create_organization(
+            created_by=user, title='Label Studio', legacy_api_tokens_enabled=input_args.enable_legacy_api_token
+        )
     else:
         org.add_user(user)
     user.active_organization = org

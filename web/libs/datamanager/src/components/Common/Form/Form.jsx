@@ -2,7 +2,7 @@ import { Component, createRef, forwardRef, useCallback, useContext, useEffect, u
 import { shallowEqualObjects } from "shallow-equal";
 import { Block, cn, Elem } from "../../../utils/bem";
 import { objectClean } from "../../../utils/helpers";
-import { Button } from "../Button/Button";
+import { Button } from "@humansignal/ui";
 import { Oneof } from "../Oneof/Oneof";
 import { Space } from "../Space/Space";
 import { Counter, Input, Select, Toggle } from "./Elements";
@@ -474,8 +474,9 @@ Form.Builder = forwardRef(
     };
 
     const renderColumns = (columns) => {
+      const columnClassName = cn("form-dm").elem("column").toString();
       return columns.map((col, index) => (
-        <div className={cn("form-dm").elem("column")} key={index} style={{ width: col.width }}>
+        <div className={columnClassName} key={index} style={{ width: col.width }}>
           {renderFields(col.fields)}
         </div>
       ));
@@ -536,7 +537,7 @@ Form.Builder = forwardRef(
         {children}
         {props.autosubmit !== true && withActions === true && (
           <Form.Actions>
-            <Button type="submit" look="primary" style={{ width: 120 }}>
+            <Button type="submit" style={{ width: 120 }}>
               Save
             </Button>
           </Form.Actions>

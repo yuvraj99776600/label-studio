@@ -1,10 +1,10 @@
-import React from "react";
 import { getParentOfType, getType } from "mobx-state-tree";
 import type { IAnyComplexType, IAnyStateTreeNode } from "mobx-state-tree/dist/internal";
 
 import Registry from "./Registry";
 import { parseValue } from "../utils/data";
-import { FF_DEV_3391, isFF } from "../utils/feature-flags";
+import { isSelfServe } from "../utils/billing";
+import { FF_BULK_ANNOTATION, FF_DEV_3391, isFF } from "../utils/feature-flags";
 import { guidGenerator } from "../utils/unique";
 
 interface ConfigNodeBaseProps {
@@ -58,7 +58,7 @@ function tagIntoObject(node: Element, taskData: Record<string, any>, replaces?: 
   const props = attrsToProps(node, replaces);
   const type = node.tagName.toLowerCase();
   const indexFlag = props.indexflag ?? "{{idx}}";
-  const id = isFF(FF_DEV_3391) ? node.getAttribute("name") ?? guidGenerator() : guidGenerator();
+  const id = isFF(FF_DEV_3391) ? (node.getAttribute("name") ?? guidGenerator()) : guidGenerator();
   const data: ConfigNode = {
     ...props,
     id,
@@ -221,7 +221,8 @@ function renderItem(ref: IAnyStateTreeNode, annotation: IAnnotation, includeKey 
   if (isFF(FF_DEV_3391)) {
     if (!annotation) return null;
 
-    el = annotation.ids.get(cleanUpId(ref.id ?? ref.name));
+    // The part `|| el` is a hack to allow it to work with Image regions. For some reason, it uses this function for rendering
+    el = annotation.ids.get(cleanUpId(ref.id ?? ref.name)) || el;
   }
 
   if (!el) {
@@ -233,6 +234,12 @@ function renderItem(ref: IAnyStateTreeNode, annotation: IAnnotation, includeKey 
   const identifierAttribute = type.identifierAttribute;
   const typeName = type.name;
   const View = Registry.getViewByModel(typeName);
+
+  const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isSelfServe() && annotation?.store?.hasInterface("annotation:bulk");
+  const isNotIndependentTag = el.isIndependent !== true;
+  if (isBulkMode && isNotIndependentTag) {
+    return null;
+  }
 
   if (!View) {
     throw new Error(`No view for model: ${typeName}`);

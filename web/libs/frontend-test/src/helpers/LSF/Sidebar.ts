@@ -1,12 +1,8 @@
-import { LabelStudio } from "./LabelStudio";
-import { FF_DEV_1170 } from "../../feature-flags";
+const metaModifier = window.navigator.platform.toLowerCase().indexOf("mac") >= 0 ? "metaKey" : "ctrlKey";
 
 export const Sidebar = {
   get outliner() {
     return cy.get(".lsf-outliner");
-  },
-  get legacySidebar() {
-    return cy.get(".lsf-sidebar-tabs");
   },
   get toolBar() {
     return this.outliner.get(".lsf-view-controls");
@@ -17,22 +13,32 @@ export const Sidebar = {
   get showAllRegionsButton() {
     return this.toolBar.get('[aria-label="Show all regions"]');
   },
+  get orderRegionsButton() {
+    return this.toolBar.get(".lsf-view-controls__sort button");
+  },
+  toggleOrderByTime() {
+    this.orderRegionsButton.click();
+    cy.get(".lsf-dropdown").contains("Order by Time").parent().click();
+    // Cypress is bad at events emitting, so this is a hack to close the panel that
+    // would be closed if the same action is done by a real person
+    this.orderRegionsButton.click();
+  },
   get regions() {
-    return LabelStudio.getFeatureFlag(FF_DEV_1170).then((isFFDEV1170) => {
-      if (isFFDEV1170) {
-        return this.outliner
-          .should("be.visible")
-          .get(".lsf-tree__node:not(.lsf-tree__node_type_footer) .lsf-tree-node-content-wrapper");
-      }
-
-      return this.legacySidebar.should("be.visible").get(".lsf-region-item");
-    });
+    return this.outliner
+      .should("be.visible")
+      .get(".lsf-tree__node:not(.lsf-tree__node_type_footer) .lsf-tree-node-content-wrapper");
   },
   findRegion(selector: string) {
     return this.regions.filter(selector);
   },
   findRegionByIndex(idx: number) {
     return this.findRegion(`:eq(${idx})`);
+  },
+  findByRegionIndex(idx: number) {
+    return this.regions
+      .find(".lsf-outliner-item__index")
+      .filter(`:contains("${idx}")`)
+      .parents(".lsf-tree-node-content-wrapper");
   },
   get hiddenRegions() {
     return this.outliner.should("be.visible").get(".lsf-tree__node_hidden .lsf-tree-node-content-wrapper");
@@ -65,16 +71,20 @@ export const Sidebar = {
       // @link https://docs.cypress.io/api/commands/hover#Example-of-clicking-on-a-hidden-element
       .click({ force: true });
   },
-  toggleRegionSelection(selectorOrIndex: string | number) {
+  toggleRegionSelection(selectorOrIndex: string | number, withModifier = false) {
     const regionFinder =
       typeof selectorOrIndex === "number" ? this.findRegionByIndex.bind(this) : this.findRegion.bind(this);
 
-    regionFinder(selectorOrIndex).click();
+    regionFinder(selectorOrIndex).click({ [metaModifier]: withModifier });
   },
   collapseDetailsRightPanel() {
     cy.get(".lsf-sidepanels__wrapper_align_right .lsf-panel__toggle").should("be.visible").click();
   },
   expandDetailsRightPanel() {
     cy.get(".lsf-sidepanels__wrapper_align_right .lsf-panel__header").should("be.visible").click();
+  },
+  assertRegionHidden(idx: number, id: string, shouldBeHidden: boolean) {
+    const expectation = shouldBeHidden ? "have.class" : "not.have.class";
+    this.findRegionByIndex(idx).should("contain.text", id).parent().should(expectation, "lsf-tree__node_hidden");
   },
 };

@@ -4,13 +4,13 @@ import BaseTool from "./Base";
 import ToolMixin from "../mixins/Tool";
 import { NodeViews } from "../components/Node/Node";
 import { DrawingTool } from "../mixins/DrawingTool";
-import { FF_DEV_3666, FF_DEV_3793, isFF } from "../utils/feature-flags";
+import { FF_DEV_3793, isFF } from "../utils/feature-flags";
 
 const _Tool = types
   .model("KeyPointTool", {
     default: types.optional(types.boolean, true),
     group: "segmentation",
-    shortcut: "K",
+    shortcut: "tool:key-point",
     smart: true,
   })
   .views(() => ({
@@ -29,7 +29,8 @@ const _Tool = types
   }))
   .actions((self) => ({
     clickEv(ev, [x, y]) {
-      if (isFF(FF_DEV_3666) && !self.canStartDrawing()) return;
+      if (!self.canStartDrawing()) return;
+      if (!self.isAllowedInteraction(ev)) return;
 
       const c = self.control;
 

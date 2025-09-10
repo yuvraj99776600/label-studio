@@ -1,17 +1,24 @@
-import React, { Component } from "react";
-import { htmlEscape, matchesSelector, moveStylesBetweenHeadTags } from "../../../utils/html";
-import ObjectTag from "../../../components/Tags/Object";
-import * as xpath from "xpath-range";
-import { inject, observer } from "mobx-react";
-import Utils from "../../../utils";
-import { fixCodePointsInRange } from "../../../utils/selection-tools";
-import "./RichText.scss";
-import { isAlive } from "mobx-state-tree";
 import { LoadingOutlined } from "@ant-design/icons";
-import { Block, cn, Elem } from "../../../utils/bem";
+import * as ff from "@humansignal/core/lib/utils/feature-flags/ff";
 import { observe } from "mobx";
-import { FF_LSDV_4620_3, isFF } from "../../../utils/feature-flags";
+import { inject, observer } from "mobx-react";
+import { isAlive } from "mobx-state-tree";
+import React, { Component } from "react";
+import * as xpath from "xpath-range";
+
+import ObjectTag from "../../../components/Tags/Object";
+import { STATE_CLASS_MODS } from "../../../mixins/HighlightMixin";
+import Utils from "../../../utils";
+import { Block, cn, Elem } from "../../../utils/bem";
+import { htmlEscape, matchesSelector } from "../../../utils/html";
+import {
+  applyTextGranularity,
+  fixCodePointsInRange,
+  rangeToGlobalOffset,
+  trimSelection,
+} from "../../../utils/selection-tools";
 import { isDefined } from "../../../utils/utilities";
+import "./RichText.scss";
 
 const DBLCLICK_TIMEOUT = 450; // ms
 const DBLCLICK_RANGE = 5; // px
@@ -27,7 +34,7 @@ class RichTextPieceView extends Component {
 
   _selectRegions = (additionalMode) => {
     const { item } = this.props;
-    const root = item.visibleNodeRef.current;
+    const root = item.mountNodeRef.current;
     const selection = window.getSelection();
     const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
     const regions = [];
@@ -35,11 +42,7 @@ class RichTextPieceView extends Component {
     while (walker.nextNode()) {
       const node = walker.currentNode;
 
-      if (
-        node.nodeName === "SPAN" &&
-        node.matches(isFF(FF_LSDV_4620_3) ? this._regionVisibleSpanSelector : this._regionSpanSelector) &&
-        selection.containsNode(node)
-      ) {
+      if (node.nodeName === "SPAN" && node.matches(this._regionVisibleSpanSelector) && selection.containsNode(node)) {
         const region = this._determineRegion(node);
 
         regions.push(region);
@@ -56,10 +59,251 @@ class RichTextPieceView extends Component {
     }
   };
 
+  /****** DRAG-N-DROP EDIT METHODS ******/
+  /******
+   * The main idea is to use browser selection with styles of the region so the region expansion will look
+   * smooth and natural. At the beginning the selection will be set to wrap the region. So users will just change
+   * the selection during drag-n-drop, no extra code required for the visual part.
+   *
+   * Steps to achieve this:
+   * 1. Detect that user is about to resize the region (mousedown on a handle)
+   * 2. Set selection style to the region's style
+   * 3. Set selection range to the region's range for the initial state
+   * 4. We do nothing on mousemove, and on mouseup we update the region's offsets
+   * 5. Remove selection style
+   *
+   * There are some tricky parts here: selection should be created after we started dragging,
+   * if we create it before, then the drag will drag-n-drop the selection instead of continuing it.
+   * Steps and flags on init:
+   * - mousedown: check if we are on a handle, set `draggableRegion` and `dragBackwards` to understand the direction
+   * - mousemove: if we have `draggableRegion` but don't have `initializedDrag`, set it; that means we are dragging
+   * - mousemove: if we have both, create selection around the region, set `currentSelection`;
+   *              we are editing the region now
+   * And we should reset all of them on mouseup.
+   **/
+
+  /**
+   * Adjust selection style to mimic region's style but with a lighter color; this is done by creating a style tag.
+   * Region style is also adjusted to be lighter so the combination of two will look like original selected region.
+   * Also sets cursor to "resize" for all document during resize.
+   * @param {*} region to mimic
+   * @param {Document} doc document to apply style to
+   */
+  _setSelectionStyle = (region, doc) => {
+    const colors = region.getColors();
+    const rules = [`background: ${colors.resizeBackground};`, `color: ${colors.activeText};`];
+
+    if (!this.selectionStyle) {
+      this.selectionStyle = doc.createElement("style");
+      // style tag in body changes its inner text, so only head!
+      doc.head.appendChild(this.selectionStyle);
+    }
+
+    this.selectionStyle.innerText = [
+      `::selection {${rules.join(" ")}}`, // set selection style to mimic region
+      `::-moz-selection {${rules.join(" ")}}`, // the same for Firefox
+      "body * { cursor: col-resize !important; }", // set cursor for all elements
+    ].join("\n");
+    this.props.item.setStyles?.({ [region.identifier]: region.resizeStyles });
+  };
+
+  /**
+   * Reset selection style and region style to default
+   */
+  _removeSelectionStyle = (region) => {
+    if (this.selectionStyle) this.selectionStyle.innerText = "";
+    if (region) this.props.item.setStyles?.({ [region.identifier]: region.styles });
+  };
+
+  /**
+   * When we finished region adjustment, or if we just clicked somewhere, we should reset all the flags
+   */
+  _resetDragParams() {
+    const { item } = this.props;
+
+    item.initializedDrag = false;
+    this.draggableRegion = undefined;
+    this.currentSelection = undefined;
+    this.dragBackwards = false;
+  }
+
+  /**
+   * Check if the target is a handle and prepare dragging if it is. Set the `draggableRegion` to mark this.
+   * @param {Event} ev Mouse down event
+   */
+  _checkHandlesAndStartDragging = (ev) => {
+    const { item } = this.props;
+    const target = ev.target;
+    const region = this._determineRegion(target);
+    const classes = [STATE_CLASS_MODS.leftHandle, STATE_CLASS_MODS.rightHandle];
+    const isHandle = target.classList.contains(classes[0]) || target.classList.contains(classes[1]);
+
+    if (ev.buttons === 1 && region?.selected && isHandle) {
+      const tag = item.mountNodeRef.current;
+      const doc = tag?.contentDocument ?? tag?.ownerDocument ?? tag;
+
+      this.draggableRegion = region;
+      // @todo that was a very good idea, but we don't need it right now, maybe later
+      // this.dragAnchor = doc.caretRangeFromPoint(ev.clientX, ev.clientY);
+      this.dragBackwards = target.classList.contains(classes[0]);
+
+      this._setSelectionStyle(region, doc);
+    } else {
+      this.draggableRegion = undefined;
+    }
+  };
+
+  /**
+   * Apply browser selection around the region. Selection anchor should respect the direction of the drag.
+   * @param {Document} _doc is not used in this implementation
+   * @param {HTMLElement} region to wrap selection around
+   */
+  _hightlightRegion = (_doc, region) => {
+    const span = region._spans[0];
+    const lastSpan = region._spans.at(-1);
+    const selection = window.getSelection();
+
+    if (this.dragBackwards) {
+      selection.selectAllChildren(lastSpan);
+      selection.collapseToEnd();
+      selection.extend(span, 0);
+    } else {
+      selection.selectAllChildren(span);
+      selection.extend(lastSpan, lastSpan.childNodes.length - 1);
+    }
+  };
+
+  /**
+   * Check if the drag is finished and apply the new offsets to the region.
+   * If we just clicked somewhere or we were not resizing the region, we should
+   * just reset all the flags and remove the selection style.
+   * @param {HTMLElement} root
+   * @returns {boolean} true if we adjusted the region, false otherwise
+   */
+  _checkDragAndAdjustRegion = (root) => {
+    const { item } = this.props;
+
+    // always reset the styles, so we won't stuck with unexpected colors
+    this._removeSelectionStyle(this.draggableRegion);
+
+    if (item.initializedDrag) {
+      const area = this.draggableRegion;
+      const selection = window.getSelection();
+
+      // don't collapse region into nothing
+      if (selection.isCollapsed) return false;
+      if (!area) return false;
+
+      let range = selection.getRangeAt(0);
+
+      // @todo would be more convenient to try to reduce the range to be within the root,
+      // @todo so for example if we drag to the left and the range is outside of the root, we would
+      // @todo just reduce it to the left edge of the root,
+      // @todo but that would be a bit more complicated, so let's just check if the range is within the root for now.
+      if (!root.contains(range.startContainer) || !root.contains(range.endContainer)) {
+        selection.removeAllRanges();
+        return false;
+      }
+
+      // remove handles to not mess with ranges and selection
+      area.detachHandles();
+
+      // we need this to properly apply the granularity; it fixes selection to point only to text nodes
+      if (item.granularity !== "symbol") {
+        trimSelection(selection);
+      }
+
+      // update range to respect granularity
+      applyTextGranularity(selection, item.granularity);
+      range = selection.getRangeAt(0);
+
+      // so no visual glitches on the screen, selection was just a helper here, we don't need it anymore
+      selection.removeAllRanges();
+
+      area._range = range;
+
+      // we have to calculate offsets before we remove spans, because it will break the range
+      const [soff, eoff] = rangeToGlobalOffset(range, root);
+
+      // remove all spans to recreate them later
+      area.removeHighlight();
+
+      // we update multiple props of the region here, so easier to just freeze the history during these updates
+      item.annotation.history.freeze("richtext:resize");
+
+      area.updateGlobalOffsets(soff, eoff);
+      if (item.type === "text") {
+        area.updateTextOffsets(soff, eoff);
+      } else {
+        // @todo right now resizing works only for text regions, this `else` branch is for the future
+        area.updateXPathsFromGlobalOffsets();
+      }
+
+      // recreating spans + attach handles because region stays selected
+      area.applyHighlight();
+      area.attachHandles();
+
+      area.notifyDrawingFinished();
+      area.updateHighlightedText({ force: true });
+
+      item.annotation.history.unfreeze("richtext:resize");
+
+      return true;
+    }
+
+    return false;
+  };
+
+  _onMouseDown = (ev) => {
+    if (this.props.item.canResizeSpans) {
+      // we definitelly not in a process of adjusting any other region anymore, so reset flags
+      this._resetDragParams();
+      this._removeSelectionStyle();
+      // but might start to adjust this one
+      this._checkHandlesAndStartDragging(ev);
+    }
+  };
+
+  _onMouseMove = (ev) => {
+    if (this.draggableRegion) {
+      ev.preventDefault();
+
+      const { item } = this.props;
+
+      if (!item.initializedDrag) {
+        item.initializedDrag = true;
+      } else if (!this.currentSelection) {
+        const tag = item.mountNodeRef.current;
+        const doc = tag?.contentDocument ?? tag?.ownerDocument ?? tag;
+        this.currentSelection = window.getSelection();
+        this._hightlightRegion(doc, this.draggableRegion);
+        // attach global event for mouseup to always catch the end of dragging, even outside of the tag;
+        // will be called after mouseup on the text tag
+        document.addEventListener("mouseup", this._onMouseUpGlobal, { once: true });
+      }
+    }
+  };
+
+  _onMouseUpGlobal = () => {
+    const { item } = this.props;
+    const rootEl = item.mountNodeRef.current;
+    const root = rootEl?.contentDocument?.body ?? rootEl;
+
+    this._checkDragAndAdjustRegion(root);
+
+    if (this.draggableRegion) {
+      this._resetDragParams();
+    }
+  };
+
   _onMouseUp = (ev) => {
     const { item } = this.props;
+
+    // if we are adjusting the region, we should not create a new one
+    if (item.initializedDrag) return;
+
     const states = item.activeStates();
-    const rootEl = item.visibleNodeRef.current;
+    const rootEl = item.mountNodeRef.current;
     const root = rootEl?.contentDocument?.body ?? rootEl;
 
     if (!states || states.length === 0 || ev.ctrlKey || ev.metaKey)
@@ -141,84 +385,15 @@ class RichTextPieceView extends Component {
     item.setHighlight(region);
   };
 
-  _removeChildrenFrom(el) {
-    while (el.lastChild) {
-      el.removeChild(el.lastChild);
-    }
-  }
-
-  _moveElements(src, dest, withSubstitution) {
-    const fragment = document.createDocumentFragment();
-
-    for (let i = 0; i < src.childNodes.length; withSubstitution && i++) {
-      const currentChild = src.childNodes[i];
-
-      if (withSubstitution) {
-        const cloneChild = currentChild.cloneNode(true);
-
-        src.replaceChild(cloneChild, currentChild);
-      }
-
-      fragment.append(currentChild);
-    }
-    this._removeChildrenFrom(dest);
-    dest.appendChild(fragment);
-  }
-
-  _moveStyles = moveStylesBetweenHeadTags;
-
-  _moveElementsToWorkingNode = () => {
-    const { item } = this.props;
-    const rootEl = item.visibleNodeRef.current;
-    const workingEl = item.workingNodeRef.current;
-
-    if (item.inline) {
-      this._moveElements(rootEl, workingEl, true);
-    } else {
-      const rootHtml = rootEl.contentDocument.documentElement;
-      const rootBody = rootEl.contentDocument.body;
-      const workingHtml = workingEl.contentDocument.documentElement;
-      const workingHead = workingEl.contentDocument.head;
-      const workingBody = workingEl.contentDocument.body;
-
-      workingHtml.setAttribute("style", rootHtml.getAttribute("style"));
-      this._removeChildrenFrom(workingHead);
-      this._moveElements(rootBody, workingBody, true);
-    }
-    item.setWorkingMode(true);
-  };
-
-  _returnElementsFromWorkingNode = () => {
-    const { item } = this.props;
-    const rootEl = item.visibleNodeRef.current;
-    const workingEl = item.workingNodeRef.current;
-
-    if (item.inline) {
-      this._moveElements(workingEl, rootEl);
-    } else {
-      const rootHtml = rootEl.contentDocument.documentElement;
-      const rootHead = rootEl.contentDocument.head;
-      const rootBody = rootEl.contentDocument.body;
-      const workingHtml = workingEl.contentDocument.documentElement;
-      const workingHead = workingEl.contentDocument.head;
-      const workingBody = workingEl.contentDocument.body;
-
-      rootHtml.setAttribute("style", workingHtml.getAttribute("style"));
-      this._moveStyles(workingHead, rootHead);
-      this._moveElements(workingBody, rootBody);
-    }
-    item.setWorkingMode(false);
-  };
-
   /**
    * Handle initial rendering and all subsequent updates
    */
   _handleUpdate(initial = false) {
     const { item } = this.props;
-    const rootEl = item.visibleNodeRef.current;
-    const root = rootEl?.contentDocument?.body ?? rootEl;
+    const root = item.getRootNode();
 
     if (!item.inline) {
+      // @TODO: How did we plan to get root.tagName === "IFRAME" here?
       if (!root || root.tagName === "IFRAME" || !root.childNodes.length || item.isLoaded === false) return;
     }
 
@@ -244,13 +419,11 @@ class RichTextPieceView extends Component {
    * @param {HTMLElement} element
    */
   _determineRegion(element) {
-    const spanSelector = isFF(FF_LSDV_4620_3) ? this._regionVisibleSpanSelector : this._regionSpanSelector;
+    const spanSelector = this._regionVisibleSpanSelector;
 
     if (matchesSelector(element, spanSelector)) {
       const span =
-        element.tagName === "SPAN" && (!isFF(FF_LSDV_4620_3) || element.matches(spanSelector))
-          ? element
-          : element.closest(spanSelector);
+        element.tagName === "SPAN" && element.matches(spanSelector) ? element : element.closest(spanSelector);
       const { item } = this.props;
 
       return item.regs.find((region) => region.find(span));
@@ -259,10 +432,6 @@ class RichTextPieceView extends Component {
 
   componentDidMount() {
     const { item } = this.props;
-
-    if (!isFF(FF_LSDV_4620_3)) {
-      item.setNeedsUpdateCallbacks(this._moveElementsToWorkingNode, this._returnElementsFromWorkingNode);
-    }
 
     if (!item.inline) {
       this.dispose = observe(item, "_isReady", this.updateLoadingVisibility, true);
@@ -318,7 +487,7 @@ class RichTextPieceView extends Component {
 
   onIFrameLoad = () => {
     const { item } = this.props;
-    const iframe = item.visibleNodeRef.current;
+    const iframe = item.mountNodeRef.current;
     const doc = iframe?.contentDocument;
     const body = doc?.body;
     const htmlEl = body?.parentElement;
@@ -382,6 +551,8 @@ class RichTextPieceView extends Component {
     if (item.inline) {
       const eventHandlers = {
         onClickCapture: this._onRegionClick,
+        onMouseDown: this._onMouseDown,
+        onMouseMove: this._onMouseMove,
         onMouseUp: this._onMouseUp,
         onMouseOverCapture: this._onRegionMouseOver,
       };
@@ -391,8 +562,9 @@ class RichTextPieceView extends Component {
           <Elem
             key="root"
             name="container"
+            mod={{ canResizeSpans: ff.isActive(ff.FF_ADJUSTABLE_SPANS) }}
             ref={(el) => {
-              item.visibleNodeRef.current = el;
+              item.mountNodeRef.current = el;
               el && this.markObjectAsLoaded();
             }}
             data-linenumbers={isText && settings.showLineNumbers ? "enabled" : "disabled"}
@@ -400,18 +572,6 @@ class RichTextPieceView extends Component {
             dangerouslySetInnerHTML={{ __html: val }}
             {...eventHandlers}
           />
-          {isFF(FF_LSDV_4620_3) ? null : (
-            <>
-              <Elem
-                key="orig"
-                name="orig-container"
-                ref={item.originalContentRef}
-                className="htx-richtext-orig"
-                dangerouslySetInnerHTML={{ __html: val }}
-              />
-              <Elem key="work" name="work-container" ref={item.workingNodeRef} className="htx-richtext-work" />
-            </>
-          )}
         </Block>
       );
     }
@@ -429,35 +589,12 @@ class RichTextPieceView extends Component {
           sandbox="allow-same-origin allow-scripts"
           ref={(el) => {
             item.setReady(false);
-            item.visibleNodeRef.current = el;
+            item.mountNodeRef.current = el;
           }}
           className="htx-richtext"
           srcDoc={val}
           onLoad={this.onIFrameLoad}
         />
-        {isFF(FF_LSDV_4620_3) ? null : (
-          <>
-            <Elem
-              key="orig"
-              name="orig-iframe"
-              tag="iframe"
-              referrerPolicy="no-referrer"
-              sandbox="allow-same-origin allow-scripts"
-              ref={item.originalContentRef}
-              className="htx-richtext-orig"
-              srcDoc={val}
-            />
-            <Elem
-              key="work"
-              name="work-iframe"
-              tag="iframe"
-              referrerPolicy="no-referrer"
-              sandbox="allow-same-origin allow-scripts"
-              ref={item.workingNodeRef}
-              className="htx-richtext-work"
-            />
-          </>
-        )}
       </Block>
     );
   }

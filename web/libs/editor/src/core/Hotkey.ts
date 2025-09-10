@@ -2,10 +2,10 @@ import keymaster from "keymaster";
 import { inject } from "mobx-react";
 import { observer } from "mobx-react";
 import { createElement, Fragment } from "react";
-import { Tooltip } from "../common/Tooltip/Tooltip";
+import { Tooltip } from "@humansignal/ui";
 import Hint from "../components/Hint/Hint";
 import { Block, Elem } from "../utils/bem";
-import { FF_LSDV_1148, FF_MULTI_OBJECT_HOTKEYS, isFF } from "../utils/feature-flags";
+import { FF_MULTI_OBJECT_HOTKEYS, isFF } from "../utils/feature-flags";
 import { isDefined, isMacOS } from "../utils/utilities";
 import defaultKeymap from "./settings/keymap.json";
 
@@ -24,12 +24,12 @@ if (!isFF(FF_MULTI_OBJECT_HOTKEYS)) {
 }
 
 // Validate keymap integrity
-const allowedKeympaKeys = ["key", "mac", "description", "modifier", "modifierDescription"];
+const allowedKeymapKeys = ["key", "mac", "description", "modifier", "modifierDescription", "active"];
 
 const validateKeymap = (keymap: Keymap) => {
   Object.entries(keymap).forEach(([name, settings]) => {
     Object.keys(settings).forEach((key) => {
-      if (!allowedKeympaKeys.includes(key)) {
+      if (!allowedKeymapKeys.includes(key)) {
         throw new Error(`Unknown keymap property ${key} for key ${name}`);
       }
     });
@@ -83,7 +83,7 @@ keymaster.filter = (event) => {
   if (keymaster.getScope() === "__none__") return false;
 
   const tag = (event.target || event.srcElement)?.tagName;
-  const inNumberPadCodeRange = event.keyCode >= 96 && event.keyCode <= 105;
+  const inNumberPadCodeRange = (event as any).keyCode >= 96 && (event as any).keyCode <= 105;
 
   if (inNumberPadCodeRange) translateNumpad(event);
   if (tag) {
@@ -93,7 +93,7 @@ keymaster.filter = (event) => {
   return true;
 };
 
-const ALIASES = {
+const ALIASES: Record<string, string> = {
   plus: "=", // "ctrl plus" is actually a "ctrl =" because shift is not used
   minus: "-",
   // Here is a magic trick. Keymaster doesn't work with comma correctly (it breaks down everything upon unbinding), but the key code for comma it expects is 188
@@ -170,13 +170,9 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
         const keys = getKeys(key);
 
         for (const key of keys) {
-          if (isFF(FF_LSDV_1148)) {
-            removeKeyHandlerRef(scope, key);
-            keymaster.unbind(key, scope);
-            rebindKeyHandlers(scope, key);
-          } else {
-            keymaster.unbind(key, scope);
-          }
+          removeKeyHandlerRef(scope, key);
+          keymaster.unbind(key, scope);
+          rebindKeyHandlers(scope, key);
           delete _hotkeys_desc[key];
         }
       }
@@ -229,9 +225,7 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
             func(...args);
           };
 
-          if (isFF(FF_LSDV_1148)) {
-            addKeyHandlerRef(scope, keyName, handler);
-          }
+          addKeyHandlerRef(scope, keyName, handler);
           keymaster(keyName, scope, handler);
         });
     },
@@ -264,13 +258,9 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
           .map((s) => s.trim())
           .filter(Boolean)
           .forEach((scope) => {
-            if (isFF(FF_LSDV_1148)) {
-              removeKeyHandlerRef(scope, key);
-              keymaster.unbind(keyName, scope);
-              rebindKeyHandlers(scope, key);
-            } else {
-              keymaster.unbind(keyName, scope);
-            }
+            removeKeyHandlerRef(scope, key);
+            keymaster.unbind(keyName, scope);
+            rebindKeyHandlers(scope, key);
           });
 
         delete _hotkeys_map[keyName];
@@ -282,10 +272,10 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
      * Add hotkey from keymap
      */
     addNamed(name: string, func: keymaster.KeyHandler, scope?: string) {
-      const hotkey = Hotkey.keymap[name];
+      const hotkey = Hotkey.keymap[name as keyof Keymap];
 
       if (isDefined(hotkey)) {
-        const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+        const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
         this.addKey(shortcut, func, hotkey.description, scope);
 
@@ -297,14 +287,21 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
       }
     },
 
+    lookupKey(name: string) {
+      const hotkey = Hotkey.keymap[name as keyof Keymap];
+      if (isDefined(hotkey)) {
+        return isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
+      }
+    },
+
     /**
      * Removed named hotkey
      */
     removeNamed(name: string, scope?: string) {
-      const hotkey = Hotkey.keymap[name];
+      const hotkey = Hotkey.keymap[name as keyof Keymap];
 
       if (isDefined(hotkey)) {
-        const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+        const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
         this.removeKey(shortcut, scope);
 
@@ -323,10 +320,10 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
      * @param {DEFAULT_SCOPE | INPUT_SCOPE} scope
      */
     overwriteNamed(name: string, func: keymaster.KeyHandler, scope?: string) {
-      const hotkey = Hotkey.keymap[name];
+      const hotkey = Hotkey.keymap[name as keyof Keymap];
 
       if (isDefined(hotkey)) {
-        const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+        const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
         this.overwriteKey(shortcut, func, hotkey.description, scope);
 
@@ -344,6 +341,24 @@ export const Hotkey = (namespace = "global", description = "Hotkeys") => {
       const keyName = key.toLowerCase();
 
       return isDefined(_hotkeys_map[keyName]);
+    },
+
+    hasKeyByName(name: string) {
+      if (!isDefined(name)) return;
+
+      const hotkey = Hotkey.keymap[name as keyof Keymap];
+
+      const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
+
+      return this.hasKey(shortcut);
+    },
+
+    hasName(name: string) {
+      if (!isDefined(name)) return;
+
+      const keyName = name.toLowerCase();
+
+      return isDefined(keyName in Hotkey.keymap);
     },
 
     getKeys() {
@@ -399,6 +414,8 @@ Hotkey.DEFAULT_SCOPE = DEFAULT_SCOPE;
 
 Hotkey.INPUT_SCOPE = INPUT_SCOPE;
 
+Hotkey.ALL_SCOPES = [DEFAULT_SCOPE, INPUT_SCOPE].join(",");
+
 Hotkey.keymap = { ...defaultKeymap } as Keymap;
 
 Hotkey.setKeymap = (newKeymap: Keymap) => {
@@ -430,18 +447,18 @@ Hotkey.setScope = (scope: string) => {
  */
 Hotkey.Tooltip = inject("store")(
   observer(({ store, name, children, ...props }: any) => {
-    const hotkey = Hotkey.keymap[name as string];
+    const hotkey = Hotkey.keymap[name as keyof Keymap];
     const enabled = store.settings.enableTooltips && store.settings.enableHotkeys;
 
     if (isDefined(hotkey)) {
-      const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+      const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
       const description = props.title ?? hotkey.description;
       const hotkeys: JSX.Element[] = [];
 
       if (enabled) {
-        shortcut.split(",").forEach((combination) => {
-          const keys = combination.split("+").map((key) =>
+        shortcut.split(",").forEach((combination: string) => {
+          const keys = combination.split("+").map((key: string) =>
             createElement(
               Elem,
               {
@@ -486,11 +503,11 @@ Hotkey.Tooltip = inject("store")(
  */
 Hotkey.Hint = inject("store")(
   observer(({ store, name }: any) => {
-    const hotkey = Hotkey.keymap[name];
+    const hotkey = Hotkey.keymap[name as keyof Keymap];
     const enabled = store.settings.enableTooltips && store.settings.enableHotkeys;
 
     if (isDefined(hotkey) && enabled) {
-      const shortcut = isMacOS() ? hotkey.mac ?? hotkey.key : hotkey.key;
+      const shortcut = isMacOS() ? (hotkey.mac ?? hotkey.key) : hotkey.key;
 
       return createElement(Hint, {}, [shortcut]);
     }
@@ -498,6 +515,8 @@ Hotkey.Hint = inject("store")(
     return null;
   }),
 );
+
+export type HotkeyList = keyof typeof Hotkey.keymap;
 
 export default {
   DEFAULT_SCOPE,

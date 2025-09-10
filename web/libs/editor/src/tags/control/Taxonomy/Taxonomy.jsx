@@ -1,4 +1,3 @@
-import React from "react";
 import { observer } from "mobx-react";
 import { flow, getRoot, types } from "mobx-state-tree";
 import { Spin } from "antd";
@@ -20,15 +19,7 @@ import SelectedChoiceMixin from "../../../mixins/SelectedChoiceMixin";
 import { SharedStoreMixin } from "../../../mixins/SharedChoiceStore/mixin";
 import VisibilityMixin from "../../../mixins/Visibility";
 import { parseValue } from "../../../utils/data";
-import {
-  FF_DEV_3617,
-  FF_LEAP_218,
-  FF_LSDV_4583,
-  FF_TAXONOMY_ASYNC,
-  FF_TAXONOMY_LABELING,
-  FF_TAXONOMY_SELECTED,
-  isFF,
-} from "../../../utils/feature-flags";
+import { FF_LEAP_218, FF_LSDV_4583, FF_TAXONOMY_ASYNC, FF_TAXONOMY_LABELING, isFF } from "../../../utils/feature-flags";
 import ControlBase from "../Base";
 import ClassificationBase from "../ClassificationBase";
 
@@ -80,13 +71,14 @@ import { errorBuilder } from "../../../core/DataValidator/ConfigValidator";
  * @param {boolean} [showFullPath=false]  - Whether to show the full path of selected items
  * @param {string} [pathSeparator= / ]    - Separator to show in the full path (default is " / "). To avoid errors, ensure that your data does not include this separator
  * @param {number} [maxUsages]            - Maximum number of times a choice can be selected per task or per region
- * @param {number} [maxWidth]             - Maximum width for dropdown
- * @param {number} [minWidth]             - Minimum width for dropdown
- * @param {boolean} [required=false]      - Whether taxonomy validation is required
+ * @param {number} [maxWidth]             - Maximum width for dropdown with units (eg: "500px")
+ * @param {number} [minWidth]             - Minimum width for dropdown with units (eg: "300px")
+ * @param {boolean} [required=false]      - Whether it is required to have selected at least one option
  * @param {string} [requiredMessage]      - Message to show if validation fails
  * @param {string} [placeholder=]         - What to display as prompt on the input
  * @param {boolean} [perRegion]           - Use this tag to classify specific regions instead of the whole object
  * @param {boolean} [perItem]             - Use this tag to classify specific items inside the object instead of the whole object
+ * @param {boolean} [labeling]            - Use taxonomy to label regions in text. Only supported with `<Text>` and `<HyperText>` object tags.
  * @param {boolean} [legacy]              - Use this tag to enable the legacy version of the Taxonomy tag. The legacy version supports the ability for annotators to add labels as needed. However, when true, the `apiUrl` parameter is not usable.
  */
 const TagAttrs = types.model({
@@ -219,7 +211,7 @@ const Model = types
     pid: types.optional(types.string, guidGenerator),
 
     type: "taxonomy",
-    [isFF(FF_DEV_3617) ? "_children" : "children"]: Types.unionArray(["choice"]),
+    _children: Types.unionArray(["choice"]),
   })
   .volatile(() => ({
     maxUsagesReached: false,
@@ -228,22 +220,17 @@ const Model = types
     _api: "", // will be filled after the first load in updateValue()
     _items: [], // items loaded via API
   }))
-  .views((self) =>
-    isFF(FF_DEV_3617)
-      ? {
-          get children() {
-            return self._children;
-          },
-          set children(val) {
-            self._children = val;
-          },
-          get isLabeling() {
-            return isFF(FF_TAXONOMY_LABELING) && self.labeling;
-          },
-        }
-      : {},
-  )
   .views((self) => ({
+    get children() {
+      return self._children;
+    },
+    set children(val) {
+      self._children = val;
+    },
+    get isLabeling() {
+      return isFF(FF_TAXONOMY_LABELING) && self.labeling;
+    },
+
     get userLabels() {
       return self.annotation.store.userLabels;
     },
@@ -363,18 +350,18 @@ const Model = types
 
       const children = ChildrenSnapshots.get(self.name) ?? [];
 
-      if (isFF(FF_DEV_3617) && self.store && children.length !== self.children.length) {
-        if (isFF(FF_TAXONOMY_SELECTED)) {
-          // we have to update it during config parsing to let other code work
-          // with correctly added children.
-          // looks like there are no obstacles to do it in the same tick
-          self.updateChildren();
-        } else {
-          setTimeout(() => self.updateChildren());
-        }
+      if (self.store && children.length !== self.children.length) {
+        // we have to update it during config parsing to let other code work
+        // with correctly added children.
+        // looks like there are no obstacles to do it in the same tick
+        self.updateChildren();
       } else {
         self.loading = false;
       }
+    },
+
+    afterClone(node) {
+      self.selected = [...node.selected];
     },
 
     /**
@@ -564,16 +551,14 @@ const Model = types
     };
   })
   .preProcessSnapshot((sn) => {
-    if (isFF(FF_DEV_3617)) {
-      const children = sn._children ?? sn.children;
+    const children = sn._children ?? sn.children;
 
-      if (children && !ChildrenSnapshots.has(sn.name)) {
-        ChildrenSnapshots.set(sn.name, children);
-      }
-
-      delete sn._children;
-      delete sn.children;
+    if (children && !ChildrenSnapshots.has(sn.name)) {
+      ChildrenSnapshots.set(sn.name, children);
     }
+
+    delete sn._children;
+    delete sn.children;
 
     return sn;
   });
@@ -587,7 +572,7 @@ const TaxonomyModel = types.compose(
   AnnotationMixin,
   RequiredMixin,
   Model,
-  ...(isFF(FF_DEV_3617) ? [SharedStoreMixin] : []),
+  SharedStoreMixin,
   PerRegionMixin,
   ...(isFF(FF_LSDV_4583) ? [PerItemMixin] : []),
   ...(isFF(FF_TAXONOMY_LABELING) ? [TaxonomyLabelingResult] : []),
@@ -619,7 +604,7 @@ const HtxTaxonomy = observer(({ item }) => {
   // they are indicated by loading icon on the item itself
   const firstLoad = item.isLoadedByApi ? !item.items.length : true;
 
-  if (item.loading && isFF(FF_DEV_3617) && firstLoad) {
+  if (item.loading && isFF(FF_TAXONOMY_ASYNC) && firstLoad) {
     return (
       <div className={className} style={visibleStyle}>
         <div className={styles.taxonomy__loading}>
@@ -630,7 +615,7 @@ const HtxTaxonomy = observer(({ item }) => {
   }
 
   return (
-    <div className={className} style={visibleStyle}>
+    <div className={className} style={visibleStyle} ref={item.elementRef}>
       {isFF(FF_TAXONOMY_ASYNC) && !item.legacy ? (
         <NewTaxonomy
           items={item.items}

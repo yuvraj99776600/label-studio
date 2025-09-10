@@ -11,6 +11,8 @@ import {
   type ReactSVG,
   useContext,
 } from "react";
+import { FF_MEMORY_LEAK_FIX, isFF } from "./feature-flags";
+import { clsx } from "clsx";
 
 interface CNMod {
   [key: string]: unknown;
@@ -166,16 +168,18 @@ export const cn = (block: string, options: CNOptions = {}): CN => {
     },
   };
 
-  Object.defineProperty(classNameBuilder, "Block", { value: Block });
-  Object.defineProperty(classNameBuilder, "Elem", { value: Elem });
-  Object.defineProperty(classNameBuilder, "__class", {
-    value: {
-      block,
-      elem,
-      mix,
-      mod,
-    },
-  });
+  if (!isFF(FF_MEMORY_LEAK_FIX)) {
+    Object.defineProperty(classNameBuilder, "Block", { value: Block });
+    Object.defineProperty(classNameBuilder, "Elem", { value: Elem });
+    Object.defineProperty(classNameBuilder, "__class", {
+      value: {
+        block,
+        elem,
+        mix,
+        mod,
+      },
+    });
+  }
 
   return classNameBuilder;
 };
@@ -185,15 +189,19 @@ export const BemWithSpecifiContext = (context?: Context<CN | null>) => {
 
   const Block = forwardRef(
     <T extends FC<any>, D extends TagNames>(
-      { tag = "div", name, mod, mix, ...rest }: WrappedComponentProps<T, D>,
+      { tag = "div", name, mod, mix, rawClassName, ...rest }: WrappedComponentProps<T, D>,
       ref: any,
     ) => {
       const rootClass = cn(name);
       const finalMix = ([] as [CNMix?]).concat(mix).filter((cn) => !!cn);
-      const className = rootClass
-        .mod(mod)
-        .mix(...(finalMix as CNMix[]), rest.className)
-        .toClassName();
+      const className = clsx(
+        rootClass
+          .mod(mod)
+          .mix(...(finalMix as CNMix[]), rest.className)
+          .toClassName(),
+        rawClassName,
+      );
+
       const finalProps =
         tag.toString() === "Symbol(react.fragment)" ? { ...rest, ref } : ({ ...rest, ref, className } as any);
 
@@ -209,18 +217,21 @@ export const BemWithSpecifiContext = (context?: Context<CN | null>) => {
 
   const Elem = forwardRef(
     <T extends FC<any>, D extends TagNames>(
-      { tag = "div", component, block, name, mod, mix, ...rest }: WrappedComponentProps<T, D>,
+      { tag = "div", component, block, name, mod, mix, rawClassName, ...rest }: WrappedComponentProps<T, D>,
       ref: any,
     ) => {
       const blockCtx = useContext(Context);
 
       const finalMix = ([] as [CNMix?]).concat(mix).filter((cn) => !!cn);
 
-      const className = (block ? cn(block) : blockCtx)!
-        .elem(name)
-        .mod(mod)
-        .mix(...(finalMix as CNMix[]), rest.className)
-        .toClassName();
+      const className = clsx(
+        (block ? cn(block) : blockCtx)!
+          .elem(name)
+          .mod(mod)
+          .mix(...(finalMix as CNMix[]), rest.className)
+          .toClassName(),
+        rawClassName,
+      );
 
       const finalProps: any = { ...rest, ref, className };
 

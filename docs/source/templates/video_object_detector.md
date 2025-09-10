@@ -9,12 +9,19 @@ meta_title: Video Object Detection Data Labeling Template
 meta_description: Template for detecting objects in videos with Label Studio for your machine learning and data science projects.
 ---
 
+<img src="/images/templates/video-object-tracking.png" alt="" class="gif-border" width="552px" height="408px" />
+
 Video object detection is aimed at detecting object in a video stream with bounding boxes, as opposed to [Image object detection](/templates/image_bbox.html) with static images.
 
 Video object tracking is a further extension where detected objects are tracked as they move around video frames, in both spatial and temporal directions.
 The illustrated templates provide both manual and automatic ways of tracking objects in videos. In addition to the new video player that supports frame-by-frame video object tracking, the latest release also features a new annotation user interface that is more efficient, ergonomic, and flexible.
 
-
+<a href="https://app.humansignal.com/b/MTkx"
+  target="_blank" rel="noopener" aria-label="Open in Label Studio" style="all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;border:1px solid rgb(109,135,241);padding:8px 12px;background:rgb(87 108 193);color:white;font-weight:500;font-family:sans-serif;gap:6px;transition:background 0.2s ease;" onmouseover="this.style.background='rgb(97 122 218)'" onmouseout="this.style.background='rgb(87 108 193)'">
+  <svg style="width:20px;height:20px" viewBox="0 0 26 26" fill="none"><path fill="none" d="M3.5 4.5h19v18h-19z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M25.7 7.503h-7.087V5.147H7.588V2.792h11.025V.436H25.7v7.067Zm-18.112 0H5.225v10.994H2.863V7.503H.5V.436h7.088v7.067Zm0 18.061v-7.067H.5v7.067h7.088ZM25.7 18.497v7.067h-7.088v-2.356H7.588v-2.355h11.025v-2.356H25.7Zm-2.363 0V7.503h-2.363v10.994h2.363Z" fill="white"/></svg>
+  <span style="font-size:14px">Open in Label Studio</span>
+  <svg style="width:16px;height:16px" viewBox="0 0 24 24"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" fill="white"/></svg>
+</a>
 
 !!! attention "important"
 
@@ -35,22 +42,17 @@ The prerequisites to use the video object detection feature are as follows:
 
 ## Key features supported 
 
-The following key features are supported by the video player.
+The following key features are supported by the video player:
 
-1. The video and object detection use case using the bounding box on the video. 
-2. Video segmentation for the video by creating rectangles on the video.
-
-
-!!! attention "important"
-
-    In the future releases, Timeline segmentation will allow you to label a conversation based on the timeline. 
+* The video and object detection use case using the bounding box on the video. 
+* Video segmentation for the video by creating rectangles on the video.
 
 
 ## Labeling Configuration
 
-The simplest way to get object detection and tracking project is to go in [project settings](/guide/setup.html#Modify-the-labeling-interface) and specify the following labeling configuration.
+The simplest way to get object detection and tracking project is to specify the following labeling configuration in your project settings.
 
-```html
+```xml
   <View>
      <Header>Label the video:</Header>
      <Video name="video" value="$video" framerate="25.0"/>
@@ -75,8 +77,11 @@ You can add a [header](/tags/header.html) to provide instructions to the annotat
 
 Use the [Video](/tags/video.html) object tag to specify the video data. The `framerate` parameter sets the frame rate of all videos in the project. Check all available parameters on the tag page reference. 
 ```xml
-<Video name="video" value="$video" framerate="25.0"/>
+<Video name="video" value="$video" frameRate="25.0"/>
 ```
+
+!!! note
+    Ensure the `frameRate` matches the video's framerate. If your video has defects or variable framerate, it might cause discrepancies. Transcoding the video to a constant framerate before uploading can help. 
      
 Use the [VideoRectangle](/tags/videorectangle.html) control tag to allow annotators to add rectangles to video frames:
 ```xml
@@ -169,6 +174,132 @@ The keyframe format inside `value.sequence` list is the following:
   "to_name": "video",
   "from_name": "box"
 }
+```
+
+### Exporting with interpolated frames
+
+By default, only keyframes are included when exporting data. 
+
+When exporting your annotations, you may want to include interpolated frames. This would ensure that every frame in the video is included.  
+
+You can accomplish this by using the `interpolate_key_frames` parameter and one of the following methods:
+
+
+#### Use the API to create an export snapshot with interpolation enabled 
+
+You can use the Label Studio API to create an export snapshot with keyframe interpolation enabled.
+
+**Endpoint:**
+```
+POST /api/projects/{project_id}/exports
+```
+**Request Body:**
+```json
+{
+  "title": "Export with Interpolated Keyframes",
+  "serialization_options": {
+    "interpolate_key_frames": true
+  }
+}
+```
+**Example cURL Command:**
+```bash
+curl -X POST 'https://your-label-studio-domain.com/api/projects/{project_id}/exports' \
+  -H 'Authorization: Token YOUR_API_KEY' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{
+    "title": "Export with Interpolated Keyframes",
+    "serialization_options": {
+      "interpolate_key_frames": true
+    }
+  }'
+```
+**Steps:**
+1. **Create export snapshot:**
+   - Send a `POST` request to `/api/projects/{project_id}/exports` with `interpolate_key_frames` set to `true` in the `serialization_options`.
+2. **Check export status:**
+   - Poll the export status using `GET /api/projects/{project_id}/exports/{export_id}` until the `status` is `completed`.
+3. **Download the export:**
+   - Once the export is completed, download the export file using:
+     ```
+     GET /api/projects/{project_id}/exports/{export_id}/download?exportType=JSON
+     ```
+   - Example cURL Command:
+     ```bash
+     curl -X GET 'https://your-label-studio-domain.com/api/projects/{project_id}/exports/{export_id}/download?exportType=JSON' \
+       -H 'Authorization: Token YOUR_API_KEY' \
+       -o 'exported_annotations.json'
+     ```
+
+#### Use the Label Studio SDK
+
+If you're using the Label Studio SDK, you can create an export with interpolation enabled:
+
+**Python code example:**
+
+```python
+from label_studio_sdk import Client
+import time
+# Connect to Label Studio
+ls = Client(url='http://localhost:8080', api_key='YOUR_API_KEY')
+# Get your project by ID
+project = ls.get_project(PROJECT_ID)
+# Create an export snapshot with interpolation enabled
+export_result = project.export_snapshot_create(
+    title='Export with Interpolated Keyframes',
+    serialization_options={
+        'interpolate_key_frames': True
+    }
+)
+# Get the export ID
+export_id = export_result['id']
+# Wait for the export to complete
+while True:
+    export_status = project.get_export_status(export_id)
+    if export_status['status'] == 'completed':
+        break
+    elif export_status['status'] == 'failed':
+        raise Exception('Export failed')
+    else:
+        time.sleep(5)  # Wait for 5 seconds before checking again
+# Download the export
+export_file_path = project.export_snapshot_download(
+    export_id, export_type='JSON', path='.'
+)
+print(f'Exported data saved to {export_file_path}')
+```
+
+**Notes:**
+- Replace `YOUR_API_KEY` with your actual API key.
+- Replace `PROJECT_ID` with your project ID.
+- Ensure that you have installed the latest version of the Label Studio SDK.
+
+#### Use the Command Line Interface (CLI)
+
+You can use the Label Studio CLI to export annotations with interpolated keyframes.
+
+**Command:**
+```bash
+label-studio export --host http://localhost:8080 --api-key YOUR_API_KEY PROJECT_ID JSON --interpolate-key-frames
+```
+**Notes:**
+- The `--interpolate-key-frames` flag enables interpolation during export.
+- Replace `YOUR_API_KEY` and `PROJECT_ID` with your API key and project ID, respectively.
+- The exported data will be saved in the `data/export` directory by default.
+
+
+#### Use the export endpoint with query parameter
+
+You can directly export tasks with interpolation by using the export endpoint and passing `interpolate_key_frames` as a query parameter.
+**Endpoint:**
+```
+GET /api/projects/{project_id}/export?interpolate_key_frames=true
+```
+**Example cURL Command:**
+```bash
+curl -X GET 'https://your-label-studio-domain.com/api/projects/{project_id}/export?interpolate_key_frames=true' \
+  -H 'Authorization: Token YOUR_API_KEY' \
+  -o 'exported_annotations.json'
 ```
 
 ## Label Studio UI enhancements

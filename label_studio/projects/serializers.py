@@ -3,6 +3,30 @@
 import bleach
 from constants import SAFE_HTML_ATTRIBUTES, SAFE_HTML_TAGS
 from django.db.models import Q
+from label_studio_sdk.label_interface import LabelInterface
+from label_studio_sdk.label_interface.control_tags import (
+    BrushLabelsTag,
+    BrushTag,
+    ChoicesTag,
+    DateTimeTag,
+    EllipseLabelsTag,
+    EllipseTag,
+    HyperTextLabelsTag,
+    KeyPointLabelsTag,
+    KeyPointTag,
+    LabelsTag,
+    NumberTag,
+    ParagraphLabelsTag,
+    PolygonLabelsTag,
+    PolygonTag,
+    RatingTag,
+    RectangleLabelsTag,
+    RectangleTag,
+    TaxonomyTag,
+    TextAreaTag,
+    TimeSeriesLabelsTag,
+    VideoRectangleTag,
+)
 from projects.models import Project, ProjectImport, ProjectOnboarding, ProjectReimport, ProjectSummary
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import serializers
@@ -66,6 +90,9 @@ class ProjectSerializer(FlexFieldsModelSerializer):
     config_has_control_tags = SerializerMethodField(
         default=None, read_only=True, help_text='Flag to detect is project ready for labeling'
     )
+    config_suitable_for_bulk_annotation = serializers.SerializerMethodField(
+        default=None, read_only=True, help_text='Flag to detect is project ready for bulk annotation'
+    )
     finished_task_number = serializers.IntegerField(default=None, read_only=True, help_text='Finished tasks')
 
     queue_total = serializers.SerializerMethodField()
@@ -79,14 +106,69 @@ class ProjectSerializer(FlexFieldsModelSerializer):
             return next(iter(self.context['user_cache']))
 
     @staticmethod
-    def get_config_has_control_tags(project):
+    def get_config_has_control_tags(project) -> bool:
         return len(project.get_parsed_config()) > 0
+
+    @staticmethod
+    def get_config_suitable_for_bulk_annotation(project) -> bool:
+        li = LabelInterface(project.label_config)
+
+        # List of tags that should not be present
+        disallowed_tags = [
+            LabelsTag,
+            BrushTag,
+            BrushLabelsTag,
+            EllipseTag,
+            EllipseLabelsTag,
+            KeyPointTag,
+            KeyPointLabelsTag,
+            PolygonTag,
+            PolygonLabelsTag,
+            RectangleTag,
+            RectangleLabelsTag,
+            HyperTextLabelsTag,
+            ParagraphLabelsTag,
+            TimeSeriesLabelsTag,
+            VideoRectangleTag,
+        ]
+
+        # Return False if any disallowed tag is present
+        for tag_class in disallowed_tags:
+            if li.find_tags_by_class(tag_class):
+                return False
+
+        # Check perRegion/perItem for expanded list of tags, plus value="no" for Choices/Taxonomy
+        allowed_tags_for_checks = [ChoicesTag, TaxonomyTag, DateTimeTag, NumberTag, RatingTag, TextAreaTag]
+        for tag_class in allowed_tags_for_checks:
+            tags = li.find_tags_by_class(tag_class)
+            for tag in tags:
+                per_region = tag.attr.get('perRegion', 'false').lower() == 'true'
+                per_item = tag.attr.get('perItem', 'false').lower() == 'true'
+                if per_region or per_item:
+                    return False
+                # For ChoicesTag and TaxonomyTag, the value attribute must not be set at all
+                if tag_class in [ChoicesTag, TaxonomyTag]:
+                    if 'value' in tag.attr:
+                        return False
+
+        # For TaxonomyTag, check labeling and apiUrl
+        taxonomy_tags = li.find_tags_by_class(TaxonomyTag)
+        for tag in taxonomy_tags:
+            labeling = tag.attr.get('labeling', 'false').lower() == 'true'
+            if labeling:
+                return False
+            api_url = tag.attr.get('apiUrl', None)
+            if api_url is not None:
+                return False
+
+        # If all checks pass, return True
+        return True
 
     @staticmethod
     def get_parsed_label_config(project):
         return project.get_parsed_config()
 
-    def get_start_training_on_annotation_update(self, instance):
+    def get_start_training_on_annotation_update(self, instance) -> bool:
         # FIXME: remake this logic with start_training_on_annotation_update
         return True if instance.min_annotations_to_start_training else False
 
@@ -104,6 +186,16 @@ class ProjectSerializer(FlexFieldsModelSerializer):
             )
 
         return data
+
+    def validate_color(self, value):
+        # color : "#FF4C25"
+        if value.startswith('#') and len(value) == 7:
+            try:
+                int(value[1:], 16)
+                return value
+            except ValueError:
+                pass
+        raise serializers.ValidationError('Color must be in "#RRGGBB" format')
 
     class Meta:
         model = Project
@@ -156,6 +248,7 @@ class ProjectSerializer(FlexFieldsModelSerializer):
             'finished_task_number',
             'queue_total',
             'queue_done',
+            'config_suitable_for_bulk_annotation',
         ]
 
     def validate_label_config(self, value):
@@ -192,14 +285,14 @@ class ProjectSerializer(FlexFieldsModelSerializer):
 
         return super().update(instance, validated_data)
 
-    def get_queue_total(self, project):
+    def get_queue_total(self, project) -> int:
         remain = project.tasks.filter(
             Q(is_labeled=False) & ~Q(annotations__completed_by_id=self.user_id)
             | Q(annotations__completed_by_id=self.user_id)
         ).distinct()
         return remain.count()
 
-    def get_queue_done(self, project):
+    def get_queue_done(self, project) -> int:
         tasks_filter = {
             'project': project,
             'annotations__completed_by_id': self.user_id,
@@ -212,6 +305,22 @@ class ProjectSerializer(FlexFieldsModelSerializer):
         result = already_done_tasks.distinct().count()
 
         return result
+
+
+class ProjectCountsSerializer(ProjectSerializer):
+    class Meta:
+        model = Project
+        fields = [
+            'id',
+            'task_number',
+            'finished_task_number',
+            'total_predictions_number',
+            'total_annotations_number',
+            'num_tasks_with_annotations',
+            'useful_annotation_number',
+            'ground_truth_number',
+            'skipped_annotations_number',
+        ]
 
 
 class ProjectOnboardingSerializer(serializers.ModelSerializer):
@@ -237,13 +346,48 @@ class ProjectSummarySerializer(serializers.ModelSerializer):
 class ProjectImportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectImport
-        fields = '__all__'
+        fields = [
+            'id',
+            'project',
+            'preannotated_from_fields',
+            'commit_to_project',
+            'return_task_ids',
+            'status',
+            'url',
+            'error',
+            'created_at',
+            'updated_at',
+            'finished_at',
+            'task_count',
+            'annotation_count',
+            'prediction_count',
+            'duration',
+            'file_upload_ids',
+            'could_be_tasks_list',
+            'found_formats',
+            'data_columns',
+            'tasks',
+            'task_ids',
+        ]
 
 
 class ProjectReimportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectReimport
-        fields = '__all__'
+        fields = [
+            'id',
+            'project',
+            'status',
+            'error',
+            'task_count',
+            'annotation_count',
+            'prediction_count',
+            'duration',
+            'file_upload_ids',
+            'files_as_tasks_list',
+            'found_formats',
+            'data_columns',
+        ]
 
 
 class ProjectModelVersionExtendedSerializer(serializers.Serializer):
@@ -255,6 +399,7 @@ class ProjectModelVersionExtendedSerializer(serializers.Serializer):
 class GetFieldsSerializer(serializers.Serializer):
     include = serializers.CharField(required=False)
     filter = serializers.CharField(required=False, default='all')
+    search = serializers.CharField(required=False, default=None)
 
     def validate_include(self, value):
         if value is not None:

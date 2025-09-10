@@ -16,6 +16,20 @@ You can use an ML backend to integrate your model development pipeline with your
 - **Interactive labeling:** Integrate ML models into the platform to help humans label or annotate large datasets more efficiently and accurately.
 - **Model evaluation and fine-tuning:** Labelers review and analyze the model outputs to assess model accuracy and optimize performance.
 
+<div class="opensource-only">
+
+!!! error enterprise
+    Label Studio Enterprise features an out-of-the-box solution for LLM-assisted auto-labeling and model evaluation. Compare LLMs based on accuracy and cost. For more information, see [Prompts](https://docs.humansignal.com/guide/prompts_overview).
+
+</div>
+
+<div class="enterprise-only">
+
+!!! info Tip
+    Prompts is an out-of-the-box solution for LLM-assisted auto-labeling and model evaluation. For more information, see [Prompts](prompts_overview).
+
+</div>
+
 For example, for an image classification task, the model pre-selects an image class for data annotators to verify. For audio transcriptions, the model displays a transcription that data annotators can modify. 
 
 Once a model is connected, the way it works is:
@@ -76,7 +90,17 @@ The model should begin running at `http://localhost:9090` (if you are using a Do
 {"model_class":"SamMLBackend","status":"UP"}
 ```
 
-If you see any errors, see [Troubleshooting ML Backends & Predictions](https://support.humansignal.com/hc/en-us/sections/23627938255117-ML-Backend-Predictions) in the HumanSignal support center and see the [Troubleshooting section in the README](https://github.com/HumanSignal/label-studio-ml-backend/tree/master?tab=readme-ov-file#troubleshooting).
+<div class="opensource-only">
+
+If you see any errors, see [Troubleshooting ML backends](troubleshooting#ML-backends) and the [Troubleshooting section in the README](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/README.md#troubleshooting).
+
+</div>
+
+<div class="enterprise-only">
+
+If you see any errors, see [Troubleshooting ML Backends & Predictions](https://support.humansignal.com/hc/en-us/sections/23627938255117-ML-Backend-Predictions) in the HumanSignal support center and see the [Troubleshooting section in the README](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/README.md#troubleshooting).
+
+</div>
 
 #### localhost and Docker containers
 

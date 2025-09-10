@@ -1,51 +1,42 @@
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
 
-import Button from "antd/lib/button/index";
-import Form from "antd/lib/form/index";
-import Input from "antd/lib/input/index";
+import { Button, Form, Input } from "antd";
 
-import { IconTrash } from "../../../assets/icons";
+import { IconTrash } from "@humansignal/icons";
 import styles from "../../../components/HtxTextBox/HtxTextBox.module.scss";
 import Registry from "../../../core/Registry";
 import { PER_REGION_MODES } from "../../../mixins/PerRegion";
 import { Block, Elem } from "../../../utils/bem";
-import { FF_LSDV_4712, isFF } from "../../../utils/feature-flags";
 
 import "./TextArea.scss";
 
 const { TextArea } = Input;
 
 const HtxTextAreaResultLine = forwardRef(
-  ({ idx, value, readOnly, onChange, onDelete, onFocus, validate, control, collapsed }, ref) => {
+  ({ idx, value, readOnly, onChange, onDelete, onFocus, validate, control, collapsed, canDelete = true }, ref) => {
     const rows = Number.parseInt(control.rows);
     const isTextarea = rows > 1;
     const [stateValue, setStateValue] = useState(value ?? "");
 
-    if (isFF(FF_LSDV_4712)) {
-      useEffect(() => {
-        if (value !== stateValue) {
-          setStateValue(value);
-        }
-      }, [value]);
-    }
+    useEffect(() => {
+      if (value !== stateValue) {
+        setStateValue(value);
+      }
+    }, [value]);
 
     const displayValue = useMemo(() => {
       if (collapsed) {
         return (value ?? "").split(/\n/)[0] ?? "";
       }
 
-      return isFF(FF_LSDV_4712) ? stateValue : value;
-    }, [value, collapsed, ...(isFF(FF_LSDV_4712) ? [stateValue] : [])]);
+      return stateValue;
+    }, [value, collapsed, stateValue]);
 
-    const changeHandler = isFF(FF_LSDV_4712)
-      ? useCallback((e) => {
-          setStateValue(e.target.value);
-        }, [])
-      : (e) => {
-          if (!collapsed) onChange(idx, e.target.value);
-        };
+    const changeHandler = useCallback((e) => {
+      setStateValue(e.target.value);
+    }, []);
 
     const blurHandler = useCallback(
       (e) => {
@@ -69,31 +60,27 @@ const HtxTextAreaResultLine = forwardRef(
       onFocus,
     };
 
-    if (isFF(FF_LSDV_4712)) {
-      inputProps.onBlur = blurHandler;
-    }
+    inputProps.onBlur = blurHandler;
 
-    if (isFF(FF_LSDV_4712) || isTextarea) {
-      inputProps.onKeyDown = (e) => {
-        if ((e.key === "Enter" && !e.shiftKey) || e.key === "Escape") {
-          e.preventDefault();
-          e.stopPropagation();
-          e.target?.blur?.();
-        }
-      };
-    }
+    inputProps.onKeyDown = (e) => {
+      if ((e.key === "Enter" && !e.shiftKey) || e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        e.target?.blur?.();
+      }
+    };
 
     return (
       <Elem name="item">
         <Elem name="input" tag={isTextarea ? TextArea : Input} {...inputProps} ref={ref} />
-        {!collapsed && !readOnly && (
+        {canDelete && !collapsed && !readOnly && (
           <Elem
             name="action"
+            size="small"
+            look="string"
             aria-label="Delete Region"
             tag={Button}
-            icon={<IconTrash />}
-            size="small"
-            type="text"
+            leading={<IconTrash />}
             onClick={() => {
               onDelete(idx);
             }}
@@ -104,7 +91,7 @@ const HtxTextAreaResultLine = forwardRef(
   },
 );
 
-const HtxTextAreaResult = observer(({ item, control, firstResultInputRef, onFocus, collapsed }) => {
+const HtxTextAreaResult = observer(({ item, control, firstResultInputRef, onFocus, collapsed, canDelete = true }) => {
   const value = item.mainValue;
   const editable = !item.isReadOnly() && item.from_name.editable && !item.area.isReadOnly();
 
@@ -143,13 +130,14 @@ const HtxTextAreaResult = observer(({ item, control, firstResultInputRef, onFocu
         ref={idx === 0 ? firstResultInputRef : null}
         onFocus={onFocus}
         collapsed={collapsed}
-        validate={isFF(FF_LSDV_4712) ? item.from_name.validateText : null}
+        validate={item.from_name.validateText}
+        canDelete={item.from_name.isDeleteable && canDelete}
       />
     );
   });
 });
 
-const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, outliner, color }) => {
+const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, outliner, color, canDelete = true }) => {
   const rows = Number.parseInt(item.rows);
   const isTextArea = rows > 1;
   const isActive = item.perRegionArea === area;
@@ -265,6 +253,7 @@ const HtxTextAreaRegionView = observer(({ item, area, collapsed, setCollapsed, o
             collapsed={collapsed}
             firstResultInputRef={firstResultInputRef}
             onFocus={expand}
+            canDelete={canDelete}
           />
         ) : null}
 

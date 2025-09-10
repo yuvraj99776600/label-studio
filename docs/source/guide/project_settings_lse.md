@@ -63,6 +63,50 @@ Select how you want to distribute tasks to annotators for labeling.
 
 </dd>
 
+<dt id="lock-tasks">Task Reservation</dt>
+
+<dd>
+
+Control how long tasks are reserved for annotators. 
+
+Task reservation ensures that the tasks an annotator starts working on are temporarily reserved by them, preventing other annotators from accessing the same tasks until the reservation expires. This helps manage task allocation and keeps project progress efficient. 
+
+!!! note
+
+    Task reservation takes the [**Annotations per task minimum**](#overlap) into consideration. For example, if your overlap is `2`, then two annotators can reserve a task simultaneously. 
+
+    When [**Distribute Labeling Tasks**](#distribute-tasks) is set to **Manual**, the Task Reservation setting is hidden because it does not apply. 
+
+A task reservation is put in place as soon as an annotator opens the task. The reservation remains until one of the following happens (whichever happens first):
+
+* The task reservation time expires. 
+* The annotator submits the task. 
+* The annotator skips the task, and the project **Skip Queue** setting is either **Requeue skipped tasks to others** or **Ignore skipped**.
+
+**Recommended reservation time** 
+
+By default, the task reservation time is 1440 minutes (1 day). This is the maximum time allowed for task reservations.
+
+When setting a reservation time, you should aim to allow a little above the max amount of time it should take to complete a task. 
+
+* **Notes about allowing too much time**
+
+    If you allow too much time for task reservation, you could risk some users becoming blocked. 
+
+    For example, say you have multiple annotators working on a project. Your minimum annotation overlap is set to `2`. 
+
+    If some of your annotators move through their labeling queue looking for the easiest tasks to complete, they could inadvertently leave a large number of tasks locked. Depending on the size of the project and how many annotators you have working, this could result in some annotators unable to continue their work until the task reservation time expires. 
+
+* **Notes about allowing too little time**
+
+    If you set the reservation time too low, you may find that you have many tasks that exceed your minimum overlap setting. 
+
+    For example, say you have multiple annotators working on a project. Your minimum annotation overlap is set to `2`. 
+    
+    Two annotators begin working on a task and it takes them both 15 minutes to complete, but your reservation time is 10 minutes. This means that after 10 minutes, another annotator can also begin working on that task - resulting in 3 annotations on the task rather than 2 (your minimum annotator overlap).
+
+</dd>
+
 <dt>Skip Queue</dt>
 
 <dd>
@@ -147,7 +191,7 @@ Configure additional settings for annotators.
 | ------------- | ------------ |
 | **Show Skip button**         | Use this to show or hide the **Skip** action for annotators. |
 | **Allow empty annotations** | This determines whether annotators can submit a task without making any annotations on it. If enabled, annotators can submit a task even if they haven't added any labels or regions, resulting in an empty annotation. |
-| **Show the Data Manager to annotators** | When disabled, annotators can only enter the label stream. When enabled, annotators can access the Data Manager, where they can select which tasks to complete from the Data Manager list. <br /><br />However, some information is still hidden from annotators and they can only view a subset of the Data Manager columns. For example, they cannot see columns such as Annotators, Agreement, Reviewers, and more. |
+| **Show the Data Manager to annotators** | When disabled, annotators can only enter the label stream. When enabled, annotators can access the Data Manager. The tasks that are available to them depend on the labeling distribution mode: <ul><li>Auto distribution: Annotators can only see tasks that they have already completed or have created a draft.</li><li>Manual distribution: Annotators can only see the tasks that they have been assigned.</li></ul>Note that some information is still hidden from annotators and they can only view a subset of the Data Manager columns. For example, they cannot see columns such as Annotators, Agreement, Reviewers, and more. |
 | **Reveal pre-annotations interactively** | When enabled, pre-annotation regions (such as bounding boxes or text spans) are not automatically displayed to the annotator. Instead, annotators can draw a selection rectangle to reveal pre-annotation regions within that area. This allows annotators to first review the image or text without being influenced by the model’s predictions. Pre-annotation regions must have the attribute `"hidden": true`. <br /><br />This feature is particularly useful when there are multiple low-confidence regions that you prefer not to display all at once to avoid clutter. |
 | **Annotators must leave a comment on skip** | When enabled, annotators are required to leave a comment when skipping a task. |
 
@@ -201,7 +245,7 @@ Enable **Show before reviewing** to display a pop-up message to reviewers when t
 
 <dd>
 
-Configure additional settings for reviewers.
+Configure what is required for a task to be considered reviewed. 
 
 <table>
 <thead>
@@ -232,6 +276,80 @@ In a task where multiple annotators submitted labels, the reviewer needs to acce
 
 </td>
 </tr>
+</table>
+
+</dd>
+
+<dt id="reject-options">Reject Options</dt>
+
+<dd>
+
+Configure what rejection options are available to reviewers. 
+
+<table>
+<thead>
+    <tr>
+      <th>Field</th>
+      <th>Description</th>
+    </tr>
+</thead>
+<tr>
+<td>
+
+**Requeue rejected tasks back to annotators**
+</td>
+<td>
+
+When a reviewer clicks **Reject**, the annotation is reassigned back to the annotator. 
+
+</td>
+</tr>
+<td>
+
+**Remove rejected tasks from labeling queue**
+</td>
+<td>
+
+When a reviewer clicks **Reject**, the annotation is not reassigned back to the annotator. 
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Allow reviewer to choose: Requeue or Remove**
+</td>
+<td>
+
+Reviewers see the following options:
+
+* **Accept**
+* **Remove** -- When selected, the annotation is rejected and removed from the labeling queue. 
+* **Requeue** -- When selected, the annotation is rejected and then reassigned back to the annotator.  
+
+For example, a reviewer might decide to requeue an annotation that is nearly correct but just needs a slight change. However, an annotation with numerous errors may be easier to simply reject entirely and remove from the queue. 
+
+Note that when you click **Remove**, the annotation is also marked as cancelled/skipped. This is reflected in various metrics (for example, Data Manager columns and dashboards), and differentiates between the two rejection actions in the API with `was_cancelled: true`. 
+
+</td>
+</tr>
+</table>
+
+</dd>
+
+<dt id="review-settings">Additional settings</dt>
+
+<dd>
+
+Configure additional reviewer settings
+
+<table>
+<thead>
+    <tr>
+      <th>Field</th>
+      <th>Description</th>
+    </tr>
+</thead>
 <tr>
 <td>
 
@@ -250,7 +368,11 @@ If enabled, a reviewer can only see tasks to which they've been assigned. Otherw
 </td>
 <td>
 
-If enabled, a reviewer only sees tasks that have met the **Annotations per task minimum** threshold. 
+When enabled, a reviewer only sees tasks that have been completed by all required annotators. 
+
+If your project is using auto distribution, then this means a reviewer only sees tasks that have met the **Annotations per task minimum** threshold. 
+
+If your project is using manual distribution, then this means a reviewer only sees tasks in which all assigned annotators have submitted an annotation. 
 
 Note that in most cases, skipped tasks do not contribute towards meeting the minimum.  
 
@@ -266,17 +388,6 @@ Note that in most cases, skipped tasks do not contribute towards meeting the min
 When disabled, reviewers can only enter the review stream. When enabled, reviewers can access the Data Manager, where they can select which tasks to review. 
 
 However, some information is still hidden from reviewers and they can only view a subset of the Data Manager columns. For example, they cannot see columns such as who the other Reviewers are. 
-
-</td>
-</tr>
-<tr>
-<td>
-
-**Requeue rejected tasks back to annotators**
-</td>
-<td>
-
-Rejected tasks are reassigned back to the annotator. 
 
 </td>
 </tr>
@@ -343,6 +454,119 @@ The following options supersede what you specified under [**Annotations > Task S
 
 </dd>
 
+<dt id="annotation-limit">Annotation Limit</dt>
+
+<dd>
+
+Set limits on how many tasks each individual user can annotate. This can be useful if you are concerned with preventing any potential bias that might arise from a small set of power users completing a majority of project tasks. 
+
+When an annotator reaches their limit, they will see a notification telling them that they have been paused. When paused, an annotator can no longer access the project. 
+
+| Field          | Description    |
+| ------------- | ------------ |
+| **Limit by Number of Tasks**    | Set a specific number of tasks each annotator is able to complete before their progress is paused.   |
+| **Limit by Percentage of Tasks** | Calculate the number of tasks each annotator is able to complete as a percentage of tasks within the project.  |
+
+You can set one or both values. Annotators will be paused when they reach whichever limit is smaller.  
+
+To unpause annotators:
+
+* If you increase the limits, previously paused annotators will regain access. 
+* If you are using a percentage-based limit and you add more tasks to a project, previously paused annotators will regain access. 
+
+For more information about pausing annotators, including how to manually pause specific annotators, see [Pause an annotator](quality#Pause-an-annotator).
+
+!!! note
+    Pauses affect users in Annotator and Reviewer roles. So, for example, if a Reviewer is also annotating tasks and they hit the annotation limit, they will be unable to regain access to the project to review annotations unless they are unpaused. 
+
+    Users in the Manager, Administrator, or Owner role are unaffected by pause settings.
+
+</dd>
+
+<dt id="annotator-eval">Annotator Evaluation</dt>
+
+<dd>
+
+Evaluate annotators against ground truth annotations within a project. 
+
+When configured, this setting looks at the agreement score for the annotator when compared solely against ground truth annotations. You can decide to automatically pause an annotator within the project if their ground truth agreement score falls below a certain threshold. 
+ 
+
+<table>
+<thead>
+    <tr>
+      <th>Field</th>
+      <th>Description</th>
+    </tr>
+</thead>
+<tr>
+<td>
+
+**Evaluation method**
+</td>
+<td>
+
+Use this option to determine what types of tasks annotators will see first. 
+
+* **Ongoing** - Annotators are presented with tasks in the order that is configured under [**Task Sampling**](#task-sampling). 
+
+    Keep in mind that ongoing evaluation respects the [annotator overlap](#overlap) you set above. For example, if you set overlap to `2`, then only 2 annotators will be able to complete annotations on ground truth tasks before the task is considered complete and removed from the labeling stream for other users.  
+* **Onboarding** - Annotators are first presented with tasks that have a ground truth annotation. This ensures that all annotators are evaluated and that they meet your evaluation standards before progressing through the remaining project tasks. 
+
+    Onboarding evaluation disregards the [annotator overlap](#overlap) for ground truth tasks. For example, if you set overlap to `2`, but you have 10 annotators, all 10 will still be able to add annotations to ground truth tasks. 
+
+**Note:** This setting only appears when the project is configured to [automatically distribute tasks](#distribute-tasks). If you are using Manual distribution, annotators will see tasks ordered by ID number. If you would like them to see ground truth tasks first, you should add ground truth annotations in the same order. 
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Minimum number of tasks for evaluation**
+</td>
+<td>
+
+The desired ground truth score threshold will not be assessed until the annotator has completed at least the specified number of ground truth tasks. 
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Desired ground truth score threshold**
+</td>
+<td>
+
+The agreement threshold the annotator must meet when evaluated against ground truth annotations. 
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Pause annotator on failed evaluation**
+</td>
+<td>
+
+If, after completing the minimum number of tasks, the annotator does not meet the ground truth agreement threshold, they will be immediately paused and unable to access the project. 
+
+If you do not enable pausing, the other **Annotator Evaluation** options are calculated in the background and can be seen in the Members Dashboard, but annotators are not paused.
+
+</td>
+</tr>
+</table> 
+
+You can see which users are paused from the **Members** page. To unpause a user, you will need to relax the evaluation settings for the project by increasing the minimum number of tasks or the score threshold.  
+
+For more information about pausing annotators, including how to manually pause specific annotators, see [Pause an annotator](quality#Pause-an-annotator).
+
+!!! note
+    Pauses affect users in Annotator and Reviewer roles. So, for example, if a Reviewer is also annotating tasks and they hit the annotation limit, they will be unable to regain access to the project to review annotations unless they are unpaused. 
+
+    Users in the Manager, Administrator, or Owner role are unaffected by pause settings. 
+
+</dd>
+
 <dt id="task-agreement">Task Agreement</dt>
 
 <dd>
@@ -378,12 +602,12 @@ Select the [metric](stats#Available-agreement-metrics) that should determine tas
 </td>
 <td>
 
+Note that to see these options, the project must be set up to [automatically distribute tasks](#distribute-tasks).
+
 You can set a low agreement strategy to ensure that a task is not marked complete until it meets 1) the required [overlap](#overlap) and 2) a minimum agreement level.  
 
 * **Do nothing** - Tasks with a low agreement can be marked complete; no additional actions are taken. 
 * **Assign additional annotator** - Automatically assign an additional annotator to tasks with low agreement. 
-
-    Note that your project must be set up to [automatically distribute tasks](#distribute-tasks).
 
 </td>
 </tr>

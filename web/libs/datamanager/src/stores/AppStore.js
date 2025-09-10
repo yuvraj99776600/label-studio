@@ -1,6 +1,12 @@
 import { destroy, flow, types } from "mobx-state-tree";
 import { Modal } from "../components/Common/Modal/Modal";
-import { FF_DEV_2887, FF_LOPS_E_3, isFF } from "../utils/feature-flags";
+import {
+  FF_DEV_2887,
+  FF_DISABLE_GLOBAL_USER_FETCHING,
+  FF_LOPS_E_3,
+  FF_REGION_VISIBILITY_FROM_URL,
+  isFF,
+} from "../utils/feature-flags";
 import { History } from "../utils/history";
 import { isDefined } from "../utils/utils";
 import { Action } from "./Action";
@@ -126,7 +132,11 @@ export const AppStore = types
     },
 
     get currentFilter() {
-      return self.currentView.filterSnposhot;
+      return self.currentView.filterSnapshot;
+    },
+
+    get usersMap() {
+      return new Map(self.users.map((user) => [user.id, user]));
     },
   }))
   .volatile(() => ({
@@ -199,12 +209,27 @@ export const AppStore = types
 
     setTask: flow(function* ({ taskID, annotationID, pushState }) {
       if (pushState !== false) {
-        History.navigate({ task: taskID, annotation: annotationID ?? null, interaction: null });
+        History.navigate({
+          task: taskID,
+          annotation: annotationID ?? null,
+          interaction: null,
+          region: null,
+        });
+      } else if (isFF(FF_REGION_VISIBILITY_FROM_URL)) {
+        const { task, region, annotation } = History.getParams();
+        History.navigate(
+          {
+            task,
+            region,
+            annotation,
+          },
+          true,
+        );
       }
 
       if (!isDefined(taskID)) return;
 
-      self.loadingData = true;
+      self.setLoadingData(true);
 
       if (self.mode === "labelstream") {
         yield self.taskStore.loadNextTask({
@@ -216,25 +241,66 @@ export const AppStore = types
         self.annotationStore.setSelected(annotationID);
       } else {
         self.taskStore.setSelected(taskID);
-
-        yield self.taskStore.loadTask(taskID, {
-          select: !!taskID && !!annotationID,
-        });
-
-        const annotation = self.LSF?.currentAnnotation;
-        const id = annotation?.pk ?? annotation?.id;
-
-        self.LSF?.setLSFTask(self.taskStore.selected, id);
-
-        self.loadingData = false;
       }
+
+      const taskPromise = self.taskStore.loadTask(taskID, {
+        select: !!taskID && !!annotationID,
+      });
+
+      // wait for the task to be loaded and LSF to be initialized
+      yield taskPromise.then(async () => {
+        // wait for self.LSF to be initialized with currentAnnotation
+        let maxWait = 1000;
+        while (!self.LSF?.currentAnnotation && maxWait > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 1));
+          maxWait -= 1;
+        }
+
+        if (self.LSF) {
+          const annotation = self.LSF?.currentAnnotation;
+          const id = annotation?.pk ?? annotation?.id;
+
+          self.LSF?.setLSFTask(self.taskStore.selected, id);
+
+          if (isFF(FF_REGION_VISIBILITY_FROM_URL)) {
+            const { annotation: annIDFromUrl, region: regionIDFromUrl } = History.getParams();
+            const annotationStore = self.LSF?.lsf?.annotationStore;
+
+            if (annIDFromUrl && annotationStore) {
+              const lsfAnnotation = [...annotationStore.annotations, ...annotationStore.predictions].find((a) => {
+                return a.pk === annIDFromUrl || a.id === annIDFromUrl;
+              });
+
+              if (lsfAnnotation) {
+                const annID = lsfAnnotation.pk ?? lsfAnnotation.id;
+                self.LSF?.setLSFTask(self.taskStore.selected, annID, undefined, lsfAnnotation.type === "prediction");
+              }
+            }
+            if (regionIDFromUrl) {
+              const currentAnn = self.LSF?.currentAnnotation;
+              // Focus on the region by hiding all other regions
+              currentAnn?.regionStore?.setRegionVisible(regionIDFromUrl);
+              // Select the region so outliner details are visible
+              currentAnn?.regionStore?.selectRegionByID(regionIDFromUrl);
+            }
+          }
+        } else {
+          console.error("LSF not initialized properly");
+        }
+
+        self.setLoadingData(false);
+      });
     }),
+
+    setLoadingData(value) {
+      self.loadingData = value;
+    },
 
     unsetTask(options) {
       try {
         self.annotationStore.unset();
         self.taskStore.unset();
-      } catch (e) {
+      } catch (_e) {
         /* Something weird */
       }
 
@@ -296,7 +362,7 @@ export const AppStore = types
       const nextAction = () => {
         self.SDK.setMode("labeling");
 
-        if (item && !item.isSelected) {
+        if (item?.id && !item.isSelected) {
           const labelingParams = {
             pushState: options?.pushState,
           };
@@ -373,7 +439,7 @@ export const AppStore = types
     },
 
     handlePopState: (({ state }) => {
-      const { tab, task, annotation, labeling } = state ?? {};
+      const { tab, task, annotation, labeling, region } = state ?? {};
 
       if (tab) {
         const tabId = Number.parseInt(tab);
@@ -392,6 +458,11 @@ export const AppStore = types
           params.id = Number.parseInt(annotation);
         } else {
           params.id = Number.parseInt(task);
+        }
+        if (region) {
+          params.region = region;
+        } else {
+          delete params.region;
         }
 
         self.startLabeling(params, { pushState: false });
@@ -434,10 +505,11 @@ export const AppStore = types
 
       try {
         const newProject = yield self.apiCall("project", params);
-        const projectLength = Object.entries(self.project ?? {}).length;
+        const hasExistingProjectData = Object.entries(self.project ?? {}).length > 0;
+        const hasNewProjectData = Object.entries(newProject ?? {}).length > 0;
 
         self.needsDataFetch =
-          options.force !== true && projectLength > 0
+          options.force !== true && hasExistingProjectData && hasNewProjectData
             ? self.project.task_count !== newProject.task_count ||
               self.project.task_number !== newProject.task_number ||
               self.project.annotation_count !== newProject.annotation_count ||
@@ -445,7 +517,7 @@ export const AppStore = types
             : false;
 
         if (options.interaction === "timer") {
-          self.project = Object.assign(self.project ?? {}, newProject);
+          self.project = Object.assign(self.project ?? {}, newProject ?? {});
         } else if (JSON.stringify(newProject ?? {}) !== JSON.stringify(self.project ?? {})) {
           self.project = newProject;
         }
@@ -455,7 +527,15 @@ export const AppStore = types
           self.SDK.invoke(`${itemType}Updated`, self.project);
         }
       } catch {
-        self.crash();
+        // When in timer (polling project counts) mode, we can still continue
+        // but we need to crash for non-polling interactions
+        // because we can't display the app without the project itself and will need to redirect
+        if (options.interaction !== "timer") {
+          self.crash({
+            error: `Project ID: ${self.SDK.projectId} does not exist or is no longer available`,
+            redirect: true,
+          });
+        }
         return false;
       }
       self.projectFetch = false;
@@ -472,8 +552,18 @@ export const AppStore = types
       self.SDK.updateActions(actions);
     }),
 
+    fetchActionForm: flow(function* (actionId) {
+      const form = yield self.apiCall("actionForm", { actionId });
+      return form;
+    }),
+
     fetchUsers: flow(function* () {
-      const list = yield self.apiCall("users");
+      const list = yield self.apiCall("users", {
+        __useQueryCache: {
+          prefixKey: "organizationMembers",
+          staleTime: 60 * 1000,
+        },
+      });
 
       self.users.push(...list);
     }),
@@ -485,11 +575,17 @@ export const AppStore = types
 
       self.viewsStore.fetchColumns();
 
-      const requests = [self.fetchProject(), self.fetchUsers()];
+      const requests = [self.fetchProject()];
+
+      // Only fetch all users if not disabled globally
+      if (!isFF(FF_DISABLE_GLOBAL_USER_FETCHING)) {
+        requests.push(self.fetchUsers());
+      }
 
       if (!isLabelStream || (self.project?.show_annotation_history && task)) {
         if (self.SDK.type === "dm") {
-          requests.push(self.fetchActions());
+          // Fetch actions in background to avoid blocking the main thread
+          setTimeout(() => self.fetchActions(), 0);
         }
 
         if (self.SDK.settings?.onlyVirtualTabs && self.project?.show_annotation_history && !task) {
@@ -573,7 +669,9 @@ export const AppStore = types
         result.isCanceled = signal.aborted;
         self.requestsInFlight.delete(requestKey);
       }
-      if (result.error && result.status !== 404 && !signal.aborted) {
+      // We don't want to show errors when loading data in polling mode
+      // we will just allow it to try again later
+      if (result.error && result.status !== 404 && !signal.aborted && params.interaction !== "timer") {
         if (options?.errorHandler?.(result)) {
           return result;
         }
@@ -635,14 +733,17 @@ export const AppStore = types
       };
 
       if (actionId === "next_task") {
-        if (labelStreamMode === "all") {
+        const isSelectAll = actionParams.selectedItems.all === true;
+        const isAllLabelStreamMode = labelStreamMode === "all";
+        const isFilteredLabelStreamMode = labelStreamMode === "filtered";
+        if (isAllLabelStreamMode && !isSelectAll) {
           delete actionParams.filters;
 
           if (actionParams.selectedItems.all === false && actionParams.selectedItems.included.length === 0) {
             delete actionParams.selectedItems;
             delete actionParams.ordering;
           }
-        } else if (labelStreamMode === "filtered") {
+        } else if (isFilteredLabelStreamMode) {
           delete actionParams.selectedItems;
         }
       }
@@ -667,6 +768,10 @@ export const AppStore = types
         body: actionParams,
       });
 
+      if (result.async) {
+        self.SDK.invoke("toast", { message: "Your action is being processed in the background.", type: "info" });
+      }
+
       if (result.reload) {
         self.SDK.reload();
         return;
@@ -683,10 +788,12 @@ export const AppStore = types
       return result;
     }),
 
-    crash() {
-      self.destroy();
-      self.crashed = true;
-      self.SDK.invoke("crash");
+    crash(options = {}) {
+      if (options.redirect !== true) {
+        self.destroy();
+        self.crashed = true;
+      }
+      self.SDK.invoke("crash", options);
     },
 
     destroy() {

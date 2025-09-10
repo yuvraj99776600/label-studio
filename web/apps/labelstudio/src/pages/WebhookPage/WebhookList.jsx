@@ -1,14 +1,11 @@
-import React, { useCallback } from "react";
-import { LsCross, LsPencil, LsPlus } from "../../assets/icons";
-import { Button } from "../../components";
-import { Form, Input, Label, Toggle } from "../../components/Form";
-import { modal } from "../../components/Modal/Modal";
+import { useCallback } from "react";
+import { IconCross, IconPencil } from "@humansignal/icons";
+import { Button, Toggle } from "@humansignal/ui";
 import { Block, Elem } from "../../utils/bem";
 import "./WebhookPage.scss";
 import { format } from "date-fns";
 import { useAPI } from "../../providers/ApiProvider";
 import { WebhookDeleteModal } from "./WebhookDeleteModal";
-import { useProject } from "../../providers/ProjectProvider";
 
 const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) => {
   const api = useAPI();
@@ -33,7 +30,9 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
     <Block name="webhook">
       <h1>Webhooks</h1>
       <Elem name="controls">
-        <Button onClick={onAddWebhook}>Add Webhook</Button>
+        <Button onClick={onAddWebhook} aria-label="Add webhook">
+          Add Webhook
+        </Button>
       </Elem>
       <Elem>
         {webhooks.length === 0 ? null : (
@@ -52,7 +51,12 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
                   <Elem name="item-date">Created {format(new Date(obj.created_at), "dd MMM yyyy, HH:mm")}</Elem>
                 </Elem>
                 <Elem name="item-control">
-                  <Button onClick={() => onSelectActive(obj.id)} icon={<LsPencil />}>
+                  <Button
+                    look="outlined"
+                    onClick={() => onSelectActive(obj.id)}
+                    icon={<IconPencil />}
+                    aria-label="Edit webhook"
+                  >
                     Edit
                   </Button>
                   <Button
@@ -64,8 +68,9 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
                         },
                       })
                     }
-                    look="danger"
-                    icon={<LsCross />}
+                    variant="negative"
+                    look="outlined"
+                    icon={<IconCross />}
                   >
                     Delete
                   </Button>

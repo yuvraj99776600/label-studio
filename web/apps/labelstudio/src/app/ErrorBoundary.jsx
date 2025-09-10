@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import { ErrorWrapper } from "../components/Error/Error";
 import { Modal } from "../components/Modal/ModalPopup";
+import { captureException } from "../config/Sentry";
+import { isFF } from "../utils/feature-flags";
+import { IMPROVE_GLOBAL_ERROR_MESSAGES } from "../providers/ApiProvider";
 
 export const ErrorContext = React.createContext();
 
@@ -16,7 +19,17 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, { componentStack }) {
-    // You can also log the error to an error reporting service
+    console.error(error);
+
+    // Capture the error in Sentry, so we can fix it directly
+    // Don't make the users copy and paste the stacktrace, it's not actionable
+    // Check if error has sentry_skip property (e.g., from ConfigurationError)
+    captureException(error, {
+      extra: {
+        component_stacktrace: componentStack,
+        sentry_skip: error.sentry_skip || false,
+      },
+    });
     this.setState({
       error,
       hasError: true,
@@ -35,13 +48,19 @@ export default class ErrorBoundary extends Component {
         setTimeout(() => location.reload(), 32);
       };
 
+      // We will capture the stacktrace in Sentry, so we don't need to show it in the modal
+      // It is not actionable to the user, let's not show it
+      const stacktrace = isFF(IMPROVE_GLOBAL_ERROR_MESSAGES)
+        ? undefined
+        : `${errorInfo ? `Component Stack: ${errorInfo}` : ""}\n\n${this.state.error?.stack ?? ""}`;
+
       return (
         <Modal onHide={() => location.reload()} style={{ width: "60vw" }} visible bare>
           <div style={{ padding: 40 }}>
             <ErrorWrapper
               title="Runtime error"
               message={error}
-              stacktrace={`${errorInfo ? `Component Stack: ${errorInfo}` : ""}\n\n${this.state.error?.stack ?? ""}`}
+              stacktrace={stacktrace}
               onGoBack={goBack}
               onReload={() => location.reload()}
             />

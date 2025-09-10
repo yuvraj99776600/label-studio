@@ -3,30 +3,36 @@ import { StaticContent } from "../../app/StaticContent/StaticContent";
 import {
   IconBook,
   IconFolder,
-  IconModel,
+  IconHome,
+  IconHotkeys,
   IconPersonInCircle,
   IconPin,
   IconTerminal,
-  LsDoor,
-  LsGitHub,
-  LsSettings,
-  LsSlack,
-} from "../../assets/icons";
+  IconDoor,
+  IconGithub,
+  IconSettings,
+  IconSlack,
+} from "@humansignal/icons";
+import { LSLogo } from "../../assets/images";
+import { Button, Userpic, ThemeToggle } from "@humansignal/ui";
 import { useConfig } from "../../providers/ConfigProvider";
 import { useContextComponent, useFixedLocation } from "../../providers/RoutesProvider";
+import { useCurrentUser } from "../../providers/CurrentUser";
 import { cn } from "../../utils/bem";
 import { absoluteURL, isDefined } from "../../utils/helpers";
 import { Breadcrumbs } from "../Breadcrumbs/Breadcrumbs";
 import { Dropdown } from "../Dropdown/Dropdown";
 import { Hamburger } from "../Hamburger/Hamburger";
 import { Menu } from "../Menu/Menu";
-import { Userpic } from "../Userpic/Userpic";
 import { VersionNotifier, VersionProvider } from "../VersionNotifier/VersionNotifier";
 import "./Menubar.scss";
 import "./MenuContent.scss";
 import "./MenuSidebar.scss";
-import { ModelsPage } from "../../pages/Organization/Models/ModelsPage";
-import { FF_DIA_835, isFF } from "../../utils/feature-flags";
+import { FF_HOMEPAGE } from "../../utils/feature-flags";
+import { pages } from "@humansignal/app-common";
+import { isFF } from "../../utils/feature-flags";
+import { ff } from "@humansignal/core";
+import { openHotkeyHelp } from "@humansignal/app-common/pages/AccountSettings/sections/Hotkeys/Help";
 
 export const MenubarContext = createContext();
 
@@ -51,6 +57,7 @@ const RightContextMenu = ({ className, ...props }) => {
 export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSidebarToggle, onSidebarPin }) => {
   const menuDropdownRef = useRef();
   const useMenuRef = useRef();
+  const { user, fetch, isInProgress } = useCurrentUser();
   const location = useFixedLocation();
 
   const config = useConfig();
@@ -66,7 +73,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
   const sidebarClass = cn("sidebar");
   const contentClass = cn("content-wrapper");
   const contextItem = menubarClass.elem("context-item");
-  const showNewsletterDot = !isDefined(config.user.allow_newsletters);
+  const showNewsletterDot = !isDefined(user?.allow_newsletters);
 
   const sidebarPin = useCallback(
     (e) => {
@@ -132,29 +139,59 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
         <div className={menubarClass}>
           <Dropdown.Trigger dropdown={menuDropdownRef} closeOnClickOutside={!sidebarPinned}>
             <div className={`${menubarClass.elem("trigger")} main-menu-trigger`}>
-              <img src={absoluteURL("/static/icons/logo.svg")} alt="Label Studio Logo" height="22" />
+              <LSLogo className={`${menubarClass.elem("logo")}`} alt="Label Studio Logo" />
               <Hamburger opened={sidebarOpened} />
             </div>
           </Dropdown.Trigger>
 
           <div className={menubarContext}>
             <LeftContextMenu className={contextItem.mod({ left: true })} />
-
             <RightContextMenu className={contextItem.mod({ right: true })} />
           </div>
+
+          <div className={menubarClass.elem("hotkeys")}>
+            <div className={menubarClass.elem("hotkeys-button")}>
+              <Button
+                variant="neutral"
+                look="outlined"
+                tooltip="Keyboard Shortcuts"
+                data-testid="hotkeys-button"
+                size="small"
+                onClick={() => {
+                  openHotkeyHelp([
+                    "annotation",
+                    "data_manager",
+                    "regions",
+                    "tools",
+                    "audio",
+                    "video",
+                    "timeseries",
+                    "image_gallery",
+                  ]);
+                }}
+                icon={<IconHotkeys />}
+              />
+            </div>
+          </div>
+
+          {ff.isActive(ff.FF_THEME_TOGGLE) && <ThemeToggle />}
 
           <Dropdown.Trigger
             ref={useMenuRef}
             align="right"
             content={
               <Menu>
-                <Menu.Item icon={<LsSettings />} label="Account &amp; Settings" href="/user/account" data-external />
+                <Menu.Item
+                  icon={<IconSettings />}
+                  label="Account &amp; Settings"
+                  href={pages.AccountSettingsPage.path}
+                />
                 {/* <Menu.Item label="Dark Mode"/> */}
-                <Menu.Item icon={<LsDoor />} label="Log Out" href={absoluteURL("/logout")} data-external />
+                <Menu.Item icon={<IconDoor />} label="Log Out" href={absoluteURL("/logout")} data-external />
                 {showNewsletterDot && (
                   <>
                     <Menu.Divider />
-                    <Menu.Item className={cn("newsletter-menu-item")} href="/user/account" data-external>
+                    <Menu.Item className={cn("newsletter-menu-item")} href={pages.AccountSettingsPage.path}>
                       <span>Please check new notification settings in the Account & Settings page</span>
                       <span className={cn("newsletter-menu-badge")} />
                     </Menu.Item>
@@ -163,8 +200,8 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
               </Menu>
             }
           >
-            <div title={config.user.email} className={menubarClass.elem("user")}>
-              <Userpic user={config.user} />
+            <div title={user?.email} className={menubarClass.elem("user")}>
+              <Userpic user={user} isInProgress={isInProgress} />
               {showNewsletterDot && <div className={menubarClass.elem("userpic-badge")} />}
             </div>
           </Dropdown.Trigger>
@@ -183,9 +220,9 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
               style={{ width: 240 }}
             >
               <Menu>
+                {isFF(FF_HOMEPAGE) && <Menu.Item label="Home" to="/" icon={<IconHome />} data-external exact />}
                 <Menu.Item label="Projects" to="/projects" icon={<IconFolder />} data-external exact />
                 <Menu.Item label="Organization" to="/organization" icon={<IconPersonInCircle />} data-external exact />
-                {isFF(FF_DIA_835) && <Menu.Item label="Models" to={ModelsPage.path} icon={<IconModel />} exact />}
 
                 <Menu.Spacer />
 
@@ -201,14 +238,14 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
                 <Menu.Item
                   label="GitHub"
                   href="https://github.com/HumanSignal/label-studio"
-                  icon={<LsGitHub />}
+                  icon={<IconGithub />}
                   target="_blank"
                   rel="noreferrer"
                 />
                 <Menu.Item
                   label="Slack Community"
                   href="https://slack.labelstud.io/?source=product-menu"
-                  icon={<LsSlack />}
+                  icon={<IconSlack />}
                   target="_blank"
                   rel="noreferrer"
                 />

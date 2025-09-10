@@ -1,15 +1,16 @@
-import React, { forwardRef, useCallback, useEffect, useRef } from "react";
+import { forwardRef } from "react";
 import { observer } from "mobx-react";
-import { Userpic } from "../../common/Userpic/Userpic";
+import { IconBan, IconSparks, IconStar } from "@humansignal/icons";
+import { Userpic } from "@humansignal/ui";
 import { Space } from "../../common/Space/Space";
 import { Block, Elem } from "../../utils/bem";
 import "./AnnotationTabs.scss";
-import { IconBan, LsGrid, LsPlus, LsSparks, LsStar } from "../../assets/icons";
 
 export const EntityTab = observer(
   forwardRef(
     ({ entity, selected, style, onClick, bordered = true, prediction = false, displayGroundTruth = false }, ref) => {
       const isUnsaved = (entity.userGenerate && !entity.sentUserGenerate) || entity.draftSelected;
+      const infoIsHidden = entity.store.hasInterface("annotations:hide-info");
 
       return (
         <Block
@@ -29,17 +30,19 @@ export const EntityTab = observer(
               tag={Userpic}
               showUsername
               username={prediction ? entity.createdBy : null}
-              user={entity.user ?? { email: entity.createdBy }}
+              user={infoIsHidden ? {} : (entity.user ?? { email: entity.createdBy })}
               mod={{ prediction }}
             >
-              {prediction && <LsSparks style={{ width: 16, height: 16 }} />}
+              {prediction && <IconSparks style={{ width: 16, height: 16 }} />}
             </Elem>
 
-            <Elem name="identifier">
-              ID {entity.pk ?? entity.id} {isUnsaved && "*"}
-            </Elem>
+            {!infoIsHidden && (
+              <Elem name="identifier">
+                ID {entity.pk ?? entity.id} {isUnsaved && "*"}
+              </Elem>
+            )}
 
-            {displayGroundTruth && entity.ground_truth && <Elem name="ground-truth" tag={LsStar} />}
+            {displayGroundTruth && entity.ground_truth && <Elem name="ground-truth" tag={IconStar} />}
 
             {entity.skipped && <Elem name="skipped" tag={IconBan} />}
           </Space>

@@ -1,21 +1,23 @@
-import { types } from "mobx-state-tree";
+import { types, getRoot } from "mobx-state-tree";
 
 import Utils from "../utils";
-import { guidGenerator } from "../utils/unique";
-import Constants, { defaultStyle } from "../core/Constants";
+import { defaultStyle } from "../core/Constants";
 import { isDefined } from "../utils/utilities";
-import { FF_LSDV_4620_3, isFF } from "../utils/feature-flags";
 
 const HIGHLIGHT_CN = "htx-highlight";
 const HIGHLIGHT_NO_LABEL_CN = "htx-no-label";
-const IDENTIFIER_LENGTH = 5;
 const LABEL_COLOR_ALPHA = 0.3;
+const LABEL_COLOR_ALPHA_ACTIVE = 0.8;
 
 export const HighlightMixin = types
   .model()
+  .volatile(() => ({
+    _spans: null,
+  }))
   .views((self) => ({
     get _hasSpans() {
       // @todo is it possible that only some spans are connected?
+      // @TODO: Need to check if it is still necessary condition. The way of working with spans was changed and it could affect this part. The main question, is there still a way to get `isConnected === false`
       return self._spans ? self._spans.every((span) => span.isConnected) : false;
     },
     get identifier() {
@@ -31,6 +33,10 @@ export const HighlightMixin = types
         classNames.push(HIGHLIGHT_NO_LABEL_CN);
       }
 
+      if (self.selected) {
+        classNames.push(STATE_CLASS_MODS.active);
+      }
+
       // in this case labels presence can't be changed from settings — manual mode
       if (isDefined(self.parent.showlabels)) {
         classNames.push("htx-manual-label");
@@ -38,22 +44,32 @@ export const HighlightMixin = types
 
       return classNames;
     },
-    get styles() {
-      const { className } = self;
-      const activeColorOpacity = 0.8;
-      const color = self.getLabelColor();
-      const initialActiveColor = Utils.Colors.rgbaChangeAlpha(color, activeColorOpacity);
-
+    /**
+     * Generate styles for region and active region, but with a lighter background is that's a resized region,
+     * so the selection of the same color will give the original color of active region.
+     * @see getColors
+     * @param {string} className
+     * @param {object} colors see `getColors()`
+     * @param {boolean} resize lighter background for resized region or original one for active region
+     * @returns {string} styles to apply to the region
+     */
+    generateStyles(className, colors, resize = false) {
       return `
         .${className} {
-          background-color: ${color} !important;
+          background-color: ${colors.background} !important;
           border: 1px dashed transparent;
         }
         .${className}.${STATE_CLASS_MODS.active}:not(.${STATE_CLASS_MODS.hidden}) {
-          color: ${Utils.Colors.contrastColor(initialActiveColor)} !important;
-          background-color: ${initialActiveColor} !important;
+          color: ${colors.activeText} !important;
+          background-color: ${resize ? colors.resizeBackground : colors.activeBackground} !important;
         }
       `;
+    },
+    get styles() {
+      return this.generateStyles(self.className, self.getColors());
+    },
+    get resizeStyles() {
+      return this.generateStyles(self.className, self.getColors(), true);
     },
   }))
   .actions((self) => ({
@@ -61,99 +77,46 @@ export const HighlightMixin = types
      * Create highlights from the stored `Range`
      */
     applyHighlight(init = false) {
-      if (isFF(FF_LSDV_4620_3)) {
-        // skip re-initing
-        if (self._hasSpans) {
-          return void 0;
-        }
-
-        self._spans = self.parent.createSpansByGlobalOffsets(self.globalOffsets);
-        self._spans?.forEach((span) => (span.className = self.classNames.join(" ")));
-        self.updateSpans();
-        if (!init) {
-          self.parent.setStyles({ [self.identifier]: self.styles });
-        }
+      // skip re-initialization
+      if (self._hasSpans) {
         return void 0;
       }
 
-      if (self.parent.isLoaded === false) {
-        return void 0;
+      self._spans = self.parent.createSpansByGlobalOffsets(self.globalOffsets);
+      self._spans?.forEach((span) => (span.className = self.classNames.join(" ")));
+      self.updateSpans();
+      if (!init) {
+        self.parent.setStyles({ [self.identifier]: self.styles });
       }
-
-      // spans in iframe disappear on every annotation switch, so check for it
-      // in iframe spans still isConnected, but window is missing
-      const isReallyConnected = Boolean(self._spans?.[0]?.ownerDocument?.defaultView);
-
-      // Avoid calling this method twice
-      if (self._hasSpans && isReallyConnected) {
-        return void 0;
-      }
-
-      const range = self.getRangeToHighlight();
-      const root = self._getRootNode();
-
-      // Avoid rendering before view is ready
-      if (!range) {
-        console.warn("No range found to highlight");
-        return void 0;
-      }
-
-      if (!root) {
-        return void 0;
-      }
-
-      const labelColor = self.getLabelColor();
-      const identifier = guidGenerator(IDENTIFIER_LENGTH);
-      // @todo use label-based stylesheets created only once
-      const stylesheet = createSpanStylesheet(root.ownerDocument, identifier, labelColor);
-      const classNames = ["htx-highlight", stylesheet.className];
-
-      if (!(self.parent.showlabels ?? self.store.settings.showLabels)) {
-        classNames.push(HIGHLIGHT_NO_LABEL_CN);
-      }
-
-      // in this case labels presence can't be changed from settings — manual mode
-      if (isDefined(self.parent.showlabels)) {
-        classNames.push("htx-manual-label");
-      }
-
-      self._stylesheet = stylesheet;
-      self._spans = Utils.Selection.highlightRange(range, {
-        classNames,
-        index: self.region_index,
-        label: self.getLabels(),
-      });
-
-      return self._spans;
+      return void 0;
     },
 
-    updateHighlightedText() {
-      if (!self.text) {
-        if (isFF(FF_LSDV_4620_3)) {
-          self.text = self.parent.getTextFromGlobalOffsets(self.globalOffsets);
-          return;
-        }
-        // Concatenating of spans' innerText is up to 10 times faster, but loses "\n"
-        const range = self.getRangeToHighlight();
-        const root = self._getRootNode();
-
-        if (!range || !root) {
-          return;
-        }
-        const selection = root.ownerDocument.defaultView.getSelection();
-
-        selection.removeAllRanges();
-        selection.addRange(range);
-        self.text = String(selection);
-        selection.removeAllRanges();
+    /**
+     * Get text from object tag by region offsets and set it to the region.
+     * Normally it would only set it initially for better performance.
+     * But when we edit the region we need to update it on every change.
+     * @param {object} options
+     * @param {boolean} options.force - always update the text
+     */
+    updateHighlightedText({ force = false } = {}) {
+      if (!self.text || force) {
+        self.text = self.parent.getTextFromGlobalOffsets(self.globalOffsets);
       }
     },
 
     updateSpans() {
-      if (self._hasSpans || (isFF(FF_LSDV_4620_3) && self._spans?.length)) {
-        const lastSpan = self._spans[self._spans.length - 1];
+      // @TODO: Is `_hasSpans` some artifact from the old version?
+      if (self._hasSpans || self._spans?.length) {
+        const firstSpan = self._spans[0];
+        const lastSpan = self._spans.at(-1);
+        const offsets = self.globalOffsets;
 
+        // @TODO: Should we manage it in domManager?
+        // update label tag (index + attached labels) which sits in the last span
         Utils.Selection.applySpanStyles(lastSpan, { index: self.region_index, label: self.getLabels() });
+        // store offsets in spans for further comparison if region got resized
+        firstSpan.setAttribute("data-start", offsets.start);
+        lastSpan.setAttribute("data-end", offsets.end);
       }
     },
 
@@ -165,32 +128,70 @@ export const HighlightMixin = types
      * Removes current highlights
      */
     removeHighlight() {
-      if (isFF(FF_LSDV_4620_3)) {
-        if (self.globalOffsets) {
-          self.parent?.removeSpansInGlobalOffsets(self._spans, self.globalOffsets);
-        }
-        self.parent?.removeStyles([self.identifier]);
-      } else {
-        Utils.Selection.removeRange(self._spans);
+      if (self.globalOffsets) {
+        self.parent?.removeSpansInGlobalOffsets(self._spans, self.globalOffsets);
       }
+      self.parent?.removeStyles([self.identifier]);
+      self._spans = null;
     },
 
     /**
      * Update region's appearance if the label was changed
      */
     updateAppearenceFromState() {
-      if (!self._spans?.length) {
-        return;
-      }
+      if (!self._spans?.length) return;
 
+      // Update label visibility based on settings
+      const settings = getRoot(self).settings;
       const lastSpan = self._spans[self._spans.length - 1];
 
-      if (isFF(FF_LSDV_4620_3)) {
-        self.parent.setStyles?.({ [self.identifier]: self.styles });
-      } else {
-        self._stylesheet.setColor(self.getLabelColor());
+      if (lastSpan) {
+        if (!self.parent?.showlabels && !settings?.showLabels) {
+          lastSpan.classList.add("htx-no-label");
+        } else {
+          lastSpan.classList.remove("htx-no-label");
+        }
       }
-      Utils.Selection.applySpanStyles(lastSpan, { index: self.region_index, label: self.getLabels() });
+
+      if (self.parent?.canResizeSpans) {
+        const start = self._spans[0].getAttribute("data-start");
+        const end = self._spans.at(-1).getAttribute("data-end");
+        const offsets = self.globalOffsets;
+
+        // if spans have different offsets stored, then we resized the region and need to recreate spans
+        if (isDefined(start) && (+start !== offsets.start || +end !== offsets.end)) {
+          self.removeHighlight();
+          self.applyHighlight();
+        } else {
+          self.parent.setStyles?.({ [self.identifier]: self.styles });
+          self.updateSpans();
+        }
+      } else {
+        self.parent.setStyles?.({ [self.identifier]: self.styles });
+        self.updateSpans();
+      }
+    },
+
+    /**
+     * Attach resize handles to the first and last spans. `area` is used to be less possible to be
+     * in user's document. They are not fully valid inside spans, but they work.
+     */
+    attachHandles() {
+      const classes = [STATE_CLASS_MODS.leftHandle, STATE_CLASS_MODS.rightHandle];
+      const spanStart = self._spans[0];
+      const spanEnd = self._spans.at(-1);
+
+      classes.forEach((resizeClass, index) => {
+        // html element that can't be encountered in a usual html
+        const handleArea = document.createElement("area");
+
+        handleArea.classList.add(resizeClass);
+        index === 0 ? spanStart.prepend(handleArea) : spanEnd.append(handleArea);
+      });
+    },
+
+    detachHandles() {
+      self._spans?.forEach((span) => span.querySelectorAll("area").forEach((area) => area.remove()));
     },
 
     /**
@@ -203,8 +204,10 @@ export const HighlightMixin = types
 
       const first = self._spans?.[0];
 
-      if (!first) {
-        return;
+      if (!first) return;
+
+      if (self.parent?.canResizeSpans) {
+        self.attachHandles();
       }
 
       if (first.scrollIntoViewIfNeeded) {
@@ -218,57 +221,35 @@ export const HighlightMixin = types
      * Unselect text region
      */
     afterUnselectRegion() {
-      self.removeClass(isFF(FF_LSDV_4620_3) ? STATE_CLASS_MODS.active : self._stylesheet?.state.active);
+      self.removeClass(STATE_CLASS_MODS.active);
+
+      if (self.parent?.canResizeSpans) {
+        self.detachHandles();
+      }
     },
 
     /**
      * Remove stylesheet before removing the highlight itself
      */
     beforeDestroy() {
-      if (isFF(FF_LSDV_4620_3)) {
-        self.parent?.removeStyles([self.identifier]);
-      } else {
-        try {
-          self._stylesheet.remove();
-        } catch (e) {
-          /* something went wrong */
-        }
-      }
+      self.parent?.removeStyles([self.identifier]);
     },
 
     /**
-     * Set cursor style of the region
-     * @param {import("prettier").CursorOptions} cursor
-     */
-    setCursor(cursor) {
-      self._stylesheet?.setCursor(cursor);
-    },
-
-    /**
-     * Draw region outline
+     * Draw region outline on hover
      * @param {boolean} val
      */
     setHighlight(val) {
-      if (!self._stylesheet && !(isFF(FF_LSDV_4620_3) && self._spans)) {
+      if (!self._spans) {
         return;
       }
 
       self._highlighted = val;
 
       if (self.highlighted) {
-        if (isFF(FF_LSDV_4620_3)) {
-          self.addClass(STATE_CLASS_MODS.highlighted);
-        } else {
-          self.addClass(self._stylesheet.state.highlighted);
-          self._stylesheet?.setCursor(Constants.RELATION_MODE_CURSOR);
-        }
+        self.addClass(STATE_CLASS_MODS.highlighted);
       } else {
-        if (isFF(FF_LSDV_4620_3)) {
-          self.removeClass(STATE_CLASS_MODS.highlighted);
-        } else {
-          self.removeClass(self._stylesheet.state.highlighted);
-          self._stylesheet?.setCursor(Constants.POINTER_CURSOR);
-        }
+        self.removeClass(STATE_CLASS_MODS.highlighted);
       }
     },
 
@@ -279,10 +260,27 @@ export const HighlightMixin = types
       return [index, text].filter(Boolean).join(":");
     },
 
-    getLabelColor() {
+    // @todo should not this be a view?
+    getColors() {
       const labelColor = self.parent.highlightcolor || (self.style || self.tag || defaultStyle).fillcolor;
 
-      return Utils.Colors.convertToRGBA(labelColor ?? "#DA935D", LABEL_COLOR_ALPHA);
+      const background = Utils.Colors.convertToRGBA(labelColor ?? "#DA935D", LABEL_COLOR_ALPHA);
+      const activeBackground = Utils.Colors.convertToRGBA(labelColor ?? "#DA935D", LABEL_COLOR_ALPHA_ACTIVE);
+      // Extended/reduced parts of the region should be colored differently in a lighter color.
+      // With extension it's simple, because it's the browser selection, so we just set a different color to it.
+      // But to color the reduced part we use opacity of overlayed blocks — region hightlight and browser selection,
+      // and multiplication of them should be the same as original activeBackground.
+      // Region color should also be different from the original one, and for simplicity we use just one color.
+      // So this color should have an opacity twice closer to 1 than the original one: 1 - (1 - alpha) * 2
+      const resizeBackground = Utils.Colors.convertToRGBA(labelColor ?? "#DA935D", 2 * LABEL_COLOR_ALPHA_ACTIVE - 1);
+      const activeText = Utils.Colors.contrastColor(activeBackground);
+
+      return {
+        background,
+        activeBackground,
+        resizeBackground,
+        activeText,
+      };
     },
 
     find(span) {
@@ -332,134 +330,7 @@ export const STATE_CLASS_MODS = {
   highlighted: "__highlighted",
   collapsed: "__collapsed",
   hidden: "__hidden",
+  rightHandle: "__resize_right",
+  leftHandle: "__resize_left",
   noLabel: HIGHLIGHT_NO_LABEL_CN,
-};
-
-/**
- * Creates a separate stylesheet for every region
- * @param {string} identifier GUID identifier of a region
- * @param {string} color Default label color
- */
-const createSpanStylesheet = (document, identifier, color) => {
-  const className = `.htx-highlight-${identifier}`;
-  const variables = {
-    color: `--background-color-${identifier}`,
-    cursor: `--cursor-style-${identifier}`,
-  };
-
-  const classNames = {
-    active: `${className}.${STATE_CLASS_MODS.active}:not(.${STATE_CLASS_MODS.hidden})`,
-    highlighted: `${className}.${STATE_CLASS_MODS.highlighted}`,
-  };
-
-  const activeColorOpacity = 0.8;
-  const toActiveColor = (color) => Utils.Colors.rgbaChangeAlpha(color, activeColorOpacity);
-
-  const initialActiveColor = toActiveColor(color);
-
-  document.documentElement.style.setProperty(variables.color, color);
-
-  const rules = {
-    [className]: `
-      background-color: var(${variables.color}) !important;
-      cursor: var(${variables.cursor}, pointer);
-      border: 1px dashed transparent;
-    `,
-    // @todo this style was applied in old RichText only
-    [`${className}[data-label]::after`]: `
-      padding: 2px 2px;
-      font-size: 9.5px;
-      font-weight: bold;
-      font-family: Monaco;
-      vertical-align: super;
-      content: attr(data-label);
-      line-height: 0;
-    `,
-    [classNames.active]: `
-      color: ${Utils.Colors.contrastColor(initialActiveColor)} !important;
-      ${variables.color}: ${initialActiveColor}
-    `,
-    [classNames.highlighted]: `
-      position: relative;
-      border-color: rgb(0, 174, 255);
-    `,
-    [`${className}.${STATE_CLASS_MODS.hidden}`]: `
-      border: none;
-      padding: 0;
-      pointer-events: none;
-      ${variables.color}: transparent;
-    `,
-    [`${className}.${STATE_CLASS_MODS.hidden}::before`]: `
-      display: none
-    `,
-    [`${className}.${STATE_CLASS_MODS.hidden}::after`]: `
-      display: none
-    `,
-    [`${className}.${STATE_CLASS_MODS.noLabel}::after`]: `
-      display: none
-    `,
-  };
-
-  const styleTag = document.createElement("style");
-
-  styleTag.type = "text/css";
-  styleTag.id = `highlight-${identifier}`;
-  document.head.appendChild(styleTag);
-
-  const stylesheet = styleTag.sheet ?? styleTag.styleSheet;
-  const supportInsertion = !!stylesheet.insertRule;
-  let lastRuleIndex = 0;
-
-  for (const ruleName in rules) {
-    if (!Object.prototype.hasOwnProperty.call(rules, ruleName)) {
-      continue;
-    }
-    if (supportInsertion) {
-      stylesheet.insertRule(`${ruleName} { ${rules[ruleName]} } `, lastRuleIndex++);
-    } else {
-      stylesheet.addRule(ruleName, rules);
-    }
-  }
-
-  /**
-   * Set region color
-   * @param {string} color
-   */
-  const setColor = (color) => {
-    const newActiveColor = toActiveColor(color);
-    // sheet could change during iframe transfers, so look up in the tag
-    const stylesheet = styleTag.sheet ?? styleTag.styleSheet;
-    // they are on different positions for old/new regions
-    const rule = [...stylesheet.rules].find((rule) => rule.selectorText.includes("__active"));
-    const { style } = rule;
-
-    // document in a closure may be a working iframe, so go up from the tag
-    styleTag.ownerDocument.documentElement.style.setProperty(variables.color, color);
-
-    style.setProperty(variables.color, newActiveColor);
-    style.color = Utils.Colors.contrastColor(newActiveColor);
-  };
-
-  /**
-   * Set cursor style
-   * @param {string} cursor
-   */
-  const setCursor = (cursor) => {
-    styleTag.ownerDocument.documentElement.style.setProperty(variables.cursor, cursor);
-  };
-
-  /**
-   * Remove stylesheet
-   */
-  const remove = () => {
-    styleTag.remove();
-  };
-
-  return {
-    className: className.substr(1),
-    state: STATE_CLASS_MODS,
-    setColor,
-    setCursor,
-    remove,
-  };
 };

@@ -38,9 +38,39 @@ In Label Studio Community Edition, the data manager is the default view for your
 
 With filters and tabs, you can split data into different sections to be labeled by different annotators, or set up data in a particular order to perform labeling according to prediction score, or another value in your data.
 
-When you filter or sort the data before you label it, you modify which tasks and the order of the tasks you see when labeling. While [task sampling](start.html#Set_up_task_sampling_for_your_project) affects the task order for an entire project and can't be changed, filtering and sorting tasks can be changed at any time. 
+When you filter or sort the data before you label it, you modify which tasks and the order of the tasks you see when labeling. While [task sampling](https://labelstud.io/guide/start#Set-up-task-sampling-for-your-project) affects the task order for an entire project and can't be changed, filtering and sorting tasks can be changed at any time. 
 
 <img src="/images/data-manager-filters.png" class="gif-border">
+
+<div class="opensource-only">
+
+!!! error Enterprise
+    In Label Studio Enterprise and Starter Cloud, you can use advanced filters against annotation results. For more information, see our [Enterprise documentation](https://docs.humansignal.com/guide/manage_data#Filter-annotation-results). 
+
+</div>
+
+<div class="enterprise-only">
+
+### Filter annotation results
+
+You can also filter on individual annotation results within a task:
+
+<img src="/images/data-manager-filters-lse.png" class="gif-border" >
+
+!!! note
+    In Label Studio Community, the `Annotation results` filter is an unstructured text search across all annotations for the task, and the example above would not be achievable.
+
+The following tags are supported:
+- All `Labels` tags (ex. `Labels`, `ParagraphLabels`, ...)
+- `Choices`
+- `Taxonomy`
+- `Rating`
+
+**Known limitations:**
+- [Taxonomies loaded using `apiUrl`](/templates/taxonomy) will not be detected.
+
+
+</div>
 
 ### Example: Label new data first
 Sort the data in your project by date to focus on labeling the newest data first.
@@ -55,7 +85,7 @@ You can sort the data in your project by prediction score if you upload [pre-ann
 1. In a project, update the **Order** of the data from the default to use the **Prediction score** field.
 2. Update the order of the items in either ascending or descending order to label based on higher confidence or lower confidence predictions. 
 3. Select **Label Tasks As Displayed** to start labeling tasks in prediction score order. 
-You can also use [task sampling](start.html#Set_up_task_sampling_for_your_project) to use prediction score ordering.
+You can also use [task sampling](https://labelstud.io/guide/start#Set-up-task-sampling-for-your-project) to use prediction score ordering.
 
 ### Example: Split a dataset using tabs and filters
 If you want to label a large dataset, you might want to use tabs and filters to split it up into smaller sections, and assign different annotators to different tabs. You can't assign annotators to specific tasks in Label Studio Community Edition, but you can rename the tabs after specific annotators as a way to basically assign tasks using tabs.  

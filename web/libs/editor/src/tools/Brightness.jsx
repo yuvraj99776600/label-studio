@@ -1,4 +1,3 @@
-import React from "react";
 import { observer } from "mobx-react";
 import { types } from "mobx-state-tree";
 
@@ -8,7 +7,7 @@ import ToolMixin from "../mixins/Tool";
 
 import { Tool } from "../components/Toolbar/Tool";
 import { Range } from "../common/Range/Range";
-import { IconBrightnessTool } from "../assets/icons";
+import { IconBrightnessTool } from "@humansignal/icons";
 
 const ToolView = observer(({ item }) => {
   return (

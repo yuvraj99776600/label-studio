@@ -1,19 +1,18 @@
 import React, { useState } from "react";
 import { useParams as useRouterParams } from "react-router";
 import { Redirect } from "react-router-dom";
-import { Button } from "../../components";
+import { Button } from "@humansignal/ui";
 import { Oneof } from "../../components/Oneof/Oneof";
 import { Spinner } from "../../components/Spinner/Spinner";
 import { ApiContext } from "../../providers/ApiProvider";
 import { useContextProps } from "../../providers/RoutesProvider";
-import { useAbortController } from "../../hooks/useAbortController";
 import { Block, Elem } from "../../utils/bem";
-import { FF_DEV_2575, isFF } from "../../utils/feature-flags";
 import { CreateProject } from "../CreateProject/CreateProject";
 import { DataManagerPage } from "../DataManager/DataManager";
 import { SettingsPage } from "../Settings";
-import "./Projects.scss";
 import { EmptyProjectsList, ProjectsList } from "./ProjectsList";
+import { useAbortController } from "@humansignal/core";
+import "./Projects.scss";
 
 const getCurrentPage = () => {
   const pageNumberFromURL = new URLSearchParams(location.search).get("page");
@@ -32,8 +31,10 @@ export const ProjectsPage = () => {
   const defaultPageSize = Number.parseInt(localStorage.getItem("pages:projects-list") ?? 30);
 
   const [modal, setModal] = React.useState(false);
-  const openModal = setModal.bind(null, true);
-  const closeModal = setModal.bind(null, false);
+
+  const openModal = () => setModal(true);
+
+  const closeModal = () => setModal(false);
 
   const fetchProjects = async (page = currentPage, pageSize = defaultPageSize) => {
     setNetworkState("loading");
@@ -41,33 +42,27 @@ export const ProjectsPage = () => {
 
     const requestParams = { page, page_size: pageSize };
 
-    if (isFF(FF_DEV_2575)) {
-      requestParams.include = [
-        "id",
-        "title",
-        "created_by",
-        "created_at",
-        "color",
-        "is_published",
-        "assignment_settings",
-      ].join(",");
-    }
+    requestParams.include = [
+      "id",
+      "title",
+      "created_by",
+      "created_at",
+      "color",
+      "is_published",
+      "assignment_settings",
+    ].join(",");
 
     const data = await api.callApi("projects", {
       params: requestParams,
-      ...(isFF(FF_DEV_2575)
-        ? {
-            signal: abortController.controller.current.signal,
-            errorFilter: (e) => e.error.includes("aborted"),
-          }
-        : null),
+      signal: abortController.controller.current.signal,
+      errorFilter: (e) => e.error.includes("aborted"),
     });
 
     setTotalItems(data?.count ?? 1);
     setProjectsList(data.results ?? []);
     setNetworkState("loaded");
 
-    if (isFF(FF_DEV_2575) && data?.results?.length) {
+    if (data?.results?.length) {
       const additionalData = await api.callApi("projects", {
         params: {
           ids: data?.results?.map(({ id }) => id).join(","),
@@ -165,7 +160,7 @@ ProjectsPage.routes = ({ store }) => [
 ProjectsPage.context = ({ openModal, showButton }) => {
   if (!showButton) return null;
   return (
-    <Button onClick={openModal} look="primary" size="compact">
+    <Button onClick={openModal} size="small" aria-label="Create new project">
       Create
     </Button>
   );

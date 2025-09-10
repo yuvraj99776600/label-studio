@@ -52,12 +52,12 @@ Once the initial organization account is created, you can begin inviting users:
 2. Select **Organization**. 
 
     If you do not see the **Organization** option, you do not have access to the Organization page. Only users in the Owner or Administrator role can access this page. 
-3. From the Organization page, click **Invite People**. 
+3. From the Organization page, click **Invite Members**. 
 
 From here you have two options:
 
 * **Invite link**  
-You can share this link with users, who can then complete the registration process. However, they will be unable to access Label Studio until an Owner or Administrator manually assigns them a role. See [Assign roles to users](admin_user_manage#Assign-roles-to-users). 
+You can share this link with users, who can then complete the registration process. However, they will be unable to access Label Studio until an Owner or Administrator manually assigns them a role. See [User roles and permissions](admin_roles). 
 
     Click **Reset Link** to reset the link. When reset, anyone who have the old link will be unable to register a new user account. 
 

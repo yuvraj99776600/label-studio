@@ -1,12 +1,12 @@
-import React, { useRef, useState } from "react";
-import { IconOutlinerDrag } from "../../../assets/icons";
+import { useRef, useState } from "react";
+import { IconOutlinerDrag, IconCollapseSmall, IconExpandSmall } from "@humansignal/ui";
 import { useDrag } from "../../../hooks/useDrag";
-import { Block, cn, Elem } from "../../../utils/bem";
+import { Block, Elem } from "../../../utils/bem";
 import { DEFAULT_PANEL_HEIGHT } from "../constants";
 import "./Tabs.scss";
 import { type BaseProps, Side, type TabProps } from "./types";
 import { determineDroppableArea, determineLeftOrRight } from "./utils";
-import { FF_OUTLINER_OPTIM, isFF } from "../../../utils/feature-flags";
+import { Button } from "../../../common/Button/Button";
 
 const classAddedTabs: (Element | undefined)[] = [];
 
@@ -163,7 +163,7 @@ const Tab = ({
       name="tab"
       mod={{ active: locked ? tabIndex === breakPointActiveTab : active }}
     >
-      {!locked && <Elem name="icon" tag={IconOutlinerDrag} width={8} />}
+      {!locked && <Elem name="icon" tag={IconOutlinerDrag} />}
       {tabText}
     </Elem>
   );
@@ -190,14 +190,22 @@ const Tab = ({
   );
 };
 
-export const Tabs = (props: BaseProps) => {
+export const Tabs = (
+  props: BaseProps & {
+    isBottomPanel?: boolean;
+    bottomCollapsed?: boolean;
+    setBottomCollapsed?: (v: boolean) => void;
+    settings?: any;
+    panelHeight?: number;
+  },
+) => {
   const ActiveComponent = props.locked
     ? props.panelViews[props.breakPointActiveTab].component
     : props.panelViews?.find((view) => view.active)?.component;
 
   return (
     <>
-      <Block name="tabs" mix={isFF(FF_OUTLINER_OPTIM) ? "ff_outliner_optim" : void 0}>
+      <Block name="tabs">
         <Elem name="tabs-row">
           {props.panelViews.map((view, index) => {
             const { component: Component } = view;
@@ -230,9 +238,38 @@ export const Tabs = (props: BaseProps) => {
             );
           })}
           <Elem id={`${props.name}_${props.panelViews.length}-droppable-space`} name="drop-space-after" />
+          {props.isBottomPanel && props.settings?.collapsibleBottomPanel && (
+            <Button
+              className="collapsible-bottom-panel-toggle"
+              // TODO: remove inline styles and use tailwind classes when Button component is updated
+              style={{
+                marginLeft: 4,
+                marginRight: 5,
+                marginTop: 4,
+                display: "flex",
+                height: "24px",
+                width: "24px",
+                padding: 0,
+                alignItems: "center",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+              }}
+              onClick={() => props.setBottomCollapsed?.(!props.bottomCollapsed)}
+              title={props.bottomCollapsed ? "Expand Bottom Panel" : "Collapse Bottom Panel"}
+            >
+              {props.bottomCollapsed ? <IconExpandSmall /> : <IconCollapseSmall />}
+            </Button>
+          )}
         </Elem>
-        <Elem name="contents">{ActiveComponent && <ActiveComponent {...props} />}</Elem>
+        {!props.bottomCollapsed && (
+          <Elem name="contents" style={{ overflow: "auto" }}>
+            {ActiveComponent && <ActiveComponent {...props} />}
+          </Elem>
+        )}
       </Block>
     </>
   );
 };
+
+Tabs.displayName = "Tabs";

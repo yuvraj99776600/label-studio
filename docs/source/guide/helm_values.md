@@ -4,7 +4,7 @@ short: Available Helm values
 tier: all
 type: guide
 order: 72
-order_enterprise: 72
+order_enterprise: 74
 meta_title: Available Helm values for Label Studio Helm Chart
 meta_description: For cases when you want to customize your Label Studio Kubernetes deployment, review these available Helm values that you can set in your Helm chart.
 section: "Install & Setup"
@@ -37,8 +37,19 @@ parent_enterprise: "install_enterprise_k8s"
   }
 </style>
 
+<div class="opensource-only">
+
 Refer to these tables with available Helm chart values for your `values.yaml` file
-when configuring your Label Studio deployment on Kubernetes. See [Deploy Label Studio on Kubernetes](install_k8s.html) for more.
+when configuring your Label Studio deployment on Kubernetes. See [Deploy Label Studio on Kubernetes](install_k8s) for more.
+
+</div>
+
+<div class="enterprise-only">
+
+Refer to these tables with available Helm chart values for your `values.yaml` file
+when configuring your Label Studio deployment on Kubernetes. See [Deploy Label Studio on Kubernetes](install_enterprise_k8s) for more.
+
+</div>
 
 ## Global parameters
 

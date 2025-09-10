@@ -16,6 +16,7 @@ async function initLabelStudio({
   settings = {},
   additionalInterfaces = [],
   params = {},
+  taskId = undefined,
 }) {
   if (window.Konva && window.Konva.stages.length) window.Konva.stages.forEach((stage) => stage.destroy());
 
@@ -37,7 +38,7 @@ async function initLabelStudio({
     "edit-history",
     ...additionalInterfaces,
   ];
-  const task = { data, annotations, predictions };
+  const task = { id: taskId, data, annotations, predictions };
 
   window.LabelStudio.destroyAll();
   window.labelStudio = new window.LabelStudio("label-studio", { interfaces, config, task, settings, ...params });
@@ -131,6 +132,12 @@ const setFeatureFlagsDefaultValue = (value) => {
   return window.APP_SETTINGS.feature_flags_default_value;
 };
 
+/**
+ * IMPORTANT NOTE: if your flags change models this helper should be invoked before `I.amOnPage()`
+ * Sets given feature flags before LSF init
+ * @param {object} featureFlags map of feature flags to set with boolean values
+ * @returns {object}
+ */
 const setFeatureFlags = (featureFlags) => {
   if (!window.APP_SETTINGS) window.APP_SETTINGS = {};
   if (!window.APP_SETTINGS.feature_flags) window.APP_SETTINGS.feature_flags = {};
@@ -189,14 +196,81 @@ const waitForImage = () => {
 const waitForAudio = async () => {
   const audios = document.querySelectorAll("audio");
 
+  console.log(`Found ${audios.length} audio elements to wait for`);
+
   await Promise.all(
-    [...audios].map((audio) => {
-      if (audio.readyState === 4) return Promise.resolve(true);
-      return new Promise((resolve) => {
-        audio.addEventListener("durationchange", () => {
-          resolve(true);
-        });
-      });
+    [...audios].map((audio, index) => {
+      console.log(`Audio ${index} readyState: ${audio.readyState}, src: ${audio.src}`);
+
+      if (audio.readyState === 4) {
+        console.log(`Audio ${index} already loaded`);
+        return Promise.resolve(true);
+      }
+
+      return Promise.race([
+        new Promise((resolve) => {
+          if (!isNaN(audio.duration)) {
+            resolve(true);
+          }
+          audio.addEventListener("durationchange", () => {
+            console.log(`Audio ${index} durationchange event fired`);
+            resolve(true);
+          });
+
+          // Also listen for canplaythrough as a backup
+          audio.addEventListener("canplaythrough", () => {
+            console.log(`Audio ${index} canplaythrough event fired`);
+            resolve(true);
+          });
+        }),
+        // Add a timeout to prevent hanging indefinitely
+        new Promise((resolve) =>
+          setTimeout(() => {
+            console.log(`Audio ${index} timeout reached, current readyState: ${audio.readyState}`);
+            resolve(true);
+          }, 5000),
+        ),
+      ]);
+    }),
+  );
+
+  console.log("All audio elements are ready or timed out");
+};
+
+const waitForAudioCanvases = async () => {
+  const audioCanvases = document.querySelectorAll("canvas.waveform-layer-main");
+
+  await Promise.all(
+    [...audioCanvases].map((canvas, index) => {
+      return Promise.race([
+        new Promise((resolve) => {
+          const checkCanvas = () => {
+            const isCanvasReady = canvas.width > 0 && canvas.height > 0;
+            if (isCanvasReady) {
+              const ctx = canvas.getContext("2d");
+              const pixel = ctx.getImageData(1, 1, 1, 1);
+              const isTransparent =
+                pixel.datap[0] === 0 && pixel.datap[1] === 0 && pixel.datap[2] === 0 && pixel.data[3] === 0;
+              if (!isTransparent) {
+                console.log(`Audio canvas ${index} is ready`);
+                resolve(true);
+              }
+            } else {
+              console.log(`Audio canvas ${index} not ready yet, checking again...`);
+              setTimeout(checkCanvas, 100);
+            }
+          };
+
+          checkCanvas();
+        }),
+        // Add a timeout to prevent hanging indefinitely
+        new Promise((resolve) =>
+          setTimeout(() => {
+            console.log(`Audio ${index} timeout reached, current readyState: ${audio.readyState}`);
+            resolve(true);
+          }, 5000),
+        ),
+      ]);
     }),
   );
 };
@@ -207,7 +281,7 @@ const waitForAudio = async () => {
 const waitForObjectsReady = async () => {
   await new Promise((resolve) => {
     const watchObjectsReady = () => {
-      const isReady = window.Htx.annotationStore.selected.objects.every((object) => object.isReady);
+      const isReady = window.Htx?.annotationStore?.selected?.objects.every((object) => object.isReady);
 
       if (isReady) {
         resolve(true);
@@ -579,8 +653,25 @@ const getImageFrameSize = () => {
 };
 const setZoom = ([scale, x, y]) => {
   return new Promise((resolve) => {
-    Htx.annotationStore.selected.objects.find((o) => o.type === "image").setZoom(scale, x, y);
+    Htx.annotationStore.selected.objects.find((o) => o.type === "image").setZoom(scale);
+    Htx.annotationStore.selected.objects.find((o) => o.type === "image").setZoomPosition(x, y);
     setTimeout(resolve, 30);
+  });
+};
+
+const getZoomProps = () => {
+  return new Promise((resolve) => {
+    const image = Htx.annotationStore.selected.objects.find((o) => o.type === "image");
+    setTimeout(() => {
+      resolve({
+        stageZoom: image.stageZoom,
+        stageZoomX: image.stageZoomX,
+        stageZoomY: image.stageZoomY,
+        currentZoom: image.currentZoom,
+        zoomScale: image.zoomScale,
+        maxScale: image.maxScale,
+      });
+    }, 30);
   });
 };
 
@@ -630,8 +721,10 @@ const getRegionAbsoultePosition = async (shapeId) => {
   };
 };
 
-const switchRegionTreeView = (viewName) => {
-  Htx.annotationStore.selected.regionStore.setView(viewName);
+const switchRegionTreeView = async (viewName) => {
+  Htx.annotationStore.selected.regionStore.setGrouping(viewName);
+  // Wait a bit for the view to update
+  await new Promise((resolve) => setTimeout(resolve, 100));
 };
 
 const serialize = () => window.Htx.annotationStore.selected.serializeAnnotation();
@@ -837,7 +930,7 @@ async function doDrawingAction(I, { msg, fromX, fromY, toX, toY }) {
     await page.mouse.move(toX, toY);
     await page.mouse.up();
   });
-  I.wait(1); // Ensure that the tool is fully finished being created.
+  I.waitTicks(3); // Ensure that the tool is fully finished being created.
 }
 
 // `mulberry32` (simple generator with a 32-bit state)
@@ -866,6 +959,7 @@ module.exports = {
   createAddEventListenerScript,
   waitForImage,
   waitForAudio,
+  waitForAudioCanvases,
   getCurrentMedia,
   waitForObjectsReady,
   delay,
@@ -890,6 +984,7 @@ module.exports = {
   getRegionAbsoultePosition,
   setKonvaLayersOpacity,
   setZoom,
+  getZoomProps,
   whereIsPixel,
   countKonvaShapes,
   isTransformerExist,

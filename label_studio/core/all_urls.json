@@ -132,12 +132,6 @@
         "decorators": ""
     },
     {
-        "url": "/projects/upload-example/",
-        "module": "projects.views.upload_example_using_config",
-        "name": "projects:project-upload-example-using-config",
-        "decorators": ""
-    },
-    {
         "url": "/api/projects/",
         "module": "projects.api.ProjectListAPI",
         "name": "projects:api:project-list",
@@ -147,6 +141,12 @@
         "url": "/api/projects/<int:pk>/",
         "module": "projects.api.ProjectAPI",
         "name": "projects:api:project-detail",
+        "decorators": ""
+    },
+    {
+        "url": "/api/projects/counts/",
+        "module": "projects.api.ProjectCountsListAPI",
+        "name": "projects:api:project-counts-list",
         "decorators": ""
     },
     {
@@ -270,18 +270,6 @@
         "decorators": ""
     },
     {
-        "url": "/tasks/<int:task_id>/presign/",
-        "module": "data_import.api.TaskPresignStorageData",
-        "name": "data_import:task-storage-data-presign",
-        "decorators": ""
-    },
-    {
-        "url": "/projects/<int:project_id>/presign/",
-        "module": "data_import.api.ProjectPresignStorageData",
-        "name": "data_import:project-storage-data-presign",
-        "decorators": ""
-    },
-    {
         "url": "/api/dm/views/",
         "module": "data_manager.api.ViewAPI",
         "name": "data_manager:api:view-list",
@@ -357,6 +345,12 @@
         "url": "/api/dm/actions/",
         "module": "data_manager.api.ProjectActionsAPI",
         "name": "data_manager:dm-actions",
+        "decorators": ""
+    },
+    {
+        "url": "/api/dm/actions/<str:action_id>/form/",
+        "module": "data_manager.api.ProjectActionsFormAPI",
+        "name": "data_manager:dm-actions-form",
         "decorators": ""
     },
     {
@@ -498,6 +492,12 @@
         "decorators": ""
     },
     {
+        "url": "/user/account/<sub_path>",
+        "module": "users.views.user_account",
+        "name": "user-account-anything",
+        "decorators": ""
+    },
+    {
         "url": "/logout/",
         "module": "users.views.logout",
         "name": "logout",
@@ -519,6 +519,18 @@
         "url": "/api/current-user/whoami",
         "module": "users.api.UserWhoAmIAPI",
         "name": "current-user-whoami",
+        "decorators": ""
+    },
+    {
+        "url": "/api/current-user/product-tour",
+        "module": "users.product_tours.api.ProductTourAPI",
+        "name": "product-tour",
+        "decorators": ""
+    },
+    {
+        "url": "/api/current-user/hotkeys/",
+        "module": "users.api.UserHotkeysAPI",
+        "name": "current-user-hotkeys",
         "decorators": ""
     },
     {
@@ -666,6 +678,12 @@
         "decorators": ""
     },
     {
+        "url": "/api/storages/s3/files",
+        "module": "io_storages.api.ImportStorageListFilesAPI",
+        "name": "storages:api:storage-s3-list-files",
+        "decorators": ""
+    },
+    {
         "url": "/api/storages/export/s3",
         "module": "io_storages.s3.api.S3ExportStorageListAPI",
         "name": "storages:api:export-storage-s3-list",
@@ -723,6 +741,12 @@
         "url": "/api/storages/azure/form",
         "module": "io_storages.azure_blob.api.AzureBlobImportStorageFormLayoutAPI",
         "name": "storages:api:storage-azure-form",
+        "decorators": ""
+    },
+    {
+        "url": "/api/storages/azure/files",
+        "module": "io_storages.api.ImportStorageListFilesAPI",
+        "name": "storages:api:storage-azure-list-files",
         "decorators": ""
     },
     {
@@ -786,6 +810,12 @@
         "decorators": ""
     },
     {
+        "url": "/api/storages/gcs/files",
+        "module": "io_storages.api.ImportStorageListFilesAPI",
+        "name": "storages:api:storage-gcs-list-files",
+        "decorators": ""
+    },
+    {
         "url": "/api/storages/export/gcs",
         "module": "io_storages.gcs.api.GCSExportStorageListAPI",
         "name": "storages:api:export-storage-gcs-list",
@@ -843,6 +873,12 @@
         "url": "/api/storages/redis/form",
         "module": "io_storages.redis.api.RedisImportStorageFormLayoutAPI",
         "name": "storages:api:storage-redis-form",
+        "decorators": ""
+    },
+    {
+        "url": "/api/storages/redis/files",
+        "module": "io_storages.api.ImportStorageListFilesAPI",
+        "name": "storages:api:storage-redis-list-files",
         "decorators": ""
     },
     {
@@ -906,6 +942,12 @@
         "decorators": ""
     },
     {
+        "url": "/api/storages/localfiles/files",
+        "module": "io_storages.api.ImportStorageListFilesAPI",
+        "name": "storages:api:storage-localfiles-list-files",
+        "decorators": ""
+    },
+    {
         "url": "/api/storages/export/localfiles",
         "module": "io_storages.localfiles.api.LocalFilesExportStorageListAPI",
         "name": "storages:api:export-storage-localfiles-list",
@@ -933,6 +975,30 @@
         "url": "/api/storages/export/localfiles/form",
         "module": "io_storages.localfiles.api.LocalFilesExportStorageFormLayoutAPI",
         "name": "storages:api:export-storage-localfiles-form",
+        "decorators": ""
+    },
+    {
+        "url": "/tasks/<int:task_id>/resolve/",
+        "module": "io_storages.proxy_api.TaskResolveStorageUri",
+        "name": "storages:task-storage-data-resolve",
+        "decorators": ""
+    },
+    {
+        "url": "/projects/<int:project_id>/resolve/",
+        "module": "io_storages.proxy_api.ProjectResolveStorageUri",
+        "name": "storages:project-storage-data-resolve",
+        "decorators": ""
+    },
+    {
+        "url": "/tasks/<int:task_id>/presign/",
+        "module": "io_storages.proxy_api.TaskResolveStorageUri",
+        "name": "storages:task-storage-data-presign",
+        "decorators": ""
+    },
+    {
+        "url": "/projects/<int:project_id>/presign/",
+        "module": "io_storages.proxy_api.ProjectResolveStorageUri",
+        "name": "storages:project-storage-data-presign",
         "decorators": ""
     },
     {
@@ -1104,21 +1170,27 @@
         "decorators": ""
     },
     {
-        "url": "/swagger<format>",
-        "module": "drf_yasg.views.SchemaView",
+        "url": "/swagger\\.json",
+        "module": "core.urls.<lambda>",
         "name": "schema-json",
         "decorators": ""
     },
     {
+        "url": "/swagger\\.yaml",
+        "module": "core.urls.<lambda>",
+        "name": "schema-yaml",
+        "decorators": ""
+    },
+    {
         "url": "/swagger/",
-        "module": "drf_yasg.views.SchemaView",
+        "module": "core.urls.<lambda>",
         "name": "schema-swagger-ui",
         "decorators": ""
     },
     {
         "url": "/docs/api/",
-        "module": "drf_yasg.views.SchemaView",
-        "name": "schema-redoc",
+        "module": "core.urls.<lambda>",
+        "name": "docs-api",
         "decorators": ""
     },
     {
@@ -1578,6 +1650,186 @@
         "decorators": ""
     },
     {
+        "url": "/admin/ml_models/modelinterface/",
+        "module": "django.contrib.admin.options.changelist_view",
+        "name": "admin:ml_models_modelinterface_changelist",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelinterface/add/",
+        "module": "django.contrib.admin.options.add_view",
+        "name": "admin:ml_models_modelinterface_add",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelinterface/<path:object_id>/history/",
+        "module": "django.contrib.admin.options.history_view",
+        "name": "admin:ml_models_modelinterface_history",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelinterface/<path:object_id>/delete/",
+        "module": "django.contrib.admin.options.delete_view",
+        "name": "admin:ml_models_modelinterface_delete",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelinterface/<path:object_id>/change/",
+        "module": "django.contrib.admin.options.change_view",
+        "name": "admin:ml_models_modelinterface_change",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelinterface/<path:object_id>/",
+        "module": "django.views.generic.base.RedirectView",
+        "name": "",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/thirdpartymodelversion/",
+        "module": "django.contrib.admin.options.changelist_view",
+        "name": "admin:ml_models_thirdpartymodelversion_changelist",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/thirdpartymodelversion/add/",
+        "module": "django.contrib.admin.options.add_view",
+        "name": "admin:ml_models_thirdpartymodelversion_add",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/thirdpartymodelversion/<path:object_id>/history/",
+        "module": "django.contrib.admin.options.history_view",
+        "name": "admin:ml_models_thirdpartymodelversion_history",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/thirdpartymodelversion/<path:object_id>/delete/",
+        "module": "django.contrib.admin.options.delete_view",
+        "name": "admin:ml_models_thirdpartymodelversion_delete",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/thirdpartymodelversion/<path:object_id>/change/",
+        "module": "django.contrib.admin.options.change_view",
+        "name": "admin:ml_models_thirdpartymodelversion_change",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/thirdpartymodelversion/<path:object_id>/",
+        "module": "django.views.generic.base.RedirectView",
+        "name": "",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelrun/",
+        "module": "django.contrib.admin.options.changelist_view",
+        "name": "admin:ml_models_modelrun_changelist",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelrun/add/",
+        "module": "django.contrib.admin.options.add_view",
+        "name": "admin:ml_models_modelrun_add",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelrun/<path:object_id>/history/",
+        "module": "django.contrib.admin.options.history_view",
+        "name": "admin:ml_models_modelrun_history",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelrun/<path:object_id>/delete/",
+        "module": "django.contrib.admin.options.delete_view",
+        "name": "admin:ml_models_modelrun_delete",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelrun/<path:object_id>/change/",
+        "module": "django.contrib.admin.options.change_view",
+        "name": "admin:ml_models_modelrun_change",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_models/modelrun/<path:object_id>/",
+        "module": "django.views.generic.base.RedirectView",
+        "name": "",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_model_providers/modelproviderconnection/",
+        "module": "django.contrib.admin.options.changelist_view",
+        "name": "admin:ml_model_providers_modelproviderconnection_changelist",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_model_providers/modelproviderconnection/add/",
+        "module": "django.contrib.admin.options.add_view",
+        "name": "admin:ml_model_providers_modelproviderconnection_add",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_model_providers/modelproviderconnection/<path:object_id>/history/",
+        "module": "django.contrib.admin.options.history_view",
+        "name": "admin:ml_model_providers_modelproviderconnection_history",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_model_providers/modelproviderconnection/<path:object_id>/delete/",
+        "module": "django.contrib.admin.options.delete_view",
+        "name": "admin:ml_model_providers_modelproviderconnection_delete",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_model_providers/modelproviderconnection/<path:object_id>/change/",
+        "module": "django.contrib.admin.options.change_view",
+        "name": "admin:ml_model_providers_modelproviderconnection_change",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/ml_model_providers/modelproviderconnection/<path:object_id>/",
+        "module": "django.views.generic.base.RedirectView",
+        "name": "",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/session_policy/sessiontimeoutpolicy/",
+        "module": "django.contrib.admin.options.changelist_view",
+        "name": "admin:session_policy_sessiontimeoutpolicy_changelist",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/session_policy/sessiontimeoutpolicy/add/",
+        "module": "django.contrib.admin.options.add_view",
+        "name": "admin:session_policy_sessiontimeoutpolicy_add",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/session_policy/sessiontimeoutpolicy/<path:object_id>/history/",
+        "module": "django.contrib.admin.options.history_view",
+        "name": "admin:session_policy_sessiontimeoutpolicy_history",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/session_policy/sessiontimeoutpolicy/<path:object_id>/delete/",
+        "module": "django.contrib.admin.options.delete_view",
+        "name": "admin:session_policy_sessiontimeoutpolicy_delete",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/session_policy/sessiontimeoutpolicy/<path:object_id>/change/",
+        "module": "django.contrib.admin.options.change_view",
+        "name": "admin:session_policy_sessiontimeoutpolicy_change",
+        "decorators": ""
+    },
+    {
+        "url": "/admin/session_policy/sessiontimeoutpolicy/<path:object_id>/",
+        "module": "django.views.generic.base.RedirectView",
+        "name": "",
+        "decorators": ""
+    },
+    {
         "url": "/admin/<app_label>/",
         "module": "django.contrib.admin.sites.app_index",
         "name": "admin:app_list",
@@ -1629,6 +1881,12 @@
         "url": "/django-rq/queues/<queue_index>/failed/",
         "module": "django_rq.views.failed_jobs",
         "name": "rq_failed_jobs",
+        "decorators": ""
+    },
+    {
+        "url": "/django-rq/queues/<queue_index>/failed/clear/",
+        "module": "django_rq.views.delete_failed_jobs",
+        "name": "rq_delete_failed_jobs",
         "decorators": ""
     },
     {
@@ -1698,9 +1956,33 @@
         "decorators": ""
     },
     {
+        "url": "/django-rq/queues/<queue_index>/<job_id>/stop/",
+        "module": "django_rq.views.stop_job",
+        "name": "rq_stop_job",
+        "decorators": ""
+    },
+    {
+        "url": "/django-rq/schedulers/<scheduler_index>/",
+        "module": "django_rq.views.scheduler_jobs",
+        "name": "rq_scheduler_jobs",
+        "decorators": ""
+    },
+    {
         "url": "/feature-flags/",
         "module": "core.views.feature_flags",
         "name": "feature_flags",
+        "decorators": ""
+    },
+    {
+        "url": "/heidi-tips/",
+        "module": "core.views.heidi_tips",
+        "name": "heidi_tips",
+        "decorators": ""
+    },
+    {
+        "url": "/__lsa/",
+        "module": "core.views.collect_metrics",
+        "name": "collect_metrics",
         "decorators": ""
     },
     {
@@ -1713,6 +1995,72 @@
         "url": "/api-auth/logout/",
         "module": "django.contrib.auth.views.LogoutView",
         "name": "rest_framework:logout",
+        "decorators": ""
+    },
+    {
+        "url": "/api/jwt/settings",
+        "module": "jwt_auth.views.JWTSettingsAPI",
+        "name": "jwt_auth:api-jwt-settings",
+        "decorators": ""
+    },
+    {
+        "url": "/api/token/",
+        "module": "jwt_auth.views.LSAPITokenView",
+        "name": "jwt_auth:token_manage",
+        "decorators": ""
+    },
+    {
+        "url": "/api/token/refresh/",
+        "module": "jwt_auth.views.DecoratedTokenRefreshView",
+        "name": "jwt_auth:token_refresh",
+        "decorators": ""
+    },
+    {
+        "url": "/api/token/blacklist/",
+        "module": "jwt_auth.views.LSTokenBlacklistView",
+        "name": "jwt_auth:token_blacklist",
+        "decorators": ""
+    },
+    {
+        "url": "/api/token/rotate/",
+        "module": "jwt_auth.views.LSAPITokenRotateView",
+        "name": "jwt_auth:token_rotate",
+        "decorators": ""
+    },
+    {
+        "url": "/api/session-policy/",
+        "module": "session_policy.api.SessionTimeoutPolicyView",
+        "name": "session_policy:session-policy",
+        "decorators": ""
+    },
+    {
+        "url": "/docs/api/schema/",
+        "module": "drf_spectacular.views.SpectacularAPIView",
+        "name": "schema",
+        "decorators": ""
+    },
+    {
+        "url": "/docs/api/schema/swagger-ui/",
+        "module": "drf_spectacular.views.SpectacularSwaggerView",
+        "name": "swagger-ui",
+        "decorators": ""
+    },
+    {
+        "url": "/docs/api/schema/redoc/",
+        "module": "drf_spectacular.views.SpectacularRedocView",
+        "name": "redoc",
+        "decorators": ""
+    },
+    {
+        "url": "/docs/api/schema/json/",
+        "module": "drf_spectacular.views.SpectacularJSONAPIView",
+        "name": "schema-json",
+        "decorators": ""
+    },
+    {
+        "url": "/docs/api/schema/yaml/",
+        "module": "drf_spectacular.views.SpectacularYAMLAPIView",
+        "name": "schema-yaml",
         "decorators": ""
     }
 ]

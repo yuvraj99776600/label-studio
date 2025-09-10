@@ -15,7 +15,25 @@ Use the Label Studio ML backend to integrate Label Studio with machine learning 
 
 Follow the steps below to wrap custom machine learning model code with the Label Studio ML SDK, or see [our library of example ML backends](ml_tutorials.html) to integrate with popular machine learning frameworks and tools such as [Huggingface's Transformers](https://huggingface.co/docs/transformers/index), [OpenAI](https://openai.com/), [Langchain](https://www.langchain.com/) and others. 
 
-For information on using one of Label Studio's example backends, see [Set up an example ML backend](ml#Set-up-an-example-ML-backend)
+For information on using one of Label Studio's example backends, see [Set up an example ML backend](ml#Set-up-an-example-ML-backend). 
+
+<div class="opensource-only">
+
+!!! error enterprise
+    Label Studio Enterprise features an out-of-the-box solution for LLM-assisted labeling. All you need to get set up is to connect one of our supported models. For more information, see [Prompts](https://docs.humansignal.com/guide/prompts_overview).
+
+</div>
+
+<div class="enterprise-only">
+
+!!! info Tip
+    Prompts is an out-of-the-box solution for LLM-assisted labeling. All you need to get set up is to connect one of our supported models. For more information, see [Prompts](prompts_overview).
+
+</div>
+
+For a video tutorial, see the following:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/cEwMNOlOUjI?si=sEPTUPOyyzZlA-n5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 
 ## 1. Install the ML backend repo

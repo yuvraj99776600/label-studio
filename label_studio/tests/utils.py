@@ -4,6 +4,7 @@ import os.path
 import re
 import tempfile
 from contextlib import contextmanager
+from functools import wraps
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -13,6 +14,7 @@ import requests
 import requests_mock
 import ujson as json
 from box import Box
+from core.feature_flags import flag_set
 from data_export.models import ConvertedFormat, Export
 from django.apps import apps
 from django.conf import settings
@@ -89,16 +91,28 @@ def gcs_client_mock():
     File = namedtuple('File', ['name'])
 
     class DummyGCSBlob:
-        def __init__(self, bucket_name, key, is_json):
+        def __init__(self, bucket_name, key, is_json, is_multitask):
             self.key = key
             self.bucket_name = bucket_name
             self.name = f'{bucket_name}/{key}'
             self.is_json = is_json
+            self.sample_json_contents = (
+                [
+                    {'data': {'image_url': 'http://ggg.com/image.jpg', 'text': 'Task 1 text'}},
+                    {'data': {'image_url': 'http://ggg.com/image2.jpg', 'text': 'Task 2 text'}},
+                ]
+                if is_multitask
+                else {
+                    'str_field': 'test',
+                    'int_field': 123,
+                    'dict_field': {'one': 'wow', 'two': 456},
+                }
+            )
 
         def download_as_string(self):
             data = f'test_blob_{self.key}'
             if self.is_json:
-                return json.dumps({'str_field': data, 'int_field': 123, 'dict_field': {'one': 'wow', 'two': 456}})
+                return json.dumps(self.sample_json_contents)
             return data
 
         def upload_from_string(self, string):
@@ -108,48 +122,55 @@ def gcs_client_mock():
             return f'https://storage.googleapis.com/{self.bucket_name}/{self.key}'
 
         def download_as_bytes(self):
-            data = f'test_blob_{self.key}'
-            if self.is_json:
-                return json.dumps({'str_field': data, 'int_field': 123, 'dict_field': {'one': 'wow', 'two': 456}})
-            return data
+            return self.download_as_string().encode('utf-8')
 
     class DummyGCSBucket:
-        def __init__(self, bucket_name, is_json, **kwargs):
+        def __init__(self, bucket_name, is_json, is_multitask):
             self.name = bucket_name
             self.is_json = is_json
+            self.is_multitask = is_multitask
 
         def list_blobs(self, prefix, **kwargs):
             if 'fake' in prefix:
                 return []
-            return [File('abc'), File('def'), File('ghi')]
+            return [File(name) for name in self.sample_blob_names]
 
         def blob(self, key):
-            return DummyGCSBlob(self.name, key, self.is_json)
+            return DummyGCSBlob(self.name, key, self.is_json, self.is_multitask)
 
     class DummyGCSClient:
+        def __init__(self, sample_json_contents=None, sample_blob_names=None):
+            self.sample_blob_names = sample_blob_names or ['abc', 'def', 'ghi']
+
         def get_bucket(self, bucket_name):
             is_json = bucket_name.endswith('_JSON')
-            return DummyGCSBucket(bucket_name, is_json)
+            is_multitask = bucket_name.startswith('multitask_')
+            return DummyGCSBucket(bucket_name, is_json, is_multitask)
 
         def list_blobs(self, bucket_name, prefix):
             is_json = bucket_name.endswith('_JSON')
-            return [
-                DummyGCSBlob(bucket_name, 'abc', is_json),
-                DummyGCSBlob(bucket_name, 'def', is_json),
-                DummyGCSBlob(bucket_name, 'ghi', is_json),
-            ]
+            is_multitask = bucket_name.startswith('multitask_')
+            sample_blob_names = ['test.json'] if is_multitask else ['abc', 'def', 'ghi']
+            return [DummyGCSBlob(bucket_name, name, is_json, is_multitask) for name in sample_blob_names]
 
     with mock.patch.object(google_storage, 'Client', return_value=DummyGCSClient()):
-        yield
+        yield google_storage
 
 
 @contextmanager
-def azure_client_mock():
+def azure_client_mock(sample_json_contents=None, sample_blob_names=None):
     from collections import namedtuple
 
     from io_storages.azure_blob import models
 
     File = namedtuple('File', ['name'])
+
+    sample_json_contents = sample_json_contents or {
+        'str_field': 'test',
+        'int_field': 123,
+        'dict_field': {'one': 'wow', 'two': 456},
+    }
+    sample_blob_names = sample_blob_names or ['abc', 'def', 'ghi']
 
     class DummyAzureBlob:
         def __init__(self, container_name, key):
@@ -166,14 +187,17 @@ def azure_client_mock():
             return f'https://storage.googleapis.com/{self.container_name}/{self.key}'
 
         def content_as_text(self):
-            return json.dumps({'str_field': str(self.key), 'int_field': 123, 'dict_field': {'one': 'wow', 'two': 456}})
+            return json.dumps(sample_json_contents)
+
+        def content_as_bytes(self):
+            return json.dumps(sample_json_contents).encode('utf-8')
 
     class DummyAzureContainer:
         def __init__(self, container_name, **kwargs):
             self.name = container_name
 
         def list_blobs(self, name_starts_with):
-            return [File('abc'), File('def'), File('ghi')]
+            return [File(name) for name in sample_blob_names]
 
         def get_blob_client(self, key):
             return DummyAzureBlob(self.name, key)
@@ -214,11 +238,11 @@ def redis_client_mock():
     from fakeredis import FakeRedis
     from io_storages.redis.models import RedisStorageMixin
 
-    redis = FakeRedis()
+    redis = FakeRedis(decode_responses=True)
     # TODO: add mocked redis data
 
     with mock.patch.object(RedisStorageMixin, 'get_redis_connection', return_value=redis):
-        yield
+        yield redis
 
 
 def upload_data(client, project, tasks):
@@ -240,7 +264,10 @@ def make_project(config, user, use_ml_backend=True, team_id=None, org=None):
 @pytest.fixture
 @pytest.mark.django_db
 def project_id(business_client):
-    payload = dict(title='test_project')
+    payload = dict(
+        title='test_project',
+        label_config='<View><Text name="text" value="$text"/><Choices name="test_batch_predictions" toName="text"><Choice value="class_A"/><Choice value="class_B"/></Choices></View>',
+    )
     response = business_client.post(
         '/api/projects/',
         data=json.dumps(payload),
@@ -390,3 +417,28 @@ def file_exists_in_storage(response, exists=True, file_path=None):
         file_path = export.file.path
 
     assert os.path.isfile(file_path) == exists
+
+
+def mock_feature_flag(flag_name: str, value: bool, parent_module: str = 'core.feature_flags'):
+    """Decorator to mock a feature flag state for a test function.
+
+    Args:
+        flag_name: Name of the feature flag to mock
+        value: True or False to set the flag state
+        parent_module: Module path containing the flag_set function to patch
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            def fake_flag_set(feature_flag, *flag_args, **flag_kwargs):
+                if feature_flag == flag_name:
+                    return value
+                return flag_set(feature_flag, *flag_args, **flag_kwargs)
+
+            with mock.patch(f'{parent_module}.flag_set', wraps=fake_flag_set):
+                return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

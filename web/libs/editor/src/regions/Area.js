@@ -8,6 +8,7 @@ import { RectRegionModel } from "./RectRegion";
 import { KeyPointRegionModel } from "./KeyPointRegion";
 import { AudioRegionModel } from "./AudioRegion";
 import { PolygonRegionModel } from "./PolygonRegion";
+import { VectorRegionModel } from "./VectorRegion";
 import { EllipseRegionModel } from "./EllipseRegion";
 import { RichTextRegionModel } from "./RichTextRegion";
 import { BrushRegionModel } from "./BrushRegion";
@@ -15,6 +16,8 @@ import { TimelineRegionModel } from "./TimelineRegion";
 import { TimeSeriesRegionModel } from "./TimeSeriesRegion";
 import { ParagraphsRegionModel } from "./ParagraphsRegion";
 import { VideoRectangleRegionModel } from "./VideoRectangleRegion";
+import { BitmaskRegionModel } from "./BitmaskRegion";
+import { CustomRegionModel } from "./CustomRegion";
 import { Object3DRegionModel } from "./Object3DRegion";
 
 // general Area type for classification Results which doesn't belong to any real Area
@@ -29,9 +32,13 @@ const ClassificationArea = types.compose(
       // true only for global classifications
       classification: true,
     })
-    .views(() => ({
+    .views((self) => ({
       get supportSuggestions() {
         return false;
+      },
+      // it's required in some contexts when it's treated as a region
+      get type() {
+        return "";
       },
     }))
     .actions(() => ({
@@ -44,11 +51,18 @@ const Area = types.union(
     dispatcher(sn) {
       // for some deserializations
       if (sn.$treenode) return sn.$treenode.type;
+
+      for (const customTag of Registry.customTags) {
+        if (sn.value?.[customTag.resultName] || sn[customTag.resultName]) return customTag.region;
+      }
+
       if (
         !sn.points && // dirty hack to make it work with polygons, but may be the whole condition is not necessary at all
+        !sn.shape && // same for vector
         // `sequence` and `ranges` are used for video regions
         !sn.sequence &&
         !sn.ranges &&
+        !sn.imageDataURL &&
         sn.value &&
         Object.values(sn.value).length <= 1
       )
@@ -80,10 +94,14 @@ const Area = types.union(
   KeyPointRegionModel,
   EllipseRegionModel,
   PolygonRegionModel,
+  VectorRegionModel,
   BrushRegionModel,
+  BitmaskRegionModel,
   VideoRectangleRegionModel,
   Object3DRegionModel,
   ClassificationArea,
+  CustomRegionModel,
+  ...Registry.customTags.map((t) => t.region),
 );
 
 export default Area;

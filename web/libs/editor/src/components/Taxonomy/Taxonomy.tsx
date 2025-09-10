@@ -1,11 +1,10 @@
 import React, { type FormEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Dropdown, Menu } from "antd";
 
-import { LsChevron } from "../../assets/icons";
-import { Tooltip } from "../../common/Tooltip/Tooltip";
+import { IconChevron } from "@humansignal/icons";
+import { Button, Tooltip } from "@humansignal/ui";
 import { useToggle } from "../../hooks/useToggle";
 import type { CNTagName } from "../../utils/bem";
-import { FF_DEV_4075, FF_PROD_309, isFF } from "../../utils/feature-flags";
 import { isArraysEqual } from "../../utils/utilities";
 import TreeStructure from "../TreeStructure/TreeStructure";
 
@@ -160,13 +159,11 @@ type HintTooltipProps = {
 };
 
 export const HintTooltip: React.FC<HintTooltipProps> = ({ title, wrapper: Wrapper, children, ...rest }) => {
-  if (!isFF(FF_PROD_309)) return children;
-
   const content = Wrapper ? <Wrapper>{children}</Wrapper> : children;
 
   if (title) {
     return (
-      <Tooltip title={title} mouseEnterDelay={500} {...rest}>
+      <Tooltip title={title} {...rest}>
         {content}
       </Tooltip>
     );
@@ -239,13 +236,9 @@ const Item: React.FC<RowProps> = ({ style, item, dimensionCallback, maxWidth, is
     <div ref={itemContainer} style={{ paddingLeft: padding, maxWidth, ...style, width: "fit-content" }}>
       {!isAddingItem ? (
         <>
-          <div
-            className={[styles.taxonomy__measure, isFF(FF_DEV_4075) ? styles.taxonomy__measure_ff_dev4075 : false]
-              .filter(Boolean)
-              .join(" ")}
-          >
+          <div className={styles.taxonomy__measure}>
             <label>{name}</label>
-            {isFF(FF_DEV_4075) && !isFiltering && (
+            {!isFiltering && (
               <div className={styles.taxonomy__extra}>
                 <span className={styles.taxonomy__extra_count}>{childCount}</span>
               </div>
@@ -254,7 +247,7 @@ const Item: React.FC<RowProps> = ({ style, item, dimensionCallback, maxWidth, is
           <HintTooltip title={hint}>
             <div className={[styles.taxonomy__item, customClassname].join(" ")}>
               <div className={styles.taxonomy__grouping} onClick={() => toggle(id)}>
-                <LsChevron stroke="#09f" style={arrowStyle} />
+                <IconChevron stroke="#09f" style={arrowStyle} />
               </div>
               <input
                 className="item"
@@ -272,7 +265,6 @@ const Item: React.FC<RowProps> = ({ style, item, dimensionCallback, maxWidth, is
               />
               <label
                 htmlFor={id}
-                style={isFF(FF_DEV_4075) ? {} : { maxWidth: `${labelMaxWidth}px` }}
                 onClick={isEditable ? onClick : undefined}
                 title={title}
                 className={disabled ? styles.taxonomy__collapsable : undefined}
@@ -443,9 +435,16 @@ const TaxonomyDropdown = ({ show, flatten, items, dropdownRef, isEditable }: Tax
             <UserLabelForm path={[]} onAddLabel={onAddLabel} onFinish={closeForm} />
           ) : isEditable ? (
             <div className={styles.taxonomy__add}>
-              <button type="button" onClick={addInside}>
+              <Button
+                size="small"
+                variant="neutral"
+                look="string"
+                type="button"
+                onClick={addInside}
+                aria-label="Add new label"
+              >
                 Add
-              </button>
+              </Button>
             </div>
           ) : null}
         </div>
@@ -574,7 +573,7 @@ const Taxonomy = ({
         <div className={["htx-taxonomy", styles.taxonomy, isOpenClassName].join(" ")} ref={taxonomyRef}>
           <span onClick={() => setOpen((val) => !val)}>
             {options.placeholder || "Click to add..."}
-            <LsChevron stroke="#09f" />
+            <IconChevron stroke="#09f" />
           </span>
           <TaxonomyDropdown
             show={isOpen}

@@ -41,6 +41,7 @@ class RichTextHelper {
     const eventOptions = {
       eventConstructor: "MouseEvent",
       buttons: 1,
+      force: true,
     };
     console.log("el", el);
     cy.wrap(el)
@@ -85,8 +86,17 @@ class RichTextHelper {
       });
     });
   }
+  findRegionWithText(text) {
+    return this.content.find(".htx-highlight").contains(text);
+  }
   hasRegionWithText(text) {
-    this.content.find(".htx-highlight").contains(text).should("exist");
+    this.findRegionWithText(text).should("exist");
+  }
+  findRegionWithLabel(label) {
+    return this.content.find(`.htx-highlight[data-label='${label}']`);
+  }
+  hasRegionWithLabel(label) {
+    this.findRegionWithLabel(label).should("exist");
   }
 }
 

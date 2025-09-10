@@ -6,6 +6,7 @@ tmp
 
 # dependencies
 node_modules
+dist
 
 # IDEs and editors
 /.idea
@@ -47,7 +48,7 @@ report.*.json
 !.env.local
 !*.lock
 
-libs/**/package.json
+libs/version
 libs/**/package-lock.json
 libs/**/yarn.lock
 
@@ -120,3 +121,7 @@ libs/datamanager/src/examples
 libs/datamanager/e2e/output
 
 libs/datamanager/.cache
+
+dist
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md

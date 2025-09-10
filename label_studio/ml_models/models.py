@@ -4,11 +4,12 @@ import logging
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
-from ml_model_providers.models import ModelProviders
+from ml_model_providers.models import ModelProviderConnection, ModelProviders
 from projects.models import Project
 from rest_framework.exceptions import ValidationError
-from tasks.models import Annotation, FailedPrediction, Prediction
+from tasks.models import Annotation, FailedPrediction, Prediction, PredictionMeta
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +68,10 @@ class ModelVersion(models.Model):
 
     prompt = models.TextField(_('prompt'), null=False, blank=False, help_text='Prompt to execute')
 
+    model_provider_connection = models.ForeignKey(
+        ModelProviderConnection, related_name='model_versions', on_delete=models.SET_NULL, null=True
+    )
+
     @property
     def full_title(self):
         return f'{self.parent_model.title}__{self.title}'
@@ -110,6 +115,13 @@ class ThirdPartyModelVersion(ModelVersion):
     organization = models.ForeignKey(
         'organizations.Organization', on_delete=models.CASCADE, related_name='third_party_model_versions', null=True
     )
+
+    @property
+    def project(self):
+        # TODO: can it be just a property of the model version?
+        if self.parent_model and self.parent_model.associated_projects.exists():
+            return self.parent_model.associated_projects.first()
+        return None
 
     def has_permission(self, user):
         return user.active_organization == self.organization
@@ -183,23 +195,34 @@ class ModelRun(models.Model):
         Executing a raw SQL query here for speed. This ignores any foreign key relationships
         so if another model has a Prediction fk and set to on_delete=CASCADE for example,
         it will not take affect. The only relationship like this that currently exists
-        is in Annotation.parent_prediction, which we are handling here
+        is in Annotation.parent_prediction, which we are handling here.
         """
         predictions = Prediction.objects.filter(model_run=self.id)
         prediction_ids = [p.id for p in predictions]
         # to delete all dependencies where predictions are foreign keys.
         Annotation.objects.filter(parent_prediction__in=prediction_ids).update(parent_prediction=None)
         try:
-            from stats.models import PredictionStats
+            from stats.models import PredictionPairStats, PredictionStats
 
             prediction_stats_to_be_deleted = PredictionStats.objects.filter(prediction_to__in=prediction_ids)
             prediction_stats_to_be_deleted.delete()
+            prediction_pair_stats_to_be_deleted = PredictionPairStats.objects.filter(
+                Q(prediction_to_id__in=prediction_ids) | Q(prediction_from_id__in=prediction_ids)
+            )
+            prediction_pair_stats_to_be_deleted.delete()
         except Exception as e:
-            logger.info(f'PredictionStats model does not exist , exception:{e}')
-        predictions._raw_delete(predictions.db)
+            logger.info(f'PredictionStats or PredictionPairStats model does not exist , exception:{e}')
 
         # Delete failed predictions. Currently no other model references this, no fk relationships to remove
         failed_predictions = FailedPrediction.objects.filter(model_run=self.id)
+        failed_predictions_ids = [p.id for p in failed_predictions]
+
+        # delete predictions meta
+        PredictionMeta.objects.filter(prediction__in=prediction_ids).delete()
+        PredictionMeta.objects.filter(failed_prediction__in=failed_predictions_ids).delete()
+
+        # remove predictions from db
+        predictions._raw_delete(predictions.db)
         failed_predictions._raw_delete(failed_predictions.db)
 
     def delete(self, *args, **kwargs):

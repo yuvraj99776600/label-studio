@@ -1,26 +1,38 @@
+import { observer } from "mobx-react";
 import { types } from "mobx-state-tree";
 
-import BaseTool from "./Base";
-import ToolMixin from "../mixins/Tool";
+import { IconMoveTool } from "@humansignal/icons";
+import { Tool } from "../components/Toolbar/Tool";
 import { AnnotationMixin } from "../mixins/AnnotationMixin";
-import { IconMoveTool } from "../assets/icons";
+import ToolMixin from "../mixins/Tool";
 import { FF_LSDV_4930, isFF } from "../utils/feature-flags";
+import BaseTool from "./Base";
+
+const ToolView = observer(({ item }) => {
+  return (
+    <Tool
+      ariaLabel="move-tool"
+      active={item.selected}
+      icon={<IconMoveTool />}
+      label="Move"
+      shortcut={item.shortcut}
+      extraShortcuts={item.extraShortcuts}
+      onClick={() => {
+        item.manager.selectTool(item, !item.selected);
+      }}
+    />
+  );
+});
 
 const _Tool = types
   .model("SelectionTool", {
-    shortcut: "V",
+    shortcut: "tool:move",
     group: "control",
   })
-  .views(() => {
+  .views((self) => {
     return {
-      get isSeparated() {
-        return true;
-      },
-      get viewTooltip() {
-        return "Move";
-      },
-      get iconComponent() {
-        return IconMoveTool;
+      get viewClass() {
+        return () => <ToolView item={self} />;
       },
       get useTransformer() {
         return true;
@@ -38,14 +50,22 @@ const _Tool = types
         return false;
       },
 
+      notifyRegions(type, x, y) {
+        for (const reg of self.obj.regs) {
+          reg?.onSelection?.(type, x, y);
+        }
+      },
+
       mousedownEv(ev, [x, y]) {
         isSelecting = true;
         self.obj.setSelectionStart({ x, y });
+        self.notifyRegions("start", x, y);
       },
 
       mousemoveEv(ev, [x, y]) {
         if (!isSelecting) return;
         self.obj.setSelectionEnd({ x, y });
+        self.notifyRegions("move", x, y);
       },
 
       mouseupEv(ev, [x, y]) {
@@ -53,6 +73,7 @@ const _Tool = types
         self.obj.setSelectionEnd({ x, y });
         const { regionsInSelectionArea } = self.obj;
 
+        self.notifyRegions("end", x, y);
         self.obj.resetSelection();
         if (ev.ctrlKey || ev.metaKey) {
           self.annotation.extendSelectionWith(regionsInSelectionArea);
@@ -67,6 +88,7 @@ const _Tool = types
           self.obj.resetSelection();
           if (!ev.ctrlKey && !ev.metaKey) {
             self.annotation.unselectAreas();
+            self.notifyRegions("reset");
           }
         }
       },

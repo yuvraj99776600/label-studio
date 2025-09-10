@@ -1,16 +1,16 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { FaTimes } from "react-icons/fa";
+import { IconCross } from "@humansignal/icons";
 import { BemWithSpecifiContext, cn } from "../../../utils/bem";
-import { aroundTransition } from "../../../utils/transition";
-import { Button } from "../Button/Button";
-import { Icon } from "../Icon/Icon";
+import { aroundTransition } from "@humansignal/core/lib/utils/transition";
+import { Button } from "@humansignal/ui";
 import "./Modal.scss";
 
 const { Block, Elem } = BemWithSpecifiContext();
 
 export class Modal extends React.Component {
   modalRef = React.createRef();
+  originalOverflow = null;
 
   constructor(props) {
     super(props);
@@ -19,15 +19,22 @@ export class Modal extends React.Component {
       title: props.title,
       body: props.body,
       footer: props.footer,
-      visible: props.animateAppearance ? false : props.visible ?? false,
+      visible: props.animateAppearance ? false : (props.visible ?? false),
       transition: props.visible ? "visible" : null,
     };
   }
 
   componentDidMount() {
+    this.originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     if (this.props.animateAppearance) {
       setTimeout(() => this.show(), 30);
     }
+  }
+
+  componentWillUnmount() {
+    document.body.style.overflow = this.originalOverflow;
   }
 
   setBody(body) {
@@ -77,12 +84,9 @@ export class Modal extends React.Component {
               <Modal.Header>
                 <Elem name="title">{this.state.title}</Elem>
                 {this.props.allowClose !== false && (
-                  <Elem
-                    tag={Button}
-                    name="close"
-                    type="text"
-                    icon={<Icon size="18" color="#617ADA" icon={FaTimes} />}
-                  />
+                  <Button name="close" look="string" onClick={() => this.hide()}>
+                    <IconCross />
+                  </Button>
                 )}
               </Modal.Header>
             )}

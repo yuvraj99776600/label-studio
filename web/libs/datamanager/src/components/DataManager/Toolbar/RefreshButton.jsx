@@ -1,9 +1,6 @@
 import { inject } from "mobx-react";
-import { LsRefresh, LsRefresh2 } from "../../../assets/icons";
-import { FF_LOPS_E_10, isFF } from "../../../utils/feature-flags";
-import { Button } from "../../Common/Button/Button";
-
-const isNewUI = isFF(FF_LOPS_E_10);
+import { IconRefresh } from "@humansignal/icons";
+import { Button } from "@humansignal/ui";
 
 const injector = inject(({ store }) => {
   return {
@@ -16,22 +13,17 @@ const injector = inject(({ store }) => {
 export const RefreshButton = injector(({ store, needsDataFetch, projectFetch, size, style, ...rest }) => {
   return (
     <Button
-      size={size}
-      look={needsDataFetch && "primary"}
+      size={size ?? "small"}
+      look={needsDataFetch ? "filled" : "outlined"}
+      variant={needsDataFetch ? "primary" : "neutral"}
       waiting={projectFetch}
+      aria-label="Refresh data"
       onClick={async () => {
         await store.fetchProject({ force: true, interaction: "refresh" });
         await store.currentView?.reload();
       }}
-      style={{
-        ...(style ?? {}),
-        minWidth: 0,
-        padding: 0,
-        width: isNewUI ? 40 : 32,
-      }}
-      {...rest}
     >
-      {isNewUI ? <LsRefresh2 /> : <LsRefresh style={{ width: 20, height: 20 }} />}
+      <IconRefresh />
     </Button>
   );
 });

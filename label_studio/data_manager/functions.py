@@ -43,12 +43,15 @@ def get_all_columns(project, *_):
 
     # all data types from import data
     all_data_columns = project.summary.all_data_columns
+    logger.info(f'get_all_columns: project_id={project.id} {all_data_columns=} {data_types=}')
     if all_data_columns:
         data_types.update({key: 'Unknown' for key in all_data_columns if key not in data_types})
+    logger.info(f'get_all_columns: project_id={project.id} {data_types=}')
 
     # remove $undefined$ if there is one type at least in labeling config, because it will be resolved automatically
     if len(project_data_types) > 0:
         data_types.pop(settings.DATA_UNDEFINED_NAME, None)
+    logger.info(f'get_all_columns: project_id={project.id} {data_types=} {project_data_types=}')
 
     for key, data_type in list(data_types.items()):  # make data types from labeling config first
         column = {
@@ -66,6 +69,8 @@ def get_all_columns(project, *_):
         result['columns'].append(column)
         task_data_children.append(column['id'])
         i += 1
+
+    remove_members_schema = flag_set('fflag_feat_fit_449_datamanager_filter_members_short', user='auto')
 
     # --- Data root ---
     data_root = {
@@ -90,23 +95,22 @@ def get_all_columns(project, *_):
         }
     ]
 
-    if flag_set('ff_back_2070_inner_id_12052022_short', user=project.organization.created_by):
-        result['columns'] += [
-            {
-                'id': 'inner_id',
-                'title': 'Inner ID',
-                'type': 'Number',
-                'help': 'Internal task ID starting from 1 for the current project',
-                'target': 'tasks',
-                'visibility_defaults': {'explore': False, 'labeling': False},
-                'project_defined': False,
-            }
-        ]
+    result['columns'] += [
+        {
+            'id': 'inner_id',
+            'title': 'Inner ID',
+            'type': 'Number',
+            'help': 'Internal task ID starting from 1 for the current project',
+            'target': 'tasks',
+            'visibility_defaults': {'explore': False, 'labeling': False},
+            'project_defined': False,
+        }
+    ]
 
-    if flag_set('fflag_fix_back_lsdv_4648_annotator_filter_29052023_short', user=project.organization.created_by):
-        project_members = project.all_members.values_list('id', flat=True)
+    if remove_members_schema:
+        project_members = []
     else:
-        project_members = project.organization.members.values_list('user__id', flat=True)
+        project_members = project.all_members.values_list('id', flat=True)
 
     result['columns'] += [
         {
@@ -151,7 +155,7 @@ def get_all_columns(project, *_):
             'type': 'List',
             'target': 'tasks',
             'help': 'All users who completed the task',
-            'schema': {'items': project_members},
+            **({'schema': {'items': project_members}} if not remove_members_schema else {}),
             'visibility_defaults': {'explore': True, 'labeling': False},
             'project_defined': False,
         },
@@ -188,7 +192,7 @@ def get_all_columns(project, *_):
             'type': 'List',
             'target': 'tasks',
             'help': 'Model versions aggregated over all predictions',
-            'schema': {'items': project.get_model_versions()},
+            'schema': {'items': project.get_model_versions(), 'multiple': True},
             'visibility_defaults': {'explore': False, 'labeling': False},
             'project_defined': False,
         },
@@ -243,7 +247,7 @@ def get_all_columns(project, *_):
             'type': 'List',
             'target': 'tasks',
             'help': 'User who did the last task update',
-            'schema': {'items': project_members},
+            **({'schema': {'items': project_members}} if not remove_members_schema else {}),
             'visibility_defaults': {'explore': False, 'labeling': False},
             'project_defined': False,
         },
@@ -357,7 +361,7 @@ def preprocess_filter(_filter, *_):
     return _filter
 
 
-def preprocess_field_name(raw_field_name, only_undefined_field=False) -> Tuple[str, bool]:
+def preprocess_field_name(raw_field_name, project) -> Tuple[str, bool]:
     """Transform a field name (as specified in the datamanager views endpoint) to
     a django ORM field name. Also handle dotted accesses to task.data.
 
@@ -389,7 +393,25 @@ def preprocess_field_name(raw_field_name, only_undefined_field=False) -> Tuple[s
         field_name = field_name[1:]
 
     if field_name.startswith('data.'):
-        if only_undefined_field:
+        # process as $undefined$ only if real_name is from labeling config, not from task.data
+        real_name = field_name.replace('data.', '')
+        common_data_columns = project.summary.common_data_columns
+        real_name_suitable = (
+            # there is only one object tag in labeling config
+            # and requested filter name == value from object tag
+            len(project.data_types.keys()) == 1
+            and real_name in project.data_types.keys()
+            # file was uploaded before labeling config is set, `data.data` is system predefined name
+            or len(project.data_types.keys()) == 0
+            and real_name == 'data'
+        )
+        if (
+            real_name_suitable
+            # common data columns are not None
+            and common_data_columns
+            # $undefined$ is in common data columns, in all tasks
+            and settings.DATA_UNDEFINED_NAME in common_data_columns
+        ):
             field_name = f'data__{settings.DATA_UNDEFINED_NAME}'
         else:
             field_name = field_name.replace('data.', 'data__')

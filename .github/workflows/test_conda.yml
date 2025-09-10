@@ -9,6 +9,7 @@ on:
 
 env:
   CACHE_NAME_PREFIX: v1
+  POETRY_VERSION: 2.1.4
 
 jobs:
   conda:
@@ -18,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ "ubuntu-latest", "windows-latest" ]
-        python-version: [ "3.10" ]
+        python-version: [ "3.13" ]
         include:
           - os: "ubuntu-latest"
             pip-cache-path: "~/.cache/pip"
@@ -34,20 +35,27 @@ jobs:
       - uses: hmarr/debug-action@v3.0.0
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
           ref: ${{ inputs.head_sha }}
 
       - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@v3.0.4
+        uses: conda-incubator/setup-miniconda@v3.2.0
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: test-environment
 
-      - name: Set up Poetry
-        uses: snok/install-poetry@v1
+      - name: "Install poetry"
+        run: pipx install "poetry==${{ env.POETRY_VERSION }}"
+
+      - name: "Set up Python"
+        id: setup_python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: 'poetry'
 
       - name: Install Python dependencies
         run: |

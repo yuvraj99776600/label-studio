@@ -1,11 +1,11 @@
-import { getRoot, types } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
 
 import { guidGenerator } from "../core/Helpers";
 import { AreaMixin } from "../mixins/AreaMixin";
+import { AnnotationMixin } from "../mixins/AnnotationMixin";
 import NormalizationMixin from "../mixins/Normalization";
 import RegionsMixin from "../mixins/Regions";
 import { VideoModel } from "../tags/object/Video";
-import { FF_LEAP_187, isFF } from "../utils/feature-flags";
 
 export const onlyProps = (props, obj) => {
   return Object.fromEntries(props.map((prop) => [prop, obj[prop]]));
@@ -30,10 +30,6 @@ const Model = types
       return self.object;
     },
 
-    get annotation() {
-      return getRoot(self)?.annotationStore?.selected;
-    },
-
     getShape() {
       throw new Error("Method getShape be implemented on a shape level");
     },
@@ -48,11 +44,9 @@ const Model = types
     },
 
     onSelectInOutliner() {
-      if (isFF(FF_LEAP_187)) {
-        // skip video to the first frame of this region
-        // @todo hidden/disabled timespans?
-        self.object.setFrame(self.sequence[0].frame);
-      }
+      // skip video to the first frame of this region
+      // @todo hidden/disabled timespans?
+      self.object.setFrame(self.sequence[0].frame);
     },
 
     serialize() {
@@ -144,6 +138,13 @@ const Model = types
     },
   }));
 
-const VideoRegion = types.compose("VideoRegionModel", RegionsMixin, AreaMixin, NormalizationMixin, Model);
+const VideoRegion = types.compose(
+  "VideoRegionModel",
+  RegionsMixin,
+  AreaMixin,
+  AnnotationMixin,
+  NormalizationMixin,
+  Model,
+);
 
 export { VideoRegion };

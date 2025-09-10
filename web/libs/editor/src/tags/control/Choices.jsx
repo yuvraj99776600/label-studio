@@ -1,5 +1,3 @@
-import React from "react";
-import { Select } from "antd";
 import { observer } from "mobx-react";
 import { types } from "mobx-state-tree";
 
@@ -22,12 +20,11 @@ import DynamicChildrenMixin from "../../mixins/DynamicChildrenMixin";
 import { FF_LSDV_4583, isFF } from "../../utils/feature-flags";
 import { ReadOnlyControlMixin } from "../../mixins/ReadOnlyMixin";
 import SelectedChoiceMixin from "../../mixins/SelectedChoiceMixin";
-import { HintTooltip } from "../../components/Taxonomy/Taxonomy";
 import ClassificationBase from "./ClassificationBase";
 import PerItemMixin from "../../mixins/PerItem";
 import Infomodal from "../../components/Infomodal/Infomodal";
-
-const { Option } = Select;
+import { useMemo } from "react";
+import { Select, Tooltip } from "@humansignal/ui";
 
 /**
  * The `Choices` tag is used to create a group of choices, with radio buttons or checkboxes. It can be used for single or multi-class classification. Also, it is used for advanced classification tasks where annotators can choose one or multiple answers.
@@ -87,14 +84,15 @@ const { Option } = Select;
  * @param {boolean} [showInline=false] - Show choices in the same visual line
  * @param {boolean} [required=false]   - Validate whether a choice has been selected
  * @param {string} [requiredMessage]   - Show a message if validation fails
- * @param {region-selected|no-region-selected|choice-selected|choice-unselected} [visibleWhen] - Control visibility of the choices. Can also be used with `when*` attributes below to narrow down visibility
- * @param {string} [whenTagName]       - Use with visibleWhen. Narrow down visibility by name of the tag. For regions, use the name of the object tag, for choices, use the name of the choices tag
- * @param {string} [whenLabelValue]    - Use with visibleWhen="region-selected". Narrow down visibility by label value
- * @param {string} [whenChoiceValue]   - Use with visibleWhen ("choice-selected" or "choice-unselected") and whenTagName, both are required. Narrow down visibility by choice value
+ * @param {region-selected|no-region-selected|choice-selected|choice-unselected} [visibleWhen] - Control visibility of the choices. Can also be used with the `when*` parameters below to narrow down visibility
+ * @param {string} [whenTagName]       - Use with `visibleWhen`. Narrow down visibility by name of the tag. For regions, use the name of the object tag, for choices, use the name of the `choices` tag
+ * @param {string} [whenLabelValue]    - Use with `visibleWhen="region-selected"`. Narrow down visibility by label value. Multiple values can be separated with commas
+ * @param {string} [whenChoiceValue]   - Use with `visibleWhen` (`"choice-selected"` or `"choice-unselected"`) and `whenTagName`, both are required. Narrow down visibility by choice value. Multiple values can be separated with commas
  * @param {boolean} [perRegion]        - Use this tag to select a choice for a specific region instead of the entire task
  * @param {boolean} [perItem]          - Use this tag to select a choice for a specific item inside the object instead of the whole object
  * @param {string} [value]             - Task data field containing a list of dynamically loaded choices (see example below)
  * @param {boolean} [allowNested]      - Allow to use `children` field in dynamic choices to nest them. Submitted result will contain array of arrays, every item is a list of values from topmost parent choice down to selected one.
+ * @param {select|inline|vertical} [layout] - Layout of the choices: `select` for dropdown/select box format, `inline` for horizontal single row display, `vertical` for vertically stacked display (default)
  */
 const TagAttrs = types.model({
   toname: types.maybeNull(types.string),
@@ -254,11 +252,25 @@ const ChoicesModel = types.compose(
 );
 
 const ChoicesSelectLayout = observer(({ item }) => {
+  const options = useMemo(
+    () =>
+      item.tiedChildren.map((i) => ({
+        value: i._value,
+        label: (
+          <Tooltip title={i.hint}>
+            <span data-testid="choiceOptionText" className="w-full">
+              {i._value}
+            </span>
+          </Tooltip>
+        ),
+      })),
+    [item.tiedChildren],
+  );
   return (
     <Select
       style={{ width: "100%" }}
       value={item.selectedLabels.map((l) => l._value)}
-      mode={item.choice === "multiple" ? "multiple" : ""}
+      multiple={item.choice === "multiple"}
       disabled={item.isReadOnly()}
       onChange={(val) => {
         if (Array.isArray(val)) {
@@ -273,21 +285,18 @@ const ChoicesSelectLayout = observer(({ item }) => {
           }
         }
       }}
-    >
-      {item.tiedChildren.map((i) => (
-        <Option key={i._value} value={i._value}>
-          <HintTooltip title={i.hint} wrapper="div">
-            {i._value}
-          </HintTooltip>
-        </Option>
-      ))}
-    </Select>
+      options={options}
+    />
   );
 });
 
 const HtxChoices = observer(({ item }) => {
   return (
-    <Block name="choices" mod={{ hidden: !item.isVisible || !item.perRegionVisible(), layout: item.layout }}>
+    <Block
+      name="choices"
+      mod={{ hidden: !item.isVisible || !item.perRegionVisible(), layout: item.layout }}
+      ref={item.elementRef}
+    >
       {item.layout === "select" ? <ChoicesSelectLayout item={item} /> : Tree.renderChildren(item, item.annotation)}
     </Block>
   );

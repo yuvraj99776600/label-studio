@@ -98,6 +98,10 @@
     position: absolute;
     overflow: hidden;
     height: 0;
+
+    img {
+      max-width: unset;
+    }
   }
 
   .frame_height {
@@ -148,7 +152,7 @@
     object-fit: cover;
 
     &:hover {
-      border-color: var(--grape_100);
+      border-color: var(--color-primary-surface-content-subtle);
     }
 
     &.active {

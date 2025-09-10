@@ -1,11 +1,11 @@
 import { inject, observer } from "mobx-react";
 import React, { useEffect, useRef } from "react";
-import { FaAngleDown, FaChevronDown } from "react-icons/fa";
-import { FF_LOPS_E_10, isFF } from "../../utils/feature-flags";
+import { IconChevronDown } from "@humansignal/icons";
 import { Filters } from "../Filters/Filters";
 import { Badge } from "./Badge/Badge";
-import { Button } from "./Button/Button";
+import { Button } from "@humansignal/ui";
 import { Dropdown } from "./Dropdown/Dropdown";
+import { Icon } from "./Icon/Icon";
 
 const buttonInjector = inject(({ store }) => {
   const { viewsStore, currentView } = store;
@@ -23,17 +23,21 @@ export const FiltersButton = buttonInjector(
       const hasFilters = activeFiltersNumber > 0;
 
       return (
-        <Button ref={ref} size={size} onClick={() => sidebarEnabled && viewsStore.toggleSidebar()} {...rest}>
+        <Button
+          ref={ref}
+          size="small"
+          variant="neutral"
+          look="outlined"
+          onClick={() => sidebarEnabled && viewsStore.toggleSidebar()}
+          trailing={<Icon icon={IconChevronDown} />}
+          aria-label="Filters"
+          {...rest}
+        >
           Filters{" "}
           {hasFilters && (
             <Badge size="small" style={{ marginLeft: 5 }}>
               {activeFiltersNumber}
             </Badge>
-          )}
-          {isFF(FF_LOPS_E_10) ? (
-            <FaChevronDown size="12" style={{ marginLeft: 8, marginRight: -7 }} color="#1F1F1F" />
-          ) : (
-            <FaAngleDown size="16" style={{ marginLeft: 4 }} color="#566fcf" />
           )}
         </Button>
       );
@@ -58,7 +62,15 @@ export const FiltersPane = injector(
     }, [sidebarEnabled]);
 
     return (
-      <Dropdown.Trigger ref={dropdown} disabled={sidebarEnabled} content={<Filters />}>
+      <Dropdown.Trigger
+        ref={dropdown}
+        disabled={sidebarEnabled}
+        content={<Filters />}
+        openUpwardForShortViewport={false}
+        isChildValid={(ele) => {
+          return !!ele.closest("[data-radix-popper-content-wrapper]");
+        }}
+      >
         <FiltersButton {...rest} size={size} />
       </Dropdown.Trigger>
     );

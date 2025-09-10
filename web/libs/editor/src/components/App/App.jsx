@@ -9,7 +9,7 @@ import { observer, Provider } from "mobx-react";
 /**
  * Core
  */
-import Tree from "../../core/Tree";
+import { CommentsOverlay } from "../InteractiveOverlays/CommentsOverlay";
 import { TreeValidation } from "../TreeValidation/TreeValidation";
 
 /**
@@ -18,35 +18,42 @@ import { TreeValidation } from "../TreeValidation/TreeValidation";
 import "../../tags/object";
 import "../../tags/control";
 import "../../tags/visual";
+import "../../tags/Custom";
 
 /**
  * Utils and common components
  */
 import { Space } from "../../common/Space/Space";
-import { Button } from "../../common/Button/Button";
-import { Block, cn, Elem } from "../../utils/bem";
-import { FF_DEV_1170, FF_DEV_3873, FF_LSDV_4620_3_ML, FF_SIMPLE_INIT, isFF } from "../../utils/feature-flags";
+import { Button } from "@humansignal/ui";
+import { Block, Elem } from "../../utils/bem";
+import { isSelfServe } from "../../utils/billing";
+import {
+  FF_BULK_ANNOTATION,
+  FF_DEV_3873,
+  FF_LSDV_4620_3_ML,
+  FF_PER_FIELD_COMMENTS,
+  FF_SIMPLE_INIT,
+  isFF,
+} from "../../utils/feature-flags";
 import { sanitizeHtml } from "../../utils/html";
 import { reactCleaner } from "../../utils/reactCleaner";
 import { guidGenerator } from "../../utils/unique";
 import { isDefined, sortAnnotations } from "../../utils/utilities";
+import { ToastProvider, ToastViewport } from "@humansignal/ui/lib/toast/toast";
 
 /**
  * Components
  */
 import { Annotation } from "./Annotation";
-import { AnnotationTab } from "../AnnotationTab/AnnotationTab";
 import { BottomBar } from "../BottomBar/BottomBar";
 import Debug from "../Debug";
-import Grid from "./Grid";
 import { InstructionsModal } from "../InstructionsModal/InstructionsModal";
-import { RelationsOverlay } from "../RelationsOverlay/RelationsOverlay";
-import Segment from "../Segment/Segment";
+import { RelationsOverlay } from "../InteractiveOverlays/RelationsOverlay";
 import Settings from "../Settings/Settings";
-import { SidebarTabs } from "../SidebarTabs/SidebarTabs";
 import { SidePanels } from "../SidePanels/SidePanels";
 import { SideTabsPanels } from "../SidePanels/TabPanels/SideTabsPanels";
 import { TopBar } from "../TopBar/TopBar";
+import { ViewAll } from "./ViewAll";
 
 /**
  * Styles
@@ -94,10 +101,17 @@ class App extends Component {
         }}
       >
         <Result status="success" title={getEnv(this.props.store).messages.NO_NEXT_TASK} />
-        <Block name="sub__result">You have completed all tasks in the queue!</Block>
-        <Button onClick={(e) => store.prevTask(e, true)} look="outlined" style={{ margin: "16px 0" }}>
-          Go to Previous Task
-        </Button>
+        <Block name="sub__result">All tasks in the queue have been completed</Block>
+        {store.taskHistory.length > 0 && (
+          <Button
+            onClick={(e) => store.prevTask(e, true)}
+            variant="neutral"
+            className="mx-0 my-4"
+            aria-label="Previous task"
+          >
+            Go to Previous Task
+          </Button>
+        )}
       </Block>
     );
   }
@@ -125,21 +139,6 @@ class App extends Component {
     return <Result icon={<Spin size="large" />} />;
   }
 
-  _renderAll(obj) {
-    if (obj.length === 1) return <Segment annotation={obj[0]}>{[Tree.renderItem(obj[0].root)]}</Segment>;
-    const renderAllClassName = cn("renderall").toClassName();
-    const fadeClassName = cn("fade").toClassName();
-    return (
-      <div className={renderAllClassName}>
-        {obj.map((c, i) => (
-          <div key={`all-${i}`} className={fadeClassName}>
-            <Segment annotation={c}>{[Tree.renderItem(c.root)]}</Segment>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   _renderUI(root, as) {
     if (as.viewingAll) return this.renderAllAnnotations();
 
@@ -148,6 +147,7 @@ class App extends Component {
         <Elem name="annotation">
           {<Annotation root={root} annotation={as.selected} />}
           {this.renderRelations(as.selected)}
+          {isFF(FF_PER_FIELD_COMMENTS) && this.renderCommentsOverlay(as.selected)}
         </Elem>
         {!isFF(FF_DEV_3873) && getRoot(as).hasInterface("infobar") && this._renderInfobar(as)}
       </Block>
@@ -175,7 +175,7 @@ class App extends Component {
       sortAnnotations(entities);
     }
 
-    return <Grid store={as} annotations={entities} root={as.root} />;
+    return <ViewAll store={as} annotations={entities} root={as.root} />;
   }
 
   renderRelations(selectedStore) {
@@ -191,6 +191,14 @@ class App extends Component {
         taskData={taskData}
       />
     );
+  }
+
+  renderCommentsOverlay(selectedAnnotation) {
+    const { store } = this.props;
+    const { commentStore } = store;
+
+    if (!store.hasInterface("annotations:comments") || !commentStore.isCommentable) return null;
+    return <CommentsOverlay commentStore={commentStore} annotation={selectedAnnotation} />;
   }
 
   render() {
@@ -220,57 +228,66 @@ class App extends Component {
       </Block>
     );
 
-    const outlinerEnabled = isFF(FF_DEV_1170);
+    const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isSelfServe() && store.hasInterface("annotation:bulk");
     const newUIEnabled = isFF(FF_DEV_3873);
 
     return (
       <Block
         name="editor"
-        mod={{ fullscreen: settings.fullscreen, _auto_height: !outlinerEnabled }}
+        mod={{ fullscreen: settings.fullscreen }}
         ref={isFF(FF_LSDV_4620_3_ML) ? reactCleaner(this) : null}
       >
         <Settings store={store} />
         <Provider store={store}>
-          {newUIEnabled ? (
-            <InstructionsModal
-              visible={store.showingDescription}
-              onCancel={() => store.toggleDescription()}
-              title="Labeling Instructions"
-            >
-              {store.description}
-            </InstructionsModal>
-          ) : (
-            <>
-              {store.showingDescription && (
-                <Segment>
-                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(store.description) }} />
-                </Segment>
-              )}
-            </>
-          )}
+          <ToastProvider>
+            {newUIEnabled ? (
+              <InstructionsModal
+                visible={store.showingDescription}
+                onCancel={() => store.toggleDescription()}
+                title={store.hasInterface("review") ? "Review Instructions" : "Labeling Instructions"}
+              >
+                {store.description}
+              </InstructionsModal>
+            ) : (
+              <>
+                {store.showingDescription && (
+                  <div className="p-base mb-base">
+                    {/* biome-ignore lint/security/noDangerouslySetInnerHtml: we need html here and it's sanitized */}
+                    <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(store.description) }} />
+                  </div>
+                )}
+              </>
+            )}
 
-          {isDefined(store) && store.hasInterface("topbar") && <TopBar store={store} />}
-          <Block
-            name="wrapper"
-            mod={{
-              viewAll: viewingAll,
-              bsp: settings.bottomSidePanel,
-              outliner: outlinerEnabled,
-              showingBottomBar: newUIEnabled,
-            }}
-          >
-            {outlinerEnabled ? (
-              newUIEnabled ? (
-                <SideTabsPanels
-                  panelsHidden={viewingAll}
-                  currentEntity={as.selectedHistory ?? as.selected}
-                  regions={as.selected.regionStore}
-                  showComments={store.hasInterface("annotations:comments")}
-                  focusTab={store.commentStore.tooltipMessage ? "comments" : null}
-                >
-                  {mainContent}
-                  {store.hasInterface("topbar") && <BottomBar store={store} />}
-                </SideTabsPanels>
+            {isDefined(store) && store.hasInterface("topbar") && <TopBar store={store} />}
+            <Block
+              name="wrapper"
+              mod={{
+                viewAll: viewingAll,
+                bsp: settings.effectiveBottomSidePanel,
+                showingBottomBar: newUIEnabled,
+              }}
+            >
+              {newUIEnabled ? (
+                isBulkMode || !store.hasInterface("side-column") ? (
+                  <>
+                    {mainContent}
+                    {store.hasInterface("topbar") && <BottomBar store={store} />}
+                  </>
+                ) : (
+                  <SideTabsPanels
+                    panelsHidden={viewingAll}
+                    currentEntity={as.selectedHistory ?? as.selected}
+                    regions={as.selected.regionStore}
+                    showComments={store.hasInterface("annotations:comments")}
+                    focusTab={store.commentStore.tooltipMessage ? "comments" : null}
+                  >
+                    {mainContent}
+                    {store.hasInterface("topbar") && <BottomBar store={store} />}
+                  </SideTabsPanels>
+                )
+              ) : isBulkMode || !store.hasInterface("side-column") ? (
+                mainContent
               ) : (
                 <SidePanels
                   panelsHidden={viewingAll}
@@ -279,25 +296,10 @@ class App extends Component {
                 >
                   {mainContent}
                 </SidePanels>
-              )
-            ) : (
-              <>
-                {mainContent}
-
-                {viewingAll === false && (
-                  <Block name="menu" mod={{ bsp: settings.bottomSidePanel }}>
-                    {store.hasInterface("side-column") && (
-                      <SidebarTabs>
-                        <AnnotationTab store={store} />
-                      </SidebarTabs>
-                    )}
-                  </Block>
-                )}
-
-                {newUIEnabled && store.hasInterface("topbar") && <BottomBar store={store} />}
-              </>
-            )}
-          </Block>
+              )}
+            </Block>
+            <ToastViewport />
+          </ToastProvider>
         </Provider>
         {store.hasInterface("debug") && <Debug store={store} />}
       </Block>

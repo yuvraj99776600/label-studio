@@ -5,7 +5,7 @@ on:
     types: [ frontend-command ]
 
 env:
-  NODE: '18'
+  NODE: "22"
   CACHE_NAME_PREFIX: v0
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
             > [Workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
       - name: Checkout on chat command
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ secrets.GIT_PAT }}
           repository: ${{ github.event.client_payload.pull_request.head.repo.full_name }}
@@ -144,4 +144,4 @@ jobs:
             > /frontend build           | Get build frontend static for all repos
             > /frontend build lsf [sha] | Get build frontend static for ${{ github.repository_owner }}/label-studio-frontend only
             > /frontend build dm [sha]  | Get build frontend static for ${{ github.repository_owner }}/dm2 only
-          reaction-type: hooray
+          reactions: hooray

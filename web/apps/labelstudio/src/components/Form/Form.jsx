@@ -5,7 +5,7 @@ import { MultiProvider } from "../../providers/MultiProvider";
 import { Block, cn, Elem } from "../../utils/bem";
 import { debounce } from "../../utils/debounce";
 import { isDefined, objectClean } from "../../utils/helpers";
-import { Button } from "../Button/Button";
+import { Button } from "@humansignal/ui";
 import { Oneof } from "../Oneof/Oneof";
 import { Space } from "../Space/Space";
 import { Counter, Input, Select, Toggle } from "./Elements";
@@ -18,6 +18,7 @@ import {
   FormValidationContext,
 } from "./FormContext";
 import * as Validators from "./Validation/Validators";
+import { ToastProvider, ToastViewport } from "@humansignal/ui";
 
 const PASSWORD_PROTECTED_VALUE = "got ya, suspicious hacker!";
 
@@ -65,6 +66,7 @@ export default class Form extends React.Component {
       <FormSubmissionContext.Provider key="form-submission-ctx" value={this.state.submitting} />,
       <FormStateContext.Provider key="form-state-ctx" value={this.state.state} />,
       <FormResponseContext.Provider key="form-response" value={this.state.lastResponse} />,
+      <ToastProvider key="toast" />,
       <ApiProvider key="form-api" ref={this.apiRef} />,
     ];
 
@@ -86,6 +88,7 @@ export default class Form extends React.Component {
             <ValidationRenderer validation={this.state.validation} />
           )}
         </form>
+        <ToastViewport />
       </MultiProvider>
     );
   }
@@ -242,7 +245,7 @@ export default class Form extends React.Component {
 
     this.setState({ lastResponse: response });
 
-    if (response === null) {
+    if (!response?.$meta?.ok) {
       this.props.onError?.();
       return false;
     }
@@ -521,7 +524,7 @@ Form.Builder = React.forwardRef(
         {children}
         {props.autosubmit !== true && withActions === true && (
           <Form.Actions>
-            <Button type="submit" look="primary" style={{ width: 120 }}>
+            <Button type="submit" className="w-[120px]" aria-label="Submit form">
               Save
             </Button>
           </Form.Actions>

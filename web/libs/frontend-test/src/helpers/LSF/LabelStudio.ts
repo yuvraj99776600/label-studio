@@ -1,3 +1,4 @@
+import { fixLSParams } from "@humansignal/frontend-test/helpers/utils/fixLSParams";
 import { expect } from "chai";
 
 type LSParams = Record<string, any>;
@@ -22,6 +23,7 @@ class LSParamsBuilder {
       "annotations:add-new",
       "annotations:delete",
       "annotations:view-all",
+      "annotations:copy-link",
       "predictions:tabs",
       "predictions:menu",
       "auto-annotation",
@@ -34,14 +36,20 @@ class LSParamsBuilder {
       predictions: [],
     },
   };
+  private _localStorageItems: Record<string, any> = {};
   private ls: typeof LabelStudio = null;
 
   constructor(ls: typeof LabelStudio) {
     this.ls = ls;
   }
 
-  init() {
-    this.ls.init(this.params);
+  init(beforeLoadCallback?: (win: Cypress.AUTWindow) => void) {
+    this.ls.init(this.params, (win) => {
+      Object.entries(this._localStorageItems).forEach(([key, value]) => {
+        win.localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
+      });
+      beforeLoadCallback?.(win);
+    });
   }
 
   private get _task() {
@@ -62,6 +70,15 @@ class LSParamsBuilder {
     return task.annotations;
   }
 
+  private get _predictions() {
+    const task = this._task;
+
+    if (!task.predictions) {
+      task.predictions = [];
+    }
+    return task.predictions;
+  }
+
   config(config) {
     this.params.config = config;
     return this;
@@ -80,6 +97,10 @@ class LSParamsBuilder {
   }
   withAnnotation(annotation) {
     this._annotations.push(annotation);
+    return this;
+  }
+  withPrediction(prediction) {
+    this._predictions.push(prediction);
     return this;
   }
   withResult(result) {
@@ -124,59 +145,102 @@ class LSParamsBuilder {
     this.params[paramName] = paramValue;
     return this;
   }
+  localStorageItems(items) {
+    this._localStorageItems = items;
+    return this;
+  }
+  withLocalStorageItem(key, value) {
+    this._localStorageItems[key] = value;
+    return this;
+  }
 }
 
 export const LabelStudio = {
   /**
    * Initializes LabelStudio instance with given configuration
    */
-  init(params: LSParams) {
+  init(params: LSParams, beforeLoadCallback?: (win: Cypress.AUTWindow) => void) {
     cy.log("Initialize LSF");
-    const windowLoadCallback = (win: Cypress.AUTWindow) => {
-      win.DEFAULT_LSF_INIT = false;
-      win.LSF_CONFIG = {
-        interfaces: [
-          "panel",
-          "update",
-          "submit",
-          "skip",
-          "controls",
-          "infobar",
-          "topbar",
-          "instruction",
-          "side-column",
-          "ground-truth",
-          "annotations:tabs",
-          "annotations:menu",
-          "annotations:current",
-          "annotations:add-new",
-          "annotations:delete",
-          "annotations:view-all",
-          "predictions:tabs",
-          "predictions:menu",
-          "auto-annotation",
-          "edit-history",
-        ],
-        ...params,
+
+    // Make it part of the Cypress chain to allow run init more than once
+    cy.wrap(null).then(() => {
+      const windowLoadCallback = (win: Cypress.AUTWindow) => {
+        win.DEFAULT_LSF_INIT = false;
+        win.LSF_CONFIG = {
+          interfaces: [
+            "panel",
+            "update",
+            "submit",
+            "skip",
+            "controls",
+            "infobar",
+            "topbar",
+            "instruction",
+            "side-column",
+            "ground-truth",
+            "annotations:tabs",
+            "annotations:menu",
+            "annotations:current",
+            "annotations:add-new",
+            "annotations:delete",
+            "annotations:view-all",
+            "annotations:copy-link",
+            "predictions:tabs",
+            "predictions:menu",
+            "auto-annotation",
+            "edit-history",
+          ],
+          ...params,
+        };
+        beforeLoadCallback?.(win);
+
+        Cypress.off("window:before:load", windowLoadCallback);
       };
 
-      Cypress.off("window:before:load", windowLoadCallback);
-    };
+      Cypress.on("window:before:load", windowLoadCallback);
 
-    Cypress.on("window:before:load", windowLoadCallback);
+      const defaultCpuThrottling = Cypress.env("DEFAULT_CPU_THROTTLING");
+      const defaultNetworkThrottling = Cypress.env("DEFAULT_NETWORK_THROTTLING");
 
-    cy.visit("/").then((win) => {
-      cy.log(`Default feature flags set ${JSON.stringify(win.APP_SETTINGS.feature_flags, null, "  ")}`);
-      const labelStudio = new win.LabelStudio("label-studio", win.LSF_CONFIG);
-
-      if (win.LSF_CONFIG.eventListeners) {
-        for (const [event, listener] of Object.entries(win.LSF_CONFIG.eventListeners)) {
-          labelStudio.on(event, listener);
-        }
+      if (defaultCpuThrottling) {
+        cy.resetCPU();
       }
-      expect(win.LabelStudio.instances.size).to.be.equal(1);
-      cy.get(".lsf-editor").should("be.visible");
-      cy.log("Label Studio initialized");
+      if (defaultNetworkThrottling) {
+        cy.resetNetwork();
+      }
+
+      cy.visit("/").then((win) => {
+        if (defaultCpuThrottling) {
+          cy.throttleCPU(defaultCpuThrottling);
+        }
+        if (defaultNetworkThrottling) {
+          // Parse network throttling preset
+          switch (defaultNetworkThrottling) {
+            case "slow3g":
+              cy.setSlow3GNetwork();
+              break;
+            case "fast3g":
+              cy.setFast3GNetwork();
+              break;
+            case "4g":
+              cy.set4GNetwork();
+              break;
+            default:
+              cy.log(`Unknown network throttling preset: ${defaultNetworkThrottling}`);
+          }
+        }
+        cy.log(`Default feature flags set ${JSON.stringify(win.APP_SETTINGS.feature_flags, null, "  ")}`);
+        const labelStudio = new win.LabelStudio("label-studio", fixLSParams(win.LSF_CONFIG, win));
+
+        if (win.LSF_CONFIG.eventListeners) {
+          for (const [event, listener] of Object.entries(win.LSF_CONFIG.eventListeners)) {
+            labelStudio.on(event, listener);
+          }
+        }
+        expect(win.LabelStudio.instances.size).to.be.equal(1);
+        cy.get(".lsf-editor").should("be.visible");
+        cy.log("Label Studio initialized");
+      });
     });
   },
 

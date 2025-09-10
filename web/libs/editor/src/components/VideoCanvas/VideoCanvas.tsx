@@ -1,11 +1,18 @@
+import { useRefCallback } from "@humansignal/core/hooks/useRefCallback";
+import { useValueRef } from "@humansignal/core/hooks/useValueRef";
 import { forwardRef, memo, type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Block, Elem } from "../../utils/bem";
-import { FF_LSDV_4711, isFF } from "../../utils/feature-flags";
+import { FF_LSDV_4711, FF_VIDEO_FRAME_SEEK_PRECISION, isFF } from "../../utils/feature-flags";
 import { clamp, isDefined } from "../../utils/utilities";
+import { useUpdateBuffering } from "../../hooks/useUpdateBuffering";
 import "./VideoCanvas.scss";
+import { useLoopRange } from "./hooks/useLoopRange";
 import { MAX_ZOOM, MIN_ZOOM } from "./VideoConstants";
 import { VirtualCanvas } from "./VirtualCanvas";
 import { VirtualVideo } from "./VirtualVideo";
+import { ff } from "@humansignal/core";
+
+const isSyncedBuffering = ff.isActive(ff.FF_SYNCED_BUFFERING);
 
 type VideoProps = {
   src: string;
@@ -14,6 +21,7 @@ type VideoProps = {
   position?: number;
   currentTime?: number;
   playing?: boolean;
+  buffering?: boolean;
   framerate?: number;
   muted?: boolean;
   zoom?: number;
@@ -37,6 +45,13 @@ type VideoProps = {
   onEnded?: () => void;
   onResize?: (dimensions: VideoDimentions) => void;
   onError?: (error: any) => void;
+  onBuffering?: (isBuffering: boolean) => void;
+
+  loopFrameRange?: boolean;
+  selectedFrameRange?: {
+    start: number;
+    end: number;
+  };
 };
 
 type PanOptions = {
@@ -54,6 +69,10 @@ export const clampZoom = (value: number) => clamp(value, MIN_ZOOM, MAX_ZOOM);
 
 const zoomRatio = (canvasWidth: number, canvasHeight: number, width: number, height: number) =>
   Math.min(1, Math.min(canvasWidth / width, canvasHeight / height));
+
+// Browsers can only handle time to the nearest 2ms, so we need to round to that precision when seeking by frames
+// https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/currentTime
+const BROWSER_TIME_PRECISION = 0.002;
 
 export interface VideoRef {
   currentFrame: number;
@@ -74,6 +93,7 @@ export interface VideoRef {
   play: () => void;
   pause: () => void;
   goToFrame: (frame: number) => void;
+  frameSteppedTime: (time?: number, isZeroBasedFrame?: boolean) => number;
   seek: (time: number) => void;
   setContrast: (value: number) => void;
   setBrightness: (value: number) => void;
@@ -82,6 +102,15 @@ export interface VideoRef {
   setPan: (x: number, y: number) => void;
   adjustPan: (x: number, y: number) => PanOptions;
 }
+
+const useBufferingWrapper = (props: VideoProps): [boolean, (isBuffering: boolean) => void] => {
+  if (isSyncedBuffering) {
+    const setBuffering = useRefCallback(props.onBuffering ?? (() => {}));
+    return [false, setBuffering];
+  }
+  const [buffering, setBuffering] = useState(false);
+  return [buffering, setBuffering];
+};
 
 export const VideoCanvas = memo(
   forwardRef<VideoRef, VideoProps>((props, ref) => {
@@ -101,7 +130,7 @@ export const VideoCanvas = memo(
     const [length, setLength] = useState(0);
     const [currentFrame, setCurrentFrame] = useState(props.position ?? 1);
     const [playing, setPlaying] = useState(false);
-    const [buffering, setBuffering] = useState(false);
+    const [buffering, setBuffering] = useBufferingWrapper(props);
     const [zoom, setZoom] = useState(props.zoom ?? 1);
     const [pan, setPan] = useState<PanOptions>(props.pan ?? { x: 0, y: 0 });
 
@@ -110,6 +139,7 @@ export const VideoCanvas = memo(
     const [contrast, setContrast] = useState(1);
     const [brightness, setBrightness] = useState(1);
     const [saturation, setSaturation] = useState(1);
+    const bufferingRef = useValueRef(props.buffering);
 
     const filters = useMemo(() => {
       const result: string[] = [];
@@ -167,7 +197,9 @@ export const VideoCanvas = memo(
         if (!contextRef.current) return;
 
         const currentTime = videoRef.current?.currentTime ?? 0;
-        const frameNumber = Math.round(currentTime * framerate);
+        const frameNumber = isFF(FF_VIDEO_FRAME_SEEK_PRECISION)
+          ? Math.ceil(currentTime * framerate)
+          : Math.round(currentTime * framerate);
         const frame = clamp(frameNumber, 1, length || 1);
         const onChange = props.onFrameChange ?? (() => {});
 
@@ -180,6 +212,21 @@ export const VideoCanvas = memo(
       [framerate, currentFrame, drawVideo, props.onFrameChange, length],
     );
 
+    const handleVideoBuffering = useCallback(
+      (isBuffering: boolean) => {
+        if (!contextRef.current) return;
+
+        if (!isBuffering) {
+          hasLoadedRef.current = true;
+        }
+
+        setBuffering(isBuffering);
+      },
+      [setBuffering],
+    );
+
+    const updateBuffering = useUpdateBuffering(videoRef, handleVideoBuffering);
+
     const delayedUpdate = useCallback(() => {
       if (!videoRef.current) return;
       if (!contextRef.current) return;
@@ -189,11 +236,15 @@ export const VideoCanvas = memo(
       if (video) {
         if (!playing) updateFrame(true);
 
-        if (video.networkState === video.NETWORK_IDLE) {
-          hasLoadedRef.current = true;
-          setBuffering(false);
+        if (isSyncedBuffering) {
+          updateBuffering();
         } else {
-          setBuffering(true);
+          if (video.networkState === video.NETWORK_IDLE) {
+            hasLoadedRef.current = true;
+            setBuffering(false);
+          } else {
+            setBuffering(true);
+          }
         }
       }
     }, [playing, updateFrame]);
@@ -201,28 +252,44 @@ export const VideoCanvas = memo(
     // VIDEO EVENTS'
     const handleVideoPlay = useCallback(() => {
       setPlaying(true);
-      setBuffering(false);
+      if (!isSyncedBuffering) {
+        setBuffering(false);
+      } else {
+        updateBuffering();
+      }
       props.onPlay?.();
     }, [props.onPlay]);
 
     const handleVideoPause = useCallback(() => {
       setPlaying(false);
-      setBuffering(false);
+      if (!isSyncedBuffering) {
+        setBuffering(false);
+      } else {
+        updateBuffering();
+      }
       props.onPause?.();
     }, [props.onPause]);
 
     const handleVideoPlaying = useCallback(() => {
-      setBuffering(false);
+      if (!isSyncedBuffering) {
+        setBuffering(false);
+      }
       delayedUpdate();
     }, [delayedUpdate]);
 
     const handleVideoWaiting = useCallback(() => {
-      setBuffering(true);
+      if (!isSyncedBuffering) {
+        setBuffering(true);
+      } else {
+        updateBuffering();
+      }
     }, []);
 
     const handleVideoEnded = useCallback(() => {
       setPlaying(false);
-      setBuffering(false);
+      if (!isSyncedBuffering) {
+        setBuffering(false);
+      }
       props.onSeeked?.();
       props.onEnded?.();
       props.onPause?.();
@@ -250,11 +317,13 @@ export const VideoCanvas = memo(
       updateFrame();
 
       if (playing) {
-        raf.current = requestAnimationFrame(handleAnimationFrame);
+        raf.current = requestAnimationFrame(handleAnimationFrameRef.current);
       } else {
         cancelAnimationFrame(raf.current!);
       }
     };
+    const handleAnimationFrameRef = useRef(handleAnimationFrame);
+    handleAnimationFrameRef.current = handleAnimationFrame;
 
     useEffect(() => {
       if (!playing) {
@@ -263,7 +332,7 @@ export const VideoCanvas = memo(
     }, [drawVideo, playing]);
 
     useEffect(() => {
-      if (playing) raf.current = requestAnimationFrame(handleAnimationFrame);
+      if (playing) raf.current = requestAnimationFrame(handleAnimationFrameRef.current);
 
       return () => {
         cancelAnimationFrame(raf.current!);
@@ -283,10 +352,13 @@ export const VideoCanvas = memo(
 
     // Handle extrnal state change [current time]
     useEffect(() => {
-      if (videoRef.current && props.currentTime) {
-        videoRef.current.currentTime = props.currentTime;
-      }
-    }, [props.currentTime]);
+      const updateId = requestAnimationFrame(() => {
+        if (isSyncedBuffering && bufferingRef.current) return;
+        if (videoRef.current && props.currentTime) videoRef.current.currentTime = props.currentTime;
+      });
+
+      return () => cancelAnimationFrame(updateId);
+    }, [props.currentTime, bufferingRef]);
 
     // Handle extrnal state change [play/pause]
     useEffect(() => {
@@ -403,20 +475,43 @@ export const VideoCanvas = memo(
         setSaturation(value);
       },
       play() {
+        prepareLoop();
         videoRef.current?.play();
       },
       pause() {
         videoRef.current?.pause();
+        if (isFF(FF_VIDEO_FRAME_SEEK_PRECISION)) {
+          // If duration is not finite,
+          // then we are trying to pause (most probably caused by buffering) before video is loaded
+          // so we need to correct the duration to 0 to avoid NaN currentTime
+          this.currentTime = clamp(this.frameSteppedTime(), 0, this.duration || 0);
+        }
       },
       seek(time) {
         this.currentTime = clamp(time, 0, this.duration);
         requestAnimationFrame(() => drawVideo());
       },
+      frameSteppedTime(time?: number, isZeroBasedFrame = false): number {
+        if (isFF(FF_VIDEO_FRAME_SEEK_PRECISION)) {
+          return (
+            Math.round((time ?? this.currentTime) / BROWSER_TIME_PRECISION) * BROWSER_TIME_PRECISION +
+            (isZeroBasedFrame ? BROWSER_TIME_PRECISION : 0)
+          );
+        }
+        return time ?? this.currentTime;
+      },
       goToFrame(frame: number) {
         const frameClamped = clamp(frame, 1, length);
 
-        this.currentTime = frameClamped / framerate;
-        requestAnimationFrame(() => drawVideo());
+        // We need to subtract 1 from the frame number because the frame number is 1-based
+        // and the currentTime is 0-based
+        const frameZeroBased = frameClamped - 1;
+
+        // Calculate exact frame time
+        const exactTime = frameZeroBased / framerate;
+
+        // Round to next closest browser precision frame time
+        this.currentTime = this.frameSteppedTime(exactTime, true);
       },
     };
 
@@ -425,6 +520,17 @@ export const VideoCanvas = memo(
     } else if (ref) {
       ref.current = refSource;
     }
+
+    const { prepareLoop } = useLoopRange({
+      loopFrameRange: props.loopFrameRange,
+      selectedFrameRange: props.selectedFrameRange,
+      videoRef,
+      refSource,
+      framerate,
+      onRedrawRequest: () => {
+        updateFrame(true);
+      },
+    });
 
     useEffect(() => {
       const { width, height } = videoDimensions;
@@ -443,8 +549,8 @@ export const VideoCanvas = memo(
 
     useEffect(() => {
       let isLoaded = false;
-      let loadTimeout: NodeJS.Timeout | undefined = undefined;
-      let timeout: NodeJS.Timeout | undefined = undefined;
+      let loadTimeout: ReturnType<typeof setTimeout> | undefined = undefined;
+      let timeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
       const checkVideoLoaded = () => {
         if (isLoaded) return;
@@ -459,7 +565,9 @@ export const VideoCanvas = memo(
           const video = videoRef.current;
 
           loadTimeout = setTimeout(() => {
-            const length = Math.ceil(video.duration * framerate);
+            const length = isFF(FF_VIDEO_FRAME_SEEK_PRECISION)
+              ? Math.round(video.duration * framerate)
+              : Math.ceil(video.duration * framerate);
             const [width, height] = [video.videoWidth, video.videoHeight];
 
             const dimensions = {
@@ -538,7 +646,7 @@ export const VideoCanvas = memo(
             width={canvasWidth}
             height={canvasHeight}
           />
-          {!loading && buffering && <Elem name="buffering" />}
+          {!isSyncedBuffering && !loading && buffering && <Elem name="buffering" aria-label="Buffering Media Source" />}
         </Elem>
 
         <VirtualVideo
@@ -553,15 +661,21 @@ export const VideoCanvas = memo(
           onLoadedData={delayedUpdate}
           onCanPlay={delayedUpdate}
           onSeeked={(event) => {
-            delayedUpdate();
+            if (!isSyncedBuffering) {
+              delayedUpdate();
+            }
             props.onSeeked?.(event);
           }}
           onSeeking={(event) => {
-            delayedUpdate();
+            if (!isSyncedBuffering) {
+              delayedUpdate();
+            }
             props.onSeeked?.(event);
           }}
           onTimeUpdate={(event) => {
-            delayedUpdate();
+            if (!isSyncedBuffering) {
+              delayedUpdate();
+            }
             props.onTimeUpdate?.(event);
           }}
           onProgress={delayedUpdate}

@@ -15,11 +15,18 @@
     margin-top: 5px;
     font-size: 14px;
     line-height: 22px;
-    color: var(--sand_500);
+    color: var(--color-neutral-subtler);
   }
 
   &__field {
     line-height: 0;
+  }
+
+  &_size_small &__text {
+    font-size: 10px;
+    margin: 0;
+    height: 14px;
+    line-height: 14px;
   }
 
   &_size_large &__text {
@@ -41,13 +48,7 @@
 
   &[data-required] &__text::after {
     content: "Required";
-    color: var(--sand_500);
-  }
-
-  &_large &__text {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 16px;
+    color: var(--color-neutral-content-subtler);
   }
 
   &_placement_right {

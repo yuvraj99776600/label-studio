@@ -1,4 +1,3 @@
-import React from "react";
 import { FilterDropdown } from "../FilterDropdown";
 
 export const BooleanFilter = [
@@ -14,6 +13,7 @@ export const BooleanFilter = [
           { value: true, label: "yes" },
           { value: false, label: "no" },
         ]}
+        disabled={props.disabled}
       />
     ),
   },

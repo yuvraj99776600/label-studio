@@ -5,17 +5,26 @@ import logging
 from django import forms
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from users.models import User
 
 EMAIL_MAX_LENGTH = 256
-PASS_MAX_LENGTH = 64
-PASS_MIN_LENGTH = 8
 USERNAME_MAX_LENGTH = 30
 DISPLAY_NAME_LENGTH = 100
-USERNAME_LENGTH_ERR = 'Please enter a username 30 characters or fewer in length'
-DISPLAY_NAME_LENGTH_ERR = 'Please enter a display name 100 characters or fewer in length'
-PASS_LENGTH_ERR = 'Please enter a password 8-12 characters in length'
+USERNAME_LENGTH_ERR = f'Please enter a username {USERNAME_MAX_LENGTH} characters or fewer in length'
+DISPLAY_NAME_LENGTH_ERR = f'Please enter a display name {DISPLAY_NAME_LENGTH} characters or fewer in length'
 INVALID_USER_ERROR = "The email and password you entered don't match."
+
+FOUND_US_ELABORATE = 'Other'
+FOUND_US_OPTIONS = (
+    ('Gi', 'Github'),
+    ('Em', 'Email or newsletter'),
+    ('Se', 'Search engine'),
+    ('Fr', 'Friend or coworker'),
+    ('Ad', 'Ad'),
+    ('Ot', FOUND_US_ELABORATE),
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,17 +60,17 @@ class LoginForm(forms.Form):
 
 class UserSignupForm(forms.Form):
     email = forms.EmailField(label='Work Email', error_messages={'required': 'Invalid email'})
-    password = forms.CharField(
-        max_length=PASS_MAX_LENGTH,
-        error_messages={'required': PASS_LENGTH_ERR},
-        widget=forms.TextInput(attrs={'type': 'password'}),
-    )
+    password = forms.CharField(widget=forms.TextInput(attrs={'type': 'password'}))
     allow_newsletters = forms.BooleanField(required=False)
+    how_find_us = forms.CharField(required=False)
+    elaborate = forms.CharField(required=False)
 
     def clean_password(self):
-        password = self.cleaned_data['password']
-        if len(password) < PASS_MIN_LENGTH:
-            raise forms.ValidationError(PASS_LENGTH_ERR)
+        password = self.cleaned_data.get('password')
+        try:
+            validate_password(password)
+        except DjangoValidationError as e:
+            raise forms.ValidationError(e.messages)
         return password
 
     def clean_username(self):
@@ -85,8 +94,14 @@ class UserSignupForm(forms.Form):
         password = cleaned['password']
         email = cleaned['email'].lower()
         allow_newsletters = None
+        how_find_us = None
         if 'allow_newsletters' in cleaned:
             allow_newsletters = cleaned['allow_newsletters']
+        if 'how_find_us' in cleaned:
+            how_find_us = cleaned['how_find_us']
+        if 'elaborate' in cleaned and how_find_us == FOUND_US_ELABORATE:
+            cleaned['elaborate']
+
         user = User.objects.create_user(email, password, allow_newsletters=allow_newsletters)
         return user
 

@@ -2,23 +2,18 @@ from django.conf import settings
 
 
 def event_processor(event, hint):
-    # skip all transactions without errors
+    # skip all transactions without exceptions, unless it's a log record
     if 'exc_info' not in hint:
+        # special flag inside of logger.error(..., extra={'sentry_force': True}) to force sentry to log the error
+        if 'log_record' in hint and event.get('extra', {}).get('sentry_force', False):
+            return event
+
         return None
 
     # skip specified exceptions
     exceptions = event.get('exception', {}).get('values', [{}])
     last = exceptions[-1]
-    if last.get('type') in [
-        'Http404',
-        'NotAuthenticated',
-        'AuthenticationFailed',
-        'NotFound',
-        'XMLSyntaxError',
-        'FileUpload.DoesNotExist',
-        'Forbidden',
-        'KeyboardInterrupt',
-    ]:
+    if last.get('type') in settings.SENTRY_IGNORED_EXCEPTIONS:
         return None
 
     # sentry ignored factory class

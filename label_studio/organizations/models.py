@@ -7,6 +7,7 @@ from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Count, Q
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
@@ -46,11 +47,11 @@ class OrganizationMember(OrganizationMemberMixin, models.Model):
         user_pk = user_or_user_pk.pk if isinstance(user_or_user_pk, User) else user_or_user_pk
         return OrganizationMember.objects.get(user=user_pk, organization=organization_pk)
 
-    @property
+    @cached_property
     def is_deleted(self):
         return bool(self.deleted_at)
 
-    @property
+    @cached_property
     def is_owner(self):
         return self.user.id == self.organization.created_by.id
 
@@ -64,7 +65,10 @@ class OrganizationMember(OrganizationMemberMixin, models.Model):
             self.user.active_organization = self.user.organizations.filter(
                 organizationmember__deleted_at__isnull=True
             ).first()
-            self.user.save(update_fields=['active_organization'])
+            if self.user.avatar:
+                self.user.avatar.delete(save=False)
+                self.user.avatar = None
+            self.user.save(update_fields=['active_organization', 'avatar'])
 
         self.user.task_locks.all().delete()
 
@@ -98,9 +102,9 @@ class Organization(OrganizationMixin, models.Model):
         return self.title + ', id=' + str(self.pk)
 
     @classmethod
-    def create_organization(cls, created_by=None, title='Your Organization'):
+    def create_organization(cls, created_by=None, title='Your Organization', **kwargs):
         _create_organization = load_func(settings.CREATE_ORGANIZATION)
-        return _create_organization(title=title, created_by=created_by)
+        return _create_organization(title=title, created_by=created_by, **kwargs)
 
     @classmethod
     def find_by_user(cls, user, check_deleted=False):
@@ -181,11 +185,11 @@ class Organization(OrganizationMixin, models.Model):
             return org_verify
         return settings.VERIFY_SSL_CERTS
 
-    @property
+    @cached_property
     def secure_mode(self):
         return False
 
-    @property
+    @cached_property
     def members(self):
         return OrganizationMember.objects.filter(organization=self)
 

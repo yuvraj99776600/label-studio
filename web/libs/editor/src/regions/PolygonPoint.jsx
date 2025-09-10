@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Circle, Rect } from "react-konva";
 import { observer } from "mobx-react";
-import { getParent, getRoot, hasParent, types } from "mobx-state-tree";
+import { getParent, hasParent, types } from "mobx-state-tree";
 
+import { RELATIVE_STAGE_HEIGHT, RELATIVE_STAGE_WIDTH } from "../components/ImageView/Image";
 import { guidGenerator } from "../core/Helpers";
 import { useRegionStyles } from "../hooks/useRegionColor";
-import { FF_DEV_2431, FF_DEV_3793, isFF } from "../utils/feature-flags";
-import { RELATIVE_STAGE_HEIGHT, RELATIVE_STAGE_WIDTH } from "../components/ImageView/Image";
+import { AnnotationMixin } from "../mixins/AnnotationMixin";
+import { FF_DEV_3793, isFF } from "../utils/feature-flags";
 
 const PolygonPointAbsoluteCoordsDEV3793 = types
   .model()
@@ -83,12 +84,10 @@ const PolygonPointRelativeCoords = types
       return self.parent?.parent;
     },
 
-    get annotation() {
-      return getRoot(self).annotationStore.selected;
-    },
     get canvasX() {
       return isFF(FF_DEV_3793) ? self.stage?.internalToCanvasX(self.x) : self.x;
     },
+
     get canvasY() {
       return isFF(FF_DEV_3793) ? self.stage?.internalToCanvasY(self.y) : self.y;
     },
@@ -196,9 +195,11 @@ const PolygonPointRelativeCoords = types
     },
   }));
 
-const PolygonPoint = isFF(FF_DEV_3793)
+const PolygonPointModel = isFF(FF_DEV_3793)
   ? PolygonPointRelativeCoords
   : types.compose("PolygonPoint", PolygonPointRelativeCoords, PolygonPointAbsoluteCoordsDEV3793);
+
+const PolygonPoint = types.compose("PolygonPoint", AnnotationMixin, PolygonPointModel);
 
 const PolygonPointView = observer(({ item, name }) => {
   if (!item.parent) return;
@@ -309,7 +310,7 @@ const PolygonPointView = observer(({ item, name }) => {
           item.parent.deletePoint(item);
         }}
         onClick={(ev) => {
-          if (isFF(FF_DEV_2431) && ev.evt.altKey) return item.parent.deletePoint(item);
+          if (ev.evt.altKey) return item.parent.deletePoint(item);
           if (item.parent.isDrawing && item.parent.points.length === 1) return;
           // don't unselect polygon on point click
           ev.evt.preventDefault();

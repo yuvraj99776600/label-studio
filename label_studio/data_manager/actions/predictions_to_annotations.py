@@ -58,6 +58,14 @@ def predictions_to_annotations(project, queryset, **kwargs):
         )
         # Update counters for tasks and is_labeled. It should be a single operation as counters affect bulk is_labeled update
         project.update_tasks_counters_and_is_labeled(Task.objects.filter(id__in=tasks_ids))
+
+        try:
+            from stats.functions.stats import recalculate_stats_async_or_sync
+
+            recalculate_stats_async_or_sync(project, all=False)
+        except (ModuleNotFoundError, ImportError):
+            logger.info('Predictions converted to annotations in LSO, stats recomputation skipped')
+
     return {'response_code': 200, 'detail': f'Created {count} annotations'}
 
 
@@ -83,6 +91,7 @@ def predictions_to_annotations_form(user, project):
                     'name': 'model_version',
                     'label': 'Choose predictions',
                     'options': versions,
+                    'value': first,
                 }
             ],
         }
@@ -98,7 +107,7 @@ actions = [
         'dialog': {
             'title': 'Create Annotations From Predictions',
             'text': 'Create annotations from predictions using selected predictions set '
-            'for each selected task.'
+            'for each selected task. '
             'Your account will be assigned as an owner to those annotations. ',
             'type': 'confirm',
             'form': predictions_to_annotations_form,

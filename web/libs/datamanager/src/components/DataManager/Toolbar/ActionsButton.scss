@@ -68,7 +68,7 @@
   }
 
   &_hasSubMenu {
-    color: var(--sand_600);
+    color: var(--color-neutral-content-subtler);
 
     &:hover {
       color: var(--black);
@@ -89,91 +89,6 @@
       background-color: var(--black_4) !important;
       color: rgb(0 0 0 / 25%) !important;
       cursor: initial;
-    }
-  }
-}
-
-.actionButtonPrime {
-  gap: 8px;
-}
-
-.actionmenu,
-.actionButton-submenu {
-  &_newUI {
-    .actionButton {
-      position: relative;
-      padding: 8px;
-      height: auto;
-
-      &.menu__item {
-        height: auto;
-        color: #1F1F1F;
-
-        &.actionButton_isTitle {
-          color: var(--grape_500);
-        }
-
-        &_look_danger {
-          color: #d00;
-        }
-      }
-
-      &:not(.menu-dm__item_active):hover {
-        background-color: transparent;
-
-        .menu-dm {
-          &__titleContainer {
-            background-color: rgb(65 60 74 / 8%);
-          }
-        }
-      }
-
-      &_hasSubMenu {
-        color: #1F1F1F;
-
-        &:hover{
-          color: #1F1F1F;
-          background-color: transparent;
-        }
-
-        .actionButton__titleContainer:hover {
-          background-color: var(--grape_0);
-        }
-      }
-
-      &__titleContainer {
-        height: 100%;
-        width: 100%;
-        padding: 4px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-
-        &:hover {
-          background-color: rgb(65 60 74 / 8%);
-        }
-      }
-
-      &_isTitle {
-        padding: 16px 8px 0;
-
-        .actionButton__titleContainer {
-          cursor: default;
-
-          &:hover {
-            background: transparent;
-          }
-        }
-      }
-
-      &_isSeparator {
-        height: 1px;
-        padding: 0;
-
-        &.menu__item {
-          height: 1px;
-          padding: 0;
-        }
-      }
     }
   }
 }

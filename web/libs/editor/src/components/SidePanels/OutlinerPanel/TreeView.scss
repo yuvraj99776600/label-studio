@@ -13,10 +13,11 @@
     position: relative;
     max-width: 100%;
     box-sizing: border-box;
+    transition: all 150ms ease-out;
 
     &:hover,
     &-selected {
-      background-color: var(--selection-color, var(--sand_100));
+      background-color: var(--selection-color, var(--color-neutral-emphasis-subtle));
     }
 
     &:hover .outliner-item__controls {
@@ -25,7 +26,8 @@
 
     &:hover .outliner-item__controls_newUI {
       .outliner-item__control_type_lock button,
-      .outliner-item__control_type_visibility button {
+      .outliner-item__control_type_visibility button,
+      .outliner-item__control_type_menu button {
         display: inline-flex !important;
       }
     }
@@ -50,14 +52,9 @@
   &-node {
     &-content-wrapper {
       flex: 1;
-      padding: 0 4px;
+      padding: var(--spacing-tighter);
       display: flex;
-      align-items: center;
-      max-width: 100%;
-
-      .ff_outliner_optim & {
-        align-items: flex-start;
-      }
+      align-items: flex-start;
     }
   }
 
@@ -93,12 +90,23 @@
     min-width: 0;
 
     .labels-list {
-      display: inline-block;
+      display: inline;
+      line-height: 1.2; // make it dense for multiline labels
+      padding: 2px 0; // + add a little padding so it won't be too close to the item edges
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
   &__node {
     border: 1px dashed transparent;
+
+    &_type_tool {
+      .tree-iconEle,
+      .outliner-item__title {
+        color: var(--color-neutral-content);
+      }
+    }
 
     &_hidden {
       opacity: 0.4;
@@ -123,33 +131,39 @@
     min-height: 32px;
     align-items: center;
     justify-content: space-between;
+    gap: var(--spacing-tighter);
   }
 
   &__index {
     width: 18px;
     height: 18px;
     display: flex;
+    flex: none;
     font-size: 9px;
-    color: var(--sand_0);
-    margin-right: 4px;
+    color: var(--color-sand-000); // TODO: Revisit this with a css variable that can be calculated against --text-color for a dynamically high contrast value.
     text-align: center;
     align-items: center;
     border-radius: 4px;
     justify-content: center;
-    background-color: var(--text-color, var(--sand_900));
+    background-color: var(--text-color, var(--color-neutral-inverted-background));
   }
 
   &__title {
     align-items: center;
     display: inline-flex;
     flex: 1;
-    color: var(--text-color, var(--sand_900));
-    min-width: 0;
+    color: var(--text-color, var(--color-neutral-content));
+    min-width: 50px;
+  }
+
+  &__ocr {
+    flex: 1 1 auto;
+    min-width: 50px;
   }
 
   &__text {
     margin-left: 5px;
-    color: var(--sand_900);
+    color: var(--color-neutral-content);
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -210,7 +224,16 @@
 
     &-wrapper {
       display: flex;
-      margin-left: 13px;
+    }
+
+    .region-context-menu {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .region-context-menu button {
+      display: none;
     }
   }
 
@@ -226,7 +249,6 @@
 .ocr {
   background: none;
   position: relative;
-  padding: 0 0 8px;
 
   &_empty {
     display: none;
@@ -248,8 +270,8 @@
   }
 
   &_hidden {
-    & .ocr{
-      background: var(--sand_0);
+    & .ocr {
+      background: var(--color-neutral-background);
     }
   }
 }

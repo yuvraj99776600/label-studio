@@ -1,12 +1,10 @@
-import React from "react";
-
 import { observer } from "mobx-react";
 import { types } from "mobx-state-tree";
 
 import BaseTool from "./Base";
 import ToolMixin from "../mixins/Tool";
 import { Tool } from "../components/Toolbar/Tool";
-import { IconRotateLeftTool, IconRotateRightTool } from "../assets/icons";
+import { IconRotateLeftTool, IconRotateRightTool } from "@humansignal/icons";
 
 const ToolView = observer(({ item }) => {
   return (
@@ -16,7 +14,7 @@ const ToolView = observer(({ item }) => {
         icon={<IconRotateLeftTool />}
         ariaLabel="rotate-left"
         label="Rotate Left"
-        shortcut="alt+left"
+        shortcut="tool:rotate-left"
         onClick={() => {
           item.rotate(-90);
         }}
@@ -26,7 +24,7 @@ const ToolView = observer(({ item }) => {
         icon={<IconRotateRightTool />}
         ariaLabel="rotate-right"
         label="Rotate Right"
-        shortcut="alt+right"
+        shortcut="tool:rotate-right"
         onClick={() => {
           item.rotate(90);
         }}

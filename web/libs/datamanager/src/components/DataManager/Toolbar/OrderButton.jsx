@@ -1,6 +1,6 @@
+import { IconSortDown, IconSortUp } from "@humansignal/icons";
+import { Button, ButtonGroup } from "@humansignal/ui";
 import { inject } from "mobx-react";
-import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
-import { Button } from "../../Common/Button/Button";
 import { FieldsButton } from "../../Common/FieldsButton";
 import { Space } from "../../Common/Space/Space";
 
@@ -16,16 +16,18 @@ const injector = inject(({ store }) => {
 export const OrderButton = injector(({ size, ordering, view, ...rest }) => {
   return (
     <Space style={{ fontSize: 12 }}>
-      Order
-      <Button.Group collapsed {...rest}>
+      <ButtonGroup collapsed {...rest}>
         <FieldsButton
           size={size}
           style={{ minWidth: 67, textAlign: "left", marginRight: -1 }}
-          title={ordering ? ordering.column?.title : "not set"}
+          title={ordering ? ordering.column?.title : "Order by"}
           onClick={(col) => view.setOrdering(col.id)}
           onReset={() => view.setOrdering(null)}
           resetTitle="Default"
           selected={ordering?.field}
+          filter={(col) => {
+            return col.orderable ?? col.original?.orderable;
+          }}
           wrapper={({ column, children }) => (
             <Space style={{ width: "100%", justifyContent: "space-between" }}>
               {children}
@@ -43,16 +45,20 @@ export const OrderButton = injector(({ size, ordering, view, ...rest }) => {
               </div>
             </Space>
           )}
+          openUpwardForShortViewport={false}
         />
 
         <Button
           size={size}
-          style={{ color: "#595959" }}
+          look="outlined"
+          variant="neutral"
           disabled={!!ordering === false}
-          icon={ordering?.desc ? <FaSortAmountUp /> : <FaSortAmountDown />}
           onClick={() => view.setOrdering(ordering?.field)}
-        />
-      </Button.Group>
+          aria-label={ordering?.desc ? "Sort ascending" : "Sort descending"}
+        >
+          {ordering?.desc ? <IconSortUp /> : <IconSortDown />}
+        </Button>
+      </ButtonGroup>
     </Space>
   );
 });

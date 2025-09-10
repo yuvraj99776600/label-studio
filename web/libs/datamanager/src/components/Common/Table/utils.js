@@ -1,20 +1,23 @@
 export const prepareColumns = (columns, hidden) => {
+  if (!hidden?.length) return [...columns];
   return columns.filter((col) => {
-    return !(hidden ?? []).includes(col.id);
+    return !hidden.includes(col.id);
   });
 };
 
 export const getProperty = (object, path) => {
   try {
-    const normalizedPath = path
-      .split(".")
-      .map((p) => `["${p}"]`)
-      .join("");
+    const properties = path.split(".");
+    let result = object;
 
-    // eslint-disable-next-line no-new-func
-    const fn = new Function("object", `return object${normalizedPath}`);
+    for (const property of properties) {
+      result = result?.[property];
+      if (result === undefined) {
+        return undefined;
+      }
+    }
 
-    return fn(object);
+    return result;
   } catch {
     return undefined;
   }

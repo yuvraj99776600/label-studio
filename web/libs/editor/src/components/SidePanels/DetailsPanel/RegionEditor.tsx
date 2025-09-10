@@ -1,15 +1,7 @@
 import { observe } from "mobx";
 import { observer } from "mobx-react";
+import { type IAnyType, isLiteralType, isOptionalType, isPrimitiveType, isUnionType, types } from "mobx-state-tree";
 import {
-  getType,
-  type IAnyType,
-  isLiteralType,
-  isOptionalType,
-  isPrimitiveType,
-  isUnionType,
-  types,
-} from "mobx-state-tree";
-import React, {
   type ChangeEvent,
   type FC,
   type HTMLInputTypeAttribute,
@@ -20,14 +12,16 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { IconPropertyAngle } from "../../../assets/icons";
+import { IconPropertyAngle } from "@humansignal/icons";
+import { Checkbox, Select } from "@humansignal/ui";
 import { Block, Elem, useBEM } from "../../../utils/bem";
-import "./RegionEditor.scss";
 import { TimeDurationControl } from "../../TimeDurationControl/TimeDurationControl";
-import { FF_DEV_2715, isFF } from "../../../utils/feature-flags";
+import { TimelineRegionEditor } from "./TimelineRegionEditor";
+import "./RegionEditor.scss";
+import type { MSTRegion } from "../../../stores/types";
 
 interface RegionEditorProps {
-  region: any;
+  region: MSTRegion;
 }
 
 const getPrimitiveType = (type: IAnyType) => {
@@ -58,21 +52,24 @@ const IconMapping = {
 };
 
 const RegionEditorComponent: FC<RegionEditorProps> = ({ region }) => {
-  const fields: any[] = region.editableFields ?? [];
-  const isAudioModel = getType(region).name === "AudioRegionModel";
+  const isAudioRegion = region.type === "audioregion";
+  const isTimelineRegion = region.type === "timelineregion";
+  const Component = isTimelineRegion ? TimelineRegionEditor : isAudioRegion ? AudioRegionProperties : RegionProperties;
 
-  const changeStartTimeHandler = (value: number) => {
-    region.setProperty("start", value);
-  };
+  return (
+    <Block name="region-editor" mod={{ disabled: region.isReadOnly() }}>
+      <Component region={region} />
+    </Block>
+  );
+};
 
-  const changeEndTimeHandler = (value: number) => {
-    region.setProperty("end", value);
-  };
+const RegionProperties = ({ region }: RegionEditorProps) => {
+  const fields = region.editableFields ?? [];
 
-  const renderRegionProperty = () => (
+  return (
     <Elem name="wrapper">
       {region.editorEnabled &&
-        fields.map((field: any, i) => {
+        fields.map((field, i) => {
           return (
             <RegionProperty
               key={`${field.property}-${i}`}
@@ -84,34 +81,38 @@ const RegionEditorComponent: FC<RegionEditorProps> = ({ region }) => {
         })}
     </Elem>
   );
+};
 
-  const renderAudioTimeControls = () => {
-    return (
-      <Elem name="wrapper-time-control">
-        <TimeDurationControl
-          startTime={region.start}
-          endTime={region.end}
-          minTime={0}
-          maxTime={region?._ws_region?.duration}
-          isSidepanel={true}
-          onChangeStartTime={changeStartTimeHandler}
-          onChangeEndTime={changeEndTimeHandler}
-        />
-      </Elem>
-    );
+const AudioRegionProperties = observer(({ region }: { region: any }) => {
+  const changeStartTimeHandler = (value: number) => {
+    region.setProperty("start", value);
+  };
+
+  const changeEndTimeHandler = (value: number) => {
+    region.setProperty("end", value);
   };
 
   return (
-    <Block name="region-editor" mod={{ disabled: region.isReadOnly() }}>
-      {isAudioModel && isFF(FF_DEV_2715) ? renderAudioTimeControls() : renderRegionProperty()}
-    </Block>
+    <Elem name="wrapper-time-control">
+      <TimeDurationControl
+        startTime={region.start}
+        endTime={region.end}
+        minTime={0}
+        maxTime={region?._ws_region?.duration}
+        isSidepanel={true}
+        onChangeStartTime={changeStartTimeHandler}
+        onChangeEndTime={changeEndTimeHandler}
+        showLabels
+        showDuration
+      />
+    </Elem>
   );
-};
+});
 
 interface RegionPropertyProps {
   property: string;
   label: string;
-  region: any;
+  region: MSTRegion;
 }
 
 const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) => {
@@ -119,9 +120,7 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
   const [value, setValue] = useState(region.getProperty(property));
 
   const propertyType = useMemo(() => {
-    const regionType = getType(region);
-
-    return (regionType as any).properties[property];
+    return region.getPropertyType(property);
   }, [region, property]);
 
   const isPrimitive = useMemo(() => {
@@ -131,7 +130,7 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
   const options = useMemo(() => {
     if (isPrimitive) return null;
 
-    let result: any[] | null = null;
+    let result: string[] | null = null;
     const isEnum = isUnionType(propertyType);
 
     if (isEnum) {
@@ -177,9 +176,8 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
   return (
     <Elem name="property" tag="label">
       {isBoolean ? (
-        <input
+        <Checkbox
           className={block?.elem("input").toClassName()}
-          type="checkbox"
           checked={value}
           onChange={(e) => onChangeHandler(e.target.checked)}
         />
@@ -191,17 +189,12 @@ const RegionProperty: FC<RegionPropertyProps> = ({ property, label, region }) =>
           onChange={(v) => onChangeHandler(Number(v))}
         />
       ) : options ? (
-        <select
+        <Select
           value={value}
-          onChange={(e) => onChangeHandler(e.target.value)}
-          className={block?.elem("select").toClassName()}
-        >
-          {options.map((value, i) => (
-            <option key={`${value}-${i}`} value={value}>
-              {value}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => onChangeHandler(val)}
+          triggerClassName={block?.elem("select").toClassName()}
+          options={options}
+        />
       ) : null}
       <PropertyLabel label={label} />
     </Elem>

@@ -1,9 +1,8 @@
 import { inject, observer } from "mobx-react";
 import { getType, types } from "mobx-state-tree";
 import ColorScheme from "pleasejs";
-import React from "react";
 
-import { Tooltip } from "../../common/Tooltip/Tooltip";
+import { Tooltip } from "@humansignal/ui";
 import InfoModal from "../../components/Infomodal/Infomodal";
 import { Label } from "../../components/Label/Label";
 import Constants from "../../core/Constants";
@@ -17,7 +16,6 @@ import { TagParentMixin } from "../../mixins/TagParentMixin";
 import ToolsManager from "../../tools/Manager";
 import Utils from "../../utils";
 import { parseValue } from "../../utils/data";
-import { FF_DEV_2128, isFF } from "../../utils/feature-flags";
 import { sanitizeHtml } from "../../utils/html";
 
 /**
@@ -65,7 +63,7 @@ const TagAttrs = types.model({
   granularity: types.maybeNull(types.enumeration(["symbol", "word", "sentence", "paragraph"])),
   groupcancontain: types.maybeNull(types.string),
   // childrencheck: types.optional(types.enumeration(["any", "all"]), "any")
-  ...(isFF(FF_DEV_2128) ? { html: types.maybeNull(types.string) } : {}),
+  html: types.maybeNull(types.string),
 });
 
 const Model = types
@@ -85,6 +83,8 @@ const Model = types
       "TimelineLabels",
       "TimeSeriesLabels",
       "ParagraphLabels",
+      "BitmaskLabels",
+      "VectorLabels",
     ]),
   })
   .volatile((self) => {
@@ -192,12 +192,6 @@ const Model = types
 
       // if we are going to select label and it would be the first in this labels group
       if (!labels.selectedLabels.length && !self.selected) {
-        // unselect labels from other groups of labels connected to this obj
-
-        self.annotation.toNames
-          .get(labels.toname)
-          .filter((tag) => tag.type && tag.type.endsWith("labels") && tag.name !== labels.name);
-
         // unselect other tools if they exist and selected
         const manager = ToolsManager.getInstance({ name: self.parent.toname });
         const tool = Object.values(self.parent?.tools || {})[0];

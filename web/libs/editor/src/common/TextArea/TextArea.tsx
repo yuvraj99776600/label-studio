@@ -1,10 +1,12 @@
 import { type FC, type FocusEvent, type MutableRefObject, type RefObject, useCallback, useEffect, useRef } from "react";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 import { cn } from "../../utils/bem";
 import { isMacOS } from "../../utils/utilities";
 
 import "./TextArea.scss";
 import mergeRefs from "../Utils/mergeRefs";
+
+export type ActionRefValue = { update?: (text?: string) => void; el?: RefObject<HTMLTextAreaElement> };
 
 export type TextAreaProps = {
   value?: string | null;
@@ -14,7 +16,7 @@ export type TextAreaProps = {
   onFocus?: (e: FocusEvent) => void;
   onBlur?: (e: FocusEvent) => void;
   ref?: MutableRefObject<HTMLTextAreaElement>;
-  actionRef?: MutableRefObject<{ update?: (text?: string) => void; el?: RefObject<HTMLTextAreaElement> }>;
+  actionRef?: MutableRefObject<ActionRefValue>;
   rows?: number;
   maxRows?: number;
   autoSize?: boolean;

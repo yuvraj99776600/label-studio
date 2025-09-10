@@ -6,13 +6,13 @@ import logging
 import mimetypes
 import os
 import posixpath
-import sys
 from pathlib import Path
 from wsgiref.util import FileWrapper
 
 import pandas as pd
+import requests
 from core import utils
-from core.feature_flags import all_flags, get_feature_file_path
+from core.feature_flags import all_flags, flag_set, get_feature_file_path
 from core.label_config import generate_time_series_json
 from core.utils.common import collect_versions
 from core.utils.io import find_file
@@ -23,13 +23,13 @@ from django.http import (
     HttpResponse,
     HttpResponseForbidden,
     HttpResponseNotFound,
-    HttpResponseServerError,
     JsonResponse,
 )
-from django.shortcuts import redirect, reverse
-from django.template import loader
+from django.shortcuts import redirect, render, reverse
 from django.utils._os import safe_join
-from drf_yasg.utils import swagger_auto_schema
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from drf_spectacular.utils import extend_schema
 from io_storages.localfiles.models import LocalFilesImportStorage
 from ranged_fileresponse import RangedFileResponse
 from rest_framework.decorators import api_view, permission_classes
@@ -52,7 +52,11 @@ def main(request):
             return redirect(reverse('user-login'))
 
         # business mode access
-        return redirect(reverse('projects:project-index'))
+        if flag_set('fflag_all_feat_dia_1777_ls_homepage_short', user):
+            print('redirect to home page')
+            return render(request, 'home/home.html')
+        else:
+            return redirect(reverse('projects:project-index'))
 
     # not authenticated
     return redirect(reverse('user-login'))
@@ -69,15 +73,14 @@ def version_page(request):
     # html / json response
     if request.path == '/version/':
         # other settings from backend
-        if request.user.is_superuser:
+        if not getattr(settings, 'CLOUD_INSTANCE', False) and request.user.is_superuser:
             result['settings'] = {
                 key: str(getattr(settings, key))
                 for key in dir(settings)
                 if not key.startswith('_') and not hasattr(getattr(settings, key), '__call__')
             }
 
-        result = json.dumps(result, indent=2)
-        result = result.replace('},', '},\n').replace('\\n', ' ').replace('\\r', '')
+        result = json.dumps(result, indent=2, ensure_ascii=False)
         return HttpResponse('<pre>' + result + '</pre>')
     else:
         return JsonResponse(result)
@@ -100,7 +103,7 @@ class TriggerAPIError(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    @swagger_auto_schema(auto_schema=None)
+    @extend_schema(exclude=True)
     def get(self, request):
         raise Exception('test')
 
@@ -109,13 +112,6 @@ def editor_files(request):
     """Get last editor files"""
     response = utils.common.find_editor_files()
     return HttpResponse(json.dumps(response), status=200)
-
-
-def custom_500(request):
-    """Custom 500 page"""
-    t = loader.get_template('500.html')
-    type_, value, tb = sys.exc_info()
-    return HttpResponseServerError(t.render({'exception': value}))
 
 
 def samples_time_series(request):
@@ -169,7 +165,34 @@ def samples_paragraphs(request):
     return HttpResponse(json.dumps(result), content_type='application/json')
 
 
-@swagger_auto_schema(methods=['GET'], auto_schema=None)
+def heidi_tips(request):
+    """Fetch live tips from github raw liveContent.json to avoid caching and client side CORS issues"""
+    url = 'https://raw.githubusercontent.com/HumanSignal/label-studio/refs/heads/develop/web/apps/labelstudio/src/components/HeidiTips/liveContent.json'
+
+    response = None
+    try:
+        response = requests.get(
+            url,
+            headers={'Cache-Control': 'no-cache', 'Content-Type': 'application/json', 'Accept': 'application/json'},
+            timeout=5,
+        )
+        # Raise an exception for bad status codes to avoid caching
+        response.raise_for_status()
+    # Catch all exceptions and return either the status code if there was a response, or default to 404 if there are network issues
+    # This is done this way to catch thrown exceptions from the request itself which will occur for air-gapped environments
+    except Exception:
+        # Any other HTTP error will return the error code, and other errors like connection/timeout errors will be a 404
+        content = {}
+        status_code = 404
+        if response is not None:
+            content['detail'] = response.reason
+            status_code = response.status_code
+        return HttpResponse(json.dumps(content), content_type='application/json', status=status_code)
+
+    return HttpResponse(response.content, content_type='application/json')
+
+
+@extend_schema(exclude=True)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def localfiles_data(request):
@@ -210,7 +233,7 @@ def localfiles_data(request):
 
 def static_file_with_host_resolver(path_on_disk, content_type):
     """Load any file, replace {{HOSTNAME}} => settings.HOSTNAME, send it as http response"""
-    path_on_disk = os.path.join(os.path.dirname(__file__), path_on_disk)
+    path_on_disk = os.path.join(settings.STATIC_ROOT, path_on_disk)
 
     def serve_file(request):
         with open(path_on_disk, 'r') as f:
@@ -244,3 +267,10 @@ def feature_flags(request):
     }
 
     return HttpResponse('<pre>' + json.dumps(flags, indent=4) + '</pre>', status=200)
+
+
+@csrf_exempt
+@require_http_methods(['POST', 'GET'])
+def collect_metrics(request):
+    """Lightweight endpoint to collect usage metrics from the frontend only when COLLECT_ANALYTICS is enabled"""
+    return HttpResponse(status=204)

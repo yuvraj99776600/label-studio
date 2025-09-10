@@ -1,13 +1,9 @@
-import "codemirror/lib/codemirror.css";
-import "codemirror/mode/xml/xml";
-import React, { useEffect, useState } from "react";
-import { UnControlled as CodeMirror } from "react-codemirror2";
+import React, { useEffect, useMemo, useState } from "react";
 import CM from "codemirror";
-import "codemirror/addon/hint/show-hint";
-import "codemirror/addon/hint/show-hint.css";
-
-import { Button, ToggleItems } from "../../../components";
-import { Form } from "../../../components/Form";
+import { Button, cnm } from "@humansignal/ui";
+import { IconTrash } from "@humansignal/icons";
+import { ToggleItems } from "../../../components";
+import { Form, Input } from "../../../components/Form";
 import { useAPI } from "../../../providers/ApiProvider";
 import { Block, cn, Elem } from "../../../utils/bem";
 import { Palette } from "../../../utils/colors";
@@ -18,10 +14,10 @@ import { Preview } from "./Preview";
 import { DEFAULT_COLUMN, EMPTY_CONFIG, isEmptyConfig, Template } from "./Template";
 import { TemplatesList } from "./TemplatesList";
 
-import "./codemirror.css";
-import "./config-hint";
-import tags from "./schema.json";
+import tags from "@humansignal/core/lib/utils/schema/tags.json";
 import { UnsavedChanges } from "./UnsavedChanges";
+import { Checkbox, CodeEditor, Select } from "@humansignal/ui";
+import snakeCase from "lodash/snakeCase";
 
 const wizardClass = cn("wizard");
 const configClass = cn("configure");
@@ -44,37 +40,36 @@ const Label = ({ label, template, color }) => {
   const value = label.getAttribute("value");
 
   return (
-    <li className={configClass.elem("label").mod({ choice: label.tagName === "Choice" })}>
-      <label style={{ background: color }}>
-        <input
-          type="color"
-          className={configClass.elem("label-color")}
-          value={colorNames[color] || color}
-          onChange={(e) => template.changeLabel(label, { background: e.target.value })}
-        />
-      </label>
-      <span>{value}</span>
-      <button
+    <li
+      className={cnm(
+        configClass
+          .elem("label")
+          .mod({ choice: label.tagName === "Choice" })
+          .toClassName(),
+        "group",
+      )}
+    >
+      <span className={cnm(configClass.elem("label-text").toClassName(), "flex")}>
+        <label style={{ background: color }}>
+          <Input
+            type="color"
+            className={configClass.elem("label-color")}
+            value={colorNames[color] || color}
+            onChange={(e) => template.changeLabel(label, { background: e.target.value })}
+          />
+        </label>
+        <span>{value}</span>
+      </span>
+      <Button
         type="button"
-        className={configClass.elem("delete-label")}
+        look="string"
+        size="smaller"
+        variant="negative"
         onClick={() => template.removeLabel(label)}
         aria-label="delete label"
-      >
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          fill="none"
-          stroke="red"
-          strokeWidth="2"
-          strokeLinecap="square"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <title>Delete label</title>
-          <path d="M2 12L12 2" />
-          <path d="M12 12L2 2" />
-        </svg>
-      </button>
+        className="hidden !p-0 z-10 absolute right-0 [&_span]:!p-0 group-hover:inline-flex"
+        leading={<IconTrash className="w-4 h-4 fill-[currentColor]" />}
+      />
     </li>
   );
 };
@@ -103,8 +98,18 @@ const ConfigureControl = ({ control, template }) => {
       <form className={configClass.elem("add-labels")} action="">
         <h4>{tagname === "Choices" ? "Add choices" : "Add label names"}</h4>
         <span>Use new line as a separator to add multiple labels</span>
-        <textarea name="labels" id="" cols="30" rows="5" ref={refLabels} onKeyPress={onKeyPress} />
-        <input type="button" value="Add" onClick={onAddLabels} />
+        <textarea
+          name="labels"
+          id=""
+          cols="50"
+          rows="5"
+          ref={refLabels}
+          onKeyPress={onKeyPress}
+          className="lsf-textarea-ls p-2 px-3"
+        />
+        <Button type="button" size="small" look="outlined" onClick={onAddLabels} aria-label="Add labels">
+          Add
+        </Button>
       </form>
       <div className={configClass.elem("current-labels")}>
         <h3>
@@ -150,26 +155,25 @@ const ConfigureSettings = ({ template }) => {
 
     switch (type) {
       case Array:
-        onChange = (e) => {
+        onChange = (val) => {
           if (typeof options.param === "function") {
-            options.param($tag, e.target.value);
+            options.param($tag, val);
           } else {
-            $object.setAttribute(options.param, e.target.value);
+            $object.setAttribute(options.param, val);
           }
           template.render();
         };
         return (
           <li key={key}>
-            <label>
-              {options.title}{" "}
-              <select value={value} onChange={onChange}>
-                {options.type.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Select
+              triggerClassName="border"
+              value={value}
+              onChange={onChange}
+              options={options.type}
+              label={options.title}
+              isInline={true}
+              dataTestid={`select-trigger-${options.title.replace(/\s+/g, "-").replace(":", "").toLowerCase()}-${value}`}
+            />
           </li>
         );
       case Boolean:
@@ -183,9 +187,9 @@ const ConfigureSettings = ({ template }) => {
         };
         return (
           <li key={key}>
-            <label>
-              <input type="checkbox" checked={value} onChange={onChange} /> {options.title}
-            </label>
+            <Checkbox checked={value} onChange={onChange}>
+              {options.title}
+            </Checkbox>
           </li>
         );
       case String:
@@ -202,7 +206,7 @@ const ConfigureSettings = ({ template }) => {
         return (
           <li key={key}>
             <label>
-              {options.title} <input type="text" onInput={onChange} value={value} size={size} />
+              {options.title} <Input type="text" onInput={onChange} value={value} size={size} />
             </label>
           </li>
         );
@@ -224,7 +228,8 @@ const ConfigureSettings = ({ template }) => {
 
 // configure value source for `obj` object tag
 const ConfigureColumn = ({ template, obj, columns }) => {
-  const value = obj.getAttribute("value")?.replace(/^\$/, "");
+  const valueAttr = obj.hasAttribute("valueList") ? "valueList" : "value";
+  const value = obj.getAttribute(valueAttr)?.replace(/^\$/, "");
   // if there is a value set already and it's not in the columns
   // or data was not uploaded yet
   const [isManual, setIsManual] = useState(!!value && !columns?.includes(value));
@@ -238,13 +243,11 @@ const ConfigureColumn = ({ template, obj, columns }) => {
   const updateValue = (value) => {
     const newValue = value.replace(/^\$/, "");
 
-    obj.setAttribute("value", `$${newValue}`);
+    obj.setAttribute(valueAttr, `$${newValue}`);
     template.render();
   };
 
-  const selectValue = (e) => {
-    const value = e.target.value;
-
+  const selectValue = (value) => {
     if (value === "-") {
       setIsManual(true);
       return;
@@ -273,23 +276,40 @@ const ConfigureColumn = ({ template, obj, columns }) => {
     }
   };
 
+  const columnsList = useMemo(() => {
+    const cols = (columns ?? []).map((col) => {
+      return {
+        value: col,
+        label: col === DEFAULT_COLUMN ? "<imported file>" : `$${col}`,
+      };
+    });
+    if (!columns?.length) {
+      cols.push({ value, label: "<imported file>" });
+    }
+    cols.push({ value: "-", label: "<set manually>" });
+    return cols;
+  }, [columns, DEFAULT_COLUMN, value]);
+
   return (
-    <p>
-      Use {obj.tagName.toLowerCase()}
-      {template.objects > 1 && ` for ${obj.getAttribute("name")}`}
-      {" from "}
-      {columns?.length > 0 && columns[0] !== DEFAULT_COLUMN && "field "}
-      <select onChange={selectValue} value={isManual ? "-" : value}>
-        {columns?.map((column) => (
-          <option key={column} value={column}>
-            {column === DEFAULT_COLUMN ? "<imported file>" : `$${column}`}
-          </option>
-        ))}
-        {!columns?.length && <option value={value}>{"<imported file>"}</option>}
-        <option value="-">{"<set manually>"}</option>
-      </select>
-      {isManual && <input value={newValue} onChange={handleChange} onBlur={handleBlur} onKeyDown={handleKeyDown} />}
-    </p>
+    <>
+      <Select
+        onChange={selectValue}
+        value={isManual ? "-" : value}
+        options={columnsList}
+        isInline={true}
+        label={
+          <>
+            Use {obj.tagName.toLowerCase()}
+            {template.objects > 1 && ` for ${obj.getAttribute("name")}`}
+            {" from "}
+            {columns?.length > 0 && columns[0] !== DEFAULT_COLUMN && "field "}
+          </>
+        }
+        labelProps={{ className: "inline-flex" }}
+        dataTestid={`select-trigger-use-image-from-field-${isManual ? "-" : value}`}
+      />
+      {isManual && <Input value={newValue} onChange={handleChange} onBlur={handleBlur} onKeyDown={handleKeyDown} />}
+    </>
   );
 };
 
@@ -352,41 +372,44 @@ const Configurator = ({
     return () => window.clearTimeout(debounceTimer.current);
   }, [config]);
 
-  React.useEffect(async () => {
-    if (!configToCheck) return;
+  React.useEffect(() => {
+    const validate = async () => {
+      if (!configToCheck) return;
 
-    setLoading(true);
+      setLoading(true);
 
-    const validation = await api.callApi("validateConfig", {
-      params: { pk: project.id },
-      body: { label_config: configToCheck },
-      errorFilter: () => true,
-    });
+      const validation = await api.callApi("validateConfig", {
+        params: { pk: project.id },
+        body: { label_config: configToCheck },
+        errorFilter: () => true,
+      });
 
-    if (validation?.error) {
-      setError(validation.response);
+      if (validation?.error) {
+        setError(validation.response);
+        setLoading(false);
+        return;
+      }
+
+      setError(null);
+      onValidate?.(validation);
+
+      const sample = await api.callApi("createSampleTask", {
+        params: { pk: project.id },
+        body: { label_config: configToCheck },
+        errorFilter: () => true,
+      });
+
       setLoading(false);
-      return;
-    }
-
-    setError(null);
-    onValidate?.(validation);
-
-    const sample = await api.callApi("createSampleTask", {
-      params: { pk: project.id },
-      body: { label_config: configToCheck },
-      errorFilter: () => true,
-    });
-
-    setLoading(false);
-    if (sample && !sample.error) {
-      setData(sample.sample_task);
-      setConfigToDisplay(configToCheck);
-    } else {
-      // @todo validation can be done in this place,
-      // @todo but for now it's extremely slow in /sample-task endpoint
-      setError(sample?.response);
-    }
+      if (sample && !sample.error) {
+        setData(sample.sample_task);
+        setConfigToDisplay(configToCheck);
+      } else {
+        // @todo validation can be done in this place,
+        // @todo but for now it's extremely slow in /sample-task endpoint
+        setError(sample?.response);
+      }
+    };
+    validate();
   }, [configToCheck]);
 
   // code should be reloaded on every render because of uncontrolled codemirror
@@ -465,21 +488,29 @@ const Configurator = ({
       <div className={configClass.elem("container")}>
         <h1>Labeling Interface{hasChanges ? " *" : ""}</h1>
         <header>
-          <button type="button" data-leave={true} onClick={onBrowse}>
+          <Button
+            type="button"
+            data-leave={true}
+            onClick={onBrowse}
+            size="small"
+            look="outlined"
+            aria-label="Browse templates"
+          >
             Browse Templates
-          </button>
+          </Button>
           <ToggleItems items={{ code: "Code", visual: "Visual" }} active={configure} onSelect={onSelect} />
         </header>
         <div className={configClass.elem("editor")}>
           {configure === "code" && (
             <div className={configClass.elem("code")} style={{ display: configure === "code" ? undefined : "none" }}>
-              <CodeMirror
+              <CodeEditor
                 name="code"
                 id="edit_code"
                 value={config}
                 autoCloseTags={true}
                 smartIndent={true}
                 detach
+                border
                 extensions={["hint", "xml-hint"]}
                 options={{
                   mode: "xml",
@@ -525,7 +556,13 @@ const Configurator = ({
                 </Elem>
               </Block>
             )}
-            <Button look="primary" size="compact" style={{ width: 120 }} onClick={onSave} waiting={waiting}>
+            <Button
+              size="small"
+              className="w-[120px]"
+              onClick={onSave}
+              waiting={waiting}
+              aria-label="Save configuration"
+            >
               {waiting ? "Saving..." : "Save"}
             </Button>
             {isFF(FF_UNSAVED_CHANGES) && <UnsavedChanges hasChanges={hasChanges} onSave={onSave} />}
@@ -556,10 +593,18 @@ export const ConfigPage = ({
 }) => {
   const [config, _setConfig] = React.useState("");
   const [mode, setMode] = React.useState("list"); // view | list
-  const [selectedGroup, setSelectedGroup] = React.useState(null);
+  const [selectedGroup, _setSelectedGroup] = React.useState(null);
   const [selectedRecipe, setSelectedRecipe] = React.useState(null);
   const [template, setCurrentTemplate] = React.useState(null);
   const api = useAPI();
+
+  const setSelectedGroup = React.useCallback(
+    (group) => {
+      _setSelectedGroup(group);
+      __lsa(`labeling_setup.list.${snakeCase(group)}`);
+    },
+    [_setSelectedGroup],
+  );
 
   const setConfig = React.useCallback(
     (config) => {
@@ -588,35 +633,46 @@ export const ConfigPage = ({
 
   const [warning, setWarning] = React.useState();
 
-  React.useEffect(async () => {
-    if (externalColumns) return; // we are in Create Project dialog, so this request is useless
-    if (!project || columns) return;
-    const res = await api.callApi("dataSummary", {
-      params: { pk: project.id },
-      // 404 is ok, and errors here don't matter
-      errorFilter: () => true,
-    });
+  React.useEffect(() => {
+    const fetchData = async () => {
+      if (!externalColumns || (project && !columns)) {
+        const res = await api.callApi("dataSummary", {
+          params: { pk: project.id },
+          // 404 is ok, and errors here don't matter
+          errorFilter: () => true,
+        });
 
-    if (res?.common_data_columns) {
-      setColumns(res.common_data_columns);
-    }
+        if (res?.common_data_columns) {
+          setColumns(res.common_data_columns);
+        }
+      }
+      fetchData();
+    };
   }, [columns, project]);
 
   const onSelectRecipe = React.useCallback((recipe) => {
     if (!recipe) {
       setSelectedRecipe(null);
       setMode("list");
-      return;
+      __lsa("labeling_setup.view.empty");
+    } else {
+      setTemplate(recipe.config);
+      setSelectedRecipe(recipe);
+      setMode("view");
+      __lsa(`labeling_setup.view.${snakeCase(recipe.group)}.${snakeCase(recipe.title)}`);
     }
-    setTemplate(recipe.config);
-    setSelectedRecipe(recipe);
-    setMode("view");
   });
 
   const onCustomTemplate = React.useCallback(() => {
     setTemplate(EMPTY_CONFIG);
     setMode("view");
+    __lsa("labeling_setup.view.custom");
   });
+
+  const onBrowse = React.useCallback(() => {
+    setMode("list");
+    __lsa("labeling_setup.list.browse");
+  }, []);
 
   React.useEffect(() => {
     if (initialConfig) {
@@ -648,7 +704,7 @@ export const ConfigPage = ({
           selectedRecipe={selectedRecipe}
           template={template}
           setTemplate={setTemplate}
-          onBrowse={setMode.bind(null, "list")}
+          onBrowse={onBrowse}
           onValidate={onValidate}
           disableSaveButton={disableSaveButton}
           onSaveClick={onSaveClick}

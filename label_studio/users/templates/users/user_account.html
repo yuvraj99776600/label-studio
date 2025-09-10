@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ settings.HOSTNAME }}{% static 'css/uikit.css' %}">
 <link rel="stylesheet" href="{{ settings.HOSTNAME }}{% static 'css/users.css' %}">
 {% endblock %}
 
@@ -20,42 +19,97 @@
 {% endblock %}
 
 {% block content %}
+<script>
+  // Take closest form (or form by id) and submit it,
+  // optional: prevent page refresh if done passed as function
+  function smart_submit(done, form_id) {
+    // use form id or take closest form to the event target
+    var f = typeof form_id === 'string' ? $(form_id) : $(event.target).closest('form');
+    console.log('smart_submit found form to use', f);
 
+    if (typeof f === 'undefined') {
+      console.log('smart_submit event target', event.target);
+      alert("Closest form not found for smart_submit")
+    }
+    console.log('YYYYYYY' +  $(f).serialize());
+    var params = {
+      url: $(f).attr('action'),
+      type: $(f).attr('method'),
+      data: $(f).serialize(),
+
+      error: function (result, textStatus, errorThrown) {
+        console.log('smart_submit ajax error', result);
+
+        // call done function if it's defined and ignore all the rest
+        if (typeof done === "function") {
+          done(result)
+        }
+        // default error handle
+        else {
+          if (typeof result.responseText !== 'undefined') {
+            alert("Error: " + message_from_response(result));
+          } else {
+            alert("Request error: " + errorThrown);
+          }
+          window.location.reload();
+        }
+      },
+
+      success: function (data, textStatus, result) {
+        // call done function if it's defined and ignore all the rest
+        if (typeof done === "function") {
+          done(result)
+        }
+        // default success handle
+        else {
+          window.location.reload();
+        }
+      }
+    };
+
+    console.log('smart_submit ajax params', params);
+    $.ajax(params);
+    event.preventDefault();
+    return false;
+  }
+
+  function message_from_response(result) {
+    console.log(result);
+
+    // result is dict
+    if (result.hasOwnProperty('detail') && result.detail)
+      return result.detail;
+
+    // result is object from XHR, check responseText first, it is always presented
+    if (!result.responseText)
+      return 'Critical error on server';
+
+    // grab responseJSON detail
+    else if (result.responseJSON && result.responseJSON.hasOwnProperty('detail'))
+      return result.responseJSON['detail'];
+
+    // something strange inside of responseJSON
+    else if (result.responseJSON)
+      return JSON.stringify(result.responseJSON);
+
+    else
+      return JSON.stringify(result)
+  }
+</script>
 
 <div class="full_content">
   <div class="account-page">
+
+  <div class="forms">
     <form action="{% url 'user-detail' pk=user.pk %}" method="patch" class="user__info">
       <input type="hidden" name="_method" value="patch"/>
-
-      <header>Account info</header>
-      <ul>
-        <li class="field">
-          <label for="">E-mail</label>
-          <input type="text" class="lsf-input-ls" value="{{user.email}}" disabled />
-        </li>
-        <li class="field">
-          <label for="">First Name</label>
-          <input type="text" class="lsf-input-ls" name="first_name" value="{{user.first_name}}" />
-        </li>
-        <li class="field">
-          <label for="">Last Name</label>
-          <input type="text" class="lsf-input-ls" name="last_name" value="{{user.last_name}}" />
-        </li>
-        <li class="field">
-          <label for="">Phone</label>
-          <input type="text" class="lsf-input-ls" name="phone" value="{{user.phone}}" />
-          <!-- <span>We'll send you sms with code if you change your number</span>
-          <span class="error">Incorrect phone number!</span> -->
-        </li>
-      </ul>
-      <div class="user-some-actions">
-
-        <div class="user-pic {{ user.avatar|yesno:'can_delete,can_upload' }}">
+      <header>Your Avatar</header>
+      <div class="user-pic {{ user.avatar|yesno:'can_delete,can_upload' }}">
           <div class="userpic userpic--big">
             {% if user.avatar %}
               <img src="{{user.avatar_url}}" alt="User photo" width="92" />
             {% endif %}
-
+            
             {% if user.get_initials %}
               <span>{{user.get_initials}}</span>
             {% else %}
@@ -63,18 +117,39 @@
             {% endif %}
           </div>
 
-          <button class="lsf-button-ls lsf-button-ls_look_danger" name="delete-avatar" type="button">
-            Delete
-          </button>
+          <div class="controls">
+            <button class="lsf-button-ls lsf-button-ls_look_danger" name="delete-avatar" type="button">
+              Delete
+            </button>
 
-          <input class="file-input" type="file" name="avatar" value="Choose"
-                accept="image/png, image/jpeg, image/jpg"/>
-        </div>
+            <input class="file-input" type="file" name="avatar" value="Choose"
+                  accept="image/png, image/jpeg, image/jpg"/>
+          </div>
+      </div>
+      <header>Personal Information</header>
+      <ul>
+        <li class="field">
+          <label for="email">E-mail</label>
+          <input type="text" class="lsf-input-ls" id="email" name="email" value="{{user.email}}" disabled />
+        </li>
+        <li class="field">
+          <label for="first_name">First Name</label>
+          <input type="text" class="lsf-input-ls" id="first_name" name="first_name" value="{{user.first_name}}" />
+        </li>
+        <li class="field">
+          <label for="last_name">Last Name</label>
+          <input type="text" class="lsf-input-ls" id="last_name" name="last_name" value="{{user.last_name}}" />
+        </li>
+        <li class="field">
+          <label for="phone">Phone</label>
+          <input type="text" class="lsf-input-ls" id="phone" name="phone" value="{{user.phone}}" />
+          <!-- <span>We'll send you sms with code if you change your number</span>
+          <span class="error">Incorrect phone number!</span> -->
+        </li>
+      </ul>
+      <div class="user-some-actions">
 
-        <!-- <div class="user-activity">
-          <p>Inspect all your actions<br/>performed on the platform</p>
-          <button type="button">Activity Log<img src="" /></button>
-        </div> -->
+
       </div>
       <footer>
         <p class="secondary">Registered {{ user.date_joined|date:"M j, Y" }}, user ID {{ user.id }}</p>
@@ -97,7 +172,7 @@
       <div class="field field--wide">
         <label for="example_fetch">Example fetch projects data:</label>
         <textarea id="example_fetch" class="example_code ls-textarea" type="text" readonly
-                  style="height: 92px; font-size: 14px">
+                  style="height: 92px; font-size: 14px; padding: 9px 16px">
           {% if settings.HOSTNAME %}
             curl -X GET {{ settings.HOSTNAME }}/api/projects/ -H 'Authorization: Token {{token}}'
           {% else %}
@@ -106,13 +181,16 @@
         </textarea>
         <p class="actions">
           <button type="button" class="blinking-status lsf-button-ls" data-copy="example_fetch">Copy</button>
-          <a class="lsf-button-ls"
-             {% if settings.VERSION_EDITION == 'Enterprise' %}
-             href="https://docs.heartex.com/guide/api.html"
-             {% else %}
-             href="https://labelstud.io/guide/api.html"
-             {% endif %} target="_blank">Documentation
+
+          {% block api_docs %}
+          <a
+            class="lsf-button-ls"
+            href="https://labelstud.io/guide/api.html"
+            target="_blank"
+          >
+            Documentation
           </a>
+          {% endblock %}
         </p>
       </div>
     </form>
@@ -143,6 +221,7 @@
     </form>
 
     <!-- Notifications -->
+    {% block notifications %}
     <form action="{% url 'user-detail' pk=user.pk %}?update-notifications=1" method="patch" class="notifications block-info" id="notifications">
       <header>
         Notifications
@@ -152,10 +231,6 @@
 
       <table>
         <tr><td style="{% if user.allow_newsletters is None %}border: 1px red solid; border-radius: 5px{% endif %}">
-
-          <input name="email" type="hidden" value="{{ user.email }}">
-          <input name="first_name" type="hidden" value="{{ user.first_name }}">
-          <input name="last_name" type="hidden" value="{{ user.last_name }}">
 
           <input name="allow_newsletters" type="hidden"
                  value="{% if user.allow_newsletters is None %}true{% else %}{{ user.allow_newsletters|yesno:"false,true" }}{% endif %}">
@@ -175,6 +250,9 @@
       </table>
 
     </form>
+    {% endblock %}
+  </div>
+    
 
 
   </div>

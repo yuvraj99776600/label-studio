@@ -1,6 +1,6 @@
 <% const isEnterpriseTheme = theme.tier === "enterprise" %>
   <ul class="page-sidebar-list">
-    <% const pages = site.pages.filter(page => !page.hide_menu && page.path !== "guide/index.html" && page.type === type && (page.tier === theme.tier || page.tier === "all" || page.type === "tags" || page.type === "playground" || page.type === "templates")); %>
+    <% const pages = site.pages.filter(page => !page.hide_menu && page.path !== "guide/index.html" && page.type === type && (page.tier === theme.tier || page.tier === "all" || page.type === "tags" || page.type === "playground" || page.type === "templates" || page.type === "plugins")); %>
     <% if(isEnterpriseTheme) pages.forEach(page => page.order = page.order_enterprise ? page.order_enterprise : page.order) %>
     <% const orderedPages = pages.sort('order') %>
     <% const parentPages = orderedPages.filter(page => isEnterpriseTheme ? page.parent_enterprise === undefined : page.parent === undefined) %>
@@ -38,9 +38,19 @@
             "video_classification": "Videos",
             "generative-supervised-llm": "LLM Fine-tuning",
             "llm_response_moderation": "LLM Evaluations",
+            "html_ner_tagging_person_and_organization": "Community Contributions",
             "gallery_cv": "Template Galleries"
           }
-        }
+        },
+        {
+          type: "plugins",
+          headers: {
+            "faq": "Overview",
+            "bulk_labeling": "Automation",
+            "json_validation": "Validation",
+            "plotly": "Visualization"
+          }
+        }         
       ]
     %>
 
@@ -159,7 +169,18 @@
               </svg>
             </a>
           </li>
+        <% } %>
+        <% if(pageTitle == "On-Prem Release Notes") { %>
+          <% if(isEnterpriseTheme) {%>
+            <li>
+            <a href="https://humansignal.com/changelog" target="_blank">Cloud Changelog
+              <svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="icon-external-link">
+                <path d="M10.9002 9.29957L9.46026 9.30898L9.46026 3.34236L1.73377 11.0689L0.698549 10.0336L8.42504 2.30714L2.46783 2.31656L2.46783 0.867251L10.9001 0.867252L10.9002 9.29957Z" fill="#6D87F1"/>
+              </svg>
+            </a>
+          </li>
           <% } %>
+        <% } %>
       </li>
     <% }) %>
     
@@ -186,6 +207,9 @@
   </li>
   <% } %>
   <% if(!isEnterpriseTheme) { %>
+    <li>
+        <a href="/guide/troubleshooting">Troubleshooting</a>
+      </li>
     <li>
       <a href="https://github.com/HumanSignal/label-studio/issues" target="_blank">GitHub Issues
         <svg width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="icon-external-link">

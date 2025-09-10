@@ -1,36 +1,61 @@
 import { inject } from "mobx-react";
-import { LsCheckAlt, LsCrossAlt } from "../../../assets/icons";
+import clsx from "clsx";
+import { useMemo } from "react";
 import { useSDK } from "../../../providers/SDKProvider";
-import { Block, Elem } from "../../../utils/bem";
+import { cn } from "../../../utils/bem";
 import { isDefined } from "../../../utils/utils";
 import { Space } from "../../Common/Space/Space";
-import { Tooltip } from "../../Common/Tooltip/Tooltip";
-import { Userpic } from "../../Common/Userpic/Userpic";
+import { IconCheckAlt, IconCrossAlt } from "@humansignal/icons";
+import { Tooltip, Userpic } from "@humansignal/ui";
 import { Common } from "../../Filters/types";
-import { VariantSelect } from "../../Filters/types/List";
 import "./Annotators.scss";
+import { isActive, FF_DM_FILTER_MEMBERS } from "@humansignal/core/lib/utils/feature-flags";
+import { VariantSelect } from "../../Filters/types/List";
+import { UserSelect } from "../../Common/UserSelect";
+
+const isFilterMembers = isActive(FF_DM_FILTER_MEMBERS);
 
 export const Annotators = (cell) => {
   const { value, column, original: task } = cell;
   const sdk = useSDK();
-  const userList = Array.from(value);
-  const renderable = userList.slice(0, 10);
-  const extra = userList.length - renderable.length;
+  const maxUsersToDisplay = window.APP_SETTINGS.data_manager?.max_users_to_display ?? 0;
+  const userList = maxUsersToDisplay > 0 ? Array.from(value).slice(0, maxUsersToDisplay) : value;
+  const userPickBadge = cn("userpic-badge");
+  const annotatorsCN = cn("annotators");
+  const isEnterprise = window.APP_SETTINGS.billing?.enterprise;
+
+  // Memoize the count field calculation
+  const extraCount = useMemo(() => {
+    const getCountField = () => {
+      switch (column.alias) {
+        case "annotators":
+          return task?.annotators_count || 0;
+        case "reviewers":
+          return task?.reviewers_count || 0;
+        case "comment_authors":
+          return task?.comment_authors_count || 0;
+        default:
+          return 0;
+      }
+    };
+
+    return getCountField() - maxUsersToDisplay;
+  }, [column.alias, task?.annotators_count, task?.reviewers_count, task?.comment_authors_count]);
 
   return (
-    <Block name="annotators">
-      {renderable.map((item) => {
+    <div className={annotatorsCN.toString()}>
+      {userList.map((item, index) => {
         const user = item.user ?? item;
         const { annotated, reviewed, review } = item;
 
         const userpicIsFaded =
-          (isDefined(annotated) && annotated === false) || (isDefined(reviewed) && reviewed === false);
+          (isDefined(annotated) && annotated === false) || (isDefined(reviewed) && reviewed === false && isEnterprise);
         const suppressStats = column.alias === "comment_authors";
 
         return (
-          <Elem
-            key={`user-${user.id}`}
-            name="item"
+          <div
+            key={`user-${user.id}-${index}`}
+            className={annotatorsCN.elem("item").toString()}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -43,29 +68,29 @@ export const Annotators = (cell) => {
                 faded={userpicIsFaded}
                 badge={{
                   bottomRight: review && (
-                    <Block name="userpic-badge" mod={{ [review]: true }}>
-                      {review === "rejected" ? <LsCrossAlt /> : <LsCheckAlt />}
-                    </Block>
+                    <div className={clsx(userPickBadge.toString(), userPickBadge.mod({ [review]: true }).toString())}>
+                      {review === "rejected" ? <IconCrossAlt /> : <IconCheckAlt />}
+                    </div>
                   ),
                 }}
               />
             </Tooltip>
-          </Elem>
+          </div>
         );
       })}
-      {extra > 0 && (
-        <Elem
-          name="item"
+      {extraCount > 0 && (
+        <div
+          className={annotatorsCN.elem("item").toString()}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             sdk.invoke("userCellCounterClick", e, column.alias, task, userList);
           }}
         >
-          <Userpic username={`+${extra}`} />
-        </Elem>
+          <Userpic addCount={`+${extraCount}`} />
+        </div>
       )}
-    </Block>
+    </div>
   );
 };
 
@@ -75,8 +100,15 @@ const UsersInjector = inject(({ store }) => {
   };
 });
 
-Annotators.FilterItem = UsersInjector(({ users, item }) => {
-  const user = users.find((u) => u.id === item);
+Annotators.filterItems = (items) => {
+  return items.filter((userId) => {
+    const user = DM.usersMap.get(userId);
+    return !(user?.firstName === "Deleted" && user?.lastName === "User");
+  });
+};
+
+Annotators.FilterItem = UsersInjector(({ item }) => {
+  const user = DM.usersMap.get(item);
 
   return user ? (
     <Space size="small">
@@ -86,19 +118,33 @@ Annotators.FilterItem = UsersInjector(({ users, item }) => {
   ) : null;
 });
 
+Annotators.searchFilter = (option, queryString) => {
+  const user = DM.usersMap.get(option?.value);
+  if (!user) {
+    // Fallback to searching by ID if user not found
+    return option?.value?.toString().toLowerCase().includes(queryString.toLowerCase());
+  }
+
+  return (
+    user.id?.toString().toLowerCase().includes(queryString.toLowerCase()) ||
+    user.email.toLowerCase().includes(queryString.toLowerCase()) ||
+    user.displayName.toLowerCase().includes(queryString.toLowerCase())
+  );
+};
+
 Annotators.filterable = true;
 Annotators.customOperators = [
   {
     key: "contains",
     label: "contains",
     valueType: "list",
-    input: (props) => <VariantSelect {...props} />,
+    input: (props) => (isFilterMembers ? <UserSelect {...props} /> : <VariantSelect {...props} />),
   },
   {
     key: "not_contains",
     label: "not contains",
     valueType: "list",
-    input: (props) => <VariantSelect {...props} />,
+    input: (props) => (isFilterMembers ? <UserSelect {...props} /> : <VariantSelect {...props} />),
   },
   ...Common,
 ];

@@ -1,7 +1,6 @@
 import { inject, observer } from "mobx-react";
 import type { FC } from "react";
 import { Block, Elem } from "../../../utils/bem";
-import { FF_DEV_2290, isFF } from "../../../utils/feature-flags";
 import { Comments as CommentsComponent } from "../../Comments/Comments";
 import { AnnotationHistory } from "../../CurrentEntity/AnnotationHistory";
 import { PanelBase, type PanelProps } from "../PanelBase";
@@ -11,8 +10,10 @@ import { RegionItem } from "./RegionItem";
 import { Relations as RelationsComponent } from "./Relations";
 // eslint-disable-next-line
 // @ts-ignore
-import { DraftPanel } from "../../DraftPanel/DraftPanel";
 import { RelationsControls } from "./RelationsControls";
+import { EmptyState } from "../Components/EmptyState";
+import { IconCursor, IconRelationLink } from "@humansignal/icons";
+import { getDocsUrl } from "../../../utils/docs";
 
 interface DetailsPanelProps extends PanelProps {
   regions: any;
@@ -39,12 +40,12 @@ const DetailsComponent: FC<DetailsPanelProps> = ({ currentEntity, regions }) => 
   );
 };
 
-const Content: FC<any> = observer(({ selection, currentEntity }) => {
+const Content: FC<any> = observer(function Content({ selection, currentEntity }: any): JSX.Element {
   return <>{selection.size ? <RegionsPanel regions={selection} /> : <GeneralPanel currentEntity={currentEntity} />}</>;
 });
 
 const CommentsTab: FC<any> = inject("store")(
-  observer(({ store }) => {
+  observer(function CommentsTab({ store }: any): JSX.Element {
     return (
       <>
         {store.hasInterface("annotations:comments") && store.commentStore.isCommentable && (
@@ -66,20 +67,36 @@ const CommentsTab: FC<any> = inject("store")(
 );
 
 const RelationsTab: FC<any> = inject("store")(
-  observer(({ currentEntity }) => {
+  observer(function RelationsTab({ currentEntity }: any): JSX.Element {
     const { relationStore } = currentEntity;
+    const hasRelations = relationStore.size > 0;
 
     return (
       <>
         <Block name="relations">
           <Elem name="section-tab">
-            <Elem name="view-control">
-              <Elem name="section-head">Relations ({relationStore.size})</Elem>
-              <RelationsControls relationStore={relationStore} />
-            </Elem>
-            <Elem name="section-content">
-              <RelationsComponent relationStore={relationStore} />
-            </Elem>
+            {hasRelations ? (
+              <>
+                <Elem name="view-control">
+                  <Elem name="section-head">Relations ({relationStore.size})</Elem>
+                  <RelationsControls relationStore={relationStore} />
+                </Elem>
+                <Elem name="section-content">
+                  <RelationsComponent relationStore={relationStore} />
+                </Elem>
+              </>
+            ) : (
+              <EmptyState
+                icon={<IconRelationLink width={24} height={24} />}
+                header="Create relations between regions"
+                description={<>Link regions to define relationships between them</>}
+                learnMore={{
+                  href: getDocsUrl("guide/labeling#Add-relations-between-annotations"),
+                  text: "Learn more",
+                  testId: "relations-panel-learn-more",
+                }}
+              />
+            )}
           </Elem>
         </Block>
       </>
@@ -88,26 +105,24 @@ const RelationsTab: FC<any> = inject("store")(
 );
 
 const HistoryTab: FC<any> = inject("store")(
-  observer(({ store, currentEntity }) => {
+  observer(function HistoryTab({ store, currentEntity }: any): JSX.Element {
     const showAnnotationHistory = store.hasInterface("annotations:history");
-    const showDraftInHistory = isFF(FF_DEV_2290);
 
     return (
       <>
         <Block name="history">
-          {!showDraftInHistory ? (
-            <DraftPanel item={currentEntity} />
-          ) : (
-            <Elem name="section-tab">
-              <Elem name="section-head">
-                Annotation History
-                <span>#{currentEntity.pk ?? currentEntity.id}</span>
-              </Elem>
-              <Elem name="section-content">
-                <AnnotationHistory inline showDraft={showDraftInHistory} enabled={showAnnotationHistory} />
-              </Elem>
-            </Elem>
-          )}
+          <Elem name="section-tab">
+            <AnnotationHistory
+              inline
+              enabled={showAnnotationHistory}
+              sectionHeader={
+                <>
+                  Annotation History
+                  <span>#{currentEntity.pk ?? currentEntity.id}</span>
+                </>
+              }
+            />
+          </Elem>
         </Block>
       </>
     );
@@ -115,13 +130,23 @@ const HistoryTab: FC<any> = inject("store")(
 );
 
 const InfoTab: FC<any> = inject("store")(
-  observer(({ selection }) => {
+  observer(function InfoTab({ selection }: any): JSX.Element {
+    const nothingSelected = !selection || selection.size === 0;
     return (
       <>
         <Block name="info">
           <Elem name="section-tab">
-            <Elem name="section-head">Selection Details</Elem>
-            <RegionsPanel regions={selection} />
+            {nothingSelected ? (
+              <EmptyState
+                icon={<IconCursor width={24} height={24} />}
+                header="View region details"
+                description={<>Select a region to view its properties, metadata and available actions</>}
+              />
+            ) : (
+              <>
+                <RegionsPanel regions={selection} />
+              </>
+            )}
           </Elem>
         </Block>
       </>
@@ -130,26 +155,23 @@ const InfoTab: FC<any> = inject("store")(
 );
 
 const GeneralPanel: FC<any> = inject("store")(
-  observer(({ store, currentEntity }) => {
+  observer(function GeneralPanel({ store, currentEntity }: any): JSX.Element {
     const { relationStore } = currentEntity;
     const showAnnotationHistory = store.hasInterface("annotations:history");
-    const showDraftInHistory = isFF(FF_DEV_2290);
-
     return (
       <>
-        {!showDraftInHistory ? (
-          <DraftPanel item={currentEntity} />
-        ) : (
-          <Elem name="section">
-            <Elem name="section-head">
-              Annotation History
-              <span>#{currentEntity.pk ?? currentEntity.id}</span>
-            </Elem>
-            <Elem name="section-content">
-              <AnnotationHistory inline showDraft={showDraftInHistory} enabled={showAnnotationHistory} />
-            </Elem>
-          </Elem>
-        )}
+        <Elem name="section">
+          <AnnotationHistory
+            inline
+            enabled={showAnnotationHistory}
+            sectionHeader={
+              <>
+                Annotation History
+                <span>#{currentEntity.pk ?? currentEntity.id}</span>
+              </>
+            }
+          />
+        </Elem>
         <Elem name="section">
           <Elem name="view-control">
             <Elem name="section-head">Relations ({relationStore.size})</Elem>
@@ -178,7 +200,7 @@ const GeneralPanel: FC<any> = inject("store")(
 
 GeneralPanel.displayName = "GeneralPanel";
 
-const RegionsPanel: FC<{ regions: any }> = observer(({ regions }) => {
+const RegionsPanel: FC<{ regions: any }> = observer(function RegionsPanel({ regions }: { regions: any }): JSX.Element {
   return (
     <div>
       {regions.list.map((reg: any) => {
@@ -188,7 +210,7 @@ const RegionsPanel: FC<{ regions: any }> = observer(({ regions }) => {
   );
 });
 
-const SelectedRegion: FC<{ region: any }> = observer(({ region }) => {
+const SelectedRegion: FC<{ region: any }> = observer(function SelectedRegion({ region }: { region: any }): JSX.Element {
   return <RegionItem region={region} mainDetails={RegionDetailsMain} metaDetails={RegionDetailsMeta} />;
 });
 

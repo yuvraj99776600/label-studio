@@ -1,33 +1,42 @@
-import { Typography } from "antd";
 import { observer } from "mobx-react";
 import { type FC, useEffect, useMemo, useRef } from "react";
 import { Block, Elem, useBEM } from "../../../utils/bem";
 import { RegionEditor } from "./RegionEditor";
 import "./RegionDetails.scss";
-
-const { Text } = Typography;
+import { Typography } from "@humansignal/ui";
 
 const TextResult: FC<{ mainValue: string[] }> = observer(({ mainValue }) => {
   return (
-    <Text mark>
+    <div className="flex flex-col items-start gap-tighter">
       {mainValue.map((value: string, i: number) => (
-        <p key={`${value}-${i}`} data-counter={i + 1}>
-          {value}
-        </p>
+        <mark
+          key={`${value}-${i}`}
+          className="bg-primary-background px-tighter py-tightest rounded-sm text-neutral-content"
+        >
+          <Typography data-counter={i + 1} size="small" className="!m-0">
+            {value}
+          </Typography>
+        </mark>
       ))}
-    </Text>
+    </div>
   );
 });
 
 const ChoicesResult: FC<{ mainValue: string[] }> = observer(({ mainValue }) => {
-  return <Text mark>{mainValue.join(", ")}</Text>;
+  return (
+    <mark className="bg-primary-background px-tighter py-tightest rounded-sm">
+      <Typography as="span" size="small" className="text-neutral-content">
+        {mainValue.join(", ")}
+      </Typography>
+    </mark>
+  );
 });
 
 const RatingResult: FC<{ mainValue: string[] }> = observer(({ mainValue }) => {
   return <span>{mainValue}</span>;
 });
 
-const ResultItem: FC<{ result: any }> = observer(({ result }) => {
+export const ResultItem: FC<{ result: any }> = observer(({ result }) => {
   const { type, mainValue } = result;
   /**
    * @todo before fix this var was always false, so fix is left commented out
@@ -40,7 +49,7 @@ const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     if (type === "rating") {
       return (
         <Elem name="result">
-          <Text>Rating: </Text>
+          <Typography size="small">Rating: </Typography>
           <Elem name="value">
             <RatingResult mainValue={mainValue} />
           </Elem>
@@ -50,7 +59,7 @@ const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     if (type === "textarea") {
       return (
         <Elem name="result">
-          <Text>Text: </Text>
+          <Typography size="small">Text: </Typography>
           <Elem name="value">
             <TextResult mainValue={mainValue} />
           </Elem>
@@ -60,9 +69,19 @@ const ResultItem: FC<{ result: any }> = observer(({ result }) => {
     if (type === "choices") {
       return (
         <Elem name="result">
-          <Text>Choices: </Text>
+          <Typography size="small">Choices: </Typography>
           <Elem name="value">
             <ChoicesResult mainValue={mainValue} />
+          </Elem>
+        </Elem>
+      );
+    }
+    if (type === "taxonomy") {
+      return (
+        <Elem name="result">
+          <Typography size="small">Taxonomy: </Typography>
+          <Elem name="value">
+            <ChoicesResult mainValue={mainValue.map((v: string[]) => v.join("/"))} />
           </Elem>
         </Elem>
       );
@@ -76,9 +95,12 @@ export const RegionDetailsMain: FC<{ region: any }> = observer(({ region }) => {
   return (
     <>
       <Elem name="result">
-        {(region?.results as any[]).map((res) => (
-          <ResultItem key={res.pid} result={res} />
-        ))}
+        {(region?.results as any[])
+          // hide per-regions stored only in this session just for a better UX
+          .filter((res) => res.canBeSubmitted)
+          .map((res) => (
+            <ResultItem key={res.pid} result={res} />
+          ))}
         {region?.text ? (
           <Block name="region-meta">
             <Elem name="item">
@@ -108,7 +130,6 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
 
     const saveMeta = (value: string) => {
       region.setMetaText(value);
-      region.setNormInput(value);
     };
 
     useEffect(() => {
@@ -127,16 +148,16 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
             ref={(el) => (input.current = el)}
             placeholder="Meta"
             className={bem.elem("meta-text").toClassName()}
-            value={region.normInput}
+            value={region.meta.text}
             onChange={(e) => saveMeta(e.target.value)}
-            onBlur={() => {
-              saveMeta(region.normInput);
+            onBlur={(e) => {
+              saveMeta(e.target.value);
               cancelEditMode?.();
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                saveMeta(region.normInput);
+                saveMeta(e.target.value);
                 cancelEditMode?.();
               }
             }}
@@ -148,32 +169,7 @@ export const RegionDetailsMeta: FC<RegionDetailsMetaProps> = observer(
             </Elem>
           )
         )}
-        {/* <Elem name="section">
-        <Elem name="section-head">
-          Data Display
-        </Elem>
-        <Elem name="section-content">
-          content
-        </Elem>
-      </Elem> */}
       </>
     );
-    // return (
-    //   <>
-    //     {region?.meta?.text && (
-    //       <Elem name="text">
-    //           Meta: <span>{region.meta.text}</span>
-    //           &nbsp;
-    //         <IconTrash
-    //           type="delete"
-    //           style={{ cursor: "pointer" }}
-    //           onClick={() => {
-    //             region.deleteMetaText();
-    //           }}
-    //         />
-    //       </Elem>
-    //     )}
-    //   </>
-    // );
   },
 );

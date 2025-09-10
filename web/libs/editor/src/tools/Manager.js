@@ -1,6 +1,7 @@
+import { ff } from "@humansignal/core";
 import { destroy } from "mobx-state-tree";
+import { FF_DEV_3391 } from "../utils/feature-flags";
 import { guidGenerator } from "../utils/unique";
-import { FF_DEV_4081, isFF } from "../utils/feature-flags";
 
 /** @type {Map<any, ToolsManager>} */
 const INSTANCES = new Map();
@@ -43,8 +44,24 @@ class ToolsManager {
   get preservedTool() {
     return window.localStorage.getItem(`selected-tool:${this.name}`);
   }
+  /**
+    There are some problems with working with ToolManager with interactive view all flag switched on.
+    For now, tool manager is hidden in view_all,
+    so it allows us to use root and selected annotation
+    while we are looking for the object or the control from the tool.
+    At the same time, we can use `annotation_id`
+    as an additional key to be able to get the right annotation in that view_all mode.
+    But in that case,
+    there will be a problem with the inconsistent state of tool manager for 2 different annotations in the context of the same task.
+    */
+  get root() {
+    return root;
+  }
 
   get obj() {
+    if (ff.isActive(FF_DEV_3391)) {
+      return root.annotationStore.selected?.names.get(this.name);
+    }
     return root.annotationStore.names.get(this.name);
   }
 
@@ -56,7 +73,7 @@ class ToolsManager {
     const name = tool.toolName ?? toolName;
     const key = `${prefix ?? this._prefix}#${name}`;
 
-    if (isFF(FF_DEV_4081) && removeDuplicatesNamed && toolName === removeDuplicatesNamed) {
+    if (removeDuplicatesNamed && toolName === removeDuplicatesNamed) {
       const findme = new RegExp(`^.*?#${name}.*$`);
 
       if (Object.keys(this.tools).some((entry) => findme.test(entry))) {
@@ -74,13 +91,13 @@ class ToolsManager {
     if (this.preservedTool && tool.shouldPreserveSelectedState) {
       if (tool.fullName === this.preservedTool && tool.setSelected) {
         this.unselectAll();
-        this.selectTool(tool, true);
+        this.selectTool(tool, true, true);
+        return;
       }
-      return;
     }
 
     if (this._default_tool && !this.hasSelected) {
-      this.selectTool(this._default_tool, true);
+      this.selectTool(this._default_tool, true, true);
     }
   }
 
@@ -98,7 +115,7 @@ class ToolsManager {
     }
   }
 
-  selectTool(tool, selected) {
+  selectTool(tool, selected, isInitial = false) {
     const currentTool = this.findSelectedTool();
     const newSelection = tool?.group;
 
@@ -123,12 +140,11 @@ class ToolsManager {
 
     if (selected) {
       this.unselectAll();
-      if (tool.setSelected) tool.setSelected(true);
+      tool.setSelected?.(true, isInitial);
     } else {
       const drawingTool = this.findDrawingTool();
 
-      if (drawingTool) return this.selectTool(drawingTool, true);
-      if (tool.setSelected) tool.setSelected(false);
+      this.selectTool(drawingTool ?? this._default_tool, true);
     }
   }
 

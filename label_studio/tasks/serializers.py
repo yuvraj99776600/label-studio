@@ -6,9 +6,11 @@ import ujson as json
 from core.feature_flags import flag_set
 from core.label_config import replace_task_data_undefined_with_config_field
 from core.utils.common import load_func, retry_database_locked
+from core.utils.db import fast_first
 from django.conf import settings
 from django.db import IntegrityError, transaction
-from drf_yasg import openapi
+from drf_spectacular.utils import extend_schema_field
+from label_studio_sdk.label_interface import LabelInterface
 from projects.models import Project
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import generics, serializers
@@ -17,7 +19,7 @@ from rest_framework.fields import SkipField
 from rest_framework.serializers import ModelSerializer
 from rest_framework.settings import api_settings
 from tasks.exceptions import AnnotationDuplicateError
-from tasks.models import Annotation, AnnotationDraft, Prediction, Task
+from tasks.models import Annotation, AnnotationDraft, Prediction, PredictionMeta, Task
 from tasks.validation import TaskValidator
 from users.models import User
 from users.serializers import UserSerializer
@@ -30,32 +32,36 @@ class PredictionQuerySerializer(serializers.Serializer):
     project = serializers.IntegerField(required=False, help_text='Project ID to filter predictions')
 
 
+@extend_schema_field(
+    {
+        'type': 'array',
+        'title': 'Prediction result list',
+        'description': 'List of prediction results for the task',
+        'items': {
+            'type': 'object',
+            'title': 'Prediction result items (regions)',
+            'description': 'List of predicted regions for the task',
+        },
+    }
+)
 class PredictionResultField(serializers.JSONField):
-    class Meta:
-        swagger_schema_fields = {
-            'type': openapi.TYPE_ARRAY,
-            'title': 'Prediction result list',
-            'description': 'List of prediction results for the task',
-            'items': {
-                'type': openapi.TYPE_OBJECT,
-                'title': 'Prediction result items (regions)',
-                'description': 'List of predicted regions for the task',
-            },
-        }
+    pass
 
 
+@extend_schema_field(
+    {
+        'type': 'array',
+        'title': 'Annotation result list',
+        'description': 'List of annotation results for the task',
+        'items': {
+            'type': 'object',
+            'title': 'Annotation result items (regions)',
+            'description': 'List of annotated regions for the task',
+        },
+    }
+)
 class AnnotationResultField(serializers.JSONField):
-    class Meta:
-        swagger_schema_fields = {
-            'type': openapi.TYPE_ARRAY,
-            'title': 'Annotation result list',
-            'description': 'List of annotation results for the task',
-            'items': {
-                'type': openapi.TYPE_OBJECT,
-                'title': 'Annotation result items (regions)',
-                'description': 'List of annotated regions for the task',
-            },
-        }
+    pass
 
 
 class PredictionSerializer(ModelSerializer):
@@ -67,6 +73,36 @@ class PredictionSerializer(ModelSerializer):
         'select specific model version for showing preannotations in the labeling interface',
     )
     created_ago = serializers.CharField(default='', read_only=True, help_text='Delta time from creation time')
+
+    def validate(self, data):
+        """Validate prediction using LabelInterface against project configuration"""
+        project = None
+        if 'task' in data:
+            project = data['task'].project
+        elif 'project' in data:
+            project = data['project']
+        ff_user = project.organization.created_by if project else 'auto'
+
+        if not flag_set('fflag_feat_utc_210_prediction_validation_15082025', user=ff_user):
+            # Skip validation if feature flag is not set
+            logger.info(f'Skipping prediction validation in PredictionSerializer for user {ff_user}')
+            return super().validate(data)
+
+        # Only validate if we're updating the result field
+        if 'result' not in data:
+            return data
+
+        if not project:
+            raise ValidationError('Project is required for prediction validation')
+
+        # Validate prediction using LabelInterface
+        li = LabelInterface(project.label_config)
+        validation_errors = li.validate_prediction(data, return_errors=True)
+
+        if validation_errors:
+            raise ValidationError(f'Error validating prediction: {validation_errors}')
+
+        return data
 
     class Meta:
         model = Prediction
@@ -119,7 +155,7 @@ class AnnotationSerializer(FlexFieldsModelSerializer):
 
         return data
 
-    def get_created_username(self, annotation):
+    def get_created_username(self, annotation) -> str:
         user = annotation.completed_by
         if not user:
             return ''
@@ -175,7 +211,10 @@ class BaseTaskSerializer(FlexFieldsModelSerializer):
 
     def validate(self, task):
         instance = self.instance if hasattr(self, 'instance') else None
-        validator = TaskValidator(self.project(), instance)
+        validator = TaskValidator(
+            self.project(task=instance),
+            instance=instance if 'data' not in task else None,
+        )
         return validator.validate(task)
 
     def to_representation(self, instance):
@@ -387,10 +426,19 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
 
             db_tasks = self.add_tasks(task_annotations, task_predictions, validated_tasks)
             db_annotations = self.add_annotations(task_annotations, user)
-            self.add_predictions(task_predictions)
+            prediction_errors = self.add_predictions(task_predictions)
+
+            raise_prediction_errors = True
+            if not flag_set('fflag_feat_utc_210_prediction_validation_15082025', user=ff_user):
+                raise_prediction_errors = False
+
+            # If there are prediction validation errors, raise them
+            if prediction_errors and raise_prediction_errors:
+                raise ValidationError({'predictions': prediction_errors})
 
         self.post_process_annotations(user, db_annotations, 'imported')
         self.post_process_tasks(self.project.id, [t.id for t in self.db_tasks])
+        self.post_process_custom_callback(self.project.id, user)
 
         if flag_set('fflag_feat_back_lsdv_5307_import_reviews_drafts_29062023_short', user=ff_user):
             with transaction.atomic():
@@ -407,36 +455,66 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
     def add_predictions(self, task_predictions):
         """Save predictions to DB and set the latest model version in the project"""
         db_predictions = []
+        validation_errors = []
+
+        should_validate = self.project.label_config_is_not_default and flag_set(
+            'fflag_feat_utc_210_prediction_validation_15082025', user=self.project.organization.created_by
+        )
 
         # add predictions
         last_model_version = None
         for i, predictions in enumerate(task_predictions):
-            for prediction in predictions:
+            for j, prediction in enumerate(predictions):
                 if not isinstance(prediction, dict):
+                    validation_errors.append(f'Task {i}, prediction {j}: Prediction must be a dictionary')
                     continue
 
-                # we need to call result normalizer here since "bulk_create" doesn't call save() method
-                result = Prediction.prepare_prediction_result(prediction['result'], self.project)
-                prediction_score = prediction.get('score')
-                if prediction_score is not None:
+                # Validate prediction only when project label config is not default
+                if should_validate:
                     try:
-                        prediction_score = float(prediction_score)
-                    except ValueError:
-                        logger.error(
-                            "Can't upload prediction score: should be in float format." 'Fallback to score=None'
-                        )
-                        prediction_score = None
+                        li = LabelInterface(self.project.label_config) if should_validate else None
+                        validation_errors_list = li.validate_prediction(prediction, return_errors=True)
 
-                last_model_version = prediction.get('model_version', 'undefined')
-                db_predictions.append(
-                    Prediction(
-                        task=self.db_tasks[i],
-                        project=self.db_tasks[i].project,
-                        result=result,
-                        score=prediction_score,
-                        model_version=last_model_version,
+                        if validation_errors_list:
+                            # Format errors for better readability
+                            for error in validation_errors_list:
+                                validation_errors.append(f'Task {i}, prediction {j}: {error}')
+                            continue
+
+                    except Exception as e:
+                        validation_errors.append(f'Task {i}, prediction {j}: Error validating prediction - {str(e)}')
+                        continue
+
+                try:
+                    # we need to call result normalizer here since "bulk_create" doesn't call save() method
+                    result = Prediction.prepare_prediction_result(prediction['result'], self.project)
+                    prediction_score = prediction.get('score')
+                    if prediction_score is not None:
+                        try:
+                            prediction_score = float(prediction_score)
+                        except ValueError:
+                            logger.error(
+                                "Can't upload prediction score: should be in float format." 'Fallback to score=None'
+                            )
+                            prediction_score = None
+
+                    last_model_version = prediction.get('model_version', 'undefined')
+                    db_predictions.append(
+                        Prediction(
+                            task=self.db_tasks[i],
+                            project=self.db_tasks[i].project,
+                            result=result,
+                            score=prediction_score,
+                            model_version=last_model_version,
+                        )
                     )
-                )
+                except Exception as e:
+                    validation_errors.append(f'Task {i}, prediction {j}: Failed to create prediction - {str(e)}')
+                    continue
+
+        # Return validation errors if they exist
+        if validation_errors:
+            return validation_errors
 
         # predictions: DB bulk create
         self.db_predictions = Prediction.objects.bulk_create(db_predictions, batch_size=settings.BATCH_SIZE)
@@ -447,7 +525,7 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
             self.project.model_version = last_model_version
             self.project.save()
 
-        return self.db_predictions, last_model_version
+        return None  # No errors
 
     def add_reviews(self, task_reviews, annotation_mapping, project):
         """Save task reviews to DB"""
@@ -533,10 +611,13 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
         db_tasks = []
         max_overlap = self.project.maximum_annotations
 
-        # identify max inner id
-        tasks = Task.objects.filter(project=self.project)
-        prev_inner_id = tasks.order_by('-inner_id')[0].inner_id if tasks else 0
+        # Acquire a lock on the project to ensure atomicity when calculating inner_id
+        project = Project.objects.select_for_update().get(id=self.project.id)
+
+        last_task = fast_first(Task.objects.filter(project=project).order_by('-inner_id'))
+        prev_inner_id = last_task.inner_id if last_task else 0
         max_inner_id = (prev_inner_id + 1) if prev_inner_id else 1
+
         for i, task in enumerate(validated_tasks):
             cancelled_annotations = len([ann for ann in task_annotations[i] if ann.get('was_cancelled', False)])
             total_annotations = len(task_annotations[i]) - cancelled_annotations
@@ -585,6 +666,10 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
     @staticmethod
     def add_annotation_fields(body, user, action):
         return body
+
+    @staticmethod
+    def post_process_custom_callback(project_id, user):
+        pass
 
     class Meta:
         model = Task
@@ -720,6 +805,15 @@ class TaskIDOnlySerializer(ModelSerializer):
     class Meta:
         model = Task
         fields = ['id']
+
+
+class PredictionMetaSerializer(ModelSerializer):
+    """Serializer for PredictionMeta model"""
+
+    class Meta:
+        model = PredictionMeta
+        fields = '__all__'
+        read_only_fields = ['prediction', 'failed_prediction']
 
 
 # LSE inherits this serializer

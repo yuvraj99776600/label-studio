@@ -1,12 +1,12 @@
 ---
-title: Task agreement and how it is calculated
-short: Task agreement matrix
+title: How task agreement and labeling consensus are calculated
+short: Task agreements
 tier: enterprise
 type: guide
 order: 0
 order_enterprise: 307
-meta_title: Data Labeling Statistics
-meta_description: Label Studio Enterprise documentation about task agreement, annotator consensus, and other data annotation statistics for data labeling and machine learning projects.
+meta_title: Task agreement in Label Studio Enterprise
+meta_description: Task agreement, or labeling consensus, and other data annotation statistics for data labeling and machine learning projects.
 section: "Review & Measure Quality"
 ---
 
@@ -17,7 +17,7 @@ Annotation statistics help you determine the quality of your dataset, its readin
 
 ## Task agreement
 
-Task agreement shows the consensus between multiple annotators when labeling the same task. There are several types of task agreement in Label Studio Enterprise:
+Task agreement, also known as "labeling consensus" or "annotation consensus," shows the consensus between multiple annotators when labeling the same task. There are several types of task agreement in Label Studio Enterprise:
 - a per-task agreement score, visible on the Data Manager page for a project. This displays how well the annotations on a particular task match across annotators. 
 - an inter-annotator agreement matrix, visible on the Members page for a project. This displays how well the annotations from specific annotators agree with each other in general, or for specific tasks. 
 
@@ -49,9 +49,9 @@ Review the diagram for a full explanation:
 One annotation that labels the text span "Excellent tool" as "positive", a second annotation that labels the span "tool" as "positive", and a third annotation that labels the text span "tool" as "negative".
 <br/><div style="text-align:center"><img alt="diagram showing example labeling scenario duplicated in surrounding text" src="/images/stats-agreement-example.png"/></div>
 
-The agreement score for the first two annotations is 50%, based on the intersection of the text spans. The agreement score comparing the second annotation with the third annotation is 0%, because the same text span was labeled differently. 
+The agreement score for the first two annotations is 50%, based on the intersection of the text spans. The agreement score comparing the second annotation with the third annotation is 0%, because the same text span was labeled differently. There is also a 0% match between the first and third annotations.  
 
-The task agreement conditions use a threshold of 40% to group annotations based on the agreement score, so the first and second annotations are matched with each other, and the third annotation is considered mismatched. In this case, task agreement exists for 2 of the 3 annotations, so the overall task agreement score is 67%.
+The task agreement conditions use a threshold of 40% to determine whether annotations are in agreement. Therefore, the first and second annotations are considered to be 100% in agreement. The remaining annotations have 0% agreements, so the overall task agreement score is (100 + 0 + 0)/3, or 33.33%.
 
 ## Agreement score
 
@@ -87,8 +87,8 @@ The following table lists the agreement metrics available in Label Studio Enterp
 | [Percentage of matched spans without labels by IOU w.r.t threshold](#Intersection-over-union-with-threshold) | Region | Image Segmentation, Object Detection | Evaluates the percentage by which two given regions overlap compared to the union (IOU) of the regions, and compare the IOU to a threshold.|
 | [Text edit distance](#Edit-distance-algorithm-example) | TextArea | Transcription | Uses the edit distance algorithm to calculate how dissimilar two text annotations are to one another. | 
 | [Text edit distance per span region](#Edit-distance-algorithm-example) | TextArea | Text | Uses the edit distance algorithm to calculate how dissimilar two text spans are to one another. |
-| [Text edit distance per span region](#Edit-distance-algorithm-example), with percentage of matched spans by [IOU w.r.t threshold](#Intersection-over-Union-example) | TextArea | Text | Uses the edit distance algorithm to calculate how dissimilar two text spans are to one another, then calculate the percentage of overlap compared to the union (IOU) of matching spans and compare the IOU to a threshold. |
-| [Text edit distance per hypertext span region](#Edit-distance-algorithm-example), with percentage of matched spans by [IOU w.r.t threshold](#Intersection-over-Union-example) | TextArea | Hypertext | Uses the edit distance algorithm to calculate how dissimilar two text spans are to one another, then calculate the intersection over union (IOU) for the percentage of matching spans and compare the IOU to a threshold. |
+| [Text edit distance per span region](#Edit-distance-algorithm-example), with percentage of matched spans by [IOU w.r.t threshold](#Intersection-over-union-example) | TextArea | Text | Uses the edit distance algorithm to calculate how dissimilar two text spans are to one another, then calculate the percentage of overlap compared to the union (IOU) of matching spans and compare the IOU to a threshold. |
+| [Text edit distance per hypertext span region](#Edit-distance-algorithm-example), with percentage of matched spans by [IOU w.r.t threshold](#Intersection-over-union-example) | TextArea | Hypertext | Uses the edit distance algorithm to calculate how dissimilar two text spans are to one another, then calculate the intersection over union (IOU) for the percentage of matching spans and compare the IOU to a threshold. |
 | [Text edit distance per bbox region](#Edit-distance-algorithm-example) | TextArea | Optical character recognition (OCR) with bounding boxes | Uses the edit distance algorithm to calculate how dissimilar two text areas are to each other for each bounding box region they are associated with. | 
 | [Text edit distance per polygon region](#Edit-distance-algorithm-example) | TextArea | OCR with polygons | Uses the edit distance algorithm to calculate how dissimilar two text areas are to each other for each polygonal region they are associated with. |
 | [OCR distance](#Edit-distance-algorithm-example) | Rectangle | Optical Character Recognition | Uses the [edit distance algorithm](#Edit-distance-algorithm-example) to calculate how dissimilar two text areas are to each other for each rectangular region they are associated with. |
@@ -97,11 +97,11 @@ The following table lists the agreement metrics available in Label Studio Enterp
 | [Intersection over Paragraphs](#Intersection-over-one-dimension-example) | ParagraphLabels | Dialogue, Text | Evaluates whether two given one-dimensional paragraph-labeled spans have points in common. |
 | [Percentage of matched spans by IOU w.r.t threshold](#Intersection-over-union-with-threshold) | ParagraphLabels | Dialogue, Text | Evaluates the percentage by which two given paragraph-labeled regions overlap compared to the union (IOU) of the regions, and compare the IOU to a threshold. |
 | [Average precision for ranking](#Precision-example) | Ranker | All types | Calculates the precision for the ranking. |
-| [IOU for bounding boxes](#Intersection-over-Union-example) | RectangleLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two bounding box regions. |
+| [IOU for bounding boxes](#Intersection-over-union-example) | RectangleLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two bounding box regions. |
 | [Precision](#Precision-example) at specific [IOU threshold](#Intersection-over-union-with-threshold) for bounding boxes | RectangleLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two bounding box regions, then computes the precision for the values above a threshold. |
 | [Recall](#Recall-example) at specific [IOU threshold](#Intersection-over-union-with-threshold) for bounding boxes | RectangleLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two bounding box regions, then computes the recall for the values above a threshold. |
 | [F1 score](#F1-score-example) at specific [IOU threshold](#Intersection-over-union-with-threshold) for bounding boxes | RectangleLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two bounding box regions, then computes the F1-score for the values above a threshold. |
-| [IOU for polygons](#Intersection-over-Union-example) | PolygonLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two polygonal regions. | 
+| [IOU for polygons](#Intersection-over-union-example) | PolygonLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two polygonal regions. | 
 | [Precision](#Precision-example) at specific [IOU threshold](#Intersection-over-union-with-threshold) for polygons | PolygonLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two polygonal regions, then computes the precision for the values above a threshold. |
 | [Recall](#Recall-example) at specific [IOU threshold](#Intersection-over-union-with-threshold) for polygons | PolygonLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two polygonal regions, then computes the recall for the values above a threshold. |
 | [F1 score](#F1-score-example) at specific [IOU threshold](#Intersection-over-union-with-threshold) for polygons | PolygonLabels | Object Detection, Semantic Segmentation | Evaluates the overlap compared to the union (IOU) of two polygonal regions, then computes the F1-score for the values above a threshold. |
@@ -109,17 +109,115 @@ The following table lists the agreement metrics available in Label Studio Enterp
 | [Intersection over 1D timeseries spans](#Intersection-over-one-dimension-example) | TimeSeriesLabels | Time Series | Evaluates whether two given one-dimensional time series spans have points in common. |
 | [Exact matching pairwise comparison](#Exact-matching-choices-example) | Pairwise | Comparison | Evaluates whether the results exactly match. | 
 | [Exact matching rating](#Exact-matching-choices-example) | Rating | Evaluation, Rating | Evaluates the ratings assigned to tasks exactly match. |
+| [IOU distance for brushes](#Intersection-over-union-example) | BrushLabels | Computer Vision, Object Detection | Evaluates the overlap compared to the union (IOU) of two brush mask regions. |
 
 ### Basic matching function
 
 Performs the default evaluation function for each control tag. For example for `TextArea` tag `Edit distance` metric is used.
 
+{% details <b>Default evaluation function</b> %}
+
+
+| Tag              | Basic Matching Function            |
+| :--------------: | :--------------------------------: |
+| BrushLabels      | IOU distance for brushes           |
+| Choices          | Exact match                        |
+| DateTime         | Exact match                        |
+| EllipseLabels    | Naive*                             |
+| HyperTextLabels  | Intersection over HTML Spans       |
+| KeyPointLabels   | Distance between keypoints         |
+| Labels           | 1D region intersection             |
+| Number           | Exact match                        |
+| Pairwise         | Exact match                        |
+| ParagraphLabels  | Intersection over paragraphs       |
+| PolygonLabels    | IOU over polygons                  |
+| Ranker           | Average precision                  |
+| Rating           | Exact match                        |
+| RectangleLabels  | IOU over bounding boxes            |
+| Relations        | Naive*                             |
+| Region           | 1D region intersection no labels   |
+| Shortcut         | Naive*                             |
+| Taxonomy         | Common subtree matches (IOU)       |
+| TextArea         | Levenshtein edit distance          |
+| TimeSeriesLabels | 1D region intersection timeseries  |
+| TimelineLabels   | Naive*                             |
+| VideoRectangle   | IOU                                |
+
+\* Naive -- “Naive” is Label Studio’s simplest pairwise agreement metric, and is essentially a python dictionary equality on the annotations' results.
+
+
+{% enddetails %}
+
 ### Exact matching
 
-For example, for two given annotations `x` and `y`, an agreement metric that performs a naive comparison of the results works like the following:
-- If both `x` and `y` are empty annotations, the agreement score is `1`.
-- If `x` and `y` share no similar points, the agreement score is `0`. 
-- If different labeling types are used in `x` and `y`, the partial agreement scores for each data labeling type are averaged.
+For example, for two given annotations `x` and `y`, an agreement metric that performs a naive comparison of the results would work as follows:
+- If both annotations `x` and `y` are empty, the agreement score is `1`.
+- If the annotations share no similar regions, the agreement score is `0`.
+- If multiple regions are in `x` and `y`, the partial agreement scores that are calculated for the corresponding region pairs are averaged.
+
+#### Example 1
+
+```
+x:  choices1 => A
+    choices2 => B
+
+y:  choices1 => A
+    choices2 => B
+```
+
+Agreement Calculation:
+
+Both annotations `x` and `y` match exactly.
+Agreement(x, y) = 1.0 (100%).
+
+#### Example 2
+
+```
+x:  choices1 => A
+    choices2 => B
+
+y:  choices1 => A
+    choices2 => C
+```
+
+Agreement Calculation:
+
+`choices1` match, but `choices2` do not.
+Agreement(x, y) = 0.5 (50%).
+
+#### Example 3
+
+```
+x:  choices1 => A
+    choices2 => B
+
+y:  choices1 => C
+    choices2 => D
+```
+
+Agreement Calculation:
+
+Neither `choices1` nor `choices2` match.
+Agreement(x, y) = 0 (0%).
+
+
+#### Example 4
+
+```
+x:  choices1 => A
+    choices2 => B
+    choices3 => [not selected]
+
+y:  choices1 => A
+    choices2 => C
+    choices3 => [not selected]
+```
+
+Agreement Calculation:
+
+`choice1` match, `choice2` don't match, and `choices3` are not selected, which is treated as a <b>match</b>.
+Agreement(x, y) = 0.6666 (66.66%).
+
 
 ### Exact matching choices example
 For data labeling tasks where annotators select a choice, such as image or text classification, or data labeling tasks where annotators select a rating, you can select the `Exact matching choices` agreement metric. For this function, the agreement score for two given task annotations `x` and `y` is computed as follows:
@@ -155,15 +253,18 @@ The following **text edit distance** algorithms are available:
 - Needleman-Wunsch
 - Smith-Waterman
 
-### Intersection over Union example
+### Intersection over union example
 
-The Intersection over Union (IoU) metric compares the area of overlapping regions, such as bounding boxes, polygons or textual / time series one-dimensional spans with the overall area, or union, of the regions.
+The Intersection over Union (IoU) metric is used to compare the overlap between regions such as bounding boxes, polygons, or textual/time series one-dimensional spans—against the combined area, or union, of the regions.
 
-For example, for two annotations `x` and `y` containing either bounding boxes or polygons, the following calculation occurs:
-- LSE identifies whether any regions overlap across the two annotations. Overlapping can be only considered with matched labels.
-- For each pair of overlapping regions across the annotations, the area of the overlap, or intersection `aI` is compared to the combined area `aU` of both regions, referred to as the union of the regions: `aI` ÷ `aU`
-- The average of `aI` ÷ `aU` for each pair of regions is used as the IoU calculation for a pair of annotations, or each IoU calculation for eadch label or region is used. 
-For example, if there are two bounding boxes for each `x` and `y` annotations, the agreement of `x` and `y` = ((`aI` ÷ `aU`) + (`aI` ÷ `aU`)) ÷2 .
+For two annotations, `x` and `y`, which contain either bounding boxes or polygons, the following steps occur:
+
+* **Identifying Overlapping Regions**: The system identifies whether any regions overlap across the two annotations. Overlaps are only considered for matched labels (i.e., regions assigned the same label or class).
+* **Calculating IoU for Each Pair**: For each pair of overlapping regions, the area of overlap, or intersection (aI), is divided by the total combined area of the two regions, known as the union (aU). This gives the IoU for that pair as `aI ÷ aU`, which results in a value between `0` and `1`, where `1` indicates perfect overlap and `0` indicates no overlap.
+* **Tracking the Maximum IoU**: When comparing multiple regions (e.g., multiple bounding boxes), the system tracks the highest IoU value for the pair using the formula `max_iou = max(iou, max_iou)`. This ensures that the most significant agreement between the two annotations is captured.
+* **Avoiding Averaging Misconceptions**: In some cases, there may be multiple overlapping regions between annotations `x` and `y`. Rather than averaging all IoU values (which could be misleading), the highest IoU for each pair is retained, ensuring the most representative comparison of agreement between the annotations.
+
+This method ensures that only the strongest level of overlap between regions is recorded for each annotation pair, reflecting the highest possible agreement between the two annotations.
 
 #### Intersection over union with text
 
@@ -173,6 +274,20 @@ For two given task annotations `x` and `y`, the agreement score formula is `m(x,
 - For text annotations, the span is defined by the `start` and `end` keys.
 - For hypertext annotations, the span is defined by the `startOffset` and `endOffset` keys. 
 - For paragraphs of dialogue annotations, the span is defined by the `startOffset` and `endOffset` keys. 
+
+#### Intersection over union with time series
+
+Intersection over Union (IoU) for time series data evaluates the overlap between two labeled regions within the time series. Here's how it works:
+
+1. **Identify Regions**: Determine the start and end points of the labeled regions in the time series data.
+2. **Calculate Intersection**: Find the overlapping duration between the two regions.
+3. **Calculate Union**: Determine the total duration covered by both regions.
+4. **Compute IoU**: Divide the intersection duration by the union duration.
+
+For example, if you have two regions:
+- Region A: (0, 20)
+- Region B: (10, 30)
+The intersection is (10, 20) with a duration of 10 units, and the union is (0, 30) with a duration of 30 units. The IoU would be 10/30 = 0.33.
 
 #### Intersection over union with other metrics 
 The IoU metric can be combined with other metrics. Several metrics in Label Studio Enterprise use IoU to establish initial agreement across annotations, then computes the [precision](#precision-example), [recall](#recall-example), or [F1-score](#f1-score-example) for the IoU values above a specific threshold. Text IoU can also include the [edit distance algorithm](#edit-distance-algorithm-example).

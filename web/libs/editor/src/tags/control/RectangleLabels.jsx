@@ -1,4 +1,3 @@
-import React from "react";
 import { observer } from "mobx-react";
 import { types } from "mobx-state-tree";
 
@@ -14,7 +13,8 @@ import ControlBase from "./Base";
 /**
  * The `RectangleLabels` tag creates labeled rectangles. Use to apply labels to bounding box semantic segmentation tasks.
  *
- * Use with the following data types: image.
+ * Use with the following data types: image. Annotation results store the left top corner of the bounding box,
+ * read more about it and rotation in the [Object Detection Template](/templates/image_bbox.html#Bounding-box-rotation-in-the-Label-Studio-results).
  *
  * @example
  * <!--Basic labeling configuration for applying labels to rectangular bounding boxes on an image -->
@@ -39,6 +39,7 @@ import ControlBase from "./Base";
  * @param {string} [strokeColor]     - Stroke color in hexadecimal
  * @param {number} [strokeWidth=1]   - Width of stroke
  * @param {boolean} [canRotate=true] - Show or hide rotation control. Note that the anchor point in the results is different than the anchor point used when rotating with the rotation tool. For more information, see [Rotation](/templates/image_bbox#Rotation).
+ * @param {pixel|none} [snap=none]   - Snap rectangle to image pixels
  */
 
 const Validation = types.model({

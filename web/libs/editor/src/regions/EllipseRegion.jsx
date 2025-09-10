@@ -1,4 +1,4 @@
-import React, { Fragment, useContext } from "react";
+import { Fragment, useContext } from "react";
 import { Ellipse } from "react-konva";
 import { getRoot, types } from "mobx-state-tree";
 
@@ -375,24 +375,21 @@ const HtxEllipseView = ({ item, setShapeRef }) => {
         }}
         dragBoundFunc={createDragBoundFunc(item, { x: item.x - item.bboxCoords.left, y: item.y - item.bboxCoords.top })}
         onMouseOver={() => {
-          if (store.annotationStore.selected.relationMode) {
+          if (store.annotationStore.selected.isLinkingMode) {
             item.setHighlight(true);
-            stage.container().style.cursor = Constants.RELATION_MODE_CURSOR;
-          } else {
-            stage.container().style.cursor = Constants.POINTER_CURSOR;
           }
+          item.updateCursor(true);
         }}
         onMouseOut={() => {
-          stage.container().style.cursor = Constants.DEFAULT_CURSOR;
-
-          if (store.annotationStore.selected.relationMode) {
+          if (store.annotationStore.selected.isLinkingMode) {
             item.setHighlight(false);
           }
+          item.updateCursor();
         }}
         onClick={(e) => {
           if (item.parent.getSkipInteractions()) return;
 
-          if (store.annotationStore.selected.relationMode) {
+          if (store.annotationStore.selected.isLinkingMode) {
             stage.container().style.cursor = Constants.DEFAULT_CURSOR;
           }
 

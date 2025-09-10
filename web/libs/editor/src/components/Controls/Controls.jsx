@@ -1,19 +1,11 @@
-/**
- * @deprecated This component is not used anywhere.
- */
-
-import React from "react";
 import { inject, observer } from "mobx-react";
 import { CheckCircleOutlined, CheckOutlined } from "@ant-design/icons";
 
 import Hint from "../Hint/Hint";
 import { DraftPanel } from "../Annotations/Annotations";
 import styles from "./Controls.module.scss";
-import { Button } from "../../common/Button/Button";
-import { Tooltip } from "../../common/Tooltip/Tooltip";
+import { Button } from "@humansignal/ui";
 import { cn } from "../../utils/bem";
-
-const TOOLTIP_DELAY = 0.8;
 
 export default inject("store")(
   observer(({ item, store }) => {
@@ -64,48 +56,45 @@ export default inject("store")(
 
       if (store.hasInterface("skip")) {
         skipButton = (
-          <Tooltip title="Cancel (skip) task: [ Ctrl+Space ]" mouseEnterDelay={TOOLTIP_DELAY}>
-            <Button
-              disabled={disabled}
-              look="danger"
-              onClick={store.skipTask}
-              className={`${styles.skip} ${skipButtonClassName}`}
-            >
-              Skip {buttons.skip}
-            </Button>
-          </Tooltip>
+          <Button
+            disabled={disabled}
+            look="danger"
+            onClick={store.skipTask}
+            tooltip="Cancel (skip) task: [ Ctrl+Space ]"
+            className={`${styles.skip} ${skipButtonClassName}`}
+          >
+            Skip {buttons.skip}
+          </Button>
         );
       }
 
       if ((userGenerate && !sentUserGenerate) || (store.explore && !userGenerate && store.hasInterface("submit"))) {
         submitButton = (
-          <Tooltip title="Save results: [ Ctrl+Enter ]" mouseEnterDelay={TOOLTIP_DELAY}>
-            <Button
-              disabled={disabled}
-              look="primary"
-              icon={<CheckOutlined />}
-              onClick={store.submitAnnotation}
-              className={`${styles.submit} ${submitButtonClassName}`}
-            >
-              Submit {buttons.submit}
-            </Button>
-          </Tooltip>
+          <Button
+            disabled={disabled}
+            look="primary"
+            icon={<CheckOutlined />}
+            onClick={store.submitAnnotation}
+            tooltip="Save results: [ Ctrl+Enter ]"
+            className={`${styles.submit} ${submitButtonClassName}`}
+          >
+            Submit {buttons.submit}
+          </Button>
         );
       }
 
       if ((userGenerate && sentUserGenerate) || (!userGenerate && store.hasInterface("update"))) {
         updateButton = (
-          <Tooltip title="Update this task: [ Alt+Enter ]" mouseEnterDelay={TOOLTIP_DELAY}>
-            <Button
-              disabled={disabled}
-              look="primary"
-              icon={<CheckCircleOutlined />}
-              onClick={store.updateAnnotation}
-              className={updateButtonClassName}
-            >
-              {sentUserGenerate || versions.result ? "Update" : "Submit"} {buttons.update}
-            </Button>
-          </Tooltip>
+          <Button
+            disabled={disabled}
+            look="primary"
+            icon={<CheckCircleOutlined />}
+            onClick={store.updateAnnotation}
+            tooltip="Update this task: [ Alt+Enter ]"
+            className={updateButtonClassName}
+          >
+            {sentUserGenerate || versions.result ? "Update" : "Submit"} {buttons.update}
+          </Button>
         );
       }
 

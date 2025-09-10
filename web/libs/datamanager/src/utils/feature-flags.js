@@ -1,6 +1,3 @@
-// Outliner + Details
-export const FF_DEV_1170 = "ff_front_1170_outliner_030222_short";
-
 /**
  * Support for notification links in the Label Steam and the Review Stream.
  * @link https://app.launchdarkly.com/default/branch/features/feat_front_dev_1752_notification_links_in_label_and_review_streams
@@ -12,17 +9,8 @@ export const FF_DEV_2186 = "ff_front_dev_2186_comments_for_update";
 
 export const FF_DEV_2536 = "fflag_feat_front_dev-2536_comment_notifications_short";
 
-/**
- * Support for loading media files only a single time. Part of the Audio v3 epic.
- * @link https://app.launchdarkly.com/default/production/features/ff_front_dev_2715_audio_3_280722_short
- */
-export const FF_DEV_2715 = "ff_front_dev_2715_audio_3_280722_short";
-
 // Comments for annotation editor
 export const FF_DEV_2887 = "fflag-feat-dev-2887-comments-ui-editor-short";
-
-// toggles the ability to drag columns on the datamanager table
-export const FF_DEV_2984 = "fflag_feat_front_dev_2984_dm_draggable_columns_short";
 
 export const FF_DEV_3034 = "fflag-feat-dev-3034-comments-with-drafts-short";
 
@@ -46,30 +34,44 @@ export const FF_LSDV_4620_3_ML = "fflag_fix_front_lsdv_4620_memory_leaks_100723_
 export const FF_LSDV_4711 = "fflag_fix_all_lsdv_4711_cors_errors_accessing_task_data_short";
 
 /**
- * Allow the ability to filter annotations by their original created_at timestamp
- */
-export const FF_LSDV_5035 = "fflag_feat_back_lsdv_5035_use_created_at_from_draft_for_annotation_256052023_short";
-
-/**
- * Updated UX with improved accessibility
- */
-export const FF_LOPS_E_10 = "fflag_feat_front_lops_e_10_updated_ux_short";
-
-/**
- * Save draft on leave annotation editor
- */
-export const FF_OPTIC_2 = "fflag_feat_optic_2_ensure_draft_saved_short";
-
-/**
- * Adding the ability to toggle dataset storage editability.
- */
-export const FF_LOPS_86 = "fflag_feat_front_lops_86_datasets_storage_edit_short";
-
-/**
  * Self Serve
  * @link https://app.launchdarkly.com/default/test/features/fflag_feat_front_leap_482_self_serve_short/
  */
 export const FF_SELF_SERVE = "fflag_feat_front_leap_482_self_serve_short";
+
+/** Add ability to preview image tasks in Data Manager Grid View */
+export const FF_GRID_PREVIEW = "fflag_feat_front_leap_1424_grid_preview_short";
+
+export const FF_MEMORY_LEAK_FIX = "fflag_feat_all_optic_1178_reduce_memory_leak_short";
+
+/**
+ * Add ability to show specific region from URL params (by hiding all other regions).
+ */
+export const FF_REGION_VISIBILITY_FROM_URL = "fflag_feat_front_optic_1553_url_based_region_visibility_short";
+
+/**
+ * Add ability to show average agreement score popover in Agreement cell.
+ */
+export const FF_AVERAGE_AGREEMENT_SCORE_POPOVER = "fflag_feat_all_leap_2042_average_agreement_score_popover";
+
+/**
+ * Allow to filter tasks in Data Manager by control tag labels used in annotation results
+ * @link https://app.launchdarkly.com/projects/default/flags/fflag_root_13_annotation_results_filtering
+ */
+export const FF_ANNOTATION_RESULTS_FILTERING = "fflag_root_13_annotation_results_filtering";
+
+/**
+ * Allow to filter tasks in Data Manager by annotation results and user annotated on the same annotation
+ * @link https://app.launchdarkly.com/projects/default/flags/fflag_root_45_better_user_filter
+ */
+export const FF_BETTER_USER_FILTER = "fflag_root_45_better_user_filter";
+
+/**
+ * Disable global user fetching for large-scale deployments
+ * @link https://app.launchdarkly.com/projects/default/flags/fflag_all_feat_utc_204_users_performance_improvements_in_dm_for_large_orgs
+ */
+export const FF_DISABLE_GLOBAL_USER_FETCHING =
+  "fflag_all_feat_utc_204_users_performance_improvements_in_dm_for_large_orgs";
 
 // Customize flags
 const flags = {};

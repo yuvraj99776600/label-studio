@@ -14,6 +14,10 @@ After multiple labelers have annotated tasks, review their output to validate th
 
 The annotation review workflow is only available in Label Studio Enterprise Edition. If you're using Label Studio Community Edition, see <a href="https://labelstud.io/guide/label_studio_compare.html">Label Studio Features</a> to learn more.
 
+See the following video for an overview of reviewer workflows: 
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/dhBrphE7PHo?si=YMRI-omwxoQFuhma" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 
 ## Why review annotations?
 
@@ -112,6 +116,43 @@ For specific labels, you can see in a donut chart how many labels of each type w
 
 For example, if you're developing a dataset of OCR images, and 90% of your tasks have **Text** labels and 10% have **Handwriting** labels, you might want to increase the number of images of handwriting in your dataset, to improve the eventual accuracy of a machine learning model trained on this dataset.
 
+## Pause an annotator
+
+For organizations with a large number of annotators, it might prove useful to pause an annotator's progress. This might be helpful for annotators that are performing poorly or exhibiting behavior that might indicate they have automated their work (bot behavior). 
+
+### Manually pause an annotator
+
+You can manually pause annotators from the Members dashboard in a project. This action is only available next to users in the Annotator and Reviewer roles:
+
+![Screenshot of pause](/images/review/pause.png)
+
+When a user is paused, the following occurs:
+
+* They immediately see a message informing them that they have been paused. 
+
+    ![Screenshot of message](/images/review/paused-message.png)
+* Their progress within their current task is saved as a draft, but they cannot make any further changes.   
+* When they click **Go Back**, they are returned to the Projects page. If they attempt to re-enter the project, they are shown the error message above. 
+
+!!! info Tip
+
+    If you hover over the **Paused** indicator, you can see the message that was shown to the user when they were paused. If a user was manually paused, it also shows who initiated the action.  
+
+    ![Screenshot of hover](/images/review/paused-tooltip.png)
+
+### Automatically pause annotators 
+
+#### Annotation Limit settings
+
+You can use **Settings > Quality > Annotation Limit** to set limits on how many tasks an annotator is able to complete before they are paused. For more information, see [Annotation Limit](project_settings_lse#annotation-limit). 
+
+#### Behavior-based triggers
+
+If you have [plugins](plugins) enabled, you can automatically pause an annotator based on certain behaviors and then customize the message that appears on their screen. 
+
+For more information, see [Plugins - Spam and Bot Detection](/plugins/pause_annotator).
+
+
 ## Verify model and annotator performance
 
 To verify the performance of specific annotators, review the **Members** section for a specific project. If you don't see an annotator's activity reflected, make sure they have been added as a member to the project.
@@ -133,11 +174,16 @@ Review a table to see the following for each annotator:
 - The agreement of their annotations with the ground truth annotations, if there are any.
 - The agreement of their annotations with predicted annotations, if there are any.
 
+See the following video for an overview of annotator agreement metrics: 
+
+<iframe class="video-border" width="560" height="315" src="https://www.youtube.com/embed/Lo_PVE9Pyw4?si=z1vtyI_xIo8aR8fY" width="100%" height="400vh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
 ### Review annotator agreement matrix
 
 You can also review the overall annotator agreement on a more individual basis with the annotator agreement matrix.
 
-Review the annotator agreement matrix to understand which annotator's annotations consistently agree with or don't agree with other annotator's annotations. You can also filter the matrix to show specific agreement statistics for each label, or view the **Overall** agreement matrix. See more about [how annotator agreement is calculated](stats.html).
+Review the annotator agreement matrix to understand which annotator's annotations consistently agree with or don't agree with other annotator's annotations. You can also filter the matrix to show specific agreement statistics for each label, or view the **Overall** agreement matrix. See more about [how annotator agreement is calculated](stats).
 
 To see the specific annotations contributing to the agreement, do the following:
 

@@ -6,8 +6,9 @@ import logging
 import numbers
 import os
 import random
+import traceback
 import uuid
-from typing import Any, Mapping, Optional, cast
+from typing import Any, Mapping, Optional, Union, cast
 from urllib.parse import urljoin
 
 import ujson as json
@@ -22,21 +23,21 @@ from core.utils.common import (
     string_is_url,
     temporary_disconnect_list_signal,
 )
-from core.utils.db import fast_first
+from core.utils.db import batch_delete, fast_first
 from core.utils.params import get_env
 from data_import.models import FileUpload
 from data_manager.managers import PreparedTaskManager, TaskManager
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
-from django.core.files.storage import default_storage
 from django.db import OperationalError, models, transaction
-from django.db.models import JSONField, Q
+from django.db.models import CheckConstraint, F, JSONField, Q
+from django.db.models.lookups import GreaterThanOrEqual
 from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import Signal, receiver
 from django.urls import reverse
 from django.utils.timesince import timesince
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+from label_studio_sdk.label_interface.objects import PredictionValue
 from rest_framework.exceptions import ValidationError
 from tasks.choices import ActionType
 
@@ -237,6 +238,36 @@ class Task(TaskMixin, models.Model):
         else:
             return []
 
+    def get_lock_exclude_query(self, user):
+        """
+        Get query for excluding annotations from the lock check
+        """
+        SkipQueue = self.project.SkipQueue
+
+        if self.project.skip_queue == SkipQueue.IGNORE_SKIPPED:
+            # IGNORE_SKIPPED: my skipped tasks don't go anywhere
+            # alien's and my skipped annotations are counted as regular annotations
+            q = Q()
+        else:
+            if self.project.skip_queue == SkipQueue.REQUEUE_FOR_ME:
+                # REQUEUE_FOR_ME means: only my skipped tasks go back to me,
+                # alien's skipped annotations are counted as regular annotations
+                q = Q(was_cancelled=True) & Q(completed_by=user)
+            elif self.project.skip_queue == SkipQueue.REQUEUE_FOR_OTHERS:
+                # REQUEUE_FOR_OTHERS: my skipped tasks go to others
+                # alien's skipped annotations are not counted at all
+                q = Q(was_cancelled=True) & ~Q(completed_by=user)
+            else:
+                raise Exception(f'Invalid SkipQueue value: {self.project.skip_queue}')
+
+            # for LSE we also need to exclude rejected queue
+            rejected_q = self.get_rejected_query()
+
+            if rejected_q:
+                q &= rejected_q
+
+        return q | Q(ground_truth=True)
+
     def has_lock(self, user=None):
         """
         Check whether current task has been locked by some user
@@ -245,23 +276,19 @@ class Task(TaskMixin, models.Model):
         """
         from projects.functions.next_task import get_next_task_logging_level
 
-        SkipQueue = self.project.SkipQueue
+        if self.project.show_ground_truth_first and flag_set(
+            'fflag_feat_all_leap_1825_annotator_evaluation_short', user='auto'
+        ):
+            # in show_ground_truth_first mode(onboarding)
+            # we ignore overlap setting for ground_truth tasks
+            # https://humansignal.atlassian.net/browse/LEAP-1963
+            if self.annotations.filter(ground_truth=True).exists():
+                return False
 
-        if self.project.skip_queue == SkipQueue.REQUEUE_FOR_ME:
-            # REQUEUE_FOR_ME means: only my skipped tasks go back to me,
-            # alien's skipped annotations are counted as regular annotations
-            q = Q(was_cancelled=True) & Q(completed_by=user)
-        elif self.project.skip_queue == SkipQueue.REQUEUE_FOR_OTHERS:
-            # REQUEUE_FOR_OTHERS: my skipped tasks go to others
-            # alien's skipped annotations are not counted at all
-            q = Q(was_cancelled=True) & ~Q(completed_by=user)
-        else:  # SkipQueue.IGNORE_SKIPPED
-            # IGNORE_SKIPPED: my skipped tasks don't go anywhere
-            # alien's and my skipped annotations are counted as regular annotations
-            q = Q()
+        q = self.get_lock_exclude_query(user)
 
         num_locks = self.num_locks_user(user=user)
-        num_annotations = self.annotations.exclude(q | Q(ground_truth=True)).count()
+        num_annotations = self.annotations.exclude(q).count()
         num = num_locks + num_annotations
 
         if num > self.overlap_with_agreement_threshold(num, num_locks):
@@ -339,6 +366,11 @@ class Task(TaskMixin, models.Model):
         num_locks = self.num_locks
         if num_locks < self.overlap:
             lock_ttl = settings.TASK_LOCK_TTL
+            if (
+                flag_set('fflag_feat_all_leap_1534_custom_task_lock_timeout_short', user=user)
+                and self.project.custom_task_lock_ttl
+            ):
+                lock_ttl = self.project.custom_task_lock_ttl
             expire_at = now() + datetime.timedelta(seconds=lock_ttl)
             try:
                 task_lock = TaskLock.objects.get(task=self, user=user)
@@ -388,12 +420,10 @@ class Task(TaskMixin, models.Model):
     def resolve_storage_uri(self, url) -> Optional[Mapping[str, Any]]:
         from io_storages.functions import get_storage_by_url
 
-        storage = self.storage
-        project = self.project
-
-        if not storage:
-            storage_objects = project.get_all_storage_objects(type_='import')
-            storage = get_storage_by_url(url, storage_objects)
+        # Instead of using self.storage, we check all storage objects for the project to
+        # support imported tasks that point to another bucket
+        storage_objects = self.project.get_all_import_storage_objects
+        storage = get_storage_by_url(url, storage_objects)
 
         if storage:
             return {
@@ -417,7 +447,7 @@ class Task(TaskMixin, models.Model):
                 protected_data[key] = value
             return protected_data
         else:
-            storage_objects = project.get_all_storage_objects(type_='import')
+            storage_objects = project.get_all_import_storage_objects
 
             # try resolve URLs via storage associated with that task
             for field in task_data:
@@ -427,13 +457,7 @@ class Task(TaskMixin, models.Model):
                     # permission check: resolve uploaded files to the project only
                     file_upload = fast_first(FileUpload.objects.filter(project=project, file=prepared_filename))
                     if file_upload is not None:
-                        if flag_set(
-                            'ff_back_dev_2915_storage_nginx_proxy_26092022_short',
-                            self.project.organization.created_by,
-                        ):
-                            task_data[field] = file_upload.url
-                        else:
-                            task_data[field] = default_storage.url(name=prepared_filename)
+                        task_data[field] = file_upload.url
                     # it's very rare case, e.g. user tried to reimport exported file from another project
                     # or user wrote his django storage path manually
                     else:
@@ -442,20 +466,12 @@ class Task(TaskMixin, models.Model):
 
                 # project storage
                 # TODO: to resolve nested lists and dicts we should improve get_storage_by_url(),
-                # TODO: problem with current approach: it can be used only the first storage that get_storage_by_url
-                # TODO: returns. However, maybe the second storage will resolve uris properly.
-                # TODO: resolve_uri() already supports them
-                storage = self.storage or get_storage_by_url(task_data[field], storage_objects)
+                # Now always using get_storage_by_url to ensure the storage with the correct bucket is used
+                # As a last fallback we can use self.storage which is the storage the Task was imported from
+                storage = get_storage_by_url(task_data[field], storage_objects) or self.storage
                 if storage:
                     try:
-                        proxy_task = None
-                        if flag_set(
-                            'fflag_fix_all_lsdv_4711_cors_errors_accessing_task_data_short',
-                            user='auto',
-                        ):
-                            proxy_task = self
-
-                        resolved_uri = storage.resolve_uri(task_data[field], proxy_task)
+                        resolved_uri = storage.resolve_uri(task_data[field], self)
                     except Exception as exc:
                         logger.debug(exc, exc_info=True)
                         resolved_uri = None
@@ -466,6 +482,9 @@ class Task(TaskMixin, models.Model):
     @property
     def storage(self):
         # maybe task has storage link
+        # TODO: this is bad idea to use storage from storage_link,
+        # because storage resolver will be limited to this storage,
+        # however, we may need to use other storages to resolve the uri.
         storage_link = self.get_storage_link()
         if storage_link:
             return storage_link.storage
@@ -500,24 +519,23 @@ class Task(TaskMixin, models.Model):
         self.annotations.exclude(id=annotation_id).update(ground_truth=False)
 
     def save(self, *args, update_fields=None, **kwargs):
-        if flag_set('ff_back_2070_inner_id_12052022_short', AnonymousUser):
-            if self.inner_id == 0:
-                task = Task.objects.filter(project=self.project).order_by('-inner_id').first()
-                max_inner_id = 1
-                if task:
-                    max_inner_id = task.inner_id
+        if self.inner_id == 0:
+            task = Task.objects.filter(project=self.project).order_by('-inner_id').first()
+            max_inner_id = 1
+            if task:
+                max_inner_id = task.inner_id
 
-                # max_inner_id might be None in the old projects
-                self.inner_id = None if max_inner_id is None else (max_inner_id + 1)
-                if update_fields is not None:
-                    update_fields = {'inner_id'}.union(update_fields)
+            # max_inner_id might be None in the old projects
+            self.inner_id = None if max_inner_id is None else (max_inner_id + 1)
+            if update_fields is not None:
+                update_fields = {'inner_id'}.union(update_fields)
 
         super().save(*args, update_fields=update_fields, **kwargs)
 
     @staticmethod
     def delete_tasks_without_signals(queryset):
         """
-        Delete Tasks queryset with switched off signals
+        Delete Tasks queryset with switched off signals in batches to minimize memory usage
         :param queryset: Tasks queryset
         """
         signals = [
@@ -525,7 +543,7 @@ class Task(TaskMixin, models.Model):
             (pre_delete, remove_data_columns, Task),
         ]
         with temporary_disconnect_list_signal(signals):
-            queryset.delete()
+            return batch_delete(queryset, batch_size=500)
 
     @staticmethod
     def delete_tasks_without_signals_from_task_ids(task_ids):
@@ -668,6 +686,13 @@ class Annotation(AnnotationMixin, models.Model):
         default=None,
         null=True,
     )
+    bulk_created = models.BooleanField(
+        _('bulk created'),
+        default=False,
+        db_default=False,
+        null=True,
+        help_text='Annotation was created in bulk mode',
+    )
 
     class Meta:
         db_table = 'task_completion'
@@ -733,7 +758,14 @@ class Annotation(AnnotationMixin, models.Model):
             self.updated_by = request.user
             if update_fields is not None:
                 update_fields = {'updated_by'}.union(update_fields)
+
+        unique_list = {result.get('id') for result in (self.result or [])}
+
+        self.result_count = len(unique_list)
+        if update_fields is not None:
+            update_fields = {'result_count'}.union(update_fields)
         result = super().save(*args, update_fields=update_fields, **kwargs)
+
         self.update_task()
         return result
 
@@ -779,6 +811,7 @@ class TaskLock(models.Model):
         on_delete=models.CASCADE,
         help_text='User who locked this task',
     )
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Creation time', null=True)
 
 
 class AnnotationDraft(models.Model):
@@ -902,15 +935,8 @@ class Prediction(models.Model):
         return timesince(self.created_at)
 
     def has_permission(self, user):
-        if flag_set(
-            'fflag_perf_back_lsdv_4695_update_prediction_query_to_use_direct_project_relation',
-            user='auto',
-        ):
-            user.project = self.project  # link for activity log
-            return self.project.has_permission(user)
-        else:
-            user.project = self.task.project  # link for activity log
-            return self.task.project.has_permission(user)
+        user.project = self.project  # link for activity log
+        return self.project.has_permission(user)
 
     @classmethod
     def prepare_prediction_result(cls, result, project):
@@ -978,13 +1004,8 @@ class Prediction(models.Model):
                 update_fields = {'project_id'}.union(update_fields)
 
         # "result" data can come in different forms - normalize them to JSON
-        if flag_set(
-            'fflag_perf_back_lsdv_4695_update_prediction_query_to_use_direct_project_relation',
-            user='auto',
-        ):
-            self.result = self.prepare_prediction_result(self.result, self.project)
-        else:
-            self.result = self.prepare_prediction_result(self.result, self.task.project)
+        self.result = self.prepare_prediction_result(self.result, self.project)
+
         if update_fields is not None:
             update_fields = {'result'}.union(update_fields)
         # set updated_at field of task to now()
@@ -996,6 +1017,52 @@ class Prediction(models.Model):
         # set updated_at field of task to now()
         self.update_task()
         return result
+
+    @classmethod
+    def create_no_commit(
+        cls, project, label_interface, task_id, data, model_version, model_run
+    ) -> Optional['Prediction']:
+        """
+        Creates a Prediction object from the given result data, without committing it to the database.
+        or returns None if it fails.
+
+        Args:
+            project: The Project object to associate with the Prediction object.
+            label_interface: The LabelInterface object to use to create regions from the result data.
+            data: The data to create the Prediction object with.
+                    Must contain keys that match control tags in labeling configuration
+                    Example:
+                        ```
+                        {
+                            'my_choices': 'positive',
+                            'my_textarea': 'generated document summary'
+                        }
+                        ```
+            task_id: The ID of the Task object to associate with the Prediction object.
+            model_version: The model version that produced the prediction.
+            model_run: The model run that created the prediction.
+        """
+        try:
+
+            # given the data receive, create annotation regions in LS format
+            # e.g. {"sentiment": "positive"} -> {"value": {"choices": ["positive"]}, "from_name": "", "to_name": "", ..}
+            pred = PredictionValue(result=label_interface.create_regions(data)).model_dump()
+
+            prediction = Prediction(
+                project=project,
+                task_id=int(task_id),
+                model_version=model_version,
+                model_run=model_run,
+                score=1.0,  # Setting to 1.0 for now as we don't get back a score
+                result=pred['result'],
+            )
+            return prediction
+        except Exception as exc:
+            # TODO: handle exceptions better
+            logger.error(
+                f'Error creating prediction for task {task_id} with {data}: {exc}. '
+                f'Traceback: {traceback.format_exc()}'
+            )
 
     class Meta:
         db_table = 'prediction'
@@ -1046,6 +1113,102 @@ class FailedPrediction(models.Model):
     )
     task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='failed_predictions')
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+
+
+class PredictionMeta(models.Model):
+    prediction = models.OneToOneField(
+        'Prediction',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='meta',
+        help_text=_('Reference to the associated prediction'),
+    )
+    failed_prediction = models.OneToOneField(
+        'FailedPrediction',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='meta',
+        help_text=_('Reference to the associated failed prediction'),
+    )
+    inference_time = models.FloatField(
+        _('inference time'), null=True, blank=True, help_text=_('Time taken for inference in seconds')
+    )
+    prompt_tokens_count = models.IntegerField(
+        _('prompt tokens count'), null=True, blank=True, help_text=_('Number of tokens in the prompt')
+    )
+    completion_tokens_count = models.IntegerField(
+        _('completion tokens count'), null=True, blank=True, help_text=_('Number of tokens in the completion')
+    )
+    total_tokens_count = models.IntegerField(
+        _('total tokens count'), null=True, blank=True, help_text=_('Total number of tokens')
+    )
+    prompt_cost = models.FloatField(_('prompt cost'), null=True, blank=True, help_text=_('Cost of the prompt'))
+    completion_cost = models.FloatField(
+        _('completion cost'), null=True, blank=True, help_text=_('Cost of the completion')
+    )
+    total_cost = models.FloatField(_('total cost'), null=True, blank=True, help_text=_('Total cost'))
+    extra = models.JSONField(_('extra'), null=True, blank=True, help_text=_('Additional metadata in JSON format'))
+
+    @classmethod
+    def create_no_commit(cls, data, prediction: Union[Prediction, FailedPrediction]) -> Optional['PredictionMeta']:
+        """
+        Creates a PredictionMeta object from the given result data, without committing it to the database.
+        or returns None if it fails.
+
+        Args:
+            data: The data to create the PredictionMeta object with.
+                  Example:
+                    {
+                        'total_cost_usd': 0.1,
+                        'prompt_cost_usd': 0.05,
+                        'completion_cost_usd': 0.05,
+                        'prompt_tokens': 10,
+                        'completion_tokens': 10,
+                        'inference_time': 0.1
+                    }
+            prediction: The Prediction or FailedPrediction object to associate with the PredictionMeta object.
+
+        Returns:
+            The PredictionMeta object created from the given data, or None if it fails.
+        """
+        try:
+            prediction_meta = PredictionMeta(
+                total_cost=data.get('total_cost_usd'),
+                prompt_cost=data.get('prompt_cost_usd'),
+                completion_cost=data.get('completion_cost_usd'),
+                prompt_tokens_count=data.get('prompt_tokens'),
+                completion_tokens_count=data.get('completion_tokens'),
+                total_tokens_count=data.get('prompt_tokens', 0) + data.get('completion_tokens', 0),
+                inference_time=data.get('inference_time'),
+                extra={
+                    'message_counts': data.get('message_counts', {}),
+                },
+            )
+            if isinstance(prediction, Prediction):
+                prediction_meta.prediction = prediction
+            else:
+                prediction_meta.failed_prediction = prediction
+            logger.debug(f'Created prediction meta: {prediction_meta}')
+            return prediction_meta
+        except Exception as exc:
+            logger.error(f'Error creating prediction meta with {data}: {exc}. Traceback: {traceback.format_exc()}')
+
+    class Meta:
+        db_table = 'prediction_meta'
+        verbose_name = _('Prediction Meta')
+        verbose_name_plural = _('Prediction Metas')
+        constraints = [
+            CheckConstraint(
+                # either prediction or failed_prediction should be not null
+                check=(
+                    (Q(prediction__isnull=False) & Q(failed_prediction__isnull=True))
+                    | (Q(prediction__isnull=True) & Q(failed_prediction__isnull=False))
+                ),
+                name='prediction_or_failed_prediction_not_null',
+            )
+        ]
 
 
 @receiver(post_delete, sender=Task)
@@ -1213,7 +1376,7 @@ def update_task_stats(task, stats=('is_labeled',), save=True):
         task.save()
 
 
-def bulk_update_stats_project_tasks(tasks, project=None):
+def deprecated_bulk_update_stats_project_tasks(tasks, project=None):
     """bulk Task update accuracy
        ex: after change settings
        apply several update queries size of batch
@@ -1232,13 +1395,15 @@ def bulk_update_stats_project_tasks(tasks, project=None):
 
     with transaction.atomic():
         use_overlap = project._can_use_overlap()
-        maximum_annotations = project.maximum_annotations
         # update filters if we can use overlap
         if use_overlap:
-            # finished tasks
-            finished_tasks = tasks.filter(
-                Q(total_annotations__gte=maximum_annotations) | Q(total_annotations__gte=1, overlap=1)
-            )
+            # following definition of `completed_annotations` above, count cancelled annotations
+            # as completed if project is in IGNORE_SKIPPED mode
+            completed_annotations_f_expr = F('total_annotations')
+            if project.skip_queue == project.SkipQueue.IGNORE_SKIPPED:
+                completed_annotations_f_expr += F('cancelled_annotations')
+            finished_q = Q(GreaterThanOrEqual(completed_annotations_f_expr, F('overlap')))
+            finished_tasks = tasks.filter(finished_q)
             finished_tasks_ids = finished_tasks.values_list('id', flat=True)
             tasks.update(is_labeled=Q(id__in=finished_tasks_ids))
 
@@ -1259,6 +1424,27 @@ def bulk_update_stats_project_tasks(tasks, project=None):
                     update_fields=['is_labeled'],
                     batch_size=settings.BATCH_SIZE,
                 )
+
+
+def bulk_update_stats_project_tasks(tasks, project=None):
+    # Avoid circular import
+    from projects.functions.utils import get_unique_ids_list
+
+    bulk_update_is_labeled = load_func(settings.BULK_UPDATE_IS_LABELED)
+
+    if flag_set('fflag_fix_back_plt_802_update_is_labeled_20062025_short', user='auto'):
+        task_ids = get_unique_ids_list(tasks)
+
+        if not task_ids:
+            return
+
+        if project is None:
+            first_task = Task.objects.get(id=task_ids[0])
+            project = first_task.project
+
+        bulk_update_is_labeled(task_ids, project)
+    else:
+        return deprecated_bulk_update_stats_project_tasks(tasks, project)
 
 
 Q_finished_annotations = Q(was_cancelled=False) & Q(result__isnull=False)

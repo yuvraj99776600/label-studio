@@ -1,8 +1,7 @@
 import { inject, observer } from "mobx-react";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { Draggable } from "react-beautiful-dnd";
-import { LSPlus } from "../../assets/icons";
-import { Block, Elem } from "../../utils/bem";
+import { cn } from "../../utils/bem";
 import { Interface } from "../Common/Interface";
 import { Space } from "../Common/Space/Space";
 import { Spinner } from "../Common/Spinner";
@@ -11,6 +10,8 @@ import { FiltersSidebar } from "../Filters/FiltersSidebar/FilterSidebar";
 import { DataView } from "../MainView";
 import "./DataManager.scss";
 import { Toolbar } from "./Toolbar/Toolbar";
+
+const tabContentCN = cn("tabs-dm-content");
 
 const injector = inject(({ store }) => {
   const { sidebarEnabled, sidebarVisible } = store.viewsStore ?? {};
@@ -43,7 +44,7 @@ const switchInjector = inject(({ store }) => {
 
 const ProjectSummary = summaryInjector((props) => {
   return (
-    <Space size="large" style={{ paddingRight: "1em", color: "rgba(0,0,0,0.3)" }}>
+    <Space size="large" style={{ paddingRight: "1em", color: "var(--color-neutral-content-subtle)" }}>
       {props.cloudSync && (
         <Space size="small" style={{ fontSize: 12, fontWeight: 400, opacity: 0.8 }}>
           Storage sync
@@ -53,9 +54,10 @@ const ProjectSummary = summaryInjector((props) => {
       <span style={{ display: "flex", alignItems: "center", fontSize: 12 }}>
         <Space size="compact">
           <span>
-            Tasks: {props.totalFoundTasks} / {props.totalTasks}
+            Tasks: <span title="Filtered tasks">{props.totalFoundTasks}</span> /{" "}
+            <span title="Total tasks in the project">{props.totalTasks}</span>
           </span>
-          <span>Annotations: {props.totalAnnotations}</span>
+          <span>Submitted annotations: {props.totalAnnotations}</span>
           <span>Predictions: {props.totalPredictions}</span>
         </Space>
       </span>
@@ -82,19 +84,18 @@ const TabsSwitch = switchInjector(
         onChange={(key) => views.setSelected(key)}
         onDragEnd={onDragEnd}
         tabBarExtraContent={<ProjectSummary />}
-        addIcon={<LSPlus />}
         allowedActions={editable}
       >
         {tabs.map((tab, index) => (
           <Draggable key={tab.key} draggableId={tab.key} index={index}>
             {(provided, snapshot) => (
-              <Elem
-                name={"draggable"}
+              <div
+                className={tabContentCN.elem("draggable").toString()}
                 ref={provided.innerRef}
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
                 style={{
-                  background: snapshot.isDragging && "#ddd",
+                  background: snapshot.isDragging,
                   ...provided.draggableProps.style,
                 }}
               >
@@ -114,7 +115,7 @@ const TabsSwitch = switchInjector(
                   deletable={tab.deletable}
                   virtual={tab.virtual}
                 />
-              </Elem>
+              </div>
             )}
           </Draggable>
         ))}
@@ -125,8 +126,8 @@ const TabsSwitch = switchInjector(
 
 export const DataManager = injector(({ shrinkWidth }) => {
   return (
-    <Block name="tabs-dm-content">
-      <Elem name="tab" mod={{ shrink: shrinkWidth }}>
+    <div className={tabContentCN.toString()}>
+      <div className={tabContentCN.elem("tab").mod({ shrink: shrinkWidth }).toString()}>
         <Interface name="tabs">
           <TabsSwitch />
         </Interface>
@@ -136,8 +137,8 @@ export const DataManager = injector(({ shrinkWidth }) => {
         </Interface>
 
         <DataView />
-      </Elem>
+      </div>
       <FiltersSidebar />
-    </Block>
+    </div>
   );
 });

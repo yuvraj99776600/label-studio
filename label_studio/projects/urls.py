@@ -11,7 +11,6 @@ _urlpatterns = [
     path('', views.project_list, name='project-index'),
     path('<int:pk>/settings/', views.project_settings, name='project-settings', kwargs={'sub_path': ''}),
     path('<int:pk>/settings/<sub_path>', views.project_settings, name='project-settings-anything'),
-    path('upload-example/', views.upload_example_using_config, name='project-upload-example-using-config'),
 ]
 
 # reverse for projects:api:name
@@ -19,6 +18,7 @@ _api_urlpatterns = [
     # CRUD
     path('', api.ProjectListAPI.as_view(), name='project-list'),
     path('<int:pk>/', api.ProjectAPI.as_view(), name='project-detail'),
+    path('counts/', api.ProjectCountsListAPI.as_view(), name='project-counts-list'),
     # Get next task
     path('<int:pk>/next/', api.ProjectNextTaskAPI.as_view(), name='project-next'),
     # Label stream history

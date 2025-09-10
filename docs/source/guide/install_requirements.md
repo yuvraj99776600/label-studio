@@ -8,8 +8,7 @@ meta_title: Requirements to Install and Upgrade
 meta_description: "Label Studio documentation: Requirements to install and upgrade Label Studio." 
 ---
 
-<!-- md deploy.md -->
-
+{% insertmd includes/deploy.md %}
 
 ## Install prerequisite
 
@@ -122,7 +121,7 @@ python -m pip install label-studio
 If you want to use nightly builds or extend the functionality, consider downloading the source code using Git and running Label Studio locally:
 
 ```bash
-git clone https://github.com/heartexlabs/label-studio.git
+git clone https://github.com/HumanSignal/label-studio.git
 cd label-studio
 # Install all package dependencies
 pip install -e .

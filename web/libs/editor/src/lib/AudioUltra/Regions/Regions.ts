@@ -74,6 +74,7 @@ export class Regions {
     container.addEventListener("mousedown", this.handleMouseDown);
     container.addEventListener("mouseup", this.handleMouseUp);
     container.addEventListener("click", this.handleClick);
+    container.addEventListener("mouseleave", this.handleMouseLeave);
   }
 
   handleDraw = () => {
@@ -86,7 +87,7 @@ export class Regions {
     const currentTime = this.waveform.currentTime;
 
     this.regions.forEach((region) => {
-      region.highlighted = region.start <= currentTime && region.end >= currentTime;
+      region.active = region.start <= currentTime && region.end >= currentTime;
       region.render();
     });
   }
@@ -226,6 +227,7 @@ export class Regions {
     container.removeEventListener("mousedown", this.handleMouseDown);
     container.removeEventListener("mouseup", this.handleMouseUp);
     container.removeEventListener("click", this.handleClick);
+    container.removeEventListener("mouseleave", this.handleMouseLeave);
 
     this.regions.forEach((region) => region.destroy());
     this.regions = [];
@@ -307,9 +309,14 @@ export class Regions {
 
     const addRegion = () => {
       const { container, zoomedWidth, fullWidth } = this.visualizer;
-      const { autoPlayNewSegments, duration } = this.waveform;
+      const {
+        settings: { autoPlayNewSegments },
+        duration,
+      } = this.waveform;
       const scrollLeft = this.visualizer.getScrollLeftPx();
 
+      // we create a region when we press the mouse, so the end is not known yet,
+      // it will be updated on mousemove
       startX = clamp(getCursorPositionX(e, container) + scrollLeft, 0, fullWidth);
       const start = pixelsToTime(startX, zoomedWidth, duration);
       const end = pixelsToTime(startX, zoomedWidth, duration);
@@ -350,7 +357,10 @@ export class Regions {
     };
 
     const handleMouseUp = () => {
-      const { player, autoPlayNewSegments } = this.waveform;
+      const {
+        player,
+        settings: { autoPlayNewSegments },
+      } = this.waveform;
 
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
@@ -364,9 +374,15 @@ export class Regions {
           if (player.playing) {
             player.pause();
           }
-          player.play();
+          // we have to unlock player's handle first, then move the playhead to the start of the segment and play it
+          setTimeout(() => {
+            this.unlock();
+            player.seek(region.start);
+            player.play();
+          });
+        } else {
+          setTimeout(() => this.unlock(), 0);
         }
-        setTimeout(() => this.unlock(), 0);
       } else {
         this.unlock();
       }
@@ -399,6 +415,15 @@ export class Regions {
     }
   };
 
+  private handleMouseLeave = (e: MouseEvent) => {
+    if (this.hoveredRegions.size) {
+      this.hoveredRegions.forEach((region) => {
+        region.invoke("mouseLeave", [region, e]);
+      });
+      this.hoveredRegions.clear();
+    }
+  };
+
   private get cursorLockedByPlayhead() {
     return this.waveform.cursor.hasFocus() && this.waveform.cursor.isFocused("playhead");
   }
@@ -407,7 +432,7 @@ export class Regions {
     if (!this.updateable) return;
     const region = this.findRegionUnderCursor(e);
 
-    if (this.layerGroup.isVisible && region?.updateable) {
+    if (this.layerGroup.isVisible && region) {
       e.preventDefault();
       e.stopPropagation();
       region.invoke("mouseDown", [region, e]);
@@ -418,7 +443,7 @@ export class Regions {
     if (!this.updateable) return;
     const region = this.findRegionUnderCursor(e);
 
-    if (this.layerGroup.isVisible && region?.updateable) {
+    if (this.layerGroup.isVisible && region) {
       region.invoke("mouseUp", [region, e]);
     }
   };

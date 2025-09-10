@@ -4,7 +4,7 @@ short: Airgapped Server
 tier: all
 type: guide
 order: 71
-order_enterprise: 71
+order_enterprise: 73
 meta_title: Install Label Studio without public internet access
 meta_description: Install Label Studio without public internet access to create machine learning and data science projects in an airgapped environment. 
 section: "Install & Setup"
@@ -24,12 +24,27 @@ If you need to install Label Studio on a server that blocks access to the intern
 
 If your organization uses an HTTPS proxy to manage access to the internet, do the following.
 
+<div class="opensource-only">
+
 1. Work with your network security team to whitelist `https://charts.heartex.com` so that you can access the Helm charts for deployment.
 2. On the Label Studio server, set an environment variable with the HTTPS proxy address:
 ```shell
 export HTTPS_PROXY=<your_proxy>
 ```
-3. [Use Helm to install Label Studio on your Kubernetes cluster](install_k8s.html#Use-Helm-to-install-Label-Studio-Enterprise-on-your-Kubernetes-cluster).
+3. [Use Helm to install Label Studio on your Kubernetes cluster](install_k8s#Use-Helm-to-install-Label-Studio-on-your-Kubernetes-cluster).
+
+</div>
+
+<div class="enterprise-only">
+
+1. Work with your network security team to whitelist `https://charts.heartex.com` so that you can access the Helm charts for deployment.
+2. On the Label Studio server, set an environment variable with the HTTPS proxy address:
+```shell
+export HTTPS_PROXY=<your_proxy>
+```
+3. [Use Helm to install Label Studio on your Kubernetes cluster](install_enterprise_k8s#Use-Helm-to-install-Label-Studio-Enterprise-on-your-Kubernetes-cluster).
+
+</div>
 
 ### Install without internet access or HTTPS proxy
 

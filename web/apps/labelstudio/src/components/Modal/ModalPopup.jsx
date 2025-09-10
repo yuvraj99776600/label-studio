@@ -1,9 +1,9 @@
 import React, { createContext, useContext } from "react";
 import { createPortal } from "react-dom";
-import { LsCross } from "../../assets/icons";
+import { IconCross } from "@humansignal/icons";
 import { BemWithSpecifiContext, cn } from "../../utils/bem";
-import { aroundTransition } from "../../utils/transition";
-import { Button } from "../Button/Button";
+import { aroundTransition } from "@humansignal/core/lib/utils/transition";
+import { Button } from "@humansignal/ui";
 import "./Modal.scss";
 
 const { Block, Elem } = BemWithSpecifiContext();
@@ -13,6 +13,10 @@ const ModalContext = createContext();
 export class Modal extends React.Component {
   modalRef = React.createRef();
 
+  get visible() {
+    return this.state.visible;
+  }
+
   constructor(props) {
     super(props);
 
@@ -20,7 +24,7 @@ export class Modal extends React.Component {
       title: props.title,
       body: props.body,
       footer: props.footer,
-      visible: props.animateAppearance ? false : props.visible ?? false,
+      visible: props.animateAppearance ? false : (props.visible ?? false),
       transition: props.visible ? "visible" : null,
     };
   }
@@ -36,6 +40,7 @@ export class Modal extends React.Component {
   }
 
   componentWillUnmount() {
+    document.body.style.overflow = "";
     document.removeEventListener("keydown", this.closeOnEscape, { capture: !this.props.allowToInterceptEscape });
   }
 
@@ -97,7 +102,11 @@ export class Modal extends React.Component {
               {!bare && (
                 <Modal.Header>
                   <Elem name="title">{this.state.title}</Elem>
-                  {this.props.allowClose !== false && <Elem tag={Button} name="close" type="text" icon={<LsCross />} />}
+                  {this.props.allowClose !== false && (
+                    <Button name="close" look="string" onClick={() => this.hide()} aria-label="Close modal">
+                      <IconCross />
+                    </Button>
+                  )}
                 </Modal.Header>
               )}
               <Elem name="body" mod={{ bare }}>
@@ -202,8 +211,8 @@ Modal.Header = ({ children, divided }) => (
   </Elem>
 );
 
-Modal.Footer = ({ children, bare }) => (
-  <Elem name="footer" mod={{ bare }}>
+Modal.Footer = ({ children, bare, style, className }) => (
+  <Elem name="footer" mod={{ bare }} mix={className} style={style}>
     {children}
   </Elem>
 );
