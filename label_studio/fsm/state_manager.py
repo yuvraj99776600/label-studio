@@ -230,8 +230,13 @@ class StateManager:
                     },
                 )
 
+                # CRITICAL FIX: Use state model's correct field name instead of entity._meta.model_name
+                # This fixes the architectural entity field mapping issue where entity._meta.model_name
+                # doesn't always match the actual field name defined in FSM state models
+                entity_field_name = state_model._get_entity_field_name()
+
                 new_state_record = state_model.objects.create(
-                    **{entity._meta.model_name: entity},
+                    **{entity_field_name: entity},
                     state=new_state,
                     previous_state=current_state,
                     transition_name=transition_name,
