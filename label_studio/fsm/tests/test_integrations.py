@@ -5,53 +5,52 @@ Tests that verify the core Label Studio FSM integrations work correctly
 and don't conflict with enterprise features.
 """
 
-import pytest
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
+
+from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
-from django.contrib.auth.models import User
+
+User = get_user_model()
 from fsm.integrations import (
-    is_enterprise_enabled,
-    is_fsm_enabled, 
-    project_created,
-    task_created,
     annotation_submitted,
     get_current_state_safe,
+    is_enterprise_enabled,
+    is_fsm_enabled,
+    project_created,
+    task_created,
 )
-from fsm.state_choices import ProjectStateChoices, TaskStateChoices, AnnotationStateChoices
+from fsm.state_choices import AnnotationStateChoices, ProjectStateChoices, TaskStateChoices
 
 
 class TestEnterpriseDetection(TestCase):
     """Test enterprise detection functionality"""
 
+    @override_settings(VERSION_EDITION='Enterprise')
     def test_enterprise_detection_when_present(self):
-        """Test that enterprise is detected when lse_fsm is available"""
-        with patch('fsm.integrations.import_module') as mock_import:
-            # Mock successful import of lse_fsm
-            mock_import.return_value = Mock()
-            # Reset the function to use the mock
-            with patch('builtins.__import__', return_value=Mock()):
-                from fsm.integrations import is_enterprise_enabled
-                # Note: This test may be environment dependent
-                # In actual deployment, this would return True when enterprise is present
+        """Test that enterprise is detected when VERSION_EDITION is not 'Community'"""
+        result = is_enterprise_enabled()
+        self.assertTrue(result)
 
+    @override_settings(VERSION_EDITION='Community')
     def test_enterprise_detection_when_absent(self):
-        """Test that enterprise is not detected when lse_fsm is not available"""  
-        with patch('builtins.__import__', side_effect=ImportError('No module named lse_fsm')):
-            # Reimport to get fresh function state
-            import importlib
-            import fsm.integrations
-            importlib.reload(fsm.integrations)
-            
-            # Should return False when enterprise is not available
-            result = fsm.integrations.is_enterprise_enabled()
-            # Note: This test may be environment dependent
+        """Test that enterprise is not detected when VERSION_EDITION is 'Community'"""
+        result = is_enterprise_enabled()
+        self.assertFalse(result)
+
+    def test_enterprise_detection_default(self):
+        """Test that enterprise detection defaults to Community when VERSION_EDITION is not set"""
+        with patch('fsm.integrations.getattr') as mock_getattr:
+            # Mock getattr to return 'Community' as default
+            mock_getattr.return_value = 'Community'
+            result = is_enterprise_enabled()
+            self.assertFalse(result)
 
 
 class TestFSMEnabledChecks(TestCase):
     """Test FSM enabled logic"""
 
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser')
+        self.user = User.objects.create_user(username='testuser', email='test@example.com')
 
     @patch('fsm.integrations.is_enterprise_enabled')
     @patch('fsm.integrations.flag_set')
@@ -59,7 +58,7 @@ class TestFSMEnabledChecks(TestCase):
         """Test that core FSM is disabled when enterprise is present"""
         mock_enterprise.return_value = True
         mock_flag_set.return_value = True
-        
+
         result = is_fsm_enabled(self.user)
         self.assertFalse(result)
 
@@ -69,7 +68,7 @@ class TestFSMEnabledChecks(TestCase):
         """Test that core FSM is enabled when enterprise is absent and flag is on"""
         mock_enterprise.return_value = False
         mock_flag_set.return_value = True
-        
+
         result = is_fsm_enabled(self.user)
         self.assertTrue(result)
 
@@ -79,7 +78,7 @@ class TestFSMEnabledChecks(TestCase):
         """Test that core FSM is disabled when feature flag is off"""
         mock_enterprise.return_value = False
         mock_flag_set.return_value = False
-        
+
         result = is_fsm_enabled(self.user)
         self.assertFalse(result)
 
@@ -88,10 +87,10 @@ class TestStateTransitions(TestCase):
     """Test core state transition functions"""
 
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser')
+        self.user = User.objects.create_user(username='testuser', email='test@example.com')
         self.mock_project = Mock()
         self.mock_project.id = 1
-        self.mock_task = Mock() 
+        self.mock_task = Mock()
         self.mock_task.id = 1
         self.mock_annotation = Mock()
         self.mock_annotation.id = 1
@@ -112,7 +111,7 @@ class TestStateTransitions(TestCase):
             entity=self.mock_project,
             new_state=ProjectStateChoices.CREATED,
             user=self.user,
-            reason='Project created in Label Studio core'
+            reason='Project created in Label Studio core',
         )
 
     @patch('fsm.integrations.is_fsm_enabled')
@@ -140,7 +139,7 @@ class TestStateTransitions(TestCase):
             entity=self.mock_task,
             new_state=TaskStateChoices.CREATED,
             user=self.user,
-            reason='Task created in Label Studio core'
+            reason='Task created in Label Studio core',
         )
 
     @patch('fsm.integrations.is_fsm_enabled')
@@ -159,16 +158,16 @@ class TestStateTransitions(TestCase):
             entity=self.mock_annotation,
             new_state=AnnotationStateChoices.SUBMITTED,
             user=self.user,
-            reason='Annotation submitted in Label Studio core'
+            reason='Annotation submitted in Label Studio core',
         )
 
-    @patch('fsm.integrations.is_fsm_enabled') 
+    @patch('fsm.integrations.is_fsm_enabled')
     @patch('fsm.integrations.get_state_manager')
     def test_error_handling_in_transitions(self, mock_get_manager, mock_enabled):
         """Test that errors in state transitions are handled gracefully"""
         mock_enabled.return_value = True
         mock_state_manager = Mock()
-        mock_state_manager.transition_state.side_effect = Exception("State manager error")
+        mock_state_manager.transition_state.side_effect = Exception('State manager error')
         mock_get_manager.return_value = mock_state_manager
 
         # Should not raise exception, should return False
@@ -188,12 +187,12 @@ class TestUtilityFunctions(TestCase):
         """Test getting current state when FSM is enabled"""
         mock_enabled.return_value = True
         mock_state_manager = Mock()
-        mock_state_manager.get_current_state_value.return_value = "CREATED"
+        mock_state_manager.get_current_state_value.return_value = 'CREATED'
         mock_get_manager.return_value = mock_state_manager
 
         result = get_current_state_safe(self.mock_entity)
 
-        self.assertEqual(result, "CREATED")
+        self.assertEqual(result, 'CREATED')
 
     @patch('fsm.integrations.is_fsm_enabled')
     def test_get_current_state_safe_when_disabled(self, mock_enabled):
@@ -210,7 +209,7 @@ class TestUtilityFunctions(TestCase):
         """Test getting current state with error handling"""
         mock_enabled.return_value = True
         mock_state_manager = Mock()
-        mock_state_manager.get_current_state_value.side_effect = Exception("State manager error")
+        mock_state_manager.get_current_state_value.side_effect = Exception('State manager error')
         mock_get_manager.return_value = mock_state_manager
 
         result = get_current_state_safe(self.mock_entity)
