@@ -38,8 +38,8 @@ The Annotation Summary shows annotation progress and quality metrics for each me
 | Column | Description |
 |--------|-------------|
 | **Paused** | Toggle indicating whether the member is currently paused in the project. Learn more about [pausing an annotator](quality.html#Pause-an-annotator). |
-| **Agreement Score** | Average agreement score against other members. Calculated as the average of the member's pairwise agreement scores with other members in the project. <br>Pairwise agreement scores are found in the [Annotator Agreement Matrix](#Annotator_agreement_matrix).|
-| **Finished** | Total number of submitted annotations. Excludes any skipped annotations. Does not consider annotation updates or review outcomes. |
+| **Agreement Score** | Average agreement score against other annotators. Calculated as the average of the member's pairwise agreement scores with other annotators in the project. <br>Pairwise agreement scores are found in the [Annotator Agreement Matrix](#Annotator_agreement_matrix).|
+| **Finished** | Total number of annotations submitted, imported, or created from predictions by the member. Excludes any skipped annotations. Does not consider annotation updates or review outcomes. |
 | **Skipped** | Total number of tasks currently skipped. |
 | **Accepted** | Total number of annotations accepted by reviewers. Only counts annotations with the current review state of 'Accepted'. |
 | **Rejected** | Total number of annotations rejected by reviewers. Only counts annotations with the current review state of 'Rejected'. |
@@ -48,7 +48,7 @@ The Annotation Summary shows annotation progress and quality metrics for each me
 | **Annotation Progress** | Member's annotation progress, calculated based on the project's [label distribution setting](project_settings_lse.html#Annotation):<ul><li><strong>Auto</strong>: (total submitted annotations) / (total submitted annotations by member + total tasks where annotation is not complete - total tasks where member has a draft annotation)</li><li><strong>Manual</strong>: (total assigned annotations submitted) / (total assigned tasks)</li></ul> |
 | **Time** | Time spent annotating based on [`lead_time`](dashboard_annotator#Performance-summaries), which includes time to submit and time spent updating. Offers three modes:<ul><li><strong>Mean Time</strong>: Average time spent per annotation</li><li><strong>Median Time</strong>: Median time spent on an annotation</li><li><strong>Total Time</strong>: Total time spent across all annotations</li></ul> |
 | **Ground Truth** | Average agreement score against ground truth annotations. [Ground truth](ground_truths.html) acts as a way to assess the accuracy of other annotations. |
-| **Predictions** | Average agreement score against model predictions. The model used for comparison is selected in the [Live Predictions setting](project_settings_lse#Annotation). |
+| **Predictions** | Average agreement score against models used in the project. |
 
 
 ### Export Annotation Summary table
