@@ -9,6 +9,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
+from core.feature_flags import flag_set
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
@@ -54,6 +55,11 @@ class StateManager:
     CACHE_PREFIX = 'fsm:current'
 
     @classmethod
+    def _is_fsm_enabled(cls, user='auto') -> bool:
+        """Check if FSM feature is enabled via feature flag."""
+        return flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+
+    @classmethod
     def get_cache_key(cls, entity: Model) -> str:
         """Generate cache key for entity's current state"""
         return f'{cls.CACHE_PREFIX}:{entity._meta.label_lower}:{entity.pk}'
@@ -78,6 +84,9 @@ class StateManager:
                 # Task is finished
                 pass
         """
+        if not cls._is_fsm_enabled():
+            return None  # Feature disabled, return no state
+
         cache_key = cls.get_cache_key(entity)
 
         # Try cache first
@@ -194,6 +203,9 @@ class StateManager:
                 reason='User started annotation work'
             )
         """
+        if not cls._is_fsm_enabled(user=user):
+            return True  # Feature disabled, silently succeed
+
         state_model = get_state_model_for_entity(entity)
         if not state_model:
             raise StateManagerError(f'No state model found for {entity._meta.model_name} when transitioning state')
