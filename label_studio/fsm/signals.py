@@ -53,9 +53,17 @@ def handle_model_state_transitions(sender, instance, created, **kwargs):
         created: True if this is a new instance
         **kwargs: Additional signal arguments
     """
+    # Check VERSION_EDITION first - only work in Community edition
+    from django.conf import settings
+
+    version_edition = getattr(settings, 'VERSION_EDITION', 'Community')
+
+    if version_edition != 'Community':
+        return
+
     from fsm.integrations import is_fsm_enabled
 
-    # Early exit if FSM is not enabled (includes enterprise check)
+    # Early exit if FSM is not enabled
     if not is_fsm_enabled():
         return
 

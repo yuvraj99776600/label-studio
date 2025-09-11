@@ -14,9 +14,18 @@ class FsmConfig(AppConfig):
 
     def ready(self):
         """Initialize FSM integration when the app is ready"""
-        logger.info('Label Studio FSM app ready, initializing core integrations')
+        # Check if this is Community edition - only register signals for Community
+        from django.conf import settings
 
-        # Import signal handlers to register them
+        version_edition = getattr(settings, 'VERSION_EDITION', 'Community')
+
+        if version_edition != 'Community':
+            logger.info(f'Label Studio FSM: Skipping initialization for {version_edition} edition')
+            return
+
+        logger.info('Label Studio FSM app ready, initializing core integrations for Community edition')
+
+        # Import signal handlers to register them (only for Community edition)
         try:
             from . import signals  # noqa: F401
 

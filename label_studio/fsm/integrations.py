@@ -37,7 +37,9 @@ def is_enterprise_enabled() -> bool:
 
 def is_fsm_enabled(user: Optional[User] = None) -> bool:
     """
-    Check if FSM is enabled via feature flags and enterprise is not present.
+    Check if FSM is enabled via feature flags.
+
+    Note: VERSION_EDITION check is handled at the app/signal level.
 
     Args:
         user: User for feature flag evaluation
@@ -45,8 +47,8 @@ def is_fsm_enabled(user: Optional[User] = None) -> bool:
     Returns:
         True if FSM should be active for core Label Studio
     """
+    # Don't activate if enterprise is present (avoids conflicts with LSE FSM)
     if is_enterprise_enabled():
-        logger.debug('FSM: Enterprise detected, disabling core integrations')
         return False
 
     return flag_set('fflag_feat_fit_568_finite_state_management', user=user)
