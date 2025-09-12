@@ -22,6 +22,32 @@ from fsm.state_manager import get_state_manager
 logger = logging.getLogger(__name__)
 
 
+def _resolve_organization_id(entity, user=None):
+    """
+    Resolve organization_id using the same logic as StateManager without additional queries.
+
+    This mirrors the organization_id resolution logic from StateManager.transition_state()
+    to provide consistent organization_id for logging without duplicating database queries.
+    """
+    # Try direct organization_id attribute first
+    organization_id = getattr(entity, 'organization_id', None)
+
+    # If entity doesn't have direct organization_id, try denormalized fields approach
+    if not organization_id:
+        # For entities with project relationship (most common case)
+        if hasattr(entity, 'project') and entity.project:
+            organization_id = getattr(entity.project, 'organization_id', None)
+        # For entities with task.project relationship
+        elif hasattr(entity, 'task') and entity.task and hasattr(entity.task, 'project') and entity.task.project:
+            organization_id = getattr(entity.task.project, 'organization_id', None)
+
+    # Fallback to user's active organization
+    if not organization_id and user and hasattr(user, 'active_organization') and user.active_organization:
+        organization_id = user.active_organization.id
+
+    return organization_id
+
+
 def is_enterprise_enabled() -> bool:
     """
     Check if Label Studio Enterprise is enabled/present.
@@ -65,7 +91,23 @@ def safe_state_transition(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            logger.error(f'FSM: Error in {func.__name__}: {str(e)}', exc_info=True)
+            # Try to extract entity and user from function arguments for organization_id resolution
+            entity = args[0] if len(args) > 0 else None
+            user = args[1] if len(args) > 1 else kwargs.get('user')
+            organization_id = _resolve_organization_id(entity, user) if entity else None
+
+            logger.error(
+                'FSM: Error in integration function',
+                extra={
+                    'event': 'fsm.integration_function_error',
+                    'function_name': func.__name__,
+                    'entity_type': entity._meta.label_lower if entity and hasattr(entity, '_meta') else None,
+                    'entity_id': getattr(entity, 'pk', None) if entity else None,
+                    'organization_id': organization_id,
+                    'error': str(e),
+                },
+                exc_info=True,
+            )
             # Return False to indicate failure but don't raise
             return False
 
@@ -280,5 +322,14 @@ def get_current_state_safe(entity):
         state_manager = get_state_manager()
         return state_manager.get_current_state_value(entity)
     except Exception as e:
-        logger.error(f'FSM: Error getting current state for {entity}: {str(e)}')
+        logger.error(
+            'FSM: Error getting current state',
+            extra={
+                'event': 'fsm.get_state_error',
+                'entity_type': entity._meta.label_lower if hasattr(entity, '_meta') else str(type(entity).__name__),
+                'entity_id': getattr(entity, 'pk', None),
+                'organization_id': _resolve_organization_id(entity),
+                'error': str(e),
+            },
+        )
         return None

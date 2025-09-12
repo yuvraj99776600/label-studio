@@ -77,7 +77,15 @@ def handle_model_state_transitions(sender, instance, created, **kwargs):
                 from fsm.integrations import project_created
 
                 project_created(instance, user=user)
-                logger.debug(f'FSM: Project {instance.id} created')
+                logger.debug(
+                    'FSM: Project created',
+                    extra={
+                        'event': 'fsm.project_created',
+                        'entity_type': 'project',
+                        'entity_id': instance.id,
+                        'user_id': user.id if user else None,
+                    },
+                )
 
         # Handle Task state transitions
         elif model_name == 'task':
@@ -90,7 +98,15 @@ def handle_model_state_transitions(sender, instance, created, **kwargs):
                 if hasattr(instance, 'project'):
                     project_started(instance.project, user=user)
 
-                logger.debug(f'FSM: Task {instance.id} created')
+                logger.debug(
+                    'FSM: Task created',
+                    extra={
+                        'event': 'fsm.task_created',
+                        'entity_type': 'task',
+                        'entity_id': instance.id,
+                        'user_id': user.id if user else None,
+                    },
+                )
 
         # Handle Annotation state transitions
         elif model_name == 'annotation':
@@ -103,7 +119,15 @@ def handle_model_state_transitions(sender, instance, created, **kwargs):
                 if hasattr(instance, 'task'):
                     task_started(instance.task, user=user)
 
-                logger.debug(f'FSM: Annotation {instance.id} submitted')
+                logger.debug(
+                    'FSM: Annotation submitted',
+                    extra={
+                        'event': 'fsm.annotation_submitted',
+                        'entity_type': 'annotation',
+                        'entity_id': instance.id,
+                        'user_id': user.id if user else None,
+                    },
+                )
 
             # Handle annotation completion (when is_completed flag is set)
             elif hasattr(instance, 'is_completed') and instance.is_completed:
@@ -118,8 +142,25 @@ def handle_model_state_transitions(sender, instance, created, **kwargs):
                     if getattr(task, 'is_labeled', False):
                         task_completed(task, user=user)
 
-                logger.debug(f'FSM: Annotation {instance.id} completed')
+                logger.debug(
+                    'FSM: Annotation completed',
+                    extra={
+                        'event': 'fsm.annotation_completed',
+                        'entity_type': 'annotation',
+                        'entity_id': instance.id,
+                        'user_id': user.id if user else None,
+                    },
+                )
 
     except Exception as e:
         # Log error but don't raise - FSM errors should never break core functionality
-        logger.error(f'FSM: Error in signal handler for {model_name}: {str(e)}', exc_info=True)
+        logger.error(
+            'FSM: Error in signal handler',
+            extra={
+                'event': 'fsm.signal_handler_error',
+                'model_name': model_name,
+                'entity_id': getattr(instance, 'id', None),
+                'error': str(e),
+            },
+            exc_info=True,
+        )

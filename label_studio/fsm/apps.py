@@ -31,4 +31,11 @@ class FsmConfig(AppConfig):
 
             logger.info('Label Studio FSM signal handlers registered successfully')
         except Exception as e:
-            logger.error(f'Failed to register Label Studio FSM signal handlers: {str(e)}', exc_info=True)
+            logger.error(
+                'FSM: Failed to register Label Studio FSM signal handlers',
+                extra={
+                    'event': 'fsm.signal_registration_error',
+                    'error': str(e),
+                },
+                exc_info=True,
+            )

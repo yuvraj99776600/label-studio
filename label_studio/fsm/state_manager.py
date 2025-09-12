@@ -93,7 +93,7 @@ class StateManager:
         cached_state = cache.get(cache_key)
         if cached_state is not None:
             logger.info(
-                'FSM cache hit',
+                'FSM: Cache hit',
                 extra={
                     'event': 'fsm.cache_hit',
                     'entity_type': entity._meta.label_lower,
@@ -115,7 +115,7 @@ class StateManager:
             if current_state is not None:
                 cache.set(cache_key, current_state, cls.CACHE_TTL)
                 logger.info(
-                    'FSM cache miss',
+                    'FSM: Cache miss',
                     extra={
                         'event': 'fsm.cache_miss',
                         'entity_type': entity._meta.label_lower,
@@ -127,7 +127,7 @@ class StateManager:
 
         except Exception as e:
             logger.error(
-                'Error getting current state',
+                'FSM: Error getting current state',
                 extra={
                     'event': 'fsm.get_state_error',
                     'entity_type': entity._meta.label_lower,
@@ -227,7 +227,7 @@ class StateManager:
                     organization_id = user.active_organization.id
 
                 logger.info(
-                    'State transition starting',
+                    'FSM: State transition starting',
                     extra={
                         'event': 'fsm.transition_state_start',
                         'entity_type': entity._meta.label_lower,
@@ -265,7 +265,7 @@ class StateManager:
                 def update_cache(key, state, user_id, org_id):
                     cache.set(key, state, cls.CACHE_TTL)
                     logger.info(
-                        'Cache updated for transition state',
+                        'FSM: Cache updated for transition state',
                         extra={
                             'event': 'fsm.transition_state_cache_updated',
                             'entity_type': entity._meta.label_lower,
@@ -280,7 +280,7 @@ class StateManager:
                 )
 
                 logger.info(
-                    'State transition successful',
+                    'FSM: State transition successful',
                     extra={
                         'event': 'fsm.transition_state_success',
                         'entity_type': entity._meta.label_lower,
@@ -300,7 +300,7 @@ class StateManager:
             cache_key = cls.get_cache_key(entity)
             cache.delete(cache_key)
             logger.error(
-                'State transition failed',
+                'FSM: State transition failed',
                 extra={
                     'event': 'fsm.transition_state_failed',
                     'entity_type': entity._meta.label_lower,
@@ -367,7 +367,7 @@ class StateManager:
         cache.delete(cache_key)
         organization_id = getattr(entity, 'organization_id', None)
         logger.info(
-            'Cache invalidated',
+            'FSM: Cache invalidated',
             extra={
                 'event': 'fsm.cache_invalidated',
                 'entity_type': entity._meta.label_lower,
@@ -398,7 +398,7 @@ class StateManager:
         if cache_updates:
             cache.set_many(cache_updates, cls.CACHE_TTL)
             logger.info(
-                'Cache warmed',
+                'FSM: Cache warmed',
                 extra={
                     'event': 'fsm.cache_warmed',
                     'entity_count': len(cache_updates),
