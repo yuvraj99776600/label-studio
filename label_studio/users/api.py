@@ -317,8 +317,8 @@ class UserGetTokenAPI(APIView):
     name='get',
     decorator=extend_schema(
         tags=['Users'],
-        summary='Retrieve my user',
-        description='Retrieve details of the account that you are using to access the API.',
+        summary='Whoami for current user',
+        description='Make the whoami call on behalf of the user you are using to access the API.',
         request=None,
         responses={200: WhoAmIUserSerializer},
         extensions={
