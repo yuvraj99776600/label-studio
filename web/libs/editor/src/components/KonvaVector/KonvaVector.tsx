@@ -12,7 +12,7 @@ import {
 } from "./components";
 import { createEventHandlers } from "./eventHandlers";
 import { convertPoint } from "./pointManagement";
-import { normalizePoints, convertBezierToSimplePoints } from "./utils";
+import { normalizePoints, convertBezierToSimplePoints, isPointInPolygon } from "./utils";
 import { findClosestPointOnPath, getDistance } from "./eventHandlers/utils";
 import { PointCreationManager } from "./pointCreationManager";
 import { VectorSelectionTracker, type VectorInstance } from "./VectorSelectionTracker";
@@ -253,10 +253,19 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
   // Normalize input points to BezierPoint format
   const [initialPoints, setInitialPoints] = useState(() => normalizePoints(rawInitialPoints));
 
+  const stablePointsHash = useMemo(() => {
+    return JSON.stringify(rawInitialPoints);
+  }, [rawInitialPoints.length, rawInitialPoints]);
+
+  // Create a stable reference for rawInitialPoints to prevent infinite loops
+  const stableRawPoints = useMemo(() => {
+    return rawInitialPoints;
+  }, [stablePointsHash]);
+
   // Update initialPoints when rawInitialPoints changes
   useEffect(() => {
-    setInitialPoints(normalizePoints(rawInitialPoints));
-  }, [rawInitialPoints]);
+    setInitialPoints(normalizePoints(stableRawPoints));
+  }, [stableRawPoints]);
 
   // Initialize lastAddedPointId and activePointId when component loads with existing points
   useEffect(() => {
@@ -1333,6 +1342,44 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
     // Shape analysis methods
     getShapeBoundingBox: () => {
       return calculateShapeBoundingBox(initialPoints);
+    },
+    // Hit testing method
+    isPointOverShape: (x: number, y: number, hitRadius = 20) => {
+      const point = { x, y };
+
+      // If no points, return false
+      if (initialPoints.length === 0) {
+        return false;
+      }
+
+      // First check if hovering over any individual point (vertices)
+      for (let i = 0; i < initialPoints.length; i++) {
+        const vertex = initialPoints[i];
+        const distance = getDistance(point, vertex);
+        if (distance <= hitRadius) {
+          return true; // Hovering over a vertex
+        }
+      }
+
+      // For single point, we already checked above, so return false if not hit
+      if (initialPoints.length === 1) {
+        return false;
+      }
+
+      // For polylines and polygons, check if point is close to any segment
+      const closestPathPoint = findClosestPointOnPath(point, initialPoints, allowClose, finalIsPathClosed);
+
+      if (closestPathPoint) {
+        const distance = getDistance(point, closestPathPoint.point);
+        return distance <= hitRadius;
+      }
+
+      // For closed polygons, also check if point is inside the polygon
+      if (finalIsPathClosed && initialPoints.length >= 3) {
+        return isPointInPolygon(point, initialPoints);
+      }
+
+      return false;
     },
   }));
 
