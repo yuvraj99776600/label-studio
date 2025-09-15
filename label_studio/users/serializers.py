@@ -1,10 +1,17 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+from typing import TypedDict
+
 from core.utils.common import load_func
 from django.conf import settings
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import serializers
 from users.models import User
+
+
+class ActiveOrganizationMeta(TypedDict):
+    title: str
+    email: str
 
 
 class BaseUserSerializer(FlexFieldsModelSerializer):
@@ -22,7 +29,7 @@ class BaseUserSerializer(FlexFieldsModelSerializer):
     def get_initials(self, instance):
         return instance.get_initials(self._is_deleted(instance))
 
-    def get_active_organization_meta(self, instance):
+    def get_active_organization_meta(self, instance) -> ActiveOrganizationMeta:
         organization = instance.active_organization
         if organization is None:
             return {'title': '', 'email': ''}
