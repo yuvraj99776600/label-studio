@@ -157,6 +157,7 @@ export const create = (columns) => {
         const taskParams = { taskID };
         if (isLabelStream) {
           taskParams.interaction = "labelstream";
+          taskParams.omit = "annotations";
         }
 
         const taskData = yield self.root.apiCall("task", taskParams);
