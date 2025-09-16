@@ -23,6 +23,17 @@ class FsmConfig(AppConfig):
             logger.info(f'Label Studio FSM: Skipping initialization for {version_edition} edition')
             return
 
+        # Additional safety check: if LSE FSM apps are present, don't initialize
+        try:
+            from django.apps import apps
+
+            if apps.is_installed('lse_fsm'):
+                logger.info('Label Studio FSM: LSE FSM detected, skipping LSO FSM initialization to avoid conflicts')
+                return
+        except Exception as e:
+            # Log but continue - this shouldn't prevent initialization in pure LSO environments
+            logger.debug(f'Label Studio FSM: Error checking for LSE apps: {e}')
+
         logger.info('Label Studio FSM app ready, initializing core integrations for Community edition')
 
         # Import signal handlers to register them (only for Community edition)

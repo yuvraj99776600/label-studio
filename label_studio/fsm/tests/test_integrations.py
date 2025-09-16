@@ -37,13 +37,13 @@ class TestEnterpriseDetection(TestCase):
     def test_enterprise_detection_when_present(self):
         """Test that enterprise is detected when VERSION_EDITION is not 'Community'"""
         result = is_enterprise_enabled()
-        self.assertTrue(result)
+        assert result is True
 
     @override_settings(VERSION_EDITION='Community')
     def test_enterprise_detection_when_absent(self):
         """Test that enterprise is not detected when VERSION_EDITION is 'Community'"""
         result = is_enterprise_enabled()
-        self.assertFalse(result)
+        assert result is False
 
     def test_enterprise_detection_default(self):
         """Test that enterprise detection defaults to Community when VERSION_EDITION is not set"""
@@ -51,7 +51,7 @@ class TestEnterpriseDetection(TestCase):
             # Mock getattr to return 'Community' as default
             mock_getattr.return_value = 'Community'
             result = is_enterprise_enabled()
-            self.assertFalse(result)
+            assert result is False
 
 
 class TestFSMEnabledChecks(TestCase):
@@ -68,7 +68,7 @@ class TestFSMEnabledChecks(TestCase):
         mock_flag_set.return_value = True
 
         result = is_fsm_enabled(self.user)
-        self.assertFalse(result)
+        assert result is False
 
     @patch('fsm.integrations.is_enterprise_enabled')
     @patch('fsm.integrations.flag_set')
@@ -78,7 +78,7 @@ class TestFSMEnabledChecks(TestCase):
         mock_flag_set.return_value = True
 
         result = is_fsm_enabled(self.user)
-        self.assertTrue(result)
+        assert result is True
 
     @patch('fsm.integrations.is_enterprise_enabled')
     @patch('fsm.integrations.flag_set')
@@ -88,7 +88,7 @@ class TestFSMEnabledChecks(TestCase):
         mock_flag_set.return_value = False
 
         result = is_fsm_enabled(self.user)
-        self.assertFalse(result)
+        assert result is False
 
 
 class TestStateTransitions(TestCase):
@@ -114,7 +114,7 @@ class TestStateTransitions(TestCase):
 
         result = project_created(self.mock_project, user=self.user)
 
-        self.assertTrue(result)
+        assert result is True
         mock_state_manager.transition_state.assert_called_once_with(
             entity=self.mock_project,
             new_state=ProjectStateChoices.CREATED,
@@ -129,7 +129,7 @@ class TestStateTransitions(TestCase):
 
         result = project_created(self.mock_project, user=self.user)
 
-        self.assertFalse(result)
+        assert result is False
 
     @patch('fsm.integrations.is_fsm_enabled')
     @patch('fsm.integrations.get_state_manager')
@@ -142,7 +142,7 @@ class TestStateTransitions(TestCase):
 
         result = task_created(self.mock_task, user=self.user)
 
-        self.assertTrue(result)
+        assert result is True
         mock_state_manager.transition_state.assert_called_once_with(
             entity=self.mock_task,
             new_state=TaskStateChoices.CREATED,
@@ -161,7 +161,7 @@ class TestStateTransitions(TestCase):
 
         result = annotation_submitted(self.mock_annotation, user=self.user)
 
-        self.assertTrue(result)
+        assert result is True
         mock_state_manager.transition_state.assert_called_once_with(
             entity=self.mock_annotation,
             new_state=AnnotationStateChoices.SUBMITTED,
@@ -180,7 +180,7 @@ class TestStateTransitions(TestCase):
 
         # Should not raise exception, should return False
         result = project_created(self.mock_project, user=self.user)
-        self.assertFalse(result)
+        assert result is False
 
 
 class TestUtilityFunctions(TestCase):
@@ -200,7 +200,7 @@ class TestUtilityFunctions(TestCase):
 
         result = get_current_state_safe(self.mock_entity)
 
-        self.assertEqual(result, 'CREATED')
+        assert result == 'CREATED'
 
     @patch('fsm.integrations.is_fsm_enabled')
     def test_get_current_state_safe_when_disabled(self, mock_enabled):
@@ -209,7 +209,7 @@ class TestUtilityFunctions(TestCase):
 
         result = get_current_state_safe(self.mock_entity)
 
-        self.assertIsNone(result)
+        assert result is None
 
     @patch('fsm.integrations.is_fsm_enabled')
     @patch('fsm.integrations.get_state_manager')
@@ -222,7 +222,7 @@ class TestUtilityFunctions(TestCase):
 
         result = get_current_state_safe(self.mock_entity)
 
-        self.assertIsNone(result)
+        assert result is None
 
 
 class TestAdditionalIntegrations(TestCase):
@@ -239,7 +239,7 @@ class TestAdditionalIntegrations(TestCase):
         """Test project_started when FSM is disabled."""
         mock_flag.return_value = False
         result = project_started(self.project, self.user)
-        self.assertFalse(result)
+        assert result is False
 
     @patch('fsm.integrations.flag_set')
     @patch('fsm.integrations.get_state_manager')
@@ -251,7 +251,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_get_manager.return_value = mock_state_manager
 
         result = project_started(self.project, self.user)
-        self.assertTrue(result)
+        assert result is True
         mock_state_manager.transition_state.assert_called_once_with(
             entity=self.project,
             new_state=ProjectStateChoices.IN_PROGRESS,
@@ -264,7 +264,7 @@ class TestAdditionalIntegrations(TestCase):
         """Test project_completed when FSM is disabled."""
         mock_flag.return_value = False
         result = project_completed(self.project, self.user)
-        self.assertFalse(result)
+        assert result is False
 
     @patch('fsm.integrations.flag_set')
     @patch('fsm.integrations.get_state_manager')
@@ -276,7 +276,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_get_manager.return_value = mock_state_manager
 
         result = project_completed(self.project, self.user)
-        self.assertTrue(result)
+        assert result is True
         mock_state_manager.transition_state.assert_called_once_with(
             entity=self.project,
             new_state=ProjectStateChoices.COMPLETED,
@@ -289,7 +289,7 @@ class TestAdditionalIntegrations(TestCase):
         """Test task_started when FSM is disabled."""
         mock_flag.return_value = False
         result = task_started(self.task, self.user)
-        self.assertFalse(result)
+        assert result is False
 
     @patch('fsm.integrations.flag_set')
     @patch('fsm.integrations.get_state_manager')
@@ -301,7 +301,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_get_manager.return_value = mock_state_manager
 
         result = task_started(self.task, self.user)
-        self.assertTrue(result)
+        assert result is True
         mock_state_manager.transition_state.assert_called_once_with(
             entity=self.task,
             new_state=TaskStateChoices.IN_PROGRESS,
@@ -314,7 +314,7 @@ class TestAdditionalIntegrations(TestCase):
         """Test task_completed when FSM is disabled."""
         mock_flag.return_value = False
         result = task_completed(self.task, self.user)
-        self.assertFalse(result)
+        assert result is False
 
     @patch('fsm.integrations.flag_set')
     @patch('fsm.integrations.get_state_manager')
@@ -326,7 +326,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_get_manager.return_value = mock_state_manager
 
         result = task_completed(self.task, self.user)
-        self.assertTrue(result)
+        assert result is True
         mock_state_manager.transition_state.assert_called_once_with(
             entity=self.task,
             new_state=TaskStateChoices.COMPLETED,
@@ -339,7 +339,7 @@ class TestAdditionalIntegrations(TestCase):
         """Test annotation_completed when FSM is disabled."""
         mock_flag.return_value = False
         result = annotation_completed(self.annotation, self.user)
-        self.assertFalse(result)
+        assert result is False
 
     @patch('fsm.integrations.flag_set')
     @patch('fsm.integrations.get_state_manager')
@@ -351,7 +351,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_get_manager.return_value = mock_state_manager
 
         result = annotation_completed(self.annotation, self.user)
-        self.assertTrue(result)
+        assert result is True
         mock_state_manager.transition_state.assert_called_once_with(
             entity=self.annotation,
             new_state=AnnotationStateChoices.COMPLETED,
@@ -364,7 +364,7 @@ class TestAdditionalIntegrations(TestCase):
         """Test get_current_state_safe when FSM is disabled."""
         mock_flag.return_value = False
         result = get_current_state_safe(self.task)
-        self.assertIsNone(result)
+        assert result is None
 
     @patch('fsm.integrations.flag_set')
     @patch('fsm.integrations.get_state_manager')
@@ -376,7 +376,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_get_manager.return_value = mock_state_manager
 
         result = get_current_state_safe(self.task)
-        self.assertEqual(result, 'CREATED')
+        assert result == 'CREATED'
 
     @patch('fsm.integrations.get_state_manager')
     def test_safe_state_transition_decorator_with_error(self, mock_get_manager):
@@ -388,21 +388,21 @@ class TestAdditionalIntegrations(TestCase):
         # This should not raise an exception, but return False
         with patch('fsm.integrations.flag_set', return_value=True):
             result = project_created(self.project, self.user)
-            self.assertFalse(result)
+            assert result is False
 
     def test_is_enterprise_enabled_when_community_alternative(self):
         """Test enterprise detection when community version."""
         with patch('fsm.integrations.getattr') as mock_getattr:
             mock_getattr.return_value = 'Community'
             result = is_enterprise_enabled()
-            self.assertFalse(result)
+            assert result is False
 
     def test_is_enterprise_enabled_when_enterprise_alternative(self):
         """Test enterprise detection when enterprise version."""
         with patch('fsm.integrations.getattr') as mock_getattr:
             mock_getattr.return_value = 'Enterprise'
             result = is_enterprise_enabled()
-            self.assertTrue(result)
+            assert result is True
 
     @patch('fsm.integrations.is_enterprise_enabled')
     @patch('fsm.integrations.flag_set')
@@ -412,7 +412,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_flag.return_value = True
 
         result = is_fsm_enabled(self.user)
-        self.assertFalse(result)
+        assert result is False
 
     @patch('fsm.integrations.is_enterprise_enabled')
     @patch('fsm.integrations.flag_set')
@@ -422,7 +422,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_flag.return_value = True
 
         result = is_fsm_enabled(self.user)
-        self.assertTrue(result)
+        assert result is True
 
     @patch('fsm.integrations.is_enterprise_enabled')
     @patch('fsm.integrations.flag_set')
@@ -432,7 +432,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_flag.return_value = False
 
         result = is_fsm_enabled(self.user)
-        self.assertFalse(result)
+        assert result is False
 
     @patch('fsm.integrations.flag_set')
     @patch('fsm.integrations.get_state_manager')
@@ -441,7 +441,7 @@ class TestAdditionalIntegrations(TestCase):
         mock_flag.return_value = False
 
         result = task_created(self.task, self.user)
-        self.assertFalse(result)
+        assert result is False
         # get_state_manager should not be called
         mock_get_manager.assert_not_called()
 
@@ -452,6 +452,6 @@ class TestAdditionalIntegrations(TestCase):
         mock_flag.return_value = False
 
         result = annotation_submitted(self.annotation, self.user)
-        self.assertFalse(result)
+        assert result is False
         # get_state_manager should not be called
         mock_get_manager.assert_not_called()

@@ -61,6 +61,17 @@ def handle_model_state_transitions(sender, instance, created, **kwargs):
     if version_edition != 'Community':
         return
 
+    # Additional safety check: if LSE FSM apps are present, don't interfere
+    try:
+        from django.apps import apps
+
+        if apps.is_installed('lse_fsm'):
+            logger.debug('FSM: LSE FSM detected, skipping LSO signal handler')
+            return
+    except Exception:
+        # If there's any issue checking for LSE apps, continue safely
+        pass
+
     from fsm.integrations import is_fsm_enabled
 
     # Early exit if FSM is not enabled

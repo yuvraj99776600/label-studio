@@ -58,7 +58,20 @@ def is_enterprise_enabled() -> bool:
     from django.conf import settings
 
     # Check if this is Enterprise edition via Django settings
-    return getattr(settings, 'VERSION_EDITION', 'Community') != 'Community'
+    if getattr(settings, 'VERSION_EDITION', 'Community') != 'Community':
+        return True
+
+    # Additional check: if LSE FSM apps are present, consider it enterprise
+    try:
+        from django.apps import apps
+
+        if apps.is_installed('lse_fsm'):
+            return True
+    except Exception:
+        # If there's any issue checking for LSE apps, continue safely
+        pass
+
+    return False
 
 
 def is_fsm_enabled(user: Optional[User] = None) -> bool:
