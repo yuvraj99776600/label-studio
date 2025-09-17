@@ -5,6 +5,7 @@
   "main": "codecept.conf.js",
   "private": true,
   "scripts": {
+    "postinstall": "playwright install chromium",
     "test": "codeceptjs run",
     "test:ui": "codecept-ui run",
     "test:local": "HEADLESS=true yarn test",
