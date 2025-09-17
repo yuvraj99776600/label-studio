@@ -13,14 +13,14 @@ module.exports = {
     this.closeAnnotations();
   },
   openAnnotaions() {
-    I.dontSee(this._annotationsList);
+    I.dontSeeElement(this._annotationsList);
     I.click(this._topbarAnnotationsToggle);
     I.seeElement(this._annotationsList);
   },
   closeAnnotations() {
     I.seeElement(this._annotationsList);
     I.click(this._topbarAnnotationsToggle);
-    I.dontSee(this._annotationsList);
+    I.dontSeeElement(this._annotationsList);
   },
   selectAnnotationAt(index = 0) {
     I.click(this._annotationsList.find(this._annotationsListItemSelector).at(index));
