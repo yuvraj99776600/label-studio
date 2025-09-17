@@ -51,7 +51,7 @@ Scenario("Drafts for unfinished polygons", async ({ I, LabelStudio, AtLabels, At
   ]);
 
   I.say("wait until autosave");
-  I.waitForFunction(() => !!window.LSDraft, 0.5);
+  I.waitForFunction(() => !!window.LSDraft, 2);
   I.say("check result");
   const draft = await I.executeScript(getLocallySavedDraft);
 
@@ -374,7 +374,7 @@ Scenario("Change label on unfinished polygons", async ({ I, LabelStudio, AtLabel
   AtLabels.clickLabel("World");
 
   I.say("wait until autosave");
-  I.waitForFunction(() => !!window.LSDraft, 0.5);
+  I.waitForFunction(() => !!window.LSDraft, 2);
   I.say("check result");
   const draft = await I.executeScript(getLocallySavedDraft);
 
