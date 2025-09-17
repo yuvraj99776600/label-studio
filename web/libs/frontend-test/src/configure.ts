@@ -38,6 +38,7 @@ export default function (
       injectDocumentDomain: true,
       viewportWidth: 1600,
       viewportHeight: 900,
+      parallel: true,
       // output config
       setupNodeEvents(on, config) {
         on("before:browser:launch", (browser = null, launchOptions) => {
