@@ -12,6 +12,7 @@ DJANGO_DB = get_env('DJANGO_DB', DJANGO_DB_SQLITE)
 DATABASES = {'default': DATABASES_ALL[DJANGO_DB]}
 
 MIDDLEWARE.append('organizations.middleware.DummyGetSessionMiddleware')
+MIDDLEWARE.append('fsm.middleware.FSMContextCacheMiddleware')  # FSM organization ID caching for request lifecycle
 MIDDLEWARE.append('core.middleware.UpdateLastActivityMiddleware')
 if INACTIVITY_SESSION_TIMEOUT_ENABLED:
     MIDDLEWARE.append('core.middleware.InactivitySessionTimeoutMiddleWare')
