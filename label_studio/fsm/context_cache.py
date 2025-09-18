@@ -63,6 +63,7 @@ def with_fsm_cache(func):
     This is useful for top-level functions like API endpoints, signal handlers,
     or worker tasks that may trigger multiple FSM operations.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         existing_cache = get_context_cache()
@@ -73,6 +74,7 @@ def with_fsm_cache(func):
             # No cache exists, create one for this operation
             with FSMContextCache():
                 return func(*args, **kwargs)
+
     return wrapper
 
 

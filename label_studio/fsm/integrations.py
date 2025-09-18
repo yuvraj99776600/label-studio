@@ -13,12 +13,12 @@ The integrations are designed to:
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from core.feature_flags import flag_set
 from django.contrib.auth.models import User
-from fsm.state_manager import get_state_manager
 from fsm.context_cache import get_context_cache
+from fsm.state_manager import get_state_manager
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +97,7 @@ def is_enterprise_enabled() -> bool:
     return False
 
 
-def is_fsm_enabled(user: Optional[User]|str = 'auto') -> bool:
+def is_fsm_enabled(user: Optional[User] | str = 'auto') -> bool:
     """
     Check if FSM is enabled via feature flags.
 
