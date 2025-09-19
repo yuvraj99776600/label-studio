@@ -407,3 +407,48 @@ class TestStateManager(TestCase):
         # Verify get_current_state_value doesn't find any state
         current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state is None
+
+    @patch('fsm.state_manager.flag_set')
+    def test_same_state_transition_prevention(self, mock_flag_set):
+        """Test that same-state transitions are prevented"""
+        from django.core.cache import cache
+
+        cache.clear()
+
+        # Enable FSM feature flag
+        mock_flag_set.return_value = True
+
+        # Create initial state
+        success = self.StateManager.transition_state(
+            entity=self.task,
+            new_state='CREATED',
+            user=self.user,
+        )
+        assert success
+
+        # Verify initial state is set
+        current_state = self.StateManager.get_current_state_value(self.task)
+        assert current_state == 'CREATED'
+
+        # Get initial state count
+        from fsm.models import TaskState
+
+        initial_count = TaskState.objects.filter(task=self.task).count()
+        assert initial_count == 1
+
+        # Attempt same-state transition (should be skipped)
+        success = self.StateManager.transition_state(
+            entity=self.task,
+            new_state='CREATED',  # Same state as current
+            user=self.user,
+            reason='This should be skipped',
+        )
+        assert success  # Returns True but doesn't create new record
+
+        # Verify no new state record was created
+        final_count = TaskState.objects.filter(task=self.task).count()
+        assert final_count == initial_count  # Should still be 1
+
+        # Verify state is still CREATED
+        current_state = self.StateManager.get_current_state_value(self.task)
+        assert current_state == 'CREATED'

@@ -212,6 +212,10 @@ class StateManager:
 
         current_state = cls.get_current_state_value(entity)
 
+        # Prevent same-state transitions - only create state records for actual changes
+        if current_state == new_state:
+            return True
+
         # Optimistic concurrency control using cache-based locking
         cache_key = cls.get_cache_key(entity)
         lock_key = f'{cache_key}:lock'
