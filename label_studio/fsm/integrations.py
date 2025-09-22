@@ -15,9 +15,9 @@ The integrations are designed to:
 import logging
 from typing import Optional
 
+from core.current_context import CurrentContext
 from core.feature_flags import flag_set
 from django.contrib.auth.models import User
-from fsm.context_cache import get_context_cache
 from fsm.state_manager import get_state_manager
 
 logger = logging.getLogger(__name__)
@@ -39,9 +39,10 @@ def _resolve_organization_id(entity=None, user=None):
         organization_id or None
     """
 
-    context_cache = get_context_cache()
-    if context_cache is not None and 'organization_id' in context_cache:
-        return context_cache['organization_id']
+    organization_id = CurrentContext.get_organization_id()
+
+    if organization_id:
+        return organization_id
 
     # Allow for function calls without entity like error logging
     # If there is no entity, return None instead of causing more calls to be made just for logging
@@ -64,9 +65,9 @@ def _resolve_organization_id(entity=None, user=None):
     if not organization_id and user and hasattr(user, 'active_organization') and user.active_organization:
         organization_id = user.active_organization.id
 
-    # Cache the result in context cache if available and we found an organization_id
-    if context_cache is not None and organization_id is not None:
-        context_cache['organization_id'] = organization_id
+    # Cache the result in the current context if we found an organization_id
+    if organization_id is not None:
+        CurrentContext.set_organization_id(organization_id)
 
     return organization_id
 
