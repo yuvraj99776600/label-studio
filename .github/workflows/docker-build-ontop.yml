@@ -65,7 +65,7 @@ jobs:
 
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: 'recursive'
           ref: ${{ inputs.ref }}
@@ -129,7 +129,7 @@ jobs:
       - docker_build
     steps:
       - name: Download digests
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ${{ runner.temp }}/digests
           pattern: digests-*
@@ -146,7 +146,7 @@ jobs:
 
       - name: Calculate Docker tags
         id: calculate-docker-tags
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             core.setOutput('docker-tags', `${{ inputs.tags }}`.split(",").join("\n"))
