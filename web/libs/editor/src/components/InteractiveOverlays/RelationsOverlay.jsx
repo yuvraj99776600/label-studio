@@ -1,6 +1,7 @@
+import { ff } from "@humansignal/core";
 import { observer } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
-import { createRef, forwardRef, PureComponent, useEffect, useRef } from "react";
+import { createRef, forwardRef, PureComponent, useEffect, useMemo, useRef } from "react";
 import { useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 
@@ -9,6 +10,8 @@ import { isDefined } from "../../utils/utilities";
 import NodesConnector from "./NodesConnector";
 
 import styles from "./RelationsOverlay.module.scss";
+
+const isFFVideoRelations = ff.isActive(ff.FF_VIDEO_RELATIONS);
 
 const ArrowMarker = ({ id, color }) => {
   return (
@@ -103,14 +106,21 @@ const RelationItem = ({ id, startNode, endNode, direction, rootRef, highlight, d
   const hideConnection = nodesHidden || !visible;
   const [, forceUpdate] = useState();
 
-  const relation = NodesConnector.connect({ id, startNode, endNode, direction, labels }, root);
+  const relation = isFFVideoRelations
+    ? useMemo(() => {
+        return NodesConnector.connect({ id, startNode, endNode, direction, labels }, root);
+      }, [id, startNode, endNode, direction, labels, root])
+    : NodesConnector.connect({ id, startNode, endNode, direction, labels }, root);
   const { start, end } = NodesConnector.getNodesBBox({ root, ...relation });
   const [path, textPosition] = NodesConnector.calculatePath(start, end);
 
-  useEffect(() => {
-    relation.onChange(() => forceUpdate({}));
-    return () => relation.destroy();
-  }, []);
+  useEffect(
+    () => {
+      relation.onChange(() => forceUpdate({}));
+      return () => relation.destroy();
+    },
+    isFFVideoRelations ? [relation] : [],
+  );
   if (start.width < 1 || start.height < 1 || end.width < 1 || end.height < 1) return null;
 
   const itemStyles = [styles.relationItem];

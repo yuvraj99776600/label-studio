@@ -332,7 +332,6 @@ module.exports = {
         const audioElement = document.querySelector(selector);
         if (!audioElement) return false;
         const isPlaying = !audioElement.paused;
-        console.log("!> waitForFunction", isPlaying === expectedPlaying, expectedPlaying, isPlaying);
         return isPlaying === expectedPlaying;
       },
       [this._audioElementSelector, playing],

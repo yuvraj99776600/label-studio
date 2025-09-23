@@ -1,3 +1,4 @@
+import { ff } from "@humansignal/core";
 import { wrapArray } from "../../utils/utilities";
 import { Geometry } from "./Geometry";
 
@@ -14,7 +15,6 @@ export class BoundingBox {
 
   static bbox(region) {
     const bbox = _detect(region);
-
     return wrapArray(bbox).map((bbox) => Object.assign({ ...DEFAULT_BBOX }, bbox));
   }
 
@@ -71,6 +71,40 @@ const stageRelatedBBox = (region, bbox) => {
     x: imageBbox.x + transformedBBox.x,
     y: imageBbox.y + transformedBBox.y,
   };
+};
+
+const videoStageRelatedBBox = (region, bbox) => {
+  // Video regions can now access stage directly through parent.stageRef
+  if (!region.parent?.stageRef?.current || !region.parent?.workingAreaCoords) return { ...DEFAULT_BBOX };
+
+  // Check if region is in lifespan for current frame
+  const currentFrame = region.parent.frame || 1;
+  if (!region.isInLifespan || !region.isInLifespan(currentFrame)) {
+    return { ...DEFAULT_BBOX };
+  }
+
+  try {
+    const stage = region.parent.stageRef.current;
+    const stageBbox = Geometry.getDOMBBox(stage.content, true);
+    const workingArea = region.parent.workingAreaCoords;
+
+    // Apply working area transformations to convert video pixel coordinates to stage coordinates
+    // bbox coordinates are in video pixels, we need to convert them to stage coordinates
+    const stageX = bbox.x * workingArea.scale + workingArea.x;
+    const stageY = bbox.y * workingArea.scale + workingArea.y;
+    const stageWidth = bbox.width * workingArea.scale;
+    const stageHeight = bbox.height * workingArea.scale;
+
+    return {
+      x: stageBbox.x + stageX,
+      y: stageBbox.y + stageY,
+      width: stageWidth,
+      height: stageHeight,
+    };
+  } catch (e) {
+    console.warn("Failed to get video stage bbox:", e);
+    return { ...DEFAULT_BBOX };
+  }
 };
 
 const _detect = (region) => {
@@ -137,6 +171,21 @@ const _detect = (region) => {
             height: bbox.bottom - bbox.top,
           })
         : DEFAULT_BBOX;
+    }
+    case "videorectangleregion": {
+      if (ff.isActive(ff.FF_VIDEO_RELATIONS)) {
+        const bbox = region.bboxCoordsCanvas;
+
+        if (!bbox) return DEFAULT_BBOX;
+
+        return videoStageRelatedBBox(region, {
+          x: bbox.left,
+          y: bbox.top,
+          width: bbox.right - bbox.left,
+          height: bbox.bottom - bbox.top,
+        });
+      }
+      return { ...DEFAULT_BBOX };
     }
     default: {
       console.warn(`Unknown region type: ${region.type}`);

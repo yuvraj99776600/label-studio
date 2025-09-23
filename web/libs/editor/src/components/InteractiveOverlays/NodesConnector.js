@@ -1,3 +1,4 @@
+import { ff } from "@humansignal/core";
 import { debounce } from "../../utils/debounce";
 import { FF_PER_FIELD_COMMENTS, isFF } from "../../utils/feature-flags";
 import { wrapArray } from "../../utils/utilities";
@@ -45,6 +46,13 @@ const obtainWatcher = (node) => {
       return createPropertyWatcher(["needsUpdate", "hidden", "touchesLength", parentImagePropsWatch]);
     case "timeseriesregion":
       return createPropertyWatcher(["start", "end", { parent: ["zoomedRange"] }]);
+    case "videorectangleregion":
+      if (ff.isActive(ff.FF_VIDEO_RELATIONS)) {
+        return createPropertyWatcher(["sequence", "hidden", { parent: ["frame", "workingAreaCoords"] }], {
+          updateStrategy: "animationFrame",
+        });
+      }
+      return null;
     default:
       return null;
   }

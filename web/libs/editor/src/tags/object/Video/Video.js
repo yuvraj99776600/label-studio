@@ -102,16 +102,24 @@ const Model = types
     errors: [],
     speed: 1,
     ref: React.createRef(),
+    stageRef: React.createRef(),
     frame: 1,
     length: 1,
     drawingRegion: null,
     loopTimelineRegion: false,
+    // Working area coordinates for proper coordinate transformation
+    workingAreaCoords: null,
   }))
   .views((self) => ({
     get store() {
       return getRoot(self);
     },
 
+    /**
+     * @TODO: Check if it is deprecated
+     * 1. it looks like it's not used
+     * 2. it looks like it does not work (as position is undefined all the time)
+     */
     get currentFrame() {
       return self.ref.current?.position ?? 1;
     },
@@ -183,6 +191,10 @@ const Model = types
       if (!framerate || Number.isNaN(framerate)) self.framerate = "24";
       else if (framerate < 1) self.framerate = String(1 / framerate);
       else self.framerate = String(framerate);
+    },
+
+    setWorkingAreaCoords(coords) {
+      self.workingAreaCoords = coords;
     },
   }))
   ////// Sync actions

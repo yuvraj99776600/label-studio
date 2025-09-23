@@ -6,6 +6,7 @@ import Registry from "../core/Registry";
 import { AreaMixin } from "../mixins/AreaMixin";
 import { onlyProps, VideoRegion } from "./VideoRegion";
 import { interpolateProp } from "../utils/props";
+import { rotateBboxCoords } from "../utils/bboxCoords";
 
 const Model = types
   .model("VideoRectangleRegionModel", {
@@ -35,6 +36,45 @@ const Model = types
       if (!next) return onlyProps(self.props, prev);
 
       return Object.fromEntries(self.props.map((prop) => [prop, interpolateProp(prev, next, frame, prop)]));
+    },
+
+    get bboxCoords() {
+      const currentFrame = self.parent?.frame || 1;
+      const shape = self.getShape(currentFrame);
+
+      if (!shape) return null;
+
+      const bboxCoords = {
+        left: shape.x,
+        top: shape.y,
+        right: shape.x + shape.width,
+        bottom: shape.y + shape.height,
+      };
+
+      if (shape.rotation === 0 || !self.parent) return bboxCoords;
+
+      return rotateBboxCoords(bboxCoords, shape.rotation, { x: shape.x, y: shape.y }, self.parent.whRatio);
+    },
+
+    get bboxCoordsCanvas() {
+      const currentFrame = self.parent?.frame || 1;
+
+      // Check if region is in lifespan for current frame
+      if (!self.isInLifespan(currentFrame)) return null;
+
+      const bbox = self.bboxCoords;
+      if (!bbox || !self.parent?.workingAreaCoords) return null;
+
+      // Video regions store coordinates as percentages (0-100)
+      // Convert them to pixel coordinates using video dimensions (not scaled)
+      const { realWidth, realHeight } = self.parent.workingAreaCoords;
+
+      return {
+        left: (bbox.left * realWidth) / 100,
+        top: (bbox.top * realHeight) / 100,
+        right: (bbox.right * realWidth) / 100,
+        bottom: (bbox.bottom * realHeight) / 100,
+      };
     },
 
     getVisibility() {

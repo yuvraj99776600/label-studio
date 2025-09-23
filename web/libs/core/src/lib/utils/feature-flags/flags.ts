@@ -118,3 +118,8 @@ export const FF_MULTIPLE_LABELS_REGIONS = "fflag_feat_front_bros_327_multiple_la
  * Agreement Filtered
  */
 export const FF_AGREEMENT_FILTERED = "fflag_feat_utc_239_filterable_agreement_column_short";
+
+/**
+ * Add displaying relation on videos + small optimizations for renders
+ */
+export const FF_VIDEO_RELATIONS = "fflag_feat_front_bros_366_video_relations_short";

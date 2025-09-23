@@ -1,3 +1,4 @@
+import { ff } from "@humansignal/core";
 import chroma from "chroma-js";
 import clamp from "lodash/clamp";
 import { observer } from "mobx-react";
@@ -83,6 +84,13 @@ const VideoRegionsPure = ({
     }),
     [workinAreaCoordinates, zoom],
   );
+
+  if (ff.isActive(ff.FF_VIDEO_RELATIONS)) {
+    // Update working area coordinates in the model for bbox calculations
+    useEffect(() => {
+      item.setWorkingAreaCoords(workinAreaCoordinates);
+    }, [workinAreaCoordinates, item]);
+  }
 
   const normalizeMouseOffsets = useCallback(
     (x, y) => {

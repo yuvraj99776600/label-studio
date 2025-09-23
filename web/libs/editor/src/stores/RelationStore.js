@@ -1,3 +1,4 @@
+import { ff } from "@humansignal/core";
 import { destroy, getParentOfType, getRoot, isAlive, types } from "mobx-state-tree";
 
 import { guidGenerator } from "../core/Helpers";
@@ -58,6 +59,16 @@ const Relation = types
       if (isDefined(sIdx) && start.object.multiImage && sIdx !== start.object.currentImage) return false;
 
       if (isDefined(eIdx) && end.object.multiImage && eIdx !== end.object.currentImage) return false;
+
+      // @TODO: For now relations have not enough rendering speed to render during playback in real time but it does not seem right
+      if (ff.isActive(ff.FF_VIDEO_RELATIONS)) {
+        if (
+          start.type === "videorectangleregion" &&
+          start.object.wasPlayingBeforeBuffering &&
+          start.object.isBuffering !== true
+        )
+          return false;
+      }
 
       return true;
     },
