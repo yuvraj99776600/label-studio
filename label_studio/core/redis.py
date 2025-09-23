@@ -110,7 +110,8 @@ def _capture_context() -> dict:
         context_data['organization_id'] = user.active_organization_id
 
     # Get any custom context values (exclude non-serializable objects)
-    for key, value in CurrentContext.get_shared_data().items():
+    job_data = CurrentContext.get_job_data()
+    for key, value in job_data.items():
         if key not in ['user', 'request'] and _is_serializable(value):
             context_data[key] = value
 
