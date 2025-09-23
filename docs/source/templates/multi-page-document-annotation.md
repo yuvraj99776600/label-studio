@@ -8,7 +8,7 @@ meta_title: Multi-page Document Annotation
 meta_description: Template for labeling large, multi-page documents more easily and efficiently.
 ---
 
-<img src="/images/templates/multipage.png" alt="" class="gif-border" />
+<img src="/images/templates/multipage.jpeg" alt="" class="gif-border" />
 
 Multi-page document annotation allows you to annotate documents that consist of multiple pages. By representing each page as an image, you can import them into a single task and annotate each page while maintaining the context of the entire document.
 
