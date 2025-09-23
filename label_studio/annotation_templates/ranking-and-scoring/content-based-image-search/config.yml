@@ -1,7 +1,7 @@
 title: Content-based Image Retrieval
 type: community
 group: Ranking & Scoring
-image: /static/templates/content-based-image-search.png
+image: /static/templates/content-based-image-search.jpeg
 details: |
   <h1>Select images related to the query image</h1>
   <dl>
