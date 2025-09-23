@@ -13,7 +13,7 @@ meta_description:
 Inventory Tracking system allows you to label exact products by given brand names illustrated by relevant sample photo. Every task with shelf photo also has a list of assiated brands to label.
 <br/>
 
-<img src="/images/templates/inventory-tracking.png" alt="Inventory Tracking example" class="gif-border" width="552px" height="408px" />
+<img src="/images/templates/inventory-tracking.jpeg" alt="Inventory Tracking example" class="gif-border" width="552px" height="408px" />
 
 ## Labeling Configuration
 
