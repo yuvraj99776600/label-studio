@@ -8,7 +8,7 @@ meta_title: Time Series + Audio + Video Data Labeling Template
 meta_description: Template for time series synchronization with audio and video.
 ---
 
-<img src="/images/templates/timeseries_audio_video.png" alt="" class="gif-border" width="552px" height="408px" />
+<img src="/images/templates/timeseries_audio_video.jpeg" alt="" class="gif-border" width="552px" height="408px" />
 
 This template demonstrates the synchronization of media streams with the corresponding sensor data by mapping audio or video frames to the appropriate time-series timestamps. For example:
 
