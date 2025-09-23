@@ -1,13 +1,17 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import functools
 import logging
 import sys
 from datetime import timedelta
 from functools import partial
+from typing import Any, Callable
 
 import django_rq
 import redis
+from core.current_context import CurrentContext
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django_rq import get_connection
 from rq.command import send_stop_job_command
 from rq.exceptions import InvalidJobOperation
@@ -80,6 +84,93 @@ def redis_connected():
     return redis_healthcheck()
 
 
+def _is_serializable(value: Any) -> bool:
+    """Check if a value can be serialized for job context."""
+    return isinstance(value, (str, int, float, bool, list, dict, type(None)))
+
+
+def _capture_context() -> dict:
+    """
+    Capture the current context for passing to a job.
+    Returns a dictionary of context data that can be serialized.
+    """
+    context_data = {}
+
+    # Get user information
+    if user := CurrentContext.get_user():
+        context_data['user_id'] = user.id
+        if hasattr(user, 'active_organization_id') and user.active_organization_id:
+            context_data['organization_id'] = user.active_organization_id
+
+    # Get organization if set separately
+    if org_id := CurrentContext.get_organization_id():
+        context_data['organization_id'] = org_id
+
+    # Get any custom context values (exclude non-serializable objects)
+    if hasattr(CurrentContext._context, 'data'):
+        for key, value in CurrentContext._context.data.items():
+            # Skip complex objects that can't be serialized
+            if key not in ['user', 'request'] and _is_serializable(value):
+                context_data[key] = value
+
+        return context_data
+
+
+def _restore_context(context_data: dict) -> None:
+    """
+    Restore context from captured data.
+    """
+    if not context_data:
+        return
+
+    try:
+
+        # Set all context data
+        for key, value in context_data.items():
+            if key != 'user_id':  # We'll handle user_id specially
+                CurrentContext.set(key, value)
+
+        # If we have a user_id, load the user object
+        if user_id := context_data.get('user_id'):
+            User = get_user_model()
+            try:
+                user = User.objects.get(pk=user_id)
+                CurrentContext.set_user(user)
+            except User.DoesNotExist:
+                logger.warning(f'User {user_id} not found when restoring context')
+
+        logger.debug(f'Restored context with keys: {list(context_data.keys())}')
+
+    except Exception as e:
+        logger.error(f'Failed to restore context: {e}')
+
+
+def _wrap_job_with_context(job_func: Callable) -> Callable:
+    """
+    Wrap a job function to restore and clear context automatically.
+    """
+
+    @functools.wraps(job_func)
+    def context_wrapper(*args, **kwargs):
+        """
+        Wrapper that restores context, runs the job, then clears context.
+        """
+        try:
+            context_data = kwargs.pop('_context_data', None)
+
+            # Restore context for this job
+            _restore_context(context_data)
+
+            # Execute the original function
+            return job_func(*args, **kwargs)
+
+        finally:
+            # Always clear context after job completes
+            CurrentContext.clear()
+
+    return context_wrapper
+
+
 def redis_get(key):
     if not redis_healthcheck():
         return
@@ -112,7 +203,9 @@ def redis_delete(key):
 
 def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
     """
-    Start job async with redis or sync if redis is not connected
+    Start job async with redis or sync if redis is not connected.
+    Automatically preserves context for async jobs and clears it after completion.
+
     :param job: Job function
     :param args: Function arguments
     :param in_seconds: Job will be delayed for in_seconds
@@ -122,15 +215,28 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
 
     redis = redis_connected() and kwargs.get('redis', True)
     queue_name = kwargs.get('queue_name', 'default')
+
     if 'queue_name' in kwargs:
         del kwargs['queue_name']
     if 'redis' in kwargs:
         del kwargs['redis']
+
     job_timeout = None
     if 'job_timeout' in kwargs:
         job_timeout = kwargs['job_timeout']
         del kwargs['job_timeout']
+
     if redis:
+        # Async execution with Redis - wrap job for context management
+        context_data = _capture_context()
+
+        if context_data:
+            # Only wrap if we have context to preserve
+            kwargs['_context_data'] = context_data
+
+        # Ensure the function is preserved so that logging and error handling work correctly
+        job = _wrap_job_with_context(job)
+
         try:
             args_info = _truncate_args_for_logging(args, kwargs)
             logger.info(f'Start async job {job.__name__} on queue {queue_name} with {args_info}.')
@@ -140,6 +246,7 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
         enqueue_method = queue.enqueue
         if in_seconds > 0:
             enqueue_method = partial(queue.enqueue_in, timedelta(seconds=in_seconds))
+
         job = enqueue_method(
             job,
             *args,
@@ -149,6 +256,8 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
         )
         return job
     else:
+        # Sync execution - context is already available from request thread
+        # No need to wrap or modify the job function
         on_failure = kwargs.pop('on_failure', None)
         try:
             return job(*args, **kwargs)

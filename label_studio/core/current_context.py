@@ -1,58 +1,44 @@
-from contextvars import ContextVar
-from typing import TYPE_CHECKING, Any, Dict, Optional
+import threading
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from django.http import Request
     from users.models import User
 
-context_var: ContextVar[Optional[Dict[str, Any]]] = ContextVar('current_context', default=None)
-
 
 class CurrentContext:
     """
-    Context object available across the entire request/worker context.
+    Context object available across the entire request or worker context (not shared between requests or workers, i.e. each request or worker has its own context)
     This is used to store contextual information that is needed across the entire request/worker context like organization_id, user, etc.
 
     In workers this needs to explicitly be set when running the worker.
     In requests this is set automatically by the ThreadLocalMiddleware.
     """
 
-    @classmethod
-    def _ensure_context(cls) -> Dict[str, Any]:
-        """Ensure context exists, creating empty one if needed"""
-        ctx = context_var.get()
-        if ctx is None:
-            ctx = {}
-            context_var.set(ctx)
-        return ctx
+    _context = threading.local()
 
     @classmethod
     def set(cls, key: str, value: Any) -> None:
-        current = cls._ensure_context()
-        new_context = {**current, key: value}
-        context_var.set(new_context)
+        if not hasattr(cls._context, 'data'):
+            cls._context.data = {}
+        cls._context.data[key] = value
 
     @classmethod
     def get(cls, key: str, default: Any = None) -> Any:
-        return cls._ensure_context().get(key, default)
-
-    @classmethod
-    def is_initialized(cls) -> bool:
-        return context_var.get() is not None
-
-    @classmethod
-    def update(cls, data: Dict[str, Any]) -> None:
-        current = cls._ensure_context()
-        context_var.set({**current, **data})
+        if not hasattr(cls._context, 'data'):
+            return default
+        return cls._context.data.get(key, default)
 
     # Convenient properties for common values
     @classmethod
     def get_request(cls) -> Optional['Request']:
-        return cls.get('request')
+        if not hasattr(cls._context, 'request'):
+            return None
+        return cls._context.request
 
     @classmethod
     def set_request(cls, request: 'Request') -> None:
-        cls.set('request', request)
+        cls._context.request = request
         if request.user:
             cls.set_user(request.user)
 
@@ -74,17 +60,17 @@ class CurrentContext:
     @classmethod
     def set_user(cls, user: 'User') -> None:
         cls.set('user', user)
-        if user.active_organization_id:
+        if getattr(user, 'active_organization_id', None):
             cls.set_organization_id(user.active_organization_id)
 
     @classmethod
-    def get_all(cls) -> Dict[str, Any]:
-        return cls._ensure_context().copy()
-
-    @classmethod
-    def is_worker(cls) -> bool:
+    def is_job(cls) -> bool:
         return cls.get_request() is None
 
     @classmethod
     def clear(cls) -> None:
-        context_var.set(None)
+        if hasattr(cls._context, 'data'):
+            delattr(cls._context, 'data')
+
+        if hasattr(cls._context, 'request'):
+            delattr(cls._context, 'request')
