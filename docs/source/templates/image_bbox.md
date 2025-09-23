@@ -19,7 +19,7 @@ If you want to perform object detection, you need to create a labeled dataset. U
 </a>
 
 <br>
-<img src="/images/templates/object-detection-with-bounding-boxes.png" alt="" class="gif-border" width="552px" height="408px" />
+<img src="/images/templates/object-detection-with-bounding-boxes.jpeg" alt="" class="gif-border" width="552px" height="408px" />
 
 <i>Figure 1: Object detection with bounding boxes.</i>
 

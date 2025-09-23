@@ -2,7 +2,7 @@ title: Object Detection with Bounding Boxes
 type: community
 group: Computer Vision
 order: 3
-image: /static/templates/object-detection-with-bounding-boxes.png
+image: /static/templates/object-detection-with-bounding-boxes.jpeg
 details: |
   <h1>Draw a bounding box around the object</h1>
   <dl>
