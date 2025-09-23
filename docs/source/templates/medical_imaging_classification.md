@@ -9,7 +9,7 @@ meta_description: Template for classifying medical images and using bounding box
 ---
 
 
-<img src="/images/templates/medical-image-classification.png" alt="" class="gif-border" width="552px" height="408px" />
+<img src="/images/templates/medical-image-classification.jpeg" alt="" class="gif-border" width="552px" height="408px" />
 
 This template interface allows annotators to:
 - Draw bounding boxes around areas identified as tumors in the image using the "Tumor" label.
