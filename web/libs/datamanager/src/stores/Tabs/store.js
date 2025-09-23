@@ -146,7 +146,7 @@ export const TabStore = types
         self.dataStore.clear();
         self.selected = selected;
 
-        yield selected.reload();
+        selected.reload();
 
         const root = getRoot(self);
 
@@ -223,13 +223,13 @@ export const TabStore = types
 
       if (autosave) {
         // with autosave it will be reloaded anyway
-        yield newView.save({ reload: !autosave && reload });
+        newView.save({ reload: !autosave && reload });
       }
 
       if (autoselect) {
         const selectedView = self.views[self.views.length - 1];
 
-        self.setSelected(selectedView);
+        yield self.setSelected(selectedView);
       }
 
       return newView;
@@ -315,13 +315,15 @@ export const TabStore = types
         conjunction: viewSnapshot.conjunction,
       };
 
-      if (result.id !== view.id) {
+      if (result.id !== tabID) {
         self.views.push({ ...newViewSnapshot, saved: true });
         const newView = self.views[self.views.length - 1];
 
-        root.SDK.hasInterface("tabs") && newView.reload();
         self.setSelected(newView);
         destroy(view);
+        if (!newView?.virtual) {
+          root.SDK.hasInterface("tabs") && (yield newView.reload());
+        }
 
         return newView;
       }
@@ -365,9 +367,8 @@ export const TabStore = types
 
       const newView = self.views[self.views.length - 1];
 
-      yield newView.save();
       self.selected = self.views[self.views.length - 1];
-      self.selected.reload();
+      yield newView.save();
     }),
 
     createView(viewSnapshot) {
