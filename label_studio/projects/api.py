@@ -49,7 +49,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
-from tasks.models import Task
+from tasks.models import Task, Annotation
 from tasks.serializers import (
     NextTaskSerializer,
     TaskSerializer,
@@ -920,3 +920,44 @@ class ProjectModelVersions(generics.RetrieveAPIView):
         count = project.delete_predictions(model_version=model_version)
 
         return Response(data=count)
+
+
+@method_decorator(
+    name='get',
+    decorator=extend_schema(
+        tags=['Projects'],
+        summary='List unique annotators for project',
+        description='Return a list of unique user IDs who have submitted annotations in the specified project.',
+        responses={
+            200: OpenApiResponse(
+                description='List of annotator user IDs',
+                response={
+                    'type': 'object',
+                    'properties': {
+                        'annotators': {
+                            'type': 'array',
+                            'items': {'type': 'integer'},
+                        }
+                    },
+                },
+            )
+        },
+        extensions={
+            'x-fern-sdk-group-name': 'projects',
+            'x-fern-sdk-method-name': 'annotators',
+            'x-fern-audiences': ['public'],
+        },
+    ),
+)
+class ProjectAnnotatorsAPI(generics.RetrieveAPIView):
+    permission_required = all_permissions.projects_view
+    queryset = Project.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        project = self.get_object()
+        annotator_ids = list(
+            Annotation.objects.filter(project=project, completed_by_id__isnull=False)
+            .values_list('completed_by_id', flat=True)
+            .distinct()
+        )
+        return Response({'annotators': annotator_ids})
