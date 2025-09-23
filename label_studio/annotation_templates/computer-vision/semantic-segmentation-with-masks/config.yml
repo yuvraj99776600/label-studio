@@ -2,7 +2,7 @@ title: Semantic Segmentation with Masks
 type: community
 group: Computer Vision
 order: 2
-image: /static/templates/semantic-segmentation-with-masks.png
+image: /static/templates/semantic-segmentation-with-masks.jpeg
 details: |
   <h1>Draw masks around the object with the brush tool</h1>
   <dl>
