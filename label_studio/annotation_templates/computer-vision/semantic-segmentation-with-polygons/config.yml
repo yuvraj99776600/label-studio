@@ -2,7 +2,7 @@ title: Semantic Segmentation with Polygons
 type: community
 group: Computer Vision
 order: 1
-image: /static/templates/semantic-segmentation-with-polygons.png
+image: /static/templates/semantic-segmentation-with-polygons.jpeg
 details: |
   <h1>Draw a polygon around object</h1>
   <dl>
