@@ -1,7 +1,7 @@
 title: Visual Question Answering
 type: community
 group: Computer Vision
-image: /static/templates/visual-question-answering.png
+image: /static/templates/visual-question-answering.jpeg
 details: |
   <h1>Answer the questions related to what you see on the picture</h1>
   <dl>
