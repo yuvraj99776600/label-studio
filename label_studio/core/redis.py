@@ -99,19 +99,20 @@ def _capture_context() -> dict:
     # Get user information
     if user := CurrentContext.get_user():
         context_data['user_id'] = user.id
-        if hasattr(user, 'active_organization_id') and user.active_organization_id:
-            context_data['organization_id'] = user.active_organization_id
 
     # Get organization if set separately
     if org_id := CurrentContext.get_organization_id():
         context_data['organization_id'] = org_id
 
+    # If organization_id is not set, try to get it from the user, this ensures that we have an organization_id for the job
+    # And it prefers the original requesting user's organization_id over the current active organization_id of the user which could change during async jobs
+    if not org_id and user and hasattr(user, 'active_organization_id') and user.active_organization_id:
+        context_data['organization_id'] = user.active_organization_id
+
     # Get any custom context values (exclude non-serializable objects)
-    if hasattr(CurrentContext._context, 'data'):
-        for key, value in CurrentContext._context.data.items():
-            # Skip complex objects that can't be serialized
-            if key not in ['user', 'request'] and _is_serializable(value):
-                context_data[key] = value
+    for key, value in CurrentContext.get_shared_data().items():
+        if key not in ['user', 'request'] and _is_serializable(value):
+            context_data[key] = value
 
         return context_data
 
@@ -135,7 +136,14 @@ def _restore_context(context_data: dict) -> None:
             User = get_user_model()
             try:
                 user = User.objects.get(pk=user_id)
-                CurrentContext.set_user(user)
+                CurrentContext.set('user', user)
+                # If organization_id is not set, try to get it from the user, this ensures that we have an organization_id for the job
+                if (
+                    CurrentContext.get_organization_id() is None
+                    and hasattr(user, 'active_organization_id')
+                    and user.active_organization_id
+                ):
+                    CurrentContext.set_organization_id(user.active_organization_id)
             except User.DoesNotExist:
                 logger.warning(f'User {user_id} not found when restoring context')
 

@@ -19,16 +19,20 @@ class CurrentContext:
     """
 
     @classmethod
-    def set(cls, key: str, value: Any) -> None:
+    def set(cls, key: str, value: Any, shared: bool = True) -> None:
         if not hasattr(_thread_locals, 'data'):
             _thread_locals.data = {}
-        _thread_locals.data[key] = value
+        if not hasattr(_thread_locals, 'job_data'):
+            _thread_locals.job_data = {}
+
+        if shared:
+            _thread_locals.job_data[key] = value
+        else:
+            _thread_locals.data[key] = value
 
     @classmethod
     def get(cls, key: str, default: Any = None) -> Any:
-        if not hasattr(_thread_locals, 'data'):
-            return default
-        return _thread_locals.data.get(key, default)
+        return _thread_locals.job_data.get(key, _thread_locals.data.get(key, default))
 
     @classmethod
     def get_request(cls) -> Optional['Request']:
@@ -63,9 +67,19 @@ class CurrentContext:
         return cls.get_request() is None
 
     @classmethod
+    def get_job_data(cls) -> dict:
+        """
+        This data will be shared to jobs spawned by the current thread.
+        """
+        return getattr(_thread_locals, 'job_data', {})
+
+    @classmethod
     def clear(cls) -> None:
         if hasattr(_thread_locals, 'data'):
             delattr(_thread_locals, 'data')
+
+        if hasattr(_thread_locals, 'job_data'):
+            delattr(_thread_locals, 'job_data')
 
         if hasattr(_thread_locals, 'request'):
             delattr(_thread_locals, 'request')
