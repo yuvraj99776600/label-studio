@@ -32,7 +32,7 @@ class CurrentContext:
 
     @classmethod
     def get(cls, key: str, default: Any = None) -> Any:
-        return _thread_locals.job_data.get(key, _thread_locals.data.get(key, default))
+        return getattr(_thread_locals, 'job_data', {}).get(key, getattr(_thread_locals, 'data', {}).get(key, default))
 
     @classmethod
     def get_request(cls) -> Optional['Request']:
