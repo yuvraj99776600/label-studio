@@ -9,7 +9,7 @@ meta_title: Video Frame Classification
 meta_description: Template for classifying frames within a video.
 ---
 
-<img src="/images/templates/video-frame-classification.png" alt="" class="gif-border" width="552px" height="408px" />
+<img src="/images/templates/video-frame-classification.jpeg" alt="" class="gif-border" width="552px" height="408px" />
 
 Video frame classification is the process of assigning labels to individual frames within a video. This technique is useful when you need to analyze specific moments or events in a video, such as detecting actions, states, or changes over time, rather than classifying the entire video as a whole.
 
