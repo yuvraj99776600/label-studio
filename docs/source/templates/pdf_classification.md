@@ -8,7 +8,7 @@ meta_title: PDF Classification Data Labeling Template
 meta_description: Template for classifying PDF data with Label Studio for your machine learning and data science projects.
 ---
 
-<img src="/images/templates/pdf-classification.png" alt="" class="gif-border" width="552px" height="408px" />
+<img src="/images/templates/pdf-classification.jpeg" alt="" class="gif-border" width="552px" height="408px" />
 
 If you want to perform PDF classification, use this template. This template prompts an annotator to rate a PDF on a 10-star scale, then categorize it.
 

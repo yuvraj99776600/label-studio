@@ -1,7 +1,7 @@
 title: PDF Classification
 type: community
 group: Structured Data Parsing
-image: /static/templates/pdf-classification.png
+image: /static/templates/pdf-classification.jpeg
 details: <h1>Classify PDF documents</h1>
 config: |
   <View>
