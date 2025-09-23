@@ -2,7 +2,7 @@ title: Keypoint Labeling
 type: community
 group: Computer Vision
 order: 10000
-image: /static/templates/keypoints.png
+image: /static/templates/keypoints.jpeg
 details: |
   <h1>Add labeled keypoints</h1>
   <dl>
