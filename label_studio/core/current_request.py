@@ -12,6 +12,11 @@ class ThreadLocalMiddleware(CommonMiddleware):
     def process_request(self, request):
         CurrentContext.set_request(request)
 
+    def process_response(self, request, response):
+        if CurrentContext.get_request():
+            CurrentContext.clear()
+        return response
 
-# ContextVars are self-cleaning, so we don't need to clean up the request object in a signal like the previous thread based solution.
-# This is also compliant with the ASGI spec.
+    def process_exception(self, request, exception):
+        if CurrentContext.get_request():
+            CurrentContext.clear()
