@@ -6,6 +6,9 @@ if TYPE_CHECKING:
     from users.models import User
 
 
+_thread_locals = threading.local()
+
+
 class CurrentContext:
     """
     Context object available across the entire request or worker context (not shared between requests or workers, i.e. each request or worker has its own context)
@@ -15,30 +18,25 @@ class CurrentContext:
     In requests this is set automatically by the ThreadLocalMiddleware.
     """
 
-    _context = threading.local()
-
     @classmethod
     def set(cls, key: str, value: Any) -> None:
-        if not hasattr(cls._context, 'data'):
-            cls._context.data = {}
-        cls._context.data[key] = value
+        if not hasattr(_thread_locals, 'data'):
+            _thread_locals.data = {}
+        _thread_locals.data[key] = value
 
     @classmethod
     def get(cls, key: str, default: Any = None) -> Any:
-        if not hasattr(cls._context, 'data'):
+        if not hasattr(_thread_locals, 'data'):
             return default
-        return cls._context.data.get(key, default)
+        return _thread_locals.data.get(key, default)
 
-    # Convenient properties for common values
     @classmethod
     def get_request(cls) -> Optional['Request']:
-        if not hasattr(cls._context, 'request'):
-            return None
-        return cls._context.request
+        return getattr(_thread_locals, 'request', None)
 
     @classmethod
     def set_request(cls, request: 'Request') -> None:
-        cls._context.request = request
+        _thread_locals.request = request
         if request.user:
             cls.set_user(request.user)
 
@@ -52,10 +50,7 @@ class CurrentContext:
 
     @classmethod
     def get_user(cls) -> Optional['User']:
-        if cls.is_worker():
-            return cls.get('user')
-
-        return cls.get_request().user
+        return cls.get('user')
 
     @classmethod
     def set_user(cls, user: 'User') -> None:
@@ -69,8 +64,8 @@ class CurrentContext:
 
     @classmethod
     def clear(cls) -> None:
-        if hasattr(cls._context, 'data'):
-            delattr(cls._context, 'data')
+        if hasattr(_thread_locals, 'data'):
+            delattr(_thread_locals, 'data')
 
-        if hasattr(cls._context, 'request'):
-            delattr(cls._context, 'request')
+        if hasattr(_thread_locals, 'request'):
+            delattr(_thread_locals, 'request')
