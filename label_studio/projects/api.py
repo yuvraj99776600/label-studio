@@ -56,6 +56,8 @@ from tasks.serializers import (
     TaskSimpleSerializer,
     TaskWithAnnotationsAndPredictionsAndDraftsSerializer,
 )
+from users.models import User
+from users.serializers import UserSimpleSerializer
 from webhooks.models import WebhookAction
 from webhooks.utils import api_webhook, api_webhook_for_delete, emit_webhooks_for_instance
 
@@ -926,20 +928,12 @@ class ProjectModelVersions(generics.RetrieveAPIView):
     name='get',
     decorator=extend_schema(
         tags=['Projects'],
-        summary='List unique annotators for project',
-        description='Return a list of unique user IDs who have submitted annotations in the specified project.',
+        summary='List annotators for project',
+        description='Return users who have submitted annotations in the specified project.',
         responses={
             200: OpenApiResponse(
-                description='List of annotator user IDs',
-                response={
-                    'type': 'object',
-                    'properties': {
-                        'annotators': {
-                            'type': 'array',
-                            'items': {'type': 'integer'},
-                        }
-                    },
-                },
+                description='List of annotator users',
+                response=UserSimpleSerializer(many=True),
             )
         },
         extensions={
@@ -960,4 +954,6 @@ class ProjectAnnotatorsAPI(generics.RetrieveAPIView):
             .values_list('completed_by_id', flat=True)
             .distinct()
         )
-        return Response({'annotators': annotator_ids})
+        users = User.objects.filter(id__in=annotator_ids).prefetch_related('om_through').order_by('id')
+        data = UserSimpleSerializer(users, many=True, context={'request': request}).data
+        return Response(data)
