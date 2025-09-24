@@ -1,4 +1,5 @@
 from django.db import migrations
+from copy import deepcopy
 from django.apps import apps as django_apps
 from core.models import AsyncMigrationStatus
 from core.redis import start_job_async_or_sync
@@ -26,7 +27,7 @@ def forward_migration():
     qs = View.objects.all().values('id', 'project_id', 'data')
 
     updated = 0
-    for row in qs.iterator(chunk_size=1000):
+    for row in qs:
         view_id = row['id']
         project_id = row['project_id']
         data = row.get('data') or {}
@@ -42,31 +43,29 @@ def forward_migration():
 
         # Compute unique annotators for this project (once per project)
         if project_id not in project_to_unique_annotators:
-            unique_ids = list(
+            unique_ids = set(
                 Annotation.objects
                 .filter(project_id=project_id, completed_by_id__isnull=False)
                 .values_list('completed_by_id', flat=True)
                 .distinct()
             )
             # Normalize to unique ints
-            unique_ids = {int(u) for u in unique_ids}
             project_to_unique_annotators[project_id] = unique_ids
 
         new_annotators = project_to_unique_annotators[project_id]
 
         # If no change, skip update
         old_set = {int(a) for a in (existing_annotators or [])}
-        if set(new_annotators) == old_set:
+        if new_annotators == old_set:
             continue
 
-        # Prepare new data JSON
-        new_data = dict(data)
-        new_agreement = dict(agreement)
-        new_agreement['annotators'] = list(new_annotators)
-        new_data['agreement_selected'] = new_agreement
+        new_data = deepcopy(data)
+        new_data['agreement_selected']['annotators'] = list(new_annotators)
 
         # Update only the JSON field via update(); do not load model instance or call save()
         View.objects.filter(id=view_id).update(data=new_data)
+        print(f'Updated View {view_id} agreement selected annotators to {list(new_annotators)}')
+        print(f'Old annotator length: {len(old_set)}, new annotator length: {len(new_annotators)}')
         updated += 1
 
     if updated:
