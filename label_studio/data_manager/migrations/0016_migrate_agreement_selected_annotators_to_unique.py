@@ -88,8 +88,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ('data_manager', '0015_alter_view_options'),
-        ('tasks', '0001_initial'),  # Historical dependency to ensure Annotation exists
+        ('data_manager', '0015_alter_view_options')
     ]
 
     operations = [
