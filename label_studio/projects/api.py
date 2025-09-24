@@ -938,7 +938,7 @@ class ProjectModelVersions(generics.RetrieveAPIView):
         },
         extensions={
             'x-fern-sdk-group-name': 'projects',
-            'x-fern-sdk-method-name': 'annotators',
+            'x-fern-sdk-method-name': 'list_unique_annotators',
             'x-fern-audiences': ['public'],
         },
     ),
