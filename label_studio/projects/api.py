@@ -49,7 +49,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
-from tasks.models import Task, Annotation
+from tasks.models import Annotation, Task
 from tasks.serializers import (
     NextTaskSerializer,
     TaskSerializer,
