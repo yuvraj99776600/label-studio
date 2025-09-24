@@ -928,8 +928,8 @@ class ProjectModelVersions(generics.RetrieveAPIView):
     name='get',
     decorator=extend_schema(
         tags=['Projects'],
-        summary='List annotators for project',
-        description='Return users who have submitted annotations in the specified project.',
+        summary='List unique annotators for project',
+        description='Return unique users who have submitted annotations in the specified project.',
         responses={
             200: OpenApiResponse(
                 description='List of annotator users',
@@ -938,7 +938,7 @@ class ProjectModelVersions(generics.RetrieveAPIView):
         },
         extensions={
             'x-fern-sdk-group-name': 'projects',
-            'x-fern-sdk-method-name': 'annotators',
+            'x-fern-sdk-method-name': 'list_unique_annotators',
             'x-fern-audiences': ['public'],
         },
     ),
