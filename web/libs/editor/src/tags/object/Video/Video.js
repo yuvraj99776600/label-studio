@@ -182,6 +182,12 @@ const Model = types
         loopTimelineRegion: self.loopTimelineRegion,
       };
     },
+
+    // helps to calculate rotation because internal coords are percentage-based and real dimensions usually aren't square
+    get whRatio() {
+      if (!self.workingAreaCoords) return 1;
+      return self.workingAreaCoords.realWidth / self.workingAreaCoords.realHeight;
+    },
   }))
   .actions((self) => ({
     afterCreate() {
