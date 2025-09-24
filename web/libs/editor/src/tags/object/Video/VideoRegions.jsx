@@ -266,14 +266,13 @@ const RegionsLayer = observer(({ regions, item, locked, isDrawing, workinAreaCoo
   );
 });
 
-const Shape = observer(({ id, reg, frame, stageRef, ...props }) => {
+const Shape = observer(({ reg, frame, stageRef, ...props }) => {
   const box = reg.getShape(frame);
 
   return (
     reg.isInLifespan(frame) &&
     box && (
       <Rectangle
-        id={id}
         reg={reg}
         box={box}
         frame={frame}

@@ -10,7 +10,6 @@ import { LabelOnVideoBbox } from "../../../components/ImageView/LabelOnRegion";
 type RectPropsExtend = typeof Rect;
 
 interface RectProps extends RectPropsExtend {
-  id: string;
   reg: any;
   frame: number;
   selected: boolean;
@@ -22,7 +21,6 @@ interface RectProps extends RectPropsExtend {
 }
 
 const RectanglePure: FC<RectProps> = ({
-  id,
   reg,
   box,
   frame,
@@ -61,7 +59,7 @@ const RectanglePure: FC<RectProps> = ({
   };
 
   return (
-    <Group id={id}>
+    <Group>
       <LabelOnVideoBbox
         reg={reg}
         box={newBox}
