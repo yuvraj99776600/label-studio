@@ -2,6 +2,7 @@ title: Text Summarization
 type: community
 group: Natural Language Processing
 image: /static/templates/text-summarization.png
+thumbnail: /static/templates/text-summarization-thumbnail.png
 details: |
   <h1>Summarize in one sentence</h1>
   <dl>

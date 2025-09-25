@@ -827,6 +827,10 @@ def read_templates_and_groups():
         if config.get('image', '').startswith('/static') and settings.HOSTNAME:
             # if hostname set manually, create full image urls
             config['image'] = settings.HOSTNAME + config['image']
+
+        if config.get('thumbnail', '').startswith('/static') and settings.HOSTNAME:
+            # if hostname set manually, create full image urls
+            config['thumbnail'] = settings.HOSTNAME + config['thumbnail']
         configs.append(config)
     template_groups_file = find_file(os.path.join('annotation_templates', 'groups.txt'))
     with open(template_groups_file, encoding='utf-8') as f:

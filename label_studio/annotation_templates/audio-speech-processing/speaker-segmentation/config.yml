@@ -2,6 +2,7 @@ title: Speaker Segmentation
 type: community
 group: Audio/Speech Processing
 image: /static/templates/speaker-segmentation.png
+thumbnail: /static/templates/speaker-segmentation-thumbnail.png
 details: |
   <h1>Perform speaker segmentation / diarization task</h1>
   <dl>

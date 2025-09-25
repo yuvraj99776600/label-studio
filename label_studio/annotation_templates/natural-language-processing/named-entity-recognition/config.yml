@@ -3,6 +3,7 @@ type: community
 group: Natural Language Processing
 order: 3
 image: /static/templates/named-entity-recognition.png
+thumbnail: /static/templates/named-entity-recognition-thumbnail.png
 details: |
   <h1>Extract named entities from text</h1>
   <dl>

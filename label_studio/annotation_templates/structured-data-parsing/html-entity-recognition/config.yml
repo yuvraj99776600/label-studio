@@ -2,6 +2,7 @@ title: HTML Entity Recognition
 type: community
 group: Structured Data Parsing
 image: /static/templates/html-entity-recognition.png
+thumbnail: /static/templates/html-entity-recognition-thumbnail.png
 details: |
   <h1>Extract entities from hypertext documents</h1>
   <dl>

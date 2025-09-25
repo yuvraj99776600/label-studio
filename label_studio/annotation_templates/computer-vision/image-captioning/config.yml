@@ -2,6 +2,7 @@ title: Image Captioning
 type: community
 group: Computer Vision
 image: /static/templates/image-captioning.png
+thumbnail: /static/templates/image-captioning-thumbnail.png
 details: |
   <h1>Write text describing the image</h1>
   <dl>

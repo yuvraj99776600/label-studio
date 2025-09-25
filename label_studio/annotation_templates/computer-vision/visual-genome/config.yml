@@ -2,6 +2,7 @@ title: Visual Genome
 type: community
 group: Computer Vision
 image: /static/templates/visual-genome.png
+thumbnail: /static/templates/visual-genome-thumbnail.png
 details: |
   <h1>Label different described features</h1>
   <dl>

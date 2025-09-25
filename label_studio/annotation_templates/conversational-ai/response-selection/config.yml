@@ -2,6 +2,7 @@ title: Response Selection
 type: community
 group: Conversational AI
 image: /static/templates/response-selection.png
+thumbnail: /static/templates/response-selection-thumbnail.png
 details: <h1>Collect chatbot training data by selecting next dialogue response</h1>
 config: |
   <View>

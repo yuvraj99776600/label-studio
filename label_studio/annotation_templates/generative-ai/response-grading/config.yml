@@ -3,6 +3,7 @@ type: community
 group: Generative AI
 order: 6
 image: /static/templates/response-grading.png
+thumbnail: /static/templates/response-grading-thumbnail.png
 details: |
   <h1>Assign a grade to LLM responses based on how well it meets your internal guidelines</h1>
   <dl>

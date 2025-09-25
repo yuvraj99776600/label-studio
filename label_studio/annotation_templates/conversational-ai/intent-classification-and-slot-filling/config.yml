@@ -2,6 +2,7 @@ title: Intent Classification and Slot Filling
 type: community
 group: Conversational AI
 image: /static/templates/intent-classification-and-slot-filling.png
+thumbnail: /static/templates/intent-classification-and-slot-filling-thumbnail.png
 details: |
   <h1>Build a task-oriented dialogue system by selecting dialogue intents and extracting slot entities</h1>
   <dl>

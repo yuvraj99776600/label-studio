@@ -2,6 +2,7 @@ title: Outliers & Anomaly Detection
 type: community
 group: Time Series Analysis
 image: /static/templates/outliers-anomaly-detection.png
+thumbnail: /static/templates/outliers-anomaly-detection-thumbnail.png
 details: |
   <h1>Select time spans identifying outliers or anomalies on time series signals</h1>
   <dl>

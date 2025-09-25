@@ -2,6 +2,7 @@ title: Activity Recognition
 type: community
 group: Time Series Analysis
 image: /static/templates/activity-recognition.png
+thumbnail: /static/templates/activity-recognition-thumbnail.png
 details: |
   <h1>Track and classify activity from sensors and IMU devices</h1>
   <dl>

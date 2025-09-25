@@ -2,6 +2,7 @@ title: Multi-page document annotation
 type: community
 group: Computer Vision
 image: /static/templates/multipage.png
+thumbnail: /static/templates/multipage-thumbnail.png
 details: |
   <h1>Annotate PDF documents</h1>
   <dl>

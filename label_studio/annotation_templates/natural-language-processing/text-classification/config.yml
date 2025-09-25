@@ -3,6 +3,7 @@ type: community
 group: Natural Language Processing
 order: 2
 image: /static/templates/text-classification.png
+thumbnail: /static/templates/text-classification-thumbnail.png
 details: |
   <h1>Classify text document</h1>
   <dl>

@@ -2,6 +2,7 @@ title: Inventory Tracking
 type: community
 group: Computer Vision
 image: /static/templates/inventory-tracking.png
+thumbnail: /static/templates/inventory-tracking-thumbnail.png
 details: |
   <h1>Label exact products on the shelves</h1>
   <dl>

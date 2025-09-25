@@ -2,6 +2,7 @@ title: Video Timeline Segmentation
 type: community
 group: Videos
 image: /static/templates/video-timeline-segmentation.png
+thumbnail: /static/templates/video-timeline-segmentation-thumbnail.png
 details: |
   <h1>Select and classify video segments</h1>
   <dl>

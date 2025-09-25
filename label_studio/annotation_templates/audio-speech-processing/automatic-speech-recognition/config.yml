@@ -2,6 +2,7 @@ title: Automatic Speech Recognition
 type: community
 group: Audio/Speech Processing
 image: /static/templates/automatic-speech-recognition.png
+thumbnail: /static/templates/automatic-speech-recognition-thumbnail.png
 details: |
   <h1>Transcribe the audio</h1>
   <dl>

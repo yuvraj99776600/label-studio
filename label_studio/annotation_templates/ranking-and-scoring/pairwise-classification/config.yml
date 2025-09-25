@@ -2,6 +2,7 @@ title: Pairwise classification
 type: community
 group: Ranking & Scoring
 image: /static/templates/pairwise-classification.png
+thumbnail: /static/templates/pairwise-classification-thumbnail.png
 details: <h1>Select one of two items</h1>
 config: |
   <View>

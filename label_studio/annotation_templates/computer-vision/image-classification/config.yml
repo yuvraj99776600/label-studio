@@ -2,6 +2,7 @@ title: Image Classification
 type: community
 group: Computer Vision
 image: /static/templates/image-classification.png
+thumbnail: /static/templates/image-classification-thumbnail.png
 details: |
   <h1>Classify the image</h1>
   <dl>

@@ -3,6 +3,7 @@ type: community
 group: Natural Language Processing
 order: 4
 image: /static/templates/taxonomy.png
+thumbnail: /static/templates/taxonomy-thumbnail.png
 details: |
   <h1>Multilabel hierarchical classification</h1>
   <dl>

@@ -2,6 +2,7 @@ title: Response Generation
 type: community
 group: Conversational AI
 image: /static/templates/response-generation.png
+thumbnail: /static/templates/response-generation-thumbnail.png
 details: <h1>Collect chatbot training data by generating next dialogue response</h1>
 config: |
   <View>

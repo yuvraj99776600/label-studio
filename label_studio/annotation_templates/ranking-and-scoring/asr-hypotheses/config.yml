@@ -2,6 +2,7 @@ title: ASR Hypotheses Selection
 type: community
 group: Ranking & Scoring
 image: /static/templates/asr-hypotheses.png
+thumbnail: /static/templates/asr-hypotheses-thumbnail.png
 details: <h1>Choose the most accurate Automatic Speach Recognition (ASR) hypothese</h1>
 config: |
   <View>

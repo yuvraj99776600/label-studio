@@ -2,6 +2,7 @@ title: Automatic Speech Recognition using Segments
 type: community
 group: Audio/Speech Processing
 image: /static/templates/automatic-speech-recognition-using-segments.png
+thumbnail: /static/templates/automatic-speech-recognition-using-segments-thumbnail.png
 details: |
   <h1>Segment voice activity and transcribe the audio</h1>
   <dl>

@@ -2,6 +2,7 @@ title: Search Page Ranking
 type: community
 group: Ranking & Scoring
 image: /static/templates/serp-ranking.png
+thumbnail: /static/templates/serp-ranking-thumbnail.png
 details: <h1>Rank different kinds of results by given search query</h1>
 config: |
   <View>

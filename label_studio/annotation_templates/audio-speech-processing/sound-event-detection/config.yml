@@ -2,6 +2,7 @@ title: Sound Event Detection
 type: community
 group: Audio/Speech Processing
 image: /static/templates/sound-event-detection.png
+thumbnail: /static/templates/sound-event-detection-thumbnail.png
 details: |
   <h1>Select audio span and classify sound event</h1>
   <dl>

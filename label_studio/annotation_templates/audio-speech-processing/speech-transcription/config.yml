@@ -2,6 +2,7 @@ title: Speech Transcription
 type: community
 group: Audio/Speech Processing
 image: /static/templates/thumbnail-audio-sentiment.png
+thumbnail: /static/templates/thumbnail-audio-sentiment-thumbnail.png
 details: |
   <h1>Transcribe audio recordings with chunks</h1>
   <dl>

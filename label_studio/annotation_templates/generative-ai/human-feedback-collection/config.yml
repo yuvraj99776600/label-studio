@@ -3,6 +3,7 @@ type: community
 group: Generative AI
 order: 2
 image: /static/templates/generative-pairwise-human-preference.png
+thumbnail: /static/templates/generative-pairwise-human-preference-thumbnail.png
 details: |
   <h1>Gather comparison data to establish human preferences for model-generated responses.</h1>
   <dl>

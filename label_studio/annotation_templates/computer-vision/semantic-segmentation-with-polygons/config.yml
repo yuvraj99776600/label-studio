@@ -3,6 +3,7 @@ type: community
 group: Computer Vision
 order: 1
 image: /static/templates/semantic-segmentation-with-polygons.png
+thumbnail: /static/templates/semantic-segmentation-with-polygons-thumbnail.png
 details: |
   <h1>Draw a polygon around object</h1>
   <dl>

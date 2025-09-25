@@ -3,6 +3,7 @@ type: community
 group: Generative AI
 order: 5
 image: /static/templates/visual-ranker.png
+thumbnail: /static/templates/visual-ranker-thumbnail.png
 details: |
   <h1>Rank and compare AI-generated visual content</h1>
   <dl>

@@ -2,6 +2,7 @@ title: Video Classification
 type: community
 group: Videos
 image: /static/templates/video-classification.png
+thumbnail: /static/templates/video-classification-thumbnail.png
 details: |
   <h1>Classify video</h1>
   <dl>

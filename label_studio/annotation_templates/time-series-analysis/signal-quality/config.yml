@@ -2,6 +2,7 @@ title: Signal Quality
 type: community
 group: Time Series Analysis
 image: /static/templates/signal-quality.png
+thumbnail: /static/templates/signal-quality-thumbnail.png
 details: |
   <h1>Rate signal quality</h1>
   <dl>

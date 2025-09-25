@@ -3,6 +3,7 @@ type: community
 group: Generative AI
 order: 3
 image: /static/templates/generative-chatbot-assessment.png
+thumbnail: /static/templates/generative-chatbot-assessment-thumbnail.png
 details: |
   <h1>Assess chatbot and LLM-generated responses for quality assurance</h1>
   <dl>

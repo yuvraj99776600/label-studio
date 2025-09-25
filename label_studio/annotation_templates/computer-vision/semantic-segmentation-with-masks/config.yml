@@ -3,6 +3,7 @@ type: community
 group: Computer Vision
 order: 2
 image: /static/templates/semantic-segmentation-with-masks.png
+thumbnail: /static/templates/semantic-segmentation-with-masks-thumbnail.png
 details: |
   <h1>Draw masks around the object with the brush tool</h1>
   <dl>

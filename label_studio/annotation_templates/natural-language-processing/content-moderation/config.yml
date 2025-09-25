@@ -2,6 +2,7 @@ title: Content Moderation
 type: community
 group: Natural Language Processing
 image: /static/templates/content-moderation.png
+thumbnail: /static/templates/content-moderation-thumbnail.png
 details: |
   <h1>Content moderation</h1>
   <dl>

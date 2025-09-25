@@ -2,6 +2,7 @@ title: Conversational Analysis
 type: community
 group: Audio/Speech Processing
 image: /static/templates/thumbnail-conversation-sentiment.png
+thumbnail: /static/templates/thumbnail-conversation-sentiment-thumbnail.png
 details: |
   <h1>Analyse dialogue utterances and markup facts and sentiment aspects</h1>
   <dl>

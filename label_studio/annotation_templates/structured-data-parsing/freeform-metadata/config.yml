@@ -2,6 +2,7 @@ title: Freeform Metadata
 type: community
 group: Structured Data Parsing
 image: /static/templates/freeform-metadata.png
+thumbnail: /static/templates/freeform-metadata-thumbnail.png
 details: <h1>Specify your own metadata in table</h1>
 config: |
   <View>

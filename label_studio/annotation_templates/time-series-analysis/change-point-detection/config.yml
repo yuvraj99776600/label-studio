@@ -2,6 +2,7 @@ title: Change Point Detection
 type: community
 group: Time Series Analysis
 image: /static/templates/change-point-detection.png
+thumbnail: /static/templates/change-point-detection-thumbnail.png
 details: |
   <h1>Identify changing points on time series signals</h1>
   <dl>

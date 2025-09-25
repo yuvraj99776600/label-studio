@@ -3,6 +3,7 @@ type: community
 group: Computer Vision
 order: 10000
 image: /static/templates/keypoints.png
+thumbnail: /static/templates/keypoints-thumbnail.png
 details: |
   <h1>Add labeled keypoints</h1>
   <dl>

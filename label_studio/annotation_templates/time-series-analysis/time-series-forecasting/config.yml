@@ -2,6 +2,7 @@ title: Time Series Forecasting
 type: community
 group: Time Series Analysis
 image: /static/templates/time-series-forecasting.png
+thumbnail: /static/templates/time-series-forecasting-thumbnail.png
 details: |
   <h1>Prepare training data for time series forecasting models</h1>
   <dl>

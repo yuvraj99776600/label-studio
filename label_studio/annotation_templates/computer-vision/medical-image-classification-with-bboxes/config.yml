@@ -2,6 +2,7 @@ title: Medical Image Classification with Bounding Boxes
 type: community
 group: Computer Vision
 image: /static/templates/medical-image-classification.png
+thumbnail: /static/templates/medical-image-classification-thumbnail.png
 details: |
   <h1>Classify medical images and draw regions</h1>
   <dl>

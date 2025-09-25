@@ -2,6 +2,7 @@ title: Pairwise regression
 type: community
 group: Ranking & Scoring
 image: /static/templates/pairwise-regression.png
+thumbnail: /static/templates/pairwise-regression-thumbnail.png
 details: <h1>Select how likely it is that two items occur together</h1>
 config: |
   <View>

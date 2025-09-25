@@ -3,6 +3,7 @@ type: community
 group: Generative AI
 order: 4
 image: /static/templates/llm-ranker.png
+thumbnail: /static/templates/llm-ranker-thumbnail.png
 details: |
   <h1>Rank and compare LLM responses</h1>
   <dl>

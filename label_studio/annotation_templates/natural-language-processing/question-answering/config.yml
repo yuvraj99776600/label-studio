@@ -3,6 +3,7 @@ type: community
 group: Natural Language Processing
 order: 1
 image: /static/templates/question-answering.png
+thumbnail: /static/templates/question-answering-thumbnail.png
 details: |
   <h1>Select an answer from text</h1>
   <dl>

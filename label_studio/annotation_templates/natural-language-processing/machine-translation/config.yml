@@ -2,6 +2,7 @@ title: Machine Translation
 type: community
 group: Natural Language Processing
 image: /static/templates/machine-translation.png
+thumbnail: /static/templates/machine-translation-thumbnail.png
 details: |
   <h1>Translate text from one language to another</h1>
   <dl>
