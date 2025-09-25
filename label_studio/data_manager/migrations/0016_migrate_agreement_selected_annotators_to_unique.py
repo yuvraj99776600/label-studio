@@ -3,8 +3,11 @@ from copy import deepcopy
 from django.apps import apps as django_apps
 from core.models import AsyncMigrationStatus
 from core.redis import start_job_async_or_sync
+import logging
 
 migration_name = '0016_migrate_agreement_selected_annotators_to_unique'
+
+logger = logging.getLogger(__name__)
 
 
 def forward_migration():
@@ -64,18 +67,18 @@ def forward_migration():
 
         # Update only the JSON field via update(); do not load model instance or call save()
         View.objects.filter(id=view_id).update(data=new_data)
-        print(f'Updated View {view_id} agreement selected annotators to {list(new_annotators)}')
-        print(f'Old annotator length: {len(old_set)}, new annotator length: {len(new_annotators)}')
+        logger.info(f'Updated View {view_id} agreement selected annotators to {list(new_annotators)}')
+        logger.info(f'Old annotator length: {len(old_set)}, new annotator length: {len(new_annotators)}')
         updated += 1
 
     if updated:
-        print(f'{migration_name} Updated {updated} View rows')
+        logger.info(f'{migration_name} Updated {updated} View rows')
     
     migration.status = AsyncMigrationStatus.STATUS_FINISHED
     migration.save(update_fields=['status'])
 
 def forwards(apps, schema_editor):
-    start_job_async_or_sync(forward_migration)
+    start_job_async_or_sync(forward_migration, queue_name='low')
 
 
 def backwards(apps, schema_editor):
