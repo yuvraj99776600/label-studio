@@ -3,7 +3,6 @@ import { guidGenerator } from "../../utils/random";
 import { isDefined } from "../../utils/utils";
 import { DEFAULT_PAGE_SIZE, getStoredPageSize } from "../../components/Common/Pagination/Pagination";
 import { FF_LOPS_E_3, isFF } from "../../utils/feature-flags";
-import { debounce } from "@humansignal/core/lib/utils/debounce";
 
 const listIncludes = (list, id) => {
   const index = id !== undefined ? Array.from(list).findIndex((item) => item.id === id) : -1;
@@ -178,11 +177,35 @@ export const DataStore = (modelName, { listItemType, apiMethod, properties, asso
       // Initialize debounced fetch function
       initDebouncedFetch() {
         if (!self.debouncedFetch) {
-          self.debouncedFetch = debounce((params) => {
-            return new Promise((resolve) => {
-              self._performFetch(params).then(resolve);
+          let timeoutId = null;
+          let pendingPromise = null;
+
+          self.debouncedFetch = (params) => {
+            return new Promise((resolve, reject) => {
+              // Clear any existing timeout
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+              }
+
+              // Cancel any pending promise
+              if (pendingPromise) {
+                pendingPromise.cancel?.();
+              }
+
+              // Set new timeout
+              timeoutId = setTimeout(async () => {
+                try {
+                  pendingPromise = self._performFetch(params);
+                  const result = await pendingPromise;
+                  resolve(result);
+                } catch (error) {
+                  reject(error);
+                } finally {
+                  pendingPromise = null;
+                }
+              }, 150);
             });
-          }, 150); // 300ms debounce delay
+          };
         }
       },
 
@@ -280,14 +303,14 @@ export const DataStore = (modelName, { listItemType, apiMethod, properties, asso
         // Only use debouncing for virtual tabs that use queries (like search/filter tabs)
         const currentView = root.viewsStore.selected;
         const isVirtualTab = currentView?.virtual && currentView?.query;
-        
+
         if (!isVirtualTab) {
           return self._performFetch(params);
         }
-        
+
         // Initialize debounced function if not already done
         self.initDebouncedFetch();
-        
+
         // For virtual tabs with queries, use debounced version
         return self.debouncedFetch(params);
       },
