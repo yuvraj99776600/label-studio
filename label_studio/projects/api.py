@@ -36,6 +36,7 @@ from projects.serializers import (
     ProjectImportSerializer,
     ProjectLabelConfigSerializer,
     ProjectModelVersionExtendedSerializer,
+    ProjectModelVersionParamsSerializer,
     ProjectReimportSerializer,
     ProjectSerializer,
     ProjectSummarySerializer,
@@ -49,13 +50,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import exception_handler
-from tasks.models import Task
+from tasks.models import Annotation, Task
 from tasks.serializers import (
     NextTaskSerializer,
     TaskSerializer,
     TaskSimpleSerializer,
     TaskWithAnnotationsAndPredictionsAndDraftsSerializer,
 )
+from users.models import User
+from users.serializers import UserSimpleSerializer
 from webhooks.models import WebhookAction
 from webhooks.utils import api_webhook, api_webhook_for_delete, emit_webhooks_for_instance
 
@@ -887,15 +890,18 @@ class ProjectSampleTask(generics.RetrieveAPIView):
 class ProjectModelVersions(generics.RetrieveAPIView):
     parser_classes = (JSONParser,)
     permission_required = all_permissions.projects_view
-    queryset = Project.objects.all()
+
+    def get_queryset(self):
+        return Project.objects.filter(organization=self.request.user.active_organization)
 
     def get(self, request, *args, **kwargs):
-        # TODO make sure "extended" is the right word and is
-        # consistent with other APIs we've got
-        extended = self.request.query_params.get('extended', False)
-        include_live_models = self.request.query_params.get('include_live_models', False)
         project = self.get_object()
-        data = project.get_model_versions(with_counters=True, extended=extended)
+        serializer = ProjectModelVersionParamsSerializer(data=self.request.query_params)
+        serializer.is_valid(raise_exception=True)
+        extended = serializer.validated_data.get('extended', False)
+        include_live_models = serializer.validated_data.get('include_live_models', False)
+        limit = serializer.validated_data.get('limit', None)
+        data = project.get_model_versions(with_counters=True, extended=extended, limit=limit)
 
         if extended:
             serializer_models = None
@@ -905,7 +911,6 @@ class ProjectModelVersions(generics.RetrieveAPIView):
                 ml_models = project.get_ml_backends()
                 serializer_models = MLBackendSerializer(ml_models, many=True)
 
-            # serializer.is_valid(raise_exception=True)
             return Response({'static': serializer.data, 'live': serializer_models and serializer_models.data})
         else:
             return Response(data=data)
@@ -920,3 +925,38 @@ class ProjectModelVersions(generics.RetrieveAPIView):
         count = project.delete_predictions(model_version=model_version)
 
         return Response(data=count)
+
+
+@method_decorator(
+    name='get',
+    decorator=extend_schema(
+        tags=['Projects'],
+        summary='List unique annotators for project',
+        description='Return unique users who have submitted annotations in the specified project.',
+        responses={
+            200: OpenApiResponse(
+                description='List of annotator users',
+                response=UserSimpleSerializer(many=True),
+            )
+        },
+        extensions={
+            'x-fern-sdk-group-name': 'projects',
+            'x-fern-sdk-method-name': 'list_unique_annotators',
+            'x-fern-audiences': ['public'],
+        },
+    ),
+)
+class ProjectAnnotatorsAPI(generics.RetrieveAPIView):
+    permission_required = all_permissions.projects_view
+    queryset = Project.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        project = self.get_object()
+        annotator_ids = list(
+            Annotation.objects.filter(project=project, completed_by_id__isnull=False)
+            .values_list('completed_by_id', flat=True)
+            .distinct()
+        )
+        users = User.objects.filter(id__in=annotator_ids).prefetch_related('om_through').order_by('id')
+        data = UserSimpleSerializer(users, many=True, context={'request': request}).data
+        return Response(data)
