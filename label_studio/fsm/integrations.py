@@ -15,7 +15,7 @@ The integrations are designed to:
 import logging
 from typing import Optional
 
-from core.current_context import CurrentContext
+from core.current_request import CurrentContext
 from core.feature_flags import flag_set
 from django.contrib.auth.models import User
 from fsm.state_manager import get_state_manager

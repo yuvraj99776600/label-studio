@@ -9,7 +9,7 @@ from typing import Any, Callable
 
 import django_rq
 import redis
-from core.current_context import CurrentContext
+from core.current_request import CurrentContext
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django_rq import get_connection
