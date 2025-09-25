@@ -1,4 +1,4 @@
-from core.current_context import CurrentContext
+from .current_context import CurrentContext
 from django.core.signals import request_finished
 from django.dispatch import receiver
 from django.middleware.common import CommonMiddleware
