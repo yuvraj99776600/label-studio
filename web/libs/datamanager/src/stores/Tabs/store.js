@@ -321,7 +321,7 @@ export const TabStore = types
 
         self.setSelected(newView);
         destroy(view);
-        if (!newView?.virtual) {
+        if (!newView?.virtual && reload !== false) {
           root.SDK.hasInterface("tabs") && (yield newView.reload());
         }
 
