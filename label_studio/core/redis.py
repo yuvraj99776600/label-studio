@@ -1,17 +1,15 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
-import functools
 import logging
 import sys
 from datetime import timedelta
 from functools import partial
-from typing import Any, Callable
+from typing import Any
 
 import django_rq
 import redis
 from core.current_request import CurrentContext
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django_rq import get_connection
 from rq.command import send_stop_job_command
 from rq.exceptions import InvalidJobOperation
@@ -118,68 +116,6 @@ def _capture_context() -> dict:
         return context_data
 
 
-def _restore_context(context_data: dict) -> None:
-    """
-    Restore context from captured data.
-    """
-    if not context_data:
-        return
-
-    try:
-
-        # Set all context data
-        for key, value in context_data.items():
-            if key != 'user_id':  # We'll handle user_id specially
-                CurrentContext.set(key, value)
-
-        # If we have a user_id, load the user object
-        if user_id := context_data.get('user_id'):
-            User = get_user_model()
-            try:
-                user = User.objects.get(pk=user_id)
-                CurrentContext.set('user', user)
-                # If organization_id is not set, try to get it from the user, this ensures that we have an organization_id for the job
-                if (
-                    CurrentContext.get_organization_id() is None
-                    and hasattr(user, 'active_organization_id')
-                    and user.active_organization_id
-                ):
-                    CurrentContext.set_organization_id(user.active_organization_id)
-            except User.DoesNotExist:
-                logger.warning(f'User {user_id} not found when restoring context')
-
-        logger.debug(f'Restored context with keys: {list(context_data.keys())}')
-
-    except Exception as e:
-        logger.error(f'Failed to restore context: {e}')
-
-
-def _wrap_job_with_context(job_func: Callable) -> Callable:
-    """
-    Wrap a job function to restore and clear context automatically.
-    """
-
-    @functools.wraps(job_func)
-    def context_wrapper(*args, **kwargs):
-        """
-        Wrapper that restores context, runs the job, then clears context.
-        """
-        try:
-            context_data = kwargs.pop('_context_data', None)
-
-            # Restore context for this job
-            _restore_context(context_data)
-
-            # Execute the original function
-            return job_func(*args, **kwargs)
-
-        finally:
-            # Always clear context after job completes
-            CurrentContext.clear()
-
-    return context_wrapper
-
-
 def redis_get(key):
     if not redis_healthcheck():
         return
@@ -237,14 +173,11 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
 
     if redis:
         # Async execution with Redis - wrap job for context management
-        # context_data = {}
-        #
-        # if context_data:
-        #     # Only wrap if we have context to preserve
-        #     kwargs['_context_data'] = context_data
+        context_data = _capture_context()
 
-        # Ensure the function is preserved so that logging and error handling work correctly
-        # job = _wrap_job_with_context(job)
+        if context_data:
+            # Only wrap if we have context to preserve
+            kwargs['_context_data'] = context_data
 
         try:
             args_info = _truncate_args_for_logging(args, kwargs)
