@@ -167,6 +167,11 @@ def _wrap_job_with_context(job_func: Callable) -> Callable:
         try:
             context_data = kwargs.pop('_context_data', None)
 
+            if not context_data:
+                print('NO CONTEXT DATA!!!!!!')
+            else:
+                print('WE STILL HAVECONTEXT DATA', context_data)
+
             # Restore context for this job
             _restore_context(context_data)
 
@@ -237,14 +242,19 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
 
     if redis:
         # Async execution with Redis - wrap job for context management
+        print('CAPTURING CONTEXT')
         context_data = _capture_context()
+        print('CONTEXT CAPTURED', context_data)
 
         if context_data:
             # Only wrap if we have context to preserve
             kwargs['_context_data'] = context_data
 
         # Ensure the function is preserved so that logging and error handling work correctly
+        print('WRAPPING JOB WITH CONTEXT')
         job = _wrap_job_with_context(job)
+
+        print('JOB WRAPPED WITH CONTEXT')
 
         try:
             args_info = _truncate_args_for_logging(args, kwargs)
@@ -256,6 +266,15 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
         if in_seconds > 0:
             enqueue_method = partial(queue.enqueue_in, timedelta(seconds=in_seconds))
 
+
+        print('kwargs', kwargs)
+        # if len(kwargs) > 1:
+        #     kwargs.pop('_context_data', None)
+        # else:
+        #     print('KEEPING KWARGS INTACT', kwargs)
+            
+        print('job', job)
+        kwargs.pop('_context_data', None)
         job = enqueue_method(
             job,
             *args,
@@ -267,6 +286,7 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
     else:
         # Sync execution - context is already available from request thread
         # No need to wrap or modify the job function
+        print(f"Sync execution - context is already available from request thread")
         on_failure = kwargs.pop('on_failure', None)
         try:
             return job(*args, **kwargs)

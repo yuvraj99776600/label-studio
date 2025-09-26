@@ -82,7 +82,12 @@ class CurrentContext:
         """
         This data will be shared to jobs spawned by the current thread.
         """
-        return getattr(_thread_locals, 'job_data', {})
+        job_data = getattr(_thread_locals, 'job_data', {})
+        print(f"job_data: {job_data}")
+
+        if job_data:
+            return job_data
+        return {}
 
     @classmethod
     def clear(cls) -> None:
@@ -99,7 +104,3 @@ class CurrentContext:
     def get_request(cls):
         return getattr(_thread_locals, 'request', None)
         # return _thread_locals.request
-    
-    @classmethod
-    def get_job_data(self):
-        return {}
