@@ -50,7 +50,7 @@ class CurrentContext:
             cls.set_organization_id(user.active_organization_id)
 
     @classmethod
-    def is_job(cls) -> bool:
+    def is_async_job(cls) -> bool:
         return cls.get_request() is None
 
     @classmethod
