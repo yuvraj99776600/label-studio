@@ -68,6 +68,9 @@ class CurrentContext:
         if hasattr(_thread_locals, 'job_data'):
             delattr(_thread_locals, 'job_data')
 
+        if hasattr(_thread_locals, 'request'):
+            del _thread_locals.request
+
     @classmethod
     def get_request(cls):
         return getattr(_thread_locals, 'request', None)
@@ -86,5 +89,4 @@ class ThreadLocalMiddleware(CommonMiddleware):
 
 @receiver(request_finished)
 def clean_request(sender, **kwargs):
-    if hasattr(_thread_locals, 'request'):
-        del _thread_locals.request
+    CurrentContext.clear()
