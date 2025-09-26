@@ -237,14 +237,14 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
 
     if redis:
         # Async execution with Redis - wrap job for context management
-        context_data = _capture_context()
-
-        if context_data:
-            # Only wrap if we have context to preserve
-            kwargs['_context_data'] = context_data
+        # context_data = {}
+        #
+        # if context_data:
+        #     # Only wrap if we have context to preserve
+        #     kwargs['_context_data'] = context_data
 
         # Ensure the function is preserved so that logging and error handling work correctly
-        job = _wrap_job_with_context(job)
+        # job = _wrap_job_with_context(job)
 
         try:
             args_info = _truncate_args_for_logging(args, kwargs)
