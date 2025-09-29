@@ -44,20 +44,6 @@ ffprobe -v error -show_format -show_streams -print_format json input.mp4
 
 {% insertmd includes/tags/video.md %}
 
-### Parameters
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| name | `string` | | Name of the element |
-| value | `string` | | URL of the video |
-| frameRate | `number` | `24` | Video frame rate per second; can use task data like `$fps` |
-| sync | `string` | | Object name to sync with |
-| muted | `boolean` | `false` | Muted video |
-| height | `number` | `600` | Height of the video player |
-| timelineHeight | `number` | `64` | Height of the timeline with regions |
-| defaultPlaybackSpeed | `number` | `1` | Default playback speed the player should start with when loaded |
-| minPlaybackSpeed | `number` | `1` | Minimum allowed playback speed; defaultPlaybackSpeed cannot be set below this value |
-
 ### Example
 
 Labeling configuration to display a video on the labeling interface
