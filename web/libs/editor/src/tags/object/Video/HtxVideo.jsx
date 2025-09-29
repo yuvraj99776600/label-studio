@@ -125,7 +125,7 @@ const VideoConfig = observer(({ item }) => {
       onSpeedChange={item.handleSpeed}
       loopTimelineRegion={item.loopTimelineRegion}
       onLoopTimelineRegionChange={item.setLoopTimelineRegion}
-      minSpeed={Number(item.minplaybackspeed) || 1}
+      minSpeed={item.minplaybackspeed}
     />
   );
 });
