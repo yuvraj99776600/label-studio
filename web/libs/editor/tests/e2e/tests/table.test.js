@@ -59,6 +59,7 @@ Scenario("Render JSON array of objects with derived columns", async ({ I, LabelS
 
   I.see("a");
   I.see("b");
+  I.see("c");
   I.dontSee("Name");
   I.dontSee("Value");
 
@@ -66,6 +67,7 @@ Scenario("Render JSON array of objects with derived columns", async ({ I, LabelS
   I.see("2");
   I.see("3");
   I.see("4");
+  I.see("5");
 });
 
 Scenario("Render JSON array of primitives as key/value table", async ({ I, LabelStudio }) => {
