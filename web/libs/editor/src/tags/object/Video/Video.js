@@ -90,8 +90,8 @@ const TagAttrs = types.model({
   height: types.optional(types.string, "600"),
   timelineheight: types.maybeNull(types.string),
   muted: false,
-  defaultplaybackspeed: types.optional(types.number, 1),
-  minplaybackspeed: types.optional(types.number, 1),
+  defaultplaybackspeed: types.optional(types.union(types.string, types.number), "1"),
+  minplaybackspeed: types.optional(types.union(types.string, types.number), "0.25"),
 });
 
 const Model = types
@@ -189,16 +189,17 @@ const Model = types
       else self.framerate = String(framerate);
 
       // normalize playback speed parameters
-      const defaultPlaybackSpeed = Number(parseValue(self.defaultplaybackspeed, self.store.task?.dataObj));
-      const minPlaybackSpeed = Number(parseValue(self.minplaybackspeed, self.store.task?.dataObj));
+      const data = self.store.task?.dataObj;
+      const defaultPlaybackSpeed = Number(parseValue(String(self.defaultplaybackspeed), data));
+      const minPlaybackSpeed = Number(parseValue(String(self.minplaybackspeed), data));
 
       // validate and set minPlaybackSpeed
       self.minplaybackspeed =
-        !minPlaybackSpeed || Number.isNaN(minPlaybackSpeed) || minPlaybackSpeed < 0.25 ? 1 : minPlaybackSpeed;
+        !minPlaybackSpeed || isNaN(minPlaybackSpeed) || minPlaybackSpeed < 0.05 ? 0.25 : minPlaybackSpeed;
 
       // validate and set defaultPlaybackSpeed
       self.defaultplaybackspeed =
-        !defaultPlaybackSpeed || Number.isNaN(defaultPlaybackSpeed) || defaultPlaybackSpeed < 0.25
+        !defaultPlaybackSpeed || isNaN(defaultPlaybackSpeed) || defaultPlaybackSpeed < 0.05
           ? 1
           : Math.max(defaultPlaybackSpeed, self.minplaybackspeed);
 
