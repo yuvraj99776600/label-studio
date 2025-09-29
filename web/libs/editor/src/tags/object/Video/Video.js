@@ -193,14 +193,14 @@ const Model = types
       const minPlaybackSpeed = Number(parseValue(self.minplaybackspeed, self.store.task?.dataObj));
 
       // validate and set minPlaybackSpeed
-      self.minplaybackspeed = (!minPlaybackSpeed || Number.isNaN(minPlaybackSpeed) || minPlaybackSpeed < 0.25) 
-        ? 1 
-        : minPlaybackSpeed;
+      self.minplaybackspeed =
+        !minPlaybackSpeed || Number.isNaN(minPlaybackSpeed) || minPlaybackSpeed < 0.25 ? 1 : minPlaybackSpeed;
 
       // validate and set defaultPlaybackSpeed
-      self.defaultplaybackspeed = (!defaultPlaybackSpeed || Number.isNaN(defaultPlaybackSpeed) || defaultPlaybackSpeed < 0.25)
-        ? 1
-        : Math.max(defaultPlaybackSpeed, self.minplaybackspeed);
+      self.defaultplaybackspeed =
+        !defaultPlaybackSpeed || Number.isNaN(defaultPlaybackSpeed) || defaultPlaybackSpeed < 0.25
+          ? 1
+          : Math.max(defaultPlaybackSpeed, self.minplaybackspeed);
 
       // set initial speed to defaultPlaybackSpeed
       self.speed = self.defaultplaybackspeed;
@@ -314,7 +314,7 @@ const Model = types
     handleSpeed(speed) {
       // enforce minimum playback speed
       const constrainedSpeed = Math.max(speed, self.minplaybackspeed);
-      
+
       self.speed = constrainedSpeed;
       self.triggerSync("speed", { speed: constrainedSpeed });
     },
