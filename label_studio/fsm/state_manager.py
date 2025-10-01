@@ -9,6 +9,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
+from core.current_request import CurrentContext
 from core.feature_flags import flag_set
 from django.conf import settings
 from django.core.cache import cache
@@ -56,6 +57,8 @@ class StateManager:
 
     @classmethod
     def _is_fsm_enabled(cls, user='auto') -> bool:
+        if user == 'auto':
+            user = CurrentContext.get_user()
         """Check if FSM feature is enabled via feature flag."""
         return flag_set('fflag_feat_fit_568_finite_state_management', user=user)
 
@@ -98,6 +101,7 @@ class StateManager:
                     'event': 'fsm.cache_hit',
                     'entity_type': entity._meta.label_lower,
                     'entity_id': entity.pk,
+                    'organization_id': CurrentContext.get_organization_id(),
                     'state': cached_state,
                 },
             )
@@ -120,6 +124,7 @@ class StateManager:
                         'event': 'fsm.cache_miss',
                         'entity_type': entity._meta.label_lower,
                         'entity_id': entity.pk,
+                        'organization_id': CurrentContext.get_organization_id(),
                     },
                 )
 
@@ -132,6 +137,7 @@ class StateManager:
                     'event': 'fsm.get_state_error',
                     'entity_type': entity._meta.label_lower,
                     'entity_id': entity.pk,
+                    'organization_id': CurrentContext.get_organization_id(),
                     'error': str(e),
                 },
                 exc_info=True,
@@ -167,6 +173,7 @@ class StateManager:
         new_state: str,
         transition_name: str = None,
         user=None,
+        organization_id=None,
         context: Dict[str, Any] = None,
         reason: str = '',
     ) -> bool:
@@ -183,6 +190,7 @@ class StateManager:
             new_state: Target state
             transition_name: Name of transition method (for audit)
             user: User triggering the transition
+            organization_id: Organization ID
             context: Additional context data
             reason: Human-readable reason for transition
 
@@ -199,6 +207,7 @@ class StateManager:
                 new_state='IN_PROGRESS',
                 transition_name='start_annotation',
                 user=request.user,
+                organization_id=request.user.active_organization_id,
                 context={'assignment_id': assignment.id},
                 reason='User started annotation work'
             )
@@ -220,6 +229,9 @@ class StateManager:
         cache_key = cls.get_cache_key(entity)
         lock_key = f'{cache_key}:lock'
 
+        if organization_id is None:
+            organization_id = CurrentContext.get_organization_id()
+
         try:
             # Try to acquire an optimistic lock using cache add (atomic operation)
             # add() only succeeds if the key doesn't exist
@@ -234,6 +246,7 @@ class StateManager:
                         'entity_type': entity._meta.label_lower,
                         'entity_id': entity.pk,
                         'target_state': new_state,
+                        'organization_id': organization_id,
                     },
                 )
                 return True
@@ -245,9 +258,12 @@ class StateManager:
                     denormalized_fields = state_model.get_denormalized_fields(entity)
 
                     # Get organization from entity or denormalized fields, or user's active organization
-                    organization_id = getattr(
-                        entity, 'organization_id', getattr(denormalized_fields, 'organization_id', None)
-                    )
+                    if organization_id is None:
+                        organization_id = getattr(
+                            entity, 'organization_id', getattr(denormalized_fields, 'organization_id', None)
+                        )
+                        if organization_id is not None:
+                            CurrentContext.set_organization_id(organization_id)
 
                     if (
                         not organization_id
@@ -256,6 +272,8 @@ class StateManager:
                         and user.active_organization
                     ):
                         organization_id = user.active_organization.id
+                        if organization_id is not None:
+                            CurrentContext.set_organization_id(organization_id)
 
                     logger.info(
                         'FSM: State transition starting',
@@ -334,9 +352,7 @@ class StateManager:
             cache.delete(cache_key)
 
             # Get organization_id for error logging if it wasn't set earlier
-            organization_id = getattr(entity, 'organization_id', None)
-            if not organization_id and user and hasattr(user, 'active_organization') and user.active_organization:
-                organization_id = user.active_organization.id
+            organization_id = CurrentContext.get_organization_id()
 
             logger.error(
                 'FSM: State transition failed',
@@ -404,7 +420,7 @@ class StateManager:
         """Invalidate cached state for an entity"""
         cache_key = cls.get_cache_key(entity)
         cache.delete(cache_key)
-        organization_id = getattr(entity, 'organization_id', None)
+        organization_id = CurrentContext.get_organization_id()
         logger.info(
             'FSM: Cache invalidated',
             extra={
@@ -424,11 +440,8 @@ class StateManager:
         bulk queries and advanced caching strategies.
         """
         cache_updates = {}
-        organization_id = None
+        organization_id = CurrentContext.get_organization_id()
         for entity in entities:
-            if organization_id is None:
-                if hasattr(entity, 'organization_id'):
-                    organization_id = entity.organization_id
             current_state = cls.get_current_state_value(entity)
             if current_state:
                 cache_key = cls.get_cache_key(entity)
