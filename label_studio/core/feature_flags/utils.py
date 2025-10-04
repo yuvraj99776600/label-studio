@@ -22,7 +22,7 @@ def get_user_repr_from_organization(organization):
             'custom': {'organization': None, 'organization_id': None},
         }
 
-    email = organization.created_by.email if organization.created_by else 'none'
+    email = organization.created_by.email if organization.created_by else None
     return {
         'key': email,
         'custom': {
