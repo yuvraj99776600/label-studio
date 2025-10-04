@@ -90,15 +90,18 @@ def flag_set(feature_flag, user=None, override_system_default=None, organization
     if feature_flag in STALE_FEATURE_FLAGS:
         return STALE_FEATURE_FLAGS[feature_flag]
 
-    if organization is not None:
-        user = get_user_repr_from_organization(organization)
-    elif user is None:
+    if user is None:
         user = AnonymousUser
     elif user == 'auto':
         user = AnonymousUser
         request = get_current_request()
         if request and getattr(request, 'user', None) and request.user.is_authenticated:
             user = request.user
+
+    if organization is None:
+        user_dict = get_user_repr(user)
+    else:
+        user_dict = get_user_repr_from_organization(organization)
 
     env_value = get_bool_env(feature_flag, default=None)
     if env_value is not None:
@@ -107,7 +110,6 @@ def flag_set(feature_flag, user=None, override_system_default=None, organization
         system_default = override_system_default
     else:
         system_default = settings.FEATURE_FLAGS_DEFAULT_VALUE
-    user_dict = get_user_repr(user)
     return client.variation(feature_flag, user_dict, system_default)
 
 
