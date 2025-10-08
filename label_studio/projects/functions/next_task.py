@@ -206,13 +206,24 @@ def get_not_solved_tasks_qs(
         # otherwise, filtering out completed tasks is sufficient
         else:
             # In Ongoing mode, we need to keep GT tasks available even if they're labeled
+            # BUT exclude GT tasks that are locked by this user to prevent task-lock re-serving
             # In Onboarding mode, GT tasks will be prioritized via the GT queue later
             if not project.show_ground_truth_first:
-                # Annotate tasks with GT status to exclude them from the is_labeled filter
+                from tasks.models import TaskLock
+
+                # Annotate tasks with GT status
                 gt_subq = Annotation.objects.filter(task=OuterRef('pk'), ground_truth=True)
                 not_solved_tasks = not_solved_tasks.annotate(has_ground_truths=Exists(gt_subq))
-                # Keep unlabeled tasks + GT tasks (even if labeled)
-                not_solved_tasks = not_solved_tasks.filter(Q(is_labeled=False) | Q(has_ground_truths=True))
+
+                # Annotate tasks with user lock status
+                user_lock_subq = TaskLock.objects.filter(task=OuterRef('pk'), user=user)
+                not_solved_tasks = not_solved_tasks.annotate(has_user_lock=Exists(user_lock_subq))
+
+                # Keep unlabeled tasks + GT tasks that aren't locked by this user
+                # This allows GT uniform distribution while preventing task-lock re-serving
+                not_solved_tasks = not_solved_tasks.filter(
+                    Q(is_labeled=False) | (Q(has_ground_truths=True) & Q(has_user_lock=False))
+                )
 
     if not flag_set('fflag_fix_back_lsdv_4523_show_overlap_first_order_27022023_short'):
         # show tasks with overlap > 1 first (unless tasks are already prioritized on agreement)
