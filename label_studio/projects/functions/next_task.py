@@ -79,10 +79,13 @@ def _try_tasks_with_overlap(tasks: QuerySet[Task]) -> Tuple[Union[Task, None], Q
 
 
 def _try_breadth_first(tasks: QuerySet[Task], user: User, project: Project) -> Union[Task, None]:
-    """Try to find tasks with maximum amount of annotations, since we are trying to label tasks as fast as possible"""
+    """Try to find tasks with maximum amount of annotations, since we are trying to label tasks as fast as possible
 
-    # Exclude ground truth annotations from the count when not in onboarding mode
-    # to prevent GT tasks from being prioritized via breadth-first logic
+    Exclude ground truth annotations from the count when not in onboarding mode
+    to prevent GT tasks from being prioritized via breadth-first logic
+    """
+
+    # Exclude ground truth annotations from the count
     annotation_filter = ~Q(annotations__completed_by=user)
     if not project.show_ground_truth_first:
         annotation_filter &= ~Q(annotations__ground_truth=True)
@@ -192,24 +195,24 @@ def get_not_solved_tasks_qs(
             )
             capacity_pred = Q(annotators__lt=F('overlap') + (lse_project.max_additional_annotators_assignable or 0))
 
-            if project.show_ground_truth_first:
-                gt_subq = Annotation.objects.filter(task=OuterRef('pk'), ground_truth=True)
-                qs = qs.annotate(has_ground_truths=Exists(gt_subq))
-                # Keep all GT tasks + apply low-agreement+capacity to the rest. For sure, we can do:
-                # - if user.solved_tasks_array.count < lse_project.annotator_evaluation_minimum_tasks
-                # - else, apply low-agreement+capacity to the rest (maybe performance will be better)
-                # but it's a question - what is better here. This version is simpler at least from the code perspective.
-                not_solved_tasks = qs.filter(Q(has_ground_truths=True) | (low_agreement_pred & capacity_pred))
-            else:
-                not_solved_tasks = qs.filter(low_agreement_pred & capacity_pred)
+            # Annotate all tasks with ground truth status for proper filtering
+            gt_subq = Annotation.objects.filter(task=OuterRef('pk'), ground_truth=True)
+            qs = qs.annotate(has_ground_truths=Exists(gt_subq))
+
+            not_solved_tasks = qs.filter(Q(has_ground_truths=True) | (low_agreement_pred & capacity_pred))
 
             prioritized_on_agreement, not_solved_tasks = _prioritize_low_agreement_tasks(not_solved_tasks, lse_project)
 
         # otherwise, filtering out completed tasks is sufficient
         else:
-            # ignore tasks that are already labeled for onboarding mode
+            # In Ongoing mode, we need to keep GT tasks available even if they're labeled
+            # In Onboarding mode, GT tasks will be prioritized via the GT queue later
             if not project.show_ground_truth_first:
-                not_solved_tasks = not_solved_tasks.filter(is_labeled=False)
+                # Annotate tasks with GT status to exclude them from the is_labeled filter
+                gt_subq = Annotation.objects.filter(task=OuterRef('pk'), ground_truth=True)
+                not_solved_tasks = not_solved_tasks.annotate(has_ground_truths=Exists(gt_subq))
+                # Keep unlabeled tasks + GT tasks (even if labeled)
+                not_solved_tasks = not_solved_tasks.filter(Q(is_labeled=False) | Q(has_ground_truths=True))
 
     if not flag_set('fflag_fix_back_lsdv_4523_show_overlap_first_order_27022023_short'):
         # show tasks with overlap > 1 first (unless tasks are already prioritized on agreement)
@@ -274,10 +277,10 @@ def get_next_task_without_dm_queue(
         if next_task:
             queue_info += (' & ' if queue_info else '') + 'Low agreement queue'
 
-    # Breadth first: label in-progress tasks first;
+    # Breadth first: label in-progress tasks first
     if not next_task and project.maximum_annotations > 1:
         # if there are already labeled tasks, but task.overlap still < project.maximum_annotations, randomly sampling from them
-        logger.debug(f'User={user} tries depth first from prepared tasks')
+        logger.debug(f'User={user} tries breadth first from prepared tasks')
         next_task = _try_breadth_first(not_solved_tasks, user, project)
         if next_task:
             queue_info += (' & ' if queue_info else '') + 'Breadth first queue'
