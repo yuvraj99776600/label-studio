@@ -314,6 +314,9 @@ def mock_s3_resource_kms(mocker):
 
 @pytest.fixture(autouse=True)
 def gcs_client():
+    # be careful, this is a global fixture and will affect all tests
+    # because it will be applied to all tests that use gcs_client
+    # and it may lead to flaky tests if the sample blob names are not deterministic
     with gcs_client_mock():
         yield
 
@@ -411,6 +414,17 @@ def ml_backend_1(ml_backend):
 def pytest_configure():
     for q in settings.RQ_QUEUES.values():
         q['ASYNC'] = False
+
+    # Reload django-rq module to pick up the ASYNC=False changes in django-rq 3.x
+    try:
+        import importlib
+
+        import django_rq.queues as dq
+
+        importlib.reload(dq)
+    except ImportError:
+        # django_rq might not be installed or imported yet
+        pass
 
 
 class URLS:
