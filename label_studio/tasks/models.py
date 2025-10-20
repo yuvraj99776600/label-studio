@@ -134,6 +134,11 @@ class Task(TaskMixin, models.Model):
         db_index=True,
         help_text='Number of total predictions for the current task',
     )
+    precomputed_agreement = models.FloatField(
+        _('precomputed_agreement'),
+        null=True,
+        help_text='Average agreement score for the task',
+    )
 
     comment_count = models.IntegerField(
         _('comment count'),
@@ -276,9 +281,7 @@ class Task(TaskMixin, models.Model):
         """
         from projects.functions.next_task import get_next_task_logging_level
 
-        if self.project.show_ground_truth_first and flag_set(
-            'fflag_feat_all_leap_1825_annotator_evaluation_short', user='auto'
-        ):
+        if self.project.show_ground_truth_first:
             # in show_ground_truth_first mode(onboarding)
             # we ignore overlap setting for ground_truth tasks
             # https://humansignal.atlassian.net/browse/LEAP-1963
