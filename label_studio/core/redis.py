@@ -176,8 +176,10 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
         context_data = _capture_context()
 
         if context_data:
-            # Only wrap if we have context to preserve
-            kwargs['_context_data'] = context_data
+            meta = kwargs.get('meta', {})
+            # Store context data in job meta for worker access
+            meta.update(context_data)
+            kwargs['meta'] = meta
 
         try:
             args_info = _truncate_args_for_logging(args, kwargs)
