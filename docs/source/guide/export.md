@@ -153,6 +153,7 @@ A popular machine learning format used by the [COCO dataset](http://cocodataset.
 !!! note "BrushLabels"
     For annotations with BrushLabels, the BrushLabels masks are automatically converted to polygons on export.  
 
+<br/>
 
 {% details <b>KeyPointLabels Export Support</b> %}
 
