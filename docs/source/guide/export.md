@@ -125,13 +125,13 @@ Label Studio supports many common and standard formats for exporting completed l
 | Export Format | BrushLabels | RectangleLabels | KeyPointLabels | PolygonLabels | Comments |
 |---------------|-------------|-----------------|----------------|---------------|----------|
 | **NumPy** | ✅ | ❌ | ❌ | ❌ |  |
-| **COCO** | ✅ | ✅ | ✅ | ✅ | See notes on KeyPointLabels |
+| **COCO** | ✅ | ✅ | ✅ | ✅ | See [note](#kpl-note) on KeyPointLabels |
 | **CSV** | ✅ | ✅ | ✅ | ✅ | All project types |
 | **JSON** | ✅ | ✅ | ✅ | ✅ | All project types |
 | **JSON_MIN** | ✅ | ✅ | ✅ | ✅ | All project types |
 | **Pascal VOC XML** | ❌ | ✅ | ❌ | ❌ | RectangleLabels only |
 | **TSV** | ✅ | ✅ | ✅ | ✅ | All project types |
-| **YOLO** | ❌ | ✅ | ✅ | ✅ | See notes on KeyPointLabels |
+| **YOLO** | ❌ | ✅ | ✅ | ✅ | See [note](#kpl-note) on KeyPointLabels |
 
 
 ### ASR_MANIFEST
@@ -153,9 +153,9 @@ A popular machine learning format used by the [COCO dataset](http://cocodataset.
 !!! note "BrushLabels"
     For annotations with BrushLabels, the BrushLabels masks are automatically converted to polygons on export.  
 
-<br/>
+<br />
 
-{% details <b>KeyPointLabels Export Support</b> %}
+{% details <b id="kpl-note">KeyPointLabels Export Support</b> %}
 
 If using `KeyPointLabels`, you will need to add the following to your labeling config:
 
