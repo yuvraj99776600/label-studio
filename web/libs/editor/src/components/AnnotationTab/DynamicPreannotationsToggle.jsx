@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Space } from "../../common/Space/Space";
 import { Toggle } from "@humansignal/ui";
 import ToolsManager from "../../tools/Manager";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import "./DynamicPreannotationsToggle.scss";
 
 export const DynamicPreannotationsToggle = inject("store")(
@@ -15,8 +15,8 @@ export const DynamicPreannotationsToggle = inject("store")(
     }, [enabled]);
 
     return enabled ? (
-      <div className={cn("dynamic-preannotations").toClassName()}>
-        <div className={cn("dynamic-preannotations").elem("wrapper").toClassName()}>
+      <Block name="dynamic-preannotations">
+        <Elem name="wrapper">
           <Space spread>
             <Toggle
               checked={store.autoAnnotation}
@@ -32,8 +32,8 @@ export const DynamicPreannotationsToggle = inject("store")(
               label="Auto-Annotation"
             />
           </Space>
-        </div>
-      </div>
+        </Elem>
+      </Block>
     ) : null;
   }),
 );

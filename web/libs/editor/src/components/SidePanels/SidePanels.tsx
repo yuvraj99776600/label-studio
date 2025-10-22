@@ -3,7 +3,7 @@
 
 import { observer } from "mobx-react";
 import { type CSSProperties, type FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import { DetailsPanel } from "./DetailsPanel/DetailsPanel";
 import { OutlinerPanel } from "./OutlinerPanel/OutlinerPanel";
 
@@ -483,30 +483,24 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
 
   return (
     <SidePanelsContext.Provider value={contextValue}>
-      <div
+      <Block
         ref={(el: HTMLDivElement | null) => {
           if (el) {
             rootRef.current = el;
             setViewportSizeMatch(el.clientWidth <= maxWindowWidth);
           }
         }}
-        className={cn("sidepanels")
-          .mod({ collapsed: sidepanelsCollapsed, newLabelingUI: isFF(FF_DEV_3873) })
-          .toClassName()}
+        name="sidepanels"
         style={{
           ...padding,
         }}
+        mod={{ collapsed: sidepanelsCollapsed, newLabelingUI: isFF(FF_DEV_3873) }}
       >
         {initialized && (
           <>
-            <div
-              className={cn("sidepanels")
-                .elem("content")
-                .mod({ resizing: resizing || positioning })
-                .toClassName()}
-            >
+            <Elem name="content" mod={{ resizing: resizing || positioning }}>
               {children}
-            </div>
+            </Elem>
             {panelsHidden !== true && (
               <>
                 {Object.entries(panels).map(([key, panel]) => {
@@ -517,22 +511,16 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
                   }
 
                   return (
-                    <div
-                      key={key}
-                      className={cn("sidepanels")
-                        .elem("wrapper")
-                        .mod({ align: key, snap: snap === key && snap !== undefined })
-                        .toClassName()}
-                    >
+                    <Elem key={key} name="wrapper" mod={{ align: key, snap: snap === key && snap !== undefined }}>
                       {content}
-                    </div>
+                    </Elem>
                   );
                 })}
               </>
             )}
           </>
         )}
-      </div>
+      </Block>
     </SidePanelsContext.Provider>
   );
 };

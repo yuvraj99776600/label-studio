@@ -1,5 +1,5 @@
 import { type ChangeEvent, type FC, forwardRef, type KeyboardEvent, useCallback, useMemo, useState } from "react";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import { Select } from "@humansignal/ui";
 import { WithHotkey } from "../Hotkey/WithHotkey";
 import "./Pagination.scss";
@@ -66,15 +66,15 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
     }, [pageSizeOptions]);
 
     return (
-      <div className={cn("pagination").mod({ size, outline, align, noPadding, disabled }).toClassName()}>
-        <div className={cn("pagination").elem("navigation").toClassName()}>
+      <Block name="pagination" mod={{ size, outline, align, noPadding, disabled }}>
+        <Elem name="navigation">
           <>
             <NavigationButton
               mod={["arrow-left", "arrow-left-double"]}
               onClick={() => onChange?.(1)}
               disabled={currentPage === 1 || disabled}
             />
-            <div className={cn("pagination").elem("divider").toClassName()} />
+            <Elem name="divider" />
           </>
           <NavigationButton
             mod={["arrow-left"]}
@@ -82,7 +82,7 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
             hotkey={hotkey?.prev}
             disabled={currentPage === 1 || disabled}
           />
-          <div className={cn("pagination").elem("input").toClassName()}>
+          <Elem name="input">
             {inputMode ? (
               <input
                 type="text"
@@ -116,8 +116,8 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
                 }}
               />
             ) : (
-              <div
-                className={cn("pagination").elem("page-indicator").toClassName()}
+              <Elem
+                name="page-indicator"
                 onClick={() => {
                   setInputMode(true);
                 }}
@@ -128,9 +128,9 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
                     /*  */
                   }}
                 />
-              </div>
+              </Elem>
             )}
-          </div>
+          </Elem>
           <NavigationButton
             mod={["arrow-right"]}
             onClick={() => onChange?.(currentPage + 1)}
@@ -138,20 +138,20 @@ export const Pagination: FC<PaginationProps> = forwardRef<any, PaginationProps>(
             hotkey={hotkey?.next}
           />
           <>
-            <div className={cn("pagination").elem("divider").toClassName()} />
+            <Elem name="divider" />
             <NavigationButton
               mod={["arrow-right", "arrow-right-double"]}
               onClick={() => onChange?.(totalPages)}
               disabled={currentPage === totalPages || disabled}
             />
           </>
-        </div>
+        </Elem>
         {pageSizeSelectable && (
-          <div className={cn("pagination").elem("page-size").toClassName()}>
+          <Elem name="page-size">
             <Select value={pageSize} onChange={handleChangeSelect} options={options} />
-          </div>
+          </Elem>
         )}
-      </div>
+      </Block>
     );
   },
 );
@@ -174,7 +174,7 @@ const NavigationButton: FC<NavigationButtonProps> = ({ mod, disabled, hotkey, on
 
   return (
     <WithHotkey binging={hotkey as HotkeyList}>
-      <div className={cn("pagination").elem("btn").mod(buttonMod).toClassName()} onClick={actionHandler} />
+      <Elem name="btn" mod={buttonMod} onClick={actionHandler} />
     </WithHotkey>
   );
 };

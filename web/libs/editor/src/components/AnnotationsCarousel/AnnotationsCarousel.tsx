@@ -1,7 +1,7 @@
 import { Button, IconChevronLeft, IconChevronRight } from "@humansignal/ui";
 import { observer } from "mobx-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import { clamp, sortAnnotations } from "../../utils/utilities";
 import { AnnotationButton } from "./AnnotationButton";
 import "./AnnotationsCarousel.scss";
@@ -62,14 +62,13 @@ export const AnnotationsCarousel = observer(({ store, annotationStore }: Annotat
   }, [annotationStore, JSON.stringify(annotationStore.predictions), JSON.stringify(annotationStore.annotations)]);
 
   return enableAnnotations || enablePredictions || enableCreateAnnotation ? (
-    <div
-      className={cn("annotations-carousel")
-        .mod({ scrolled: currentPosition > 0 })
-        .toClassName()}
-      style={{ "--carousel-left": `${currentPosition}px` } as any}
+    <Block
+      name="annotations-carousel"
+      mod={{ scrolled: currentPosition > 0 }}
+      style={{ "--carousel-left": `${currentPosition}px` }}
     >
-      <div ref={containerRef as any} className={cn("annotations-carousel").elem("container").toClassName()}>
-        <div ref={carouselRef as any} className={cn("annotations-carousel").elem("carosel").toClassName()}>
+      <Elem ref={containerRef} name="container">
+        <Elem ref={carouselRef} name="carosel">
           {sortAnnotations(entities).map((entity) => (
             <AnnotationButton
               key={entity?.id}
@@ -84,10 +83,10 @@ export const AnnotationsCarousel = observer(({ store, annotationStore }: Annotat
               annotationStore={annotationStore}
             />
           ))}
-        </div>
-      </div>
+        </Elem>
+      </Elem>
       {(!isLeftDisabled || !isRightDisabled) && (
-        <div className={cn("annotations-carousel").elem("carousel-controls").toClassName()}>
+        <Elem name="carousel-controls">
           <Button
             disabled={isLeftDisabled}
             aria-label="Carousel left"
@@ -106,8 +105,8 @@ export const AnnotationsCarousel = observer(({ store, annotationStore }: Annotat
           >
             <IconChevronRight />
           </Button>
-        </div>
+        </Elem>
       )}
-    </div>
+    </Block>
   ) : null;
 });

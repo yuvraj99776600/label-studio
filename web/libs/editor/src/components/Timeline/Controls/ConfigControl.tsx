@@ -2,7 +2,7 @@ import type React from "react";
 import { type FC, type MouseEvent, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Toggle } from "@humansignal/ui";
-import { cn } from "../../../utils/bem";
+import { Block, Elem } from "../../../utils/bem";
 
 import { IconConfig } from "@humansignal/icons";
 import { TimelineContext } from "../Context";
@@ -156,32 +156,33 @@ export const ConfigControl: FC<ConfigControlProps> = ({
 
   const renderLayerToggles = () => {
     return (
-      <div className={cn("audio-config").elem("buttons").toClassName()}>
-        <div className={cn("audio-config").elem("menu-button").toClassName()} onClick={handleSetTimeline}>
+      <Elem name={"buttons"}>
+        <Elem name="menu-button" onClick={handleSetTimeline}>
           {isTimeline ? "Hide" : "Show"} timeline
-        </div>
-        <div className={cn("audio-config").elem("menu-button").toClassName()} onClick={handleSetAudioWave}>
+        </Elem>
+        <Elem name="menu-button" onClick={handleSetAudioWave}>
           {isAudioWave ? "Hide" : "Show"} audio wave
-        </div>
+        </Elem>
         {isFF(FF_AUDIO_SPECTROGRAMS) && (
-          <div className={cn("audio-config").elem("menu-button").toClassName()} onClick={handleSetSpectrogram}>
+          <Elem name="menu-button" onClick={handleSetSpectrogram}>
             {isSpectrogram ? "Hide" : "Show"} spectrogram
-          </div>
+          </Elem>
         )}
-      </div>
+      </Elem>
     );
   };
 
   const renderModal = () => {
     const modalJSX = (
-      <div
-        className={cn("audio-config").elem("modal").toClassName()}
+      <Elem
+        block="audio-config"
+        name="modal"
         ref={modalRef}
         onClick={(e: MouseEvent<HTMLDivElement>) => e.stopPropagation()}
         style={{ opacity: 0, position: "fixed" }}
       >
-        <div className={cn("audio-config").elem("scroll-content").toClassName()}>
-          <div className={cn("audio-config").elem("section-header").toClassName()}>Playback Settings</div>
+        <Elem name="scroll-content">
+          <Elem name="section-header">Playback Settings</Elem>
           <Slider
             min={MIN_SPEED}
             max={MAX_SPEED}
@@ -200,47 +201,43 @@ export const ConfigControl: FC<ConfigControlProps> = ({
             info={"Increase or decrease the appearance of amplitude"}
             onChange={handleChangeAmp}
           />
-          <div className={cn("audio-config").elem("toggle").toClassName()}>
+          <Elem name="toggle">
             <Toggle
               checked={settings?.loopRegion}
               onChange={(e) => changeSetting?.("loopRegion", e.target.checked)}
               label="Loop Regions"
               labelProps={{ size: "small" }}
             />
-          </div>
-          <div className={cn("audio-config").elem("toggle").toClassName()}>
+          </Elem>
+          <Elem name="toggle">
             <Toggle
               checked={settings?.autoPlayNewSegments}
               onChange={(e) => changeSetting?.("autoPlayNewSegments", e.target.checked)}
               label="Auto-play New Regions"
               labelProps={{ size: "small" }}
             />
-          </div>
+          </Elem>
 
           {isFF(FF_AUDIO_SPECTROGRAMS) && (
             <>
-              <div className={cn("audio-config").elem("section-header").toClassName()}>Spectrogram Settings</div>
+              <Elem name="section-header">Spectrogram Settings</Elem>
               <SpectrogramControl waveform={waveform} />
             </>
           )}
-        </div>
+        </Elem>
         {renderLayerToggles()}
-      </div>
+      </Elem>
     );
 
     return typeof document !== "undefined" ? createPortal(modalJSX, document.body) : null;
   };
 
   return (
-    <div
-      className={cn("audio-config").toClassName()}
-      ref={buttonRef as any}
-      onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}
-    >
+    <Block name="audio-config" ref={buttonRef} onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
       <ControlButton look={configModal ? "filled" : undefined} onClick={onSetModal} aria-label="Audio settings">
         {<IconConfig />}
       </ControlButton>
       {configModal && renderModal()}
-    </div>
+    </Block>
   );
 };

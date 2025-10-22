@@ -17,7 +17,7 @@ import {
 } from "@humansignal/icons";
 import { Tooltip, Userpic } from "@humansignal/ui";
 import { Space } from "../../common/Space/Space";
-import { cn } from "../../utils/bem";
+import { Block, cn, Elem } from "../../utils/bem";
 import { humanDateDiff, userDisplayName } from "../../utils/utilities";
 import { EmptyState } from "../SidePanels/Components/EmptyState";
 import "./AnnotationHistory.scss";
@@ -78,17 +78,17 @@ const DraftState: FC<{
       date={annotation.draftSaved}
       extra={
         annotation.isDraftSaving ? (
-          <div className={cn("annotation-history").elem("saving").toClassName()}>
-            <div className={cn("annotation-history").elem("spin").toClassName()} />
-          </div>
+          <Elem name="saving">
+            <Elem name="spin" />
+          </Elem>
         ) : hasUnsavedChanges ? (
-          <div className={cn("annotation-history").elem("saving").toClassName()}>
-            <div className={cn("annotation-history").elem("dot").toClassName()} />
-          </div>
+          <Elem name="saving">
+            <Elem name="dot" />
+          </Elem>
         ) : hasChanges ? (
-          <div className={cn("annotation-history").elem("saving").toClassName()}>
-            <IconCheck className={cn("annotation-history").elem("saved").toClassName()} />
-          </div>
+          <Elem name="saving">
+            <Elem name="saved" component={IconCheck} />
+          </Elem>
         ) : null
       }
       inline={inline}
@@ -141,17 +141,17 @@ const AnnotationHistoryComponent: FC<any> = ({
   // If we should show empty state, render it
   if (shouldShowEmptyState) {
     return (
-      <div className={cn("annotation-history").mod({ inline, empty: true }).toClassName()}>
+      <Block name="annotation-history" mod={{ inline, empty: true }}>
         {sectionHeader && (
           <div className={`${cn("annotation-history").elem("section-head").toString()} sr-only`}>{sectionHeader}</div>
         )}
         {renderEmptyState ? renderEmptyState() : defaultEmptyState}
-      </div>
+      </Block>
     );
   }
 
   return (
-    <div className={cn("annotation-history").mod({ inline }).toClassName()}>
+    <Block name="annotation-history" mod={{ inline }}>
       {sectionHeader && (
         <div className={`${cn("annotation-history").elem("section-head").toString()} sr-only`}>{sectionHeader}</div>
       )}
@@ -194,7 +194,7 @@ const AnnotationHistoryComponent: FC<any> = ({
             />
           );
         })}
-    </div>
+    </Block>
   );
 };
 
@@ -264,42 +264,44 @@ const HistoryItemComponent: FC<{
   );
 
   return (
-    <div className={cn("history-item").mod({ inline, selected, disabled }).toClassName()} onClick={handleClick}>
+    <Block name="history-item" mod={{ inline, selected, disabled }} onClick={handleClick}>
       <Space spread size="medium" truncated>
         <Space size="small" truncated>
-          <Userpic
-            className={cn("history-item").elem("userpic").mod({ prediction: isPrediction }).toClassName()}
+          <Elem
+            tag={Userpic}
             user={user}
+            name="userpic"
             showUsername
             username={isPrediction ? entity.createdBy : null}
+            mod={{ prediction: isPrediction }}
           >
             {isPrediction && <IconSparks style={{ width: 16, height: 16 }} />}
-          </Userpic>
-          <span className={cn("history-item").elem("name").toClassName()}>
+          </Elem>
+          <Elem name="name" tag="span">
             {isPrediction ? entity.createdBy : userDisplayName(user)}
-          </span>
+          </Elem>
         </Space>
 
         {!infoIsHidden && (
           <Space size="small">
-            {extra && <div className={cn("history-item").elem("date").toClassName()}>{extra}</div>}
+            {extra && <Elem name="date">{extra}</Elem>}
             {date && (
-              <div className={cn("history-item").elem("date").toClassName()}>
+              <Elem name="date">
                 <Tooltip alignment="top-right" title={new Date(date).toLocaleString()}>
                   <span>{humanDateDiff(date)}</span>
                 </Tooltip>
-              </div>
+              </Elem>
             )}
           </Space>
         )}
       </Space>
       {(reason || comment) && (
-        <Space className={cn("history-item").elem("action").toClassName()} size="small">
+        <Elem name="action" tag={Space} size="small">
           {acceptedState && <HistoryIcon type={acceptedState} />}
           <HistoryComment comment={comment} reason={reason} />
-        </Space>
+        </Elem>
       )}
-    </div>
+    </Block>
   );
 };
 
@@ -323,26 +325,24 @@ const HistoryComment: FC<{
   }, []);
 
   return (
-    <div className={cn("history-item").elem("comment").mod({ collapsed }).toClassName()} ref={commentRef as any}>
-      <div
-        className={cn("history-item").elem("comment-content").toClassName()}
-        data-reason={`${reason}${comment ? ": " : ""}`}
-      >
+    <Elem name="comment" ref={commentRef} mod={{ collapsed }}>
+      <Elem name="comment-content" data-reason={`${reason}${comment ? ": " : ""}`}>
         {comment}
-      </div>
+      </Elem>
 
       {collapsible && (
-        <div
-          className={cn("history-item").elem("collapse-comment").mod({ collapsed }).toClassName()}
-          onClick={(e: any) => {
+        <Elem
+          name="collapse-comment"
+          mod={{ collapsed }}
+          onClick={(e: MouseEvent) => {
             e.stopPropagation();
             setCollapsed((v) => !v);
           }}
         >
           {collapsed ? "Show more" : "Show less"}
-        </div>
+        </Elem>
       )}
-    </div>
+    </Elem>
   );
 };
 
@@ -376,7 +376,7 @@ const HistoryIcon: FC<{ type: HistoryItemType }> = ({ type }) => {
     }
   }, [type]);
 
-  return icon && <div className={cn("history-item").elem("history-icon").toClassName()}>{icon}</div>;
+  return icon && <Elem name="history-icon">{icon}</Elem>;
 };
 
 const HistoryItem = observer(HistoryItemComponent);

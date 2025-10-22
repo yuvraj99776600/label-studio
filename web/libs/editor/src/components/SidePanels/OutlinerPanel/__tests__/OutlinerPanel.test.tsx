@@ -3,24 +3,16 @@ import { OutlinerPanel } from "../OutlinerPanel";
 
 // Mock the dependencies
 jest.mock("../../../../utils/bem", () => ({
-  cn: (block: string) => ({
-    elem: (elem: string) => ({
-      toClassName: () => `dm-${block}__${elem}`,
-      mod: (mods: any) => ({
-        toClassName: () => `dm-${block}__${elem}`,
-      }),
-    }),
-    mod: (mods: any) => ({
-      toClassName: () => `dm-${block}`,
-      mix: (...args: any[]) => ({
-        toClassName: () => `dm-${block}`,
-      }),
-    }),
-    toClassName: () => `dm-${block}`,
-    mix: (...args: any[]) => ({
-      toClassName: () => `dm-${block}`,
-    }),
-  }),
+  Block: ({ children, ...props }: any) => (
+    <div data-testid="block" {...props}>
+      {children}
+    </div>
+  ),
+  Elem: ({ children, ...props }: any) => (
+    <div data-testid="elem" {...props}>
+      {children}
+    </div>
+  ),
 }));
 
 jest.mock("../../PanelBase", () => ({
@@ -171,7 +163,7 @@ describe("OutlinerPanel", () => {
 
       expect(screen.getByTestId("empty-state")).toBeInTheDocument();
       expect(screen.queryByTestId("outliner-tree")).not.toBeInTheDocument();
-      expect(screen.queryByText("All regions hidden")).not.toBeInTheDocument(); // No filters-info message
+      expect(screen.queryByTestId("block")).not.toBeInTheDocument(); // No filters-info block
     });
 
     it("does not render empty state when regions exist", () => {
@@ -198,9 +190,15 @@ describe("OutlinerPanel", () => {
 
       render(<OutlinerPanel {...defaultProps} regions={regionsAllHidden} />);
 
+      expect(screen.getByTestId("block")).toBeInTheDocument();
       expect(screen.getByTestId("icon-info")).toBeInTheDocument();
-      expect(screen.getByText("All regions hidden")).toBeInTheDocument();
-      expect(screen.getByText("Adjust or remove the filters to view")).toBeInTheDocument();
+      const titleElem = screen.getAllByTestId("elem").find((elem) => elem.textContent === "All regions hidden");
+      expect(titleElem).toBeInTheDocument();
+
+      const descriptionElem = screen
+        .getAllByTestId("elem")
+        .find((elem) => elem.textContent === "Adjust or remove the filters to view");
+      expect(descriptionElem).toBeInTheDocument();
     });
 
     it("shows hidden regions count in footer when some regions are filtered", () => {

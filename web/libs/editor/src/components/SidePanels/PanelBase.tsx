@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import { IconArrowLeft, IconArrowRight, IconOutlinerCollapse, IconOutlinerExpand } from "@humansignal/icons";
 
 import "./PanelBase.scss";
@@ -310,66 +310,42 @@ export const PanelBase: FC<PanelBaseProps> = ({
   );
 
   return (
-    <div
-      ref={panelRef as any}
-      className={cn("panel").mix(name).mod(mods).toClassName()}
-      style={{ ...style, ...coordinates }}
-    >
-      <div className={cn("panel").elem("content").toClassName()}>
+    <Block ref={panelRef} name="panel" mix={name} mod={mods} style={{ ...style, ...coordinates }}>
+      <Elem name="content">
         {!locked && (
-          <div
-            ref={headerRef as any}
-            className={cn("panel").elem("header").toClassName()}
-            onClick={!detached ? handleExpand : undefined}
-          >
-            {(visible || detached) && <div className={cn("panel").elem("title").toClassName()}>{title}</div>}
+          <Elem ref={headerRef} name="header" onClick={!detached ? handleExpand : undefined}>
+            {(visible || detached) && <Elem name="title">{title}</Elem>}
 
-            <div
-              className={cn("panel").elem("toggle").mod({ enabled: visible }).toClassName()}
+            <Elem
+              name="toggle"
+              mod={{ enabled: visible }}
               onClick={detached && !visible ? handleExpand : handleCollapse}
               data-tooltip={tooltipText}
             >
               {currentIcon}
-            </div>
-          </div>
+            </Elem>
+          </Elem>
         )}
         {visible && (
-          <div className={cn("panel").elem("body").toClassName()}>
-            <div
-              className={cn(name)
-                .mix(...(Array.isArray(mix) ? mix : [mix]))
-                .toClassName()}
-            >
+          <Elem name="body">
+            <Block name={name} mix={mix}>
               {children}
-            </div>
-          </div>
+            </Block>
+          </Elem>
         )}
-      </div>
+      </Elem>
 
       {visible && !positioning && !locked && (
-        <div
-          className={cn("panel")
-            .elem("resizers")
-            .mod({ locked: positioning || locked })
-            .toClassName()}
-          ref={resizerRef as any}
-        >
+        <Elem name="resizers" ref={resizerRef} mod={{ locked: positioning || locked }}>
           {resizers.map((res) => {
             const shouldRender = ((res === "left" || res === "right") && alignment !== res) || detached || detached;
 
             return shouldRender ? (
-              <div
-                key={res}
-                className={cn("panel")
-                  .elem("resizer")
-                  .mod({ drag: res === resizing })
-                  .toClassName()}
-                data-resize={res}
-              />
+              <Elem key={res} name="resizer" mod={{ drag: res === resizing }} data-resize={res} />
             ) : null;
           })}
-        </div>
+        </Elem>
       )}
-    </div>
+    </Block>
   );
 };

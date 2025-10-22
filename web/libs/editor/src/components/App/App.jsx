@@ -25,7 +25,7 @@ import "../../tags/Custom";
  */
 import { Space } from "../../common/Space/Space";
 import { Button } from "@humansignal/ui";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
 import {
   FF_BULK_ANNOTATION,
@@ -74,24 +74,24 @@ class App extends Component {
 
   renderSuccess() {
     return (
-      <div className={cn("editor").toClassName()}>
+      <Block name="editor">
         <Result status="success" title={getEnv(this.props.store).messages.DONE} />
-      </div>
+      </Block>
     );
   }
 
   renderNoAnnotation() {
     return (
-      <div className={cn("editor").toClassName()}>
+      <Block name="editor">
         <Result status="success" title={getEnv(this.props.store).messages.NO_COMP_LEFT} />
-      </div>
+      </Block>
     );
   }
 
   renderNothingToLabel(store) {
     return (
-      <div
-        className={cn("editor").toClassName()}
+      <Block
+        name="editor"
         style={{
           display: "flex",
           alignItems: "center",
@@ -101,7 +101,7 @@ class App extends Component {
         }}
       >
         <Result status="success" title={getEnv(this.props.store).messages.NO_NEXT_TASK} />
-        <div className={cn("sub__result").toClassName()}>All tasks in the queue have been completed</div>
+        <Block name="sub__result">All tasks in the queue have been completed</Block>
         {store.taskHistory.length > 0 && (
           <Button
             onClick={(e) => store.prevTask(e, true)}
@@ -112,28 +112,26 @@ class App extends Component {
             Go to Previous Task
           </Button>
         )}
-      </div>
+      </Block>
     );
   }
 
   renderNoAccess() {
     return (
-      <div className={cn("editor").toClassName()}>
+      <Block name="editor">
         <Result status="warning" title={getEnv(this.props.store).messages.NO_ACCESS} />
-      </div>
+      </Block>
     );
   }
 
   renderConfigValidationException(store) {
     return (
-      <div className={cn("main-view").toClassName()}>
-        <div className={cn("main-view").elem("annotation").toClassName()}>
+      <Block name="main-view">
+        <Elem name="annotation">
           <TreeValidation errors={this.props.store.annotationStore.validation} />
-        </div>
-        {!isFF(FF_DEV_3873) && store.hasInterface("infobar") && (
-          <div className={cn("main-view").elem("infobar").toClassName()}>Task #{store.task.id}</div>
-        )}
-      </div>
+        </Elem>
+        {!isFF(FF_DEV_3873) && store.hasInterface("infobar") && <Elem name="infobar">Task #{store.task.id}</Elem>}
+      </Block>
     );
   }
 
@@ -145,18 +143,14 @@ class App extends Component {
     if (as.viewingAll) return this.renderAllAnnotations();
 
     return (
-      <div
-        key={(as.selectedHistory ?? as.selected)?.id}
-        className={cn("main-view").toClassName()}
-        onScrollCapture={this._notifyScroll}
-      >
-        <div className={cn("main-view").elem("annotation").toClassName()}>
+      <Block key={(as.selectedHistory ?? as.selected)?.id} name="main-view" onScrollCapture={this._notifyScroll}>
+        <Elem name="annotation">
           {<Annotation root={root} annotation={as.selected} />}
           {this.renderRelations(as.selected)}
           {isFF(FF_PER_FIELD_COMMENTS) && this.renderCommentsOverlay(as.selected)}
-        </div>
+        </Elem>
         {!isFF(FF_DEV_3873) && getRoot(as).hasInterface("infobar") && this._renderInfobar(as)}
-      </div>
+      </Block>
     );
   }
 
@@ -164,11 +158,11 @@ class App extends Component {
     const { id, queue } = getRoot(as).task;
 
     return (
-      <Space className={cn("main-view").elem("infobar").toClassName()} size="small">
+      <Elem name="infobar" tag={Space} size="small">
         <span>Task #{id}</span>
 
         {queue && <span>{queue}</span>}
-      </Space>
+      </Elem>
     );
   }
 
@@ -227,23 +221,20 @@ class App extends Component {
 
     // tags can be styled in config when user is awaiting for suggestions from ML backend
     const mainContent = (
-      <div
-        className={cn("main-content")
-          .mix(...(store.awaitingSuggestions ? ["requesting"] : []))
-          .toClassName()}
-      >
+      <Block name="main-content" mix={store.awaitingSuggestions ? ["requesting"] : []}>
         {as.validation === null
           ? this._renderUI(as.selectedHistory?.root ?? root, as)
           : this.renderConfigValidationException(store)}
-      </div>
+      </Block>
     );
 
     const isBulkMode = isFF(FF_BULK_ANNOTATION) && !isSelfServe() && store.hasInterface("annotation:bulk");
     const newUIEnabled = isFF(FF_DEV_3873);
 
     return (
-      <div
-        className={cn("editor").mod({ fullscreen: settings.fullscreen }).toClassName()}
+      <Block
+        name="editor"
+        mod={{ fullscreen: settings.fullscreen }}
         ref={isFF(FF_LSDV_4620_3_ML) ? reactCleaner(this) : null}
       >
         <Settings store={store} />
@@ -269,14 +260,13 @@ class App extends Component {
             )}
 
             {isDefined(store) && store.hasInterface("topbar") && <TopBar store={store} />}
-            <div
-              className={cn("wrapper")
-                .mod({
-                  viewAll: viewingAll,
-                  bsp: settings.effectiveBottomSidePanel,
-                  showingBottomBar: newUIEnabled,
-                })
-                .toClassName()}
+            <Block
+              name="wrapper"
+              mod={{
+                viewAll: viewingAll,
+                bsp: settings.effectiveBottomSidePanel,
+                showingBottomBar: newUIEnabled,
+              }}
             >
               {newUIEnabled ? (
                 isBulkMode || !store.hasInterface("side-column") ? (
@@ -307,12 +297,12 @@ class App extends Component {
                   {mainContent}
                 </SidePanels>
               )}
-            </div>
+            </Block>
             <ToastViewport />
           </ToastProvider>
         </Provider>
         {store.hasInterface("debug") && <Debug store={store} />}
-      </div>
+      </Block>
     );
   }
 

@@ -1,5 +1,5 @@
 import type { CSSProperties, FC } from "react";
-import { cn } from "../../utils/bem";
+import { Block } from "../../utils/bem";
 
 import "./Hint.scss";
 
@@ -14,9 +14,9 @@ interface HintProps {
  */
 const Hint: FC<HintProps> = (props) => {
   return (
-    <sup className={cn("hint").mix(props.className).toClassName()} data-copy={props.copy} style={props.style}>
+    <Block name="hint" tag="sup" className={props.className} data-copy={props.copy} style={props.style}>
       {props.children}
-    </sup>
+    </Block>
   );
 };
 

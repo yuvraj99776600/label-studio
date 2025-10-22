@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { IconViewAll, IconPlus } from "@humansignal/icons";
 import { Button } from "@humansignal/ui";
 import { ff } from "@humansignal/core";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
 import { FF_BULK_ANNOTATION, FF_DEV_3873, isFF } from "../../utils/feature-flags";
 import { AnnotationsCarousel } from "../AnnotationsCarousel/AnnotationsCarousel";
@@ -26,13 +26,9 @@ export const TopBar = observer(({ store }) => {
   if (isFF(FF_DEV_3873) && isBulkMode) return null;
 
   return store ? (
-    <div
-      className={cn("topbar")
-        .mod({ newLabelingUI: isFF(FF_DEV_3873) })
-        .toClassName()}
-    >
+    <Block name="topbar" mod={{ newLabelingUI: isFF(FF_DEV_3873) }}>
       {isFF(FF_DEV_3873) ? (
-        <div className={cn("topbar").elem("group").toClassName()}>
+        <Elem name="group">
           <CurrentTask store={store} />
           {store.hasInterface("annotations:view-all") && (
             <Button
@@ -74,33 +70,30 @@ export const TopBar = observer(({ store }) => {
               commentStore={store.commentStore}
             />
           )}
-        </div>
+        </Elem>
       ) : (
         <>
-          <div className={cn("topbar").elem("group").toClassName()}>
+          <Elem name="group">
             {!isBulkMode && <CurrentTask store={store} />}
             {!isViewAll && !isBulkMode && (
               <Annotations store={store} annotationStore={store.annotationStore} commentStore={store.commentStore} />
             )}
             <Actions store={store} />
-          </div>
-          <div className={cn("topbar").elem("group").toClassName()}>
+          </Elem>
+          <Elem name="group">
             {!isViewAll && (
-              <div className={cn("topbar").elem("section").toClassName()}>
+              <Elem name="section">
                 <DynamicPreannotationsToggle />
-              </div>
+              </Elem>
             )}
             {!isViewAll && store.hasInterface("controls") && (store.hasInterface("review") || !isPrediction) && (
-              <div
-                className={cn("topbar").elem("section").mod({ flat: true }).toClassName()}
-                style={{ width: 320, boxSizing: "border-box" }}
-              >
+              <Elem name="section" mod={{ flat: true }} style={{ width: 320, boxSizing: "border-box" }}>
                 <Controls annotation={entity} />
-              </div>
+              </Elem>
             )}
-          </div>
+          </Elem>
         </>
       )}
-    </div>
+    </Block>
   ) : null;
 });

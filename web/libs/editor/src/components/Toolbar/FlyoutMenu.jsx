@@ -1,4 +1,4 @@
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import { isDefined } from "../../utils/utilities";
 import { Fragment, useEffect, useState } from "react";
 import { Hotkey } from "../../core/Hotkey";
@@ -18,7 +18,7 @@ const shortcutView = (shortcut) => {
   const combos = sc.split(",").map((s) => s.trim());
 
   return (
-    <div className={cn("flyoutmenu").elem("shortcut").toClassName()}>
+    <Elem name="shortcut">
       {combos.map((combo, index) => {
         const keys = combo.split("+");
 
@@ -26,15 +26,15 @@ const shortcutView = (shortcut) => {
           <Fragment key={`${keys.join("-")}-${index}`}>
             {keys.map((key) => {
               return (
-                <kbd className={cn("flyoutmenu").elem("key").toClassName()} key={key}>
+                <Elem name="key" tag="kbd" key={key}>
                   {keysDictionary[key] ?? key}
-                </kbd>
+                </Elem>
               );
             })}
           </Fragment>
         );
       })}
-    </div>
+    </Elem>
   );
 };
 
@@ -87,28 +87,22 @@ export const FlyoutMenu = ({ items, icon }) => {
   });
 
   return (
-    <div
-      className={cn("flyoutmenu")
-        .mix(isClicked ? "hovered" : "")
-        .toClassName()}
+    <Block
+      name="flyoutmenu"
+      tag="div"
+      className={`${isClicked ? "hovered" : ""}`}
       onClick={(e) => {
         e.stopPropagation();
         setClicked(!isClicked);
       }}
     >
-      <div
-        className={cn("flyoutmenu")
-          .elem("icon")
-          .mix(isClicked ? "isClicked" : "")
-          .toClassName()}
-        title="Zoom presets (click to see options)"
-      >
+      <Elem name="icon" className={`${isClicked ? "isClicked" : ""}`} title="Zoom presets (click to see options)">
         {icon}
-      </div>
-      <div className={cn("tooltips").toClassName()}>
+      </Elem>
+      <Block name="tooltips" tag="div">
         {items.map((childItem, index) => (
-          <div
-            className={cn("tooltips").elem("tooltip").toClassName()}
+          <Elem
+            name="tooltip"
             key={index}
             onClick={(e) => {
               e.stopPropagation();
@@ -116,13 +110,13 @@ export const FlyoutMenu = ({ items, icon }) => {
               setClicked(false);
             }}
           >
-            <div className={cn("tooltips").elem("tooltip-body").toClassName()}>
-              <div className={cn("tooltips").elem("label").toClassName()}>{childItem.label}</div>
+            <Elem name="tooltip-body">
+              <Elem name="label">{childItem.label}</Elem>
               {shortcutView(childItem.shortcut)}
-            </div>
-          </div>
+            </Elem>
+          </Elem>
         ))}
-      </div>
-    </div>
+      </Block>
+    </Block>
   );
 };

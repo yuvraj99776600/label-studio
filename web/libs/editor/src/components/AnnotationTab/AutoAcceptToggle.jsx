@@ -3,7 +3,7 @@ import { inject, observer } from "mobx-react";
 import { IconCheck, IconCross } from "@humansignal/icons";
 import { Button, Toggle } from "@humansignal/ui";
 import { Space } from "../../common/Space/Space";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 
 import "./AutoAcceptToggle.scss";
 
@@ -27,27 +27,31 @@ export const AutoAcceptToggle = injector(
     const loading = store.awaitingSuggestions;
 
     return (
-      <div className={cn("auto-accept").toClassName()}>
+      <Block name="auto-accept">
         {withSuggestions && (
-          <div className={cn("auto-accept").elem("wrapper").mod({ loading }).toClassName()}>
+          <Elem name="wrapper" mod={{ loading }}>
             <Space spread>
               {suggestions.size > 0 ? (
                 <Space size="small">
-                  <div className={cn("auto-accept").elem("info").toClassName()}>
+                  <Elem name="info">
                     {suggestions.size} suggestion{suggestions.size > 0 && "s"}
-                  </div>
-                  <Button
-                    className={cn("auto-accept").elem("action").mod({ type: "reject" }).toClassName()}
+                  </Elem>
+                  <Elem
+                    name="action"
+                    tag={Button}
+                    mod={{ type: "reject" }}
                     onClick={() => annotation.rejectAllSuggestions()}
                   >
                     <IconCross />
-                  </Button>
-                  <Button
-                    className={cn("auto-accept").elem("action").mod({ type: "accept" }).toClassName()}
+                  </Elem>
+                  <Elem
+                    name="action"
+                    tag={Button}
+                    mod={{ type: "accept" }}
                     onClick={() => annotation.acceptAllSuggestions()}
                   >
                     <IconCheck />
-                  </Button>
+                  </Elem>
                 </Space>
               ) : (
                 <Toggle
@@ -57,10 +61,10 @@ export const AutoAcceptToggle = injector(
                 />
               )}
             </Space>
-          </div>
+          </Elem>
         )}
-        {loading && <div className={cn("auto-accept").elem("spinner").toClassName()} />}
-      </div>
+        {loading && <Elem name="spinner" />}
+      </Block>
     );
   }),
 );

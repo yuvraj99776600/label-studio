@@ -1,7 +1,7 @@
 import { Button } from "@humansignal/ui";
 import { IconCopy, IconInfo, IconViewAll, IconTrash, IconSettings } from "@humansignal/icons";
 import { Tooltip } from "@humansignal/ui";
-import { cn } from "../../utils/bem";
+import { Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
 import { FF_BULK_ANNOTATION, isFF } from "../../utils/feature-flags";
 import { GroundTruth } from "../CurrentEntity/GroundTruth";
@@ -22,7 +22,7 @@ export const Actions = ({ store }) => {
   }, [annotationStore]);
 
   return (
-    <div className={cn("topbar").elem("section").toClassName()}>
+    <Elem name="section">
       {store.hasInterface("annotations:view-all") && !isBulkMode && (
         <Tooltip title="Compare all annotations">
           <Button
@@ -125,6 +125,6 @@ export const Actions = ({ store }) => {
           }}
         />
       )}
-    </div>
+    </Elem>
   );
 };

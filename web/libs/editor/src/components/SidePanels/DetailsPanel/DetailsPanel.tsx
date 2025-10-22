@@ -1,6 +1,6 @@
 import { inject, observer } from "mobx-react";
 import type { FC } from "react";
-import { cn } from "../../../utils/bem";
+import { Block, Elem } from "../../../utils/bem";
 import { Comments as CommentsComponent } from "../../Comments/Comments";
 import { AnnotationHistory } from "../../CurrentEntity/AnnotationHistory";
 import { PanelBase, type PanelProps } from "../PanelBase";
@@ -34,9 +34,9 @@ const DetailsComponent: FC<DetailsPanelProps> = ({ currentEntity, regions }) => 
   const selectedRegions = regions.selection;
 
   return (
-    <div className={cn("details-tab").toClassName()}>
+    <Block name="details-tab">
       <Content selection={selectedRegions} currentEntity={currentEntity} />
-    </div>
+    </Block>
   );
 };
 
@@ -49,17 +49,17 @@ const CommentsTab: FC<any> = inject("store")(
     return (
       <>
         {store.hasInterface("annotations:comments") && store.commentStore.isCommentable && (
-          <div className={cn("comments-panel").toClassName()}>
-            <div className={cn("comments-panel").elem("section-tab").toClassName()}>
-              <div className={cn("comments-panel").elem("section-content").toClassName()}>
+          <Block name="comments-panel">
+            <Elem name="section-tab">
+              <Elem name="section-content">
                 <CommentsComponent
                   annotationStore={store.annotationStore}
                   commentStore={store.commentStore}
                   cacheKey={`task.${store.task.id}`}
                 />
-              </div>
-            </div>
-          </div>
+              </Elem>
+            </Elem>
+          </Block>
         )}
       </>
     );
@@ -73,19 +73,17 @@ const RelationsTab: FC<any> = inject("store")(
 
     return (
       <>
-        <div className={cn("relations").toClassName()}>
-          <div className={cn("relations").elem("section-tab").toClassName()}>
+        <Block name="relations">
+          <Elem name="section-tab">
             {hasRelations ? (
               <>
-                <div className={cn("relations").elem("view-control").toClassName()}>
-                  <div className={cn("relations").elem("section-head").toClassName()}>
-                    Relations ({relationStore.size})
-                  </div>
+                <Elem name="view-control">
+                  <Elem name="section-head">Relations ({relationStore.size})</Elem>
                   <RelationsControls relationStore={relationStore} />
-                </div>
-                <div className={cn("relations").elem("section-content").toClassName()}>
+                </Elem>
+                <Elem name="section-content">
                   <RelationsComponent relationStore={relationStore} />
-                </div>
+                </Elem>
               </>
             ) : (
               <EmptyState
@@ -99,8 +97,8 @@ const RelationsTab: FC<any> = inject("store")(
                 }}
               />
             )}
-          </div>
-        </div>
+          </Elem>
+        </Block>
       </>
     );
   }),
@@ -112,8 +110,8 @@ const HistoryTab: FC<any> = inject("store")(
 
     return (
       <>
-        <div className={cn("history").toClassName()}>
-          <div className={cn("history").elem("section-tab").toClassName()}>
+        <Block name="history">
+          <Elem name="section-tab">
             <AnnotationHistory
               inline
               enabled={showAnnotationHistory}
@@ -124,8 +122,8 @@ const HistoryTab: FC<any> = inject("store")(
                 </>
               }
             />
-          </div>
-        </div>
+          </Elem>
+        </Block>
       </>
     );
   }),
@@ -136,8 +134,8 @@ const InfoTab: FC<any> = inject("store")(
     const nothingSelected = !selection || selection.size === 0;
     return (
       <>
-        <div className={cn("info").toClassName()}>
-          <div className={cn("info").elem("section-tab").toClassName()}>
+        <Block name="info">
+          <Elem name="section-tab">
             {nothingSelected ? (
               <EmptyState
                 icon={<IconCursor width={24} height={24} />}
@@ -149,8 +147,8 @@ const InfoTab: FC<any> = inject("store")(
                 <RegionsPanel regions={selection} />
               </>
             )}
-          </div>
-        </div>
+          </Elem>
+        </Block>
       </>
     );
   }),
@@ -162,7 +160,7 @@ const GeneralPanel: FC<any> = inject("store")(
     const showAnnotationHistory = store.hasInterface("annotations:history");
     return (
       <>
-        <div className={cn("details").elem("section").toClassName()}>
+        <Elem name="section">
           <AnnotationHistory
             inline
             enabled={showAnnotationHistory}
@@ -173,27 +171,27 @@ const GeneralPanel: FC<any> = inject("store")(
               </>
             }
           />
-        </div>
-        <div className={cn("details").elem("section").toClassName()}>
-          <div className={cn("details").elem("view-control").toClassName()}>
-            <div className={cn("details").elem("section-head").toClassName()}>Relations ({relationStore.size})</div>
+        </Elem>
+        <Elem name="section">
+          <Elem name="view-control">
+            <Elem name="section-head">Relations ({relationStore.size})</Elem>
             <RelationsControls relationStore={relationStore} />
-          </div>
-          <div className={cn("details").elem("section-content").toClassName()}>
+          </Elem>
+          <Elem name="section-content">
             <RelationsComponent relationStore={relationStore} />
-          </div>
-        </div>
+          </Elem>
+        </Elem>
         {store.hasInterface("annotations:comments") && store.commentStore.isCommentable && (
-          <div className={cn("details").elem("section").toClassName()}>
-            <div className={cn("details").elem("section-head").toClassName()}>Comments</div>
-            <div className={cn("details").elem("section-content").toClassName()}>
+          <Elem name="section">
+            <Elem name="section-head">Comments</Elem>
+            <Elem name="section-content">
               <CommentsComponent
                 annotationStore={store.annotationStore}
                 commentStore={store.commentStore}
                 cacheKey={`task.${store.task.id}`}
               />
-            </div>
-          </div>
+            </Elem>
+          </Elem>
         )}
       </>
     );

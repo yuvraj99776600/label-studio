@@ -9,7 +9,7 @@ import React, {
 } from "react";
 
 import "./TaxonomySearch.scss";
-import { cn } from "../../utils/bem";
+import { Block } from "../../utils/bem";
 import type { AntTaxonomyItem } from "./NewTaxonomy";
 import debounce from "lodash/debounce";
 
@@ -116,9 +116,10 @@ const TaxonomySearch = React.forwardRef<TaxonomySearchRef, TaxonomySearchProps>(
   );
 
   return (
-    <input
-      ref={inputRef as any}
+    <Block
+      ref={inputRef}
       value={inputValue}
+      tag={"input"}
       onChange={(e: ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
         handleSearch(e);
@@ -130,7 +131,6 @@ const TaxonomySearch = React.forwardRef<TaxonomySearchRef, TaxonomySearchProps>(
       placeholder={"Search"}
       data-testid={"taxonomy-search"}
       name={"taxonomy-search-input"}
-      className={cn("taxonomy-search-input").toClassName()}
     />
   );
 });

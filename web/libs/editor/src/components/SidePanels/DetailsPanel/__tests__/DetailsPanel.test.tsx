@@ -4,24 +4,16 @@ import { Relations, Info } from "../DetailsPanel";
 
 // Mock the dependencies
 jest.mock("../../../../utils/bem", () => ({
-  cn: (block: string) => ({
-    elem: (elem: string) => ({
-      toClassName: () => `dm-${block}__${elem}`,
-      mod: (mods: any) => ({
-        toClassName: () => `dm-${block}__${elem}`,
-      }),
-    }),
-    mod: (mods: any) => ({
-      toClassName: () => `dm-${block}`,
-      mix: (...args: any[]) => ({
-        toClassName: () => `dm-${block}`,
-      }),
-    }),
-    toClassName: () => `dm-${block}`,
-    mix: (...args: any[]) => ({
-      toClassName: () => `dm-${block}`,
-    }),
-  }),
+  Block: ({ children, ...props }: any) => (
+    <div data-testid="block" {...props}>
+      {children}
+    </div>
+  ),
+  Elem: ({ children, ...props }: any) => (
+    <div data-testid="elem" {...props}>
+      {children}
+    </div>
+  ),
 }));
 
 jest.mock("../../../Comments/Comments", () => ({
@@ -156,7 +148,9 @@ describe("DetailsPanel", () => {
       it("does not render relations count header when no relations exist", () => {
         render(<Relations currentEntity={mockCurrentEntityWithoutRelations} />);
 
-        expect(screen.queryByText(/Relations \(/)).not.toBeInTheDocument();
+        const allElems = screen.getAllByTestId("elem");
+        const relationsCountElem = allElems.find((elem) => elem.textContent?.includes("Relations ("));
+        expect(relationsCountElem).toBeUndefined();
       });
     });
 
@@ -177,7 +171,9 @@ describe("DetailsPanel", () => {
       it("renders relations count in header when relations exist", () => {
         render(<Relations currentEntity={mockCurrentEntityWithRelations} />);
 
-        expect(screen.getByText("Relations (3)")).toBeInTheDocument();
+        const allElems = screen.getAllByTestId("elem");
+        const relationsCountElem = allElems.find((elem) => elem.textContent === "Relations (3)");
+        expect(relationsCountElem).toBeInTheDocument();
       });
     });
   });

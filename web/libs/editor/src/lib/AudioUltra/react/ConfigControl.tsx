@@ -1,7 +1,7 @@
 import type React from "react";
 import { type FC, type MouseEvent, useContext, useEffect, useState } from "react";
 import { Toggle } from "@humansignal/ui";
-import { cn } from "../../../utils/bem";
+import { Block, Elem } from "../../../utils/bem";
 import { IconConfig } from "@humansignal/ui";
 import { TimelineContext } from "../../../components/Timeline/Context";
 import { ControlButton } from "../../../components/Timeline/Controls";
@@ -80,20 +80,20 @@ export const ConfigControl: FC<ConfigControlProps> = ({
 
   const renderLayerToggles = () => {
     return (
-      <div className={cn("audio-config").elem("buttons").toClassName()}>
-        <div className={cn("audio-config").elem("menu-button").toClassName()} onClick={handleSetTimeline}>
+      <Elem name={"buttons"}>
+        <Elem name="menu-button" onClick={handleSetTimeline}>
           {isTimeline ? "Hide" : "Show"} timeline
-        </div>
-        <div className={cn("audio-config").elem("menu-button").toClassName()} onClick={handleSetAudioWave}>
+        </Elem>
+        <Elem name="menu-button" onClick={handleSetAudioWave}>
           {isAudioWave ? "Hide" : "Show"} audio wave
-        </div>
-      </div>
+        </Elem>
+      </Elem>
     );
   };
 
   const renderModal = () => {
     return (
-      <div className={cn("audio-config").elem("modal").toClassName()}>
+      <Elem name="modal">
         <Slider
           min={MIN_SPEED}
           max={MAX_SPEED}
@@ -112,35 +112,32 @@ export const ConfigControl: FC<ConfigControlProps> = ({
           info={"Increase or decrease the appearance of amplitude"}
           onChange={handleChangeAmp}
         />
-        <div className={cn("audio-config").elem("toggle").toClassName()}>
+        <Elem name="toggle">
           <Toggle
             checked={settings?.loopRegion}
             onChange={(e) => changeSetting?.("loopRegion", e.target.checked)}
             label="Loop Regions"
           />
-        </div>
-        <div className={cn("audio-config").elem("toggle").toClassName()}>
+        </Elem>
+        <Elem name="toggle">
           <Toggle
             checked={settings?.autoPlayNewSegments}
             onChange={(e) => changeSetting?.("autoPlayNewSegments", e.target.checked)}
             label="Auto-play New Regions"
           />
-        </div>
+        </Elem>
         {renderLayerToggles()}
         <SpectrogramConfig waveform={waveform} />
-      </div>
+      </Elem>
     );
   };
 
   return (
-    <div
-      className={cn("audio-config").toClassName()}
-      onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}
-    >
+    <Block name="audio-config" onClick={(e: MouseEvent<HTMLButtonElement>) => e.stopPropagation()}>
       <ControlButton look={configModal ? "active" : undefined} onClick={onSetModal}>
         {<IconConfig />}
       </ControlButton>
       {configModal && renderModal()}
-    </div>
+    </Block>
   );
 };

@@ -1,7 +1,7 @@
 import type React from "react";
 import { type FC, useContext, useEffect, useMemo, useState } from "react";
 import { Tooltip, Select } from "@humansignal/ui";
-import { cn } from "../../../utils/bem";
+import { Block, Elem } from "../../../utils/bem";
 import { Range } from "../../../common/Range/Range";
 import { IconInfoConfig, IconWarningCircleFilled } from "@humansignal/icons";
 import { TimelineContext } from "../Context";
@@ -424,7 +424,7 @@ export const SpectrogramControl: FC<SpectrogramControlProps> = ({ waveform }) =>
   const isMelScaleSelected = displayScale === "mel";
 
   return (
-    <div className={cn("spectrogram-controls").toClassName()}>
+    <Block name="spectrogram-controls">
       {showWarning && (
         <Tooltip title="High FFT or mel band values may cause performance issues or artifacts.">
           <IconWarningCircleFilled
@@ -442,7 +442,7 @@ export const SpectrogramControl: FC<SpectrogramControlProps> = ({ waveform }) =>
           />
         </Tooltip>
       )}
-      <div className={cn("spectrogram-controls").elem("slider-container").toClassName()}>
+      <Elem name="slider-container">
         <Slider
           min={0}
           max={FFT_SAMPLE_VALUES.length - 1}
@@ -451,32 +451,34 @@ export const SpectrogramControl: FC<SpectrogramControlProps> = ({ waveform }) =>
           showInput={false}
           onChange={handleChangeFftSamplesSlider}
         />
-        <div className={cn("spectrogram-controls").elem("control").toClassName()}>
-          <div className={cn("spectrogram-controls").elem("info").toClassName()}>
+        <Elem name="control">
+          <Elem name="info">
             FFT Samples
             <Tooltip title={fftInfoText}>
               <IconInfoConfig />
             </Tooltip>
-          </div>
-          <input
-            className={cn("spectrogram-controls").elem("input").mod({ error: fftInputError }).toClassName()}
+          </Elem>
+          <Elem
+            tag="input"
+            name="input"
             type="text"
             value={fftInputText}
             onChange={handleFftInputChange}
+            mod={{ error: fftInputError }}
           />
-        </div>
-      </div>
-      <div className={cn("spectrogram-controls").elem("spectrogram-controls").toClassName()}>
-        <div className={cn("spectrogram-controls").elem("info").toClassName()}>
+        </Elem>
+      </Elem>
+      <Elem name="spectrogram-controls">
+        <Elem name="info">
           Scale
           <Tooltip title="Determines the frequency scale mapping: Linear, Logarithmic, or Mel (perceptual).">
             <IconInfoConfig />
           </Tooltip>
-        </div>
+        </Elem>
         <Select value={displayScale} onChange={handleChangeScale} options={SCALE_OPTIONS} style={{ width: "100%" }} />
-      </div>
+      </Elem>
       {isMelScaleSelected && (
-        <div className={cn("spectrogram-controls").elem("spectrogram-controls").toClassName()}>
+        <Elem name="spectrogram-controls">
           <Slider
             min={20}
             max={220}
@@ -486,9 +488,9 @@ export const SpectrogramControl: FC<SpectrogramControlProps> = ({ waveform }) =>
             info={"Specifies the number of frequency bands using the Mel scale. "}
             onChange={handleChangeNumberOfMelBands}
           />
-        </div>
+        </Elem>
       )}
-      <div className={cn("spectrogram-controls").elem("spectrogram-controls").toClassName()}>
+      <Elem name="spectrogram-controls">
         <Range
           multi
           continuous
@@ -500,16 +502,17 @@ export const SpectrogramControl: FC<SpectrogramControlProps> = ({ waveform }) =>
           onChange={handleRangeChange}
           size={200}
         />
-        <div className={cn("spectrogram-controls").elem("control").toClassName()}>
-          <div className={cn("spectrogram-controls").elem("info").toClassName()}>
+        <Elem name="control">
+          <Elem name="info">
             Spectogram dB
             <Tooltip title="Controls the range of decibel values shown in the spectrogram. Lower values show quieter sounds.">
               <IconInfoConfig />
             </Tooltip>
-          </div>
-          <div className={cn("spectrogram-controls").elem("input-group").toClassName()}>
-            <input
-              className={cn("spectrogram-controls").elem("input").toClassName()}
+          </Elem>
+          <Elem name="input-group">
+            <Elem
+              name="input"
+              tag="input"
               type="number"
               value={displayMinDb}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -521,9 +524,12 @@ export const SpectrogramControl: FC<SpectrogramControlProps> = ({ waveform }) =>
               min={-120}
               max={displayMaxDb - 10}
             />
-            <span className={cn("spectrogram-controls").elem("separator").toClassName()}>to</span>
-            <input
-              className={cn("spectrogram-controls").elem("input").toClassName()}
+            <Elem tag="span" name="separator">
+              to
+            </Elem>
+            <Elem
+              name="input"
+              tag="input"
               type="number"
               value={displayMaxDb}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -535,20 +541,20 @@ export const SpectrogramControl: FC<SpectrogramControlProps> = ({ waveform }) =>
               min={displayMinDb + 10}
               max={0}
             />
-          </div>
-        </div>
-      </div>
-      <div className={cn("spectrogram-controls").elem("spectrogram-controls").toClassName()}>
-        <div className={cn("spectrogram-controls").elem("label").toClassName()}>Windowing Function</div>
+          </Elem>
+        </Elem>
+      </Elem>
+      <Elem name="spectrogram-controls">
+        <Elem name="label">Windowing Function</Elem>
         <Select
           value={displayWindowFunc}
           onChange={handleChangeWindowingFunction}
           options={WINDOWING_OPTIONS}
           style={{ width: "100%" }}
         />
-      </div>
-      <div className={cn("spectrogram-controls").elem("spectrogram-controls").toClassName()}>
-        <div className={cn("spectrogram-controls").elem("label").toClassName()}>Color Scheme</div>
+      </Elem>
+      <Elem name="spectrogram-controls">
+        <Elem name="label">Color Scheme</Elem>
         <Select
           value={displayColorScheme}
           onChange={handleChangeColorScheme}
@@ -559,7 +565,7 @@ export const SpectrogramControl: FC<SpectrogramControlProps> = ({ waveform }) =>
           listHeight={320}
           className="color-scheme-select"
         />
-      </div>
-    </div>
+      </Elem>
+    </Block>
   );
 };

@@ -1,8 +1,8 @@
 import { IconInfoOutline, IconSettings } from "@humansignal/icons";
 import { Button, Space } from "@humansignal/ui";
-import { cn } from "../../utils/bem";
+import { Elem } from "../../utils/bem";
 import { isSelfServe } from "../../utils/billing";
-import { FF_BULK_ANNOTATION, isFF } from "../../utils/feature-flags";
+import { FF_BULK_ANNOTATION } from "../../utils/feature-flags";
 import { AutoAcceptToggle } from "../AnnotationTab/AutoAcceptToggle";
 import { DynamicPreannotationsToggle } from "../AnnotationTab/DynamicPreannotationsToggle";
 import { GroundTruth } from "../CurrentEntity/GroundTruth";
@@ -48,10 +48,10 @@ export const Actions = ({ store }) => {
       {store.hasInterface("ground-truth") && !isBulkMode && <GroundTruth entity={entity} />}
 
       {!isViewAll && (
-        <div className={cn("bottombar").elem("section").toClassName()}>
+        <Elem name="section">
           <DynamicPreannotationsToggle />
           <AutoAcceptToggle />
-        </div>
+        </Elem>
       )}
     </Space>
   );

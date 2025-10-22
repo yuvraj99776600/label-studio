@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { IconOutlinerDrag, IconCollapseSmall, IconExpandSmall } from "@humansignal/ui";
 import { useDrag } from "../../../hooks/useDrag";
-import { cn } from "../../../utils/bem";
+import { Block, Elem } from "../../../utils/bem";
 import { DEFAULT_PANEL_HEIGHT } from "../constants";
 import "./Tabs.scss";
 import { type BaseProps, Side, type TabProps } from "./types";
@@ -158,30 +158,24 @@ const Tab = ({
   );
 
   const Label = () => (
-    <div
+    <Elem
       id={`${panelKey}_${tabIndex}_droppable`}
-      className={cn("panel-tabs")
-        .elem("tab")
-        .mod({ active: locked ? tabIndex === breakPointActiveTab : active })
-        .toClassName()}
+      name="tab"
+      mod={{ active: locked ? tabIndex === breakPointActiveTab : active }}
     >
-      {!locked && <IconOutlinerDrag className={cn("panel-tabs").elem("icon").toClassName()} />}
+      {!locked && <Elem name="icon" tag={IconOutlinerDrag} />}
       {tabText}
-    </div>
+    </Elem>
   );
 
   return (
-    <div className={cn("panel-tabs").toClassName()}>
-      <div
-        className={cn("panel-tabs").elem("draggable-tab").toClassName()}
-        id={`${tabText}-draggable`}
-        ref={tabRef as any}
-      >
+    <Block name="panel-tabs">
+      <Elem name="draggable-tab" id={`${tabText}-draggable`} ref={tabRef}>
         <Label />
-      </div>
-      <div
-        ref={ghostTabRef as any}
-        className={cn("panel-tabs").elem("ghost-tab").toClassName()}
+      </Elem>
+      <Elem
+        ref={ghostTabRef}
+        name="ghost-tab"
         style={{
           width: `${panelWidth}px`,
           height: "fit-content",
@@ -190,9 +184,9 @@ const Tab = ({
         }}
       >
         <Label />
-        {shouldShowGhostTab && <div className={cn("panel-tabs").elem("contents").toClassName()}>{children}</div>}
-      </div>
-    </div>
+        {shouldShowGhostTab && <Elem name="contents">{children}</Elem>}
+      </Elem>
+    </Block>
   );
 };
 
@@ -211,16 +205,13 @@ export const Tabs = (
 
   return (
     <>
-      <div className={cn("tabs").toClassName()}>
-        <div className={cn("tabs").elem("tabs-row").toClassName()}>
+      <Block name="tabs">
+        <Elem name="tabs-row">
           {props.panelViews.map((view, index) => {
             const { component: Component } = view;
 
             return (
-              <div
-                className={cn("tabs").elem("tab-container").mod({ active: view.active }).toClassName()}
-                key={`${view.title}-${index}-tab`}
-              >
+              <Elem name="tab-container" key={`${view.title}-${index}-tab`} mod={{ active: view.active }}>
                 <Tab
                   name={view.name}
                   rootRef={props.root}
@@ -239,17 +230,14 @@ export const Tabs = (
                   breakPointActiveTab={props.breakPointActiveTab}
                   setBreakPointActiveTab={props.setBreakPointActiveTab}
                 >
-                  <div className={cn("tabs").elem("content").toClassName()}>
+                  <Elem name="content">
                     <Component key={`${view.title}-${index}-ghost`} {...props} name={"outliner"} />
-                  </div>
+                  </Elem>
                 </Tab>
-              </div>
+              </Elem>
             );
           })}
-          <div
-            id={`${props.name}_${props.panelViews.length}-droppable-space`}
-            className={cn("tabs").elem("drop-space-after").toClassName()}
-          />
+          <Elem id={`${props.name}_${props.panelViews.length}-droppable-space`} name="drop-space-after" />
           {props.isBottomPanel && props.settings?.collapsibleBottomPanel && (
             <Button
               className="collapsible-bottom-panel-toggle"
@@ -273,13 +261,13 @@ export const Tabs = (
               {props.bottomCollapsed ? <IconExpandSmall /> : <IconCollapseSmall />}
             </Button>
           )}
-        </div>
+        </Elem>
         {!props.bottomCollapsed && (
-          <div className={cn("tabs").elem("contents").toClassName()} style={{ overflow: "auto" }}>
+          <Elem name="contents" style={{ overflow: "auto" }}>
             {ActiveComponent && <ActiveComponent {...props} />}
-          </div>
+          </Elem>
         )}
-      </div>
+      </Block>
     </>
   );
 };

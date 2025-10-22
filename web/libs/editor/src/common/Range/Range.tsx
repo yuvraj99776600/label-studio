@@ -1,5 +1,5 @@
 import { type CSSProperties, type FC, type MouseEvent as RMouseEvent, useCallback } from "react";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import { clamp, isDefined } from "../../utils/utilities";
 import { useValueTracker } from "../Utils/useValueTracker";
 import "./Range.scss";
@@ -138,20 +138,20 @@ export const Range: FC<RangeProps> = ({
   const sizeProperty = align === "horizontal" ? "minWidth" : "minHeight";
 
   return (
-    <div className={cn("range").mod({ align }).toClassName()} style={{ [sizeProperty]: size }}>
+    <Block name="range" mod={{ align }} style={{ [sizeProperty]: size }}>
       {reverse
         ? maxIcon && (
-            <div className={cn("range").elem("icon").toClassName()} onMouseDown={increase}>
+            <Elem name="icon" onMouseDown={increase}>
               {maxIcon}
-            </div>
+            </Elem>
           )
         : minIcon && (
-            <div className={cn("range").elem("icon").toClassName()} onMouseDown={decrease}>
+            <Elem name="icon" onMouseDown={decrease}>
               {minIcon}
-            </div>
+            </Elem>
           )}
-      <div className={cn("range").elem("body").toClassName()} onClick={onClick}>
-        <div className={cn("range").elem("line").toClassName()} />
+      <Elem name="body" onClick={onClick}>
+        <Elem name="line" />
         <RangeIndicator align={align} reverse={reverse} value={currentValue} valueConvert={valueToPercentage} />
         {isMultiArray ? (
           arrayReverse(currentValue, reverse).map((value, i) => {
@@ -196,19 +196,19 @@ export const Range: FC<RangeProps> = ({
             onChange={(val) => updateValue(val, true, true)}
           />
         )}
-      </div>
+      </Elem>
       {reverse
         ? minIcon && (
-            <div className={cn("range").elem("icon").toClassName()} onMouseDown={decrease}>
+            <Elem name="icon" onMouseDown={decrease}>
               {minIcon}
-            </div>
+            </Elem>
           )
         : maxIcon && (
-            <div className={cn("range").elem("icon").toClassName()} onMouseDown={increase}>
+            <Elem name="icon" onMouseDown={increase}>
               {maxIcon}
-            </div>
+            </Elem>
           )}
-    </div>
+    </Block>
   );
 };
 
@@ -276,8 +276,8 @@ const RangeHandle: FC<RangeHandleProps> = ({
   };
 
   return (
-    <div
-      className={cn("range").elem("range-handle").toClassName()}
+    <Elem
+      name="range-handle"
       style={{ [offsetProperty]: `${valueConvert(value)}%` }}
       onMouseDownCapture={handleMouseDown}
       onDoubleClick={handleDoubleClick}
@@ -318,5 +318,5 @@ const RangeIndicator: FC<RangeIndicatorProps> = ({ value, valueConvert, align, r
     if (reverse && !multi) [style.top, style.bottom] = [style.bottom, style.top];
   }
 
-  return <div className={cn("range").elem("indicator").toClassName()} style={style} />;
+  return <Elem name="indicator" style={style} />;
 };

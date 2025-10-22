@@ -1,6 +1,6 @@
 import { useResizeObserver } from "@humansignal/core/hooks/useResizeObserver";
 import { type FC, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "../../../../utils/bem";
+import { Block, Elem } from "../../../../utils/bem";
 import { isDefined } from "../../../../utils/utilities";
 import { TimelineContext } from "../../Context";
 import { visualizeLifespans } from "./Utils";
@@ -29,26 +29,20 @@ export const Minimap: FC<any> = () => {
   }, [length, rootWidth]);
 
   return (
-    <div ref={root as any} className={cn("minimap").toClassName()}>
+    <Block ref={root} name="minimap">
       {visualization.slice(0, 5).map(({ id, color, lifespans }) => {
         return (
-          <div key={id} className={cn("minimap").elem("region").toClassName()} style={{ "--color": color } as any}>
+          <Elem key={id} name="region" style={{ "--color": color }}>
             {lifespans.map((connection, i) => {
               const isLast = i + 1 === lifespans.length;
               const left = connection.start * step;
               const width = isLast && connection.enabled ? "100%" : connection.width;
 
-              return (
-                <div
-                  key={`${id}${i}`}
-                  className={cn("minimap").elem("connection").toClassName()}
-                  style={{ left, width }}
-                />
-              );
+              return <Elem key={`${id}${i}`} name="connection" style={{ left, width }} />;
             })}
-          </div>
+          </Elem>
         );
       })}
-    </div>
+    </Block>
   );
 };

@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { cn } from "../../../utils/bem";
+import { Block, Elem } from "../../../utils/bem";
 
 export type RegionLabelProps = {
   item: any;
@@ -18,20 +18,18 @@ export const RegionLabel = observer(({ item }: RegionLabelProps) => {
     const labels: any[] = [].concat(...labelsInResults);
 
     return (
-      <div className={cn("labels-list").toClassName()}>
+      <Block name="labels-list">
         {labels.map((label, index) => {
           const color = label.background || "#000000";
 
           return [
             index ? ", " : null,
-            // This comes from an Elem tag that was set without a name. The CSS was fixed to make it work,
-            // but this is clearly bad CSS usage.
-            <div key={label.id} className={cn("labels-list").toClassName()} style={{ color }}>
+            <Elem key={label.id} style={{ color }}>
               {label.value || "No label"}
-            </div>,
+            </Elem>,
           ];
         })}
-      </div>
+      </Block>
     );
   }
   if (type.includes("tool")) {

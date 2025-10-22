@@ -2,7 +2,7 @@ import { useResizeObserver } from "@humansignal/core/hooks/useResizeObserver";
 import clamp from "lodash/clamp";
 import { type FC, type MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMemoizedHandlers } from "../../../../hooks/useMemoizedHandlers";
-import { cn } from "../../../../utils/bem";
+import { Block, Elem } from "../../../../utils/bem";
 import { isDefined } from "../../../../utils/utilities";
 import type { MSTTimelineRegion, TimelineRegion, TimelineViewProps } from "../../Types";
 import { Keypoints } from "./Keypoints";
@@ -407,27 +407,27 @@ export const Frames: FC<TimelineViewProps> = ({
   };
 
   return (
-    <div className={cn("timeline-frames").toClassName()} style={styles as any}>
-      <div className={cn("timeline-frames").elem("controls").toClassName()}>
-        <div
-          className={cn("timeline-frames").elem("indicator").toClassName()}
+    <Block name="timeline-frames" style={styles as any}>
+      <Elem name="controls">
+        <Elem
+          name="indicator"
           onMouseDown={handleMovement}
           style={{ left: clamp(seekerOffset - step, timelineStartOffset - step, viewWidth) }}
         />
 
         {isDefined(hoverOffset) && hoverEnabled && (
-          <div
-            className={cn("timeline-frames").elem("hover").toClassName()}
+          <Elem
+            name="hover"
             style={{ left: roundToStep(hoverOffset, step), marginLeft: timelineStartOffset }}
             data-frame={toSteps(currentOffsetX + hoverOffset, step) + 1}
           />
         )}
-      </div>
+      </Elem>
 
-      <div className={cn("timeline-frames").elem("labels-bg").toClassName()} style={{ width: timelineStartOffset }} />
+      <Elem name="labels-bg" style={{ width: timelineStartOffset }} />
 
-      <div
-        className={cn("timeline-frames").elem("scroll").toClassName()}
+      <Elem
+        name="scroll"
         ref={scrollable as any}
         onWheel={scrollHandler}
         onMouseMove={hoverHandler}
@@ -435,7 +435,7 @@ export const Frames: FC<TimelineViewProps> = ({
         onClickCapture={scrollClickHandler}
         onMouseDown={onFrameScrub}
       >
-        <div className={cn("timeline-frames").elem("filler").toClassName()}>
+        <Elem name="filler">
           <KeypointsVirtual
             regions={regions}
             scrollTop={currentOffsetY}
@@ -443,11 +443,11 @@ export const Frames: FC<TimelineViewProps> = ({
             onSelectRegion={onSelectRegion}
             disabled={regionSelectionDisabled}
           />
-        </div>
-      </div>
+        </Elem>
+      </Elem>
 
-      <div className={cn("timeline-frames").elem("background").toClassName()} style={{ backgroundImage: background }} />
-    </div>
+      <Elem name="background" style={{ backgroundImage: background }} />
+    </Block>
   );
 };
 
@@ -470,7 +470,7 @@ const KeypointsVirtual: FC<KeypointsVirtualProps> = ({ regions, startOffset, scr
   }, [scrollTop, regions.length]);
 
   return (
-    <div className={cn("timeline-frames").elem("keypoints").toClassName()} style={{ height: regions.length * height }}>
+    <Elem name="keypoints" style={{ height: regions.length * height }}>
       {regions.map((region, i) => {
         return region.sequence.length > 0 || region.timeline ? (
           <Keypoints
@@ -483,6 +483,6 @@ const KeypointsVirtual: FC<KeypointsVirtualProps> = ({ regions, startOffset, scr
           />
         ) : null;
       })}
-    </div>
+    </Elem>
   );
 };

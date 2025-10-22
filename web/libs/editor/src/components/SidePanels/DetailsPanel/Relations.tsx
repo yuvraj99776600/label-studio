@@ -10,7 +10,7 @@ import {
 import { Button, Select } from "@humansignal/ui";
 import { observer } from "mobx-react";
 import { type FC, useCallback, useMemo, useState } from "react";
-import { cn } from "../../../utils/bem";
+import { Block, Elem } from "../../../utils/bem";
 import { wrapArray } from "../../../utils/utilities";
 import { RegionItem } from "./RegionItem";
 import "./Relations.scss";
@@ -19,9 +19,9 @@ const RealtionsComponent: FC<any> = ({ relationStore }) => {
   const relations = relationStore.orderedRelations;
 
   return (
-    <div className={cn("relations").toClassName()}>
+    <Block name="relations">
       <RelationsList relations={relations} />
-    </div>
+    </Block>
   );
 };
 
@@ -76,21 +76,17 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
   // const;
 
   return (
-    <div
-      className={cn("relations").elem("item").mod({ hidden: !relation.visible }).toClassName()}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      <div className={cn("relations").elem("content").toClassName()}>
-        <div className={cn("relations").elem("icon").toClassName()} onClick={relation.rotateDirection}>
-          <div className={cn("relations").elem("direction").toClassName()}>{directionIcon}</div>
-        </div>
-        <div className={cn("relations").elem("nodes").toClassName()}>
+    <Elem name="item" mod={{ hidden: !relation.visible }} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      <Elem name="content">
+        <Elem name="icon" onClick={relation.rotateDirection}>
+          <Elem name="direction">{directionIcon}</Elem>
+        </Elem>
+        <Elem name="nodes">
           <RegionItem compact withActions={false} withIds={false} region={relation.node1} />
           <RegionItem compact withActions={false} withIds={false} region={relation.node2} />
-        </div>
-        <div className={cn("relations").elem("actions").toClassName()}>
-          <div className={cn("relations").elem("action").toClassName()}>
+        </Elem>
+        <Elem name="actions">
+          <Elem name="action">
             {(hovered || relation.showMeta) && relation.hasRelations && (
               <Button
                 primary={relation.showMeta}
@@ -102,8 +98,8 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
                 <IconMenu />
               </Button>
             )}
-          </div>
-          <div className={cn("relations").elem("action").toClassName()}>
+          </Elem>
+          <Elem name="action">
             {(hovered || !relation.visible) && (
               <Button
                 variant="neutral"
@@ -120,8 +116,8 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
                 )}
               </Button>
             )}
-          </div>
-          <div className={cn("relations").elem("action").toClassName()}>
+          </Elem>
+          <Elem name="action">
             {hovered && (
               <Button
                 variant="negative"
@@ -138,11 +134,11 @@ const RelationItem: FC<{ relation: any }> = observer(({ relation }) => {
                 <IconTrash />
               </Button>
             )}
-          </div>
-        </div>
-      </div>
+          </Elem>
+        </Elem>
+      </Elem>
       {relation.showMeta && <RelationMeta relation={relation} />}
-    </div>
+    </Elem>
   );
 });
 
@@ -172,7 +168,7 @@ const RelationMeta: FC<any> = observer(({ relation }) => {
   );
 
   return (
-    <div className={cn("relation-meta").toClassName()}>
+    <Block name="relation-meta">
       <Select
         multiple={selectionMode}
         style={{ width: "100%" }}
@@ -181,7 +177,7 @@ const RelationMeta: FC<any> = observer(({ relation }) => {
         onChange={onChange}
         options={options}
       />
-    </div>
+    </Block>
   );
 });
 

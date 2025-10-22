@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useMemo } from "react";
-import { cn } from "../../utils/bem";
+import { Block, cn } from "../../utils/bem";
 import { useDropdown } from "../Dropdown/DropdownTrigger";
 import "./Menu.scss";
 import { MenuContext } from "./MenuContext";
@@ -34,14 +34,17 @@ export const Menu = forwardRef(
 
     return (
       <MenuContext.Provider value={contextValue}>
-        <ul
+        <Block
           ref={ref}
-          className={cn("menu").mod({ size, collapsed }).mix(className).toClassName()}
+          tag="ul"
+          name="menu"
+          mod={{ size, collapsed }}
+          mix={className}
           style={style}
           onClick={clickHandler}
         >
           {children}
-        </ul>
+        </Block>
       </MenuContext.Provider>
     );
   },

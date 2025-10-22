@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { observer } from "mobx-react";
 import { useEffect, useState } from "react";
 import { Button, IconChevronLeft, IconChevronRight } from "@humansignal/ui";
-import { cn } from "../../utils/bem";
+import { Block, Elem } from "../../utils/bem";
 import { FF_DEV_3873, FF_DEV_4174, FF_LEAP_1173, FF_TASK_COUNT_FIX, isFF } from "../../utils/feature-flags";
 import { guidGenerator } from "../../utils/unique";
 import { isDefined } from "../../utils/utilities";
@@ -54,38 +54,31 @@ export const CurrentTask = observer(({ store }) => {
   }
 
   return (
-    <div className={cn("topbar").elem("section").toClassName()}>
-      <div
-        className={cn("current-task").mod({ "with-history": historyEnabled }).toClassName()}
+    <Elem name="section">
+      <Block
+        name="current-task"
+        mod={{ "with-history": historyEnabled }}
         style={{
           padding: isFF(FF_DEV_3873) && 0,
           width: isFF(FF_DEV_3873) && "auto",
         }}
       >
-        <div
-          className={cn("current-task").elem("task-id").toClassName()}
-          style={{ fontSize: isFF(FF_DEV_3873) ? 12 : 14 }}
-        >
+        <Elem name="task-id" style={{ fontSize: isFF(FF_DEV_3873) ? 12 : 14 }}>
           {store.task.id ?? guidGenerator()}
           {historyEnabled &&
             showCounter &&
             (isFF(FF_TASK_COUNT_FIX) ? (
-              <div className={cn("current-task").elem("task-count").toClassName()}>
+              <Elem name="task-count">
                 {store.queuePosition} of {store.queueTotal}
-              </div>
+              </Elem>
             ) : (
-              <div className={cn("current-task").elem("task-count").toClassName()}>
+              <Elem name="task-count">
                 {currentIndex} of {store.taskHistory.length}
-              </div>
+              </Elem>
             ))}
-        </div>
+        </Elem>
         {historyEnabled && (
-          <div
-            className={cn("current-task")
-              .elem("history-controls")
-              .mod({ newui: isFF(FF_DEV_3873) })
-              .toClassName()}
-          >
+          <Elem name="history-controls" mod={{ newui: isFF(FF_DEV_3873) }}>
             <Button
               data-testid="prev-task"
               aria-label="Previous task"
@@ -108,9 +101,9 @@ export const CurrentTask = observer(({ store }) => {
             >
               <IconChevronRight />
             </Button>
-          </div>
+          </Elem>
         )}
-      </div>
-    </div>
+      </Block>
+    </Elem>
   );
 });

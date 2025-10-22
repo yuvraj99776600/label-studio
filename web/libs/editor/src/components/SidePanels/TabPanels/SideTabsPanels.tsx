@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import { type FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "../../../utils/bem";
+import { Block, Elem } from "../../../utils/bem";
 import { useMedia } from "../../../hooks/useMedia";
 import ResizeObserver from "../../../utils/resize-observer";
 import { clamp } from "../../../utils/utilities";
@@ -540,34 +540,29 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
 
   return (
     <SidePanelsContext.Provider value={contextValue}>
-      <div
+      <Block
         ref={(el: HTMLDivElement | null) => {
           if (el) {
             rootRef.current = el;
             setViewportSizeMatch(el.clientWidth <= maxWindowWidth);
           }
         }}
-        className={cn("sidepanels").mod({ collapsed: panelBreakPoint }).toClassName()}
+        name="sidepanels"
+        mod={{ collapsed: panelBreakPoint }}
         style={{ ...padding }}
       >
         {initialized && (
           <>
-            <div
-              ref={contentRef}
-              className={cn("sidepanels")
-                .elem("content")
-                .mod({ resizing: lockPanelContents || positioning })
-                .toClassName()}
-            >
+            <Elem ref={contentRef} name="content" mod={{ resizing: lockPanelContents || positioning }}>
               {children}
-            </div>
+            </Elem>
             {panelsHidden !== true && panelBreakPoint ? (
               <>
-                <div className={cn("sidepanels").elem("wrapper").toClassName()}>
+                <Elem name="wrapper">
                   <PanelTabsBase {...emptyBaseProps} contentRef={contentRef} isBottomPanel={true}>
                     <Tabs {...emptyBaseProps} />
                   </PanelTabsBase>
-                </div>
+                </Elem>
               </>
             ) : (
               <>
@@ -586,22 +581,20 @@ const SideTabsPanelsComponent: FC<SidePanelsProps> = ({
                     return <Fragment key={panelType}>{content}</Fragment>;
                   }
                   return (
-                    <div
+                    <Elem
                       key={panelType}
-                      className={cn("sidepanels")
-                        .elem("wrapper")
-                        .mod({ align: panelType, snap: !lockPanelContents && snap === panelType && snap !== undefined })
-                        .toClassName()}
+                      name="wrapper"
+                      mod={{ align: panelType, snap: !lockPanelContents && snap === panelType && snap !== undefined }}
                     >
                       {content}
-                    </div>
+                    </Elem>
                   );
                 })}
               </>
             )}
           </>
         )}
-      </div>
+      </Block>
     </SidePanelsContext.Provider>
   );
 };
