@@ -387,6 +387,8 @@ class TaskListAPI(generics.ListCreateAPIView):
                 )
             )
 
+            print(tasks.explain(analyze=True))
+
             tasks_by_ids = {task.id: task for task in tasks}
             # keep ids ordering
             page = [tasks_by_ids[_id] for _id in ids]
