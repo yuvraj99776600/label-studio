@@ -7,6 +7,7 @@ from data_manager.models import Filter, FilterGroup, View
 from django.conf import settings
 from django.db import transaction
 from drf_spectacular.utils import extend_schema_field
+from fsm.serializer_fields import FSMStateField
 from projects.models import Project
 from rest_framework import serializers
 from tasks.models import Task
@@ -434,6 +435,14 @@ class PredictionsDMFieldSerializer(serializers.SerializerMethodField):
 
 
 class DataManagerTaskSerializer(TaskSerializer):
+    """
+    Data Manager Task Serializer with FSM state support.
+
+    Note: The 'state' field will be populated from the queryset annotation
+    if present, preventing N+1 queries. Ensure your queryset uses .with_state()
+    or .annotate_fsm_state() for optimal performance.
+    """
+
     predictions = PredictionsDMFieldSerializer(required=False, read_only=True)
     annotations = AnnotationsDMFieldSerializer(required=False, many=True, default=[], read_only=True)
     drafts = AnnotationDraftDMFieldSerializer(required=False, read_only=True)
@@ -454,6 +463,7 @@ class DataManagerTaskSerializer(TaskSerializer):
     avg_lead_time = serializers.FloatField(required=False)
     draft_exists = serializers.BooleanField(required=False)
     updated_by = UpdatedByDMFieldSerializer(required=False, read_only=True)
+    state = FSMStateField(read_only=True)  # FSM state - automatically uses annotation if present
 
     CHAR_LIMITS = 500
 

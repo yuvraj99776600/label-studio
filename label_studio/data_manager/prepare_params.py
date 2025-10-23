@@ -62,6 +62,7 @@ class CustomEnum(Enum):
 class Column(Enum):
     ID = 'id', 'Number', 'Task ID'
     INNER_ID = 'inner_id', 'Number', 'Task Inner ID, it starts from 1 for all projects'
+    STATE = 'state', 'String', 'Current FSM state of the task'
     GROUND_TRUTH = 'ground_truth', 'Boolean', 'Ground truth status of the tasks'
     ANNOTATIONS_RESULTS = 'annotations_results', 'String', 'Annotation results for the tasks'
     REVIEWED = 'reviewed', 'Boolean', 'Whether the tasks have been reviewed (Enterprise only)'

@@ -11,6 +11,7 @@ from core.utils.db import fast_first
 from django.conf import settings
 from django.db import IntegrityError, transaction
 from drf_spectacular.utils import extend_schema_field
+from fsm.serializer_fields import FSMStateField
 from label_studio_sdk.label_interface import LabelInterface
 from projects.models import Project
 from rest_flex_fields import FlexFieldsModelSerializer
@@ -121,7 +122,15 @@ class CompletedByDMSerializer(UserSerializer):
 
 
 class AnnotationSerializer(FlexFieldsModelSerializer):
-    """ """
+    """
+    Annotation Serializer with FSM state support.
+
+    Note: The 'state' field will be populated from the queryset annotation
+    if present, preventing N+1 queries. Use .with_state() on your queryset.
+    """
+
+    state = FSMStateField(read_only=True)  # FSM state - automatically uses annotation if present
+    """"""
 
     result = AnnotationResultField(required=False)
     created_username = serializers.SerializerMethodField(default='', read_only=True, help_text='Username string')
@@ -710,7 +719,14 @@ class TaskWithAnnotationsSerializer(TaskSerializer):
 
 
 class AnnotationDraftSerializer(ModelSerializer):
+    """
+    AnnotationDraft Serializer with FSM state support.
 
+    Note: The 'state' field will be populated from the queryset annotation
+    if present, preventing N+1 queries. Use .with_state() on your queryset.
+    """
+
+    state = FSMStateField(read_only=True)  # FSM state - automatically uses annotation if present
     user = serializers.CharField(default=serializers.CurrentUserDefault())
     created_username = serializers.SerializerMethodField(default='', read_only=True, help_text='User name string')
     created_ago = serializers.CharField(default='', read_only=True, help_text='Delta time from creation time')

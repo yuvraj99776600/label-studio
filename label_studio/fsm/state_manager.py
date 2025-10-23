@@ -10,7 +10,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Type
 
 from core.current_request import CurrentContext
-from core.feature_flags import flag_set
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
@@ -57,9 +56,12 @@ class StateManager:
 
     @classmethod
     def _is_fsm_enabled(cls, user='auto') -> bool:
+        """Check if FSM feature is enabled via feature flag."""
+        # Import at function level to avoid circular imports during Django initialization
+        from core.feature_flags import flag_set
+
         if user == 'auto':
             user = CurrentContext.get_user()
-        """Check if FSM feature is enabled via feature flag."""
         return flag_set('fflag_feat_fit_568_finite_state_management', user=user)
 
     @classmethod

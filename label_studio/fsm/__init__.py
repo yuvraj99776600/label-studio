@@ -9,4 +9,16 @@ Core components:
 - StateManager: High-performance state management
 - Core state choices for basic entities
 - UUID7 utilities for time-series optimization
+- FSMStateQuerySetMixin: QuerySet mixin for annotating state (prevents N+1 queries)
+- FSMStateField: DRF serializer field for exposing state in APIs
 """
+
+from fsm.queryset_mixins import FSMMultiStateQuerySetMixin, FSMStateQuerySetMixin
+from fsm.serializer_fields import FSMStateField, FSMStateMetadataField
+
+__all__ = [
+    'FSMStateQuerySetMixin',
+    'FSMMultiStateQuerySetMixin',
+    'FSMStateField',
+    'FSMStateMetadataField',
+]

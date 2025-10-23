@@ -2474,7 +2474,7 @@
     },
     "fflag_feat_fit_568_finite_state_management": {
       "key": "fflag_feat_fit_568_finite_state_management",
-      "on": false,
+      "on": true,
       "prerequisites": [],
       "targets": [],
       "contextTargets": [],

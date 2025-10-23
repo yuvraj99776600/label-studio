@@ -107,6 +107,31 @@ def get_all_columns(project, *_):
         }
     ]
 
+    # Add FSM state column if FSM is enabled
+    if flag_set('fflag_feat_fit_568_finite_state_management', user='auto'):
+        from fsm.registry import get_state_choices
+
+        # Get state choices for tasks
+        task_state_choices = get_state_choices('task')
+        state_schema = {}
+        if task_state_choices:
+            # Extract state values for schema (for filtering in Data Manager)
+            state_values = [choice[0] for choice in task_state_choices.choices]
+            state_schema = {'items': state_values}
+
+        result['columns'] += [
+            {
+                'id': 'state',
+                'title': 'State',
+                'type': 'String',
+                'target': 'tasks',
+                'help': 'Current FSM state of the task',
+                'schema': state_schema,
+                'visibility_defaults': {'explore': True, 'labeling': False},
+                'project_defined': False,
+            }
+        ]
+
     if remove_members_schema:
         project_members = []
     else:
