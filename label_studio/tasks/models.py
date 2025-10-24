@@ -16,6 +16,7 @@ from core.bulk_update_utils import bulk_update
 from core.current_request import get_current_request
 from core.feature_flags import flag_set
 from core.label_config import SINGLE_VALUED_TAGS
+from core.models import HsModel
 from core.redis import start_job_async_or_sync
 from core.utils.common import (
     find_first_one_to_one_related_field_by_prefix,
@@ -46,7 +47,7 @@ logger = logging.getLogger(__name__)
 TaskMixin = load_func(settings.TASK_MIXIN)
 
 
-class Task(TaskMixin, models.Model):
+class Task(TaskMixin, HsModel):
     """Business tasks from project"""
 
     id = models.AutoField(
@@ -584,7 +585,7 @@ with tt as (
 AnnotationMixin = load_func(settings.ANNOTATION_MIXIN)
 
 
-class Annotation(AnnotationMixin, models.Model):
+class Annotation(AnnotationMixin, HsModel):
     """Annotations & Labeling results"""
 
     objects = AnnotationManager()
@@ -817,7 +818,7 @@ class TaskLock(models.Model):
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Creation time', null=True)
 
 
-class AnnotationDraft(models.Model):
+class AnnotationDraft(HsModel):
     result = JSONField(_('result'), help_text='Draft result in JSON format')
     lead_time = models.FloatField(
         _('lead time'),

@@ -7,8 +7,8 @@ previous signal-based approach.
 """
 
 from django.test import TestCase, override_settings
-from fsm.state_manager import StateManager
 from fsm.state_choices import ProjectStateChoices
+from fsm.state_manager import StateManager
 from organizations.models import Organization
 from projects.models import Project
 from users.models import User
@@ -28,11 +28,7 @@ class TestProjectFSMIntegration(TestCase):
     def test_project_creation_triggers_fsm(self):
         """Test that creating a project triggers FSM transition"""
         # Create a project
-        project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user
-        )
+        project = Project.objects.create(title='Test Project', organization=self.organization, created_by=self.user)
 
         # Verify FSM state was created
         state = StateManager.get_current_state_value(project)
@@ -48,10 +44,7 @@ class TestProjectFSMIntegration(TestCase):
         """Test that changing project settings triggers FSM transition"""
         # Create a project
         project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user,
-            maximum_annotations=1
+            title='Test Project', organization=self.organization, created_by=self.user, maximum_annotations=1
         )
 
         # Change a state-affecting setting
@@ -77,11 +70,7 @@ class TestProjectFSMIntegration(TestCase):
     def test_project_non_state_change_no_fsm(self):
         """Test that non-state-affecting changes don't trigger FSM"""
         # Create a project
-        project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user
-        )
+        project = Project.objects.create(title='Test Project', organization=self.organization, created_by=self.user)
 
         # Change a non-state-affecting field
         project.description = 'Updated description'
@@ -99,7 +88,7 @@ class TestProjectFSMIntegration(TestCase):
             title='Test Project',
             organization=self.organization,
             created_by=self.user,
-            skip_fsm=True  # Skip FSM processing
+            skip_fsm=True,  # Skip FSM processing
         )
 
         # Verify no FSM state was created
@@ -114,7 +103,7 @@ class TestProjectFSMIntegration(TestCase):
             organization=self.organization,
             created_by=self.user,
             maximum_annotations=1,
-            overlap_cohort_percentage=50
+            overlap_cohort_percentage=50,
         )
 
         # Change multiple settings
@@ -135,11 +124,7 @@ class TestProjectFSMIntegration(TestCase):
     def test_project_state_metadata(self):
         """Test that FSM state records include proper metadata"""
         # Create a project
-        project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user
-        )
+        project = Project.objects.create(title='Test Project', organization=self.organization, created_by=self.user)
 
         # Get the state record
         state_record = StateManager.get_current_state_object(project)
@@ -168,11 +153,7 @@ class TestProjectFSMTransitions(TestCase):
 
     def test_project_created_transition_reason(self):
         """Test that project_created transition has correct reason"""
-        project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user
-        )
+        project = Project.objects.create(title='Test Project', organization=self.organization, created_by=self.user)
 
         state_record = StateManager.get_current_state_object(project)
         self.assertEqual(state_record.reason, 'Project created')
@@ -180,10 +161,7 @@ class TestProjectFSMTransitions(TestCase):
     def test_settings_changed_transition_includes_changed_fields(self):
         """Test that settings_changed transition records changed fields"""
         project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user,
-            maximum_annotations=1
+            title='Test Project', organization=self.organization, created_by=self.user, maximum_annotations=1
         )
 
         # Change setting
@@ -207,10 +185,7 @@ class TestProjectFSMTransitions(TestCase):
         """Test that publishing a project triggers FSM transition"""
         # Create an unpublished project
         project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user,
-            is_published=False
+            title='Test Project', organization=self.organization, created_by=self.user, is_published=False
         )
 
         # Publish the project
@@ -230,10 +205,7 @@ class TestProjectFSMTransitions(TestCase):
         """Test that unpublishing a project triggers FSM transition"""
         # Create a published project
         project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user,
-            is_published=True
+            title='Test Project', organization=self.organization, created_by=self.user, is_published=True
         )
 
         # Unpublish the project
@@ -252,10 +224,7 @@ class TestProjectFSMTransitions(TestCase):
         """Test publishing and unpublishing a project multiple times"""
         # Create project
         project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user,
-            is_published=False
+            title='Test Project', organization=self.organization, created_by=self.user, is_published=False
         )
 
         # Publish
@@ -279,4 +248,3 @@ class TestProjectFSMTransitions(TestCase):
         self.assertEqual(history[1].transition_name, 'project_unpublished')
         self.assertEqual(history[2].transition_name, 'project_published')
         self.assertEqual(history[3].transition_name, 'project_created')
-

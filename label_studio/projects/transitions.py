@@ -240,4 +240,3 @@ class ProjectUnpublishedTransition(ModelChangeTransition):
             'task_count': project.num_tasks if hasattr(project, 'num_tasks') else 0,
             'unpublished_by_id': context.current_user.id if context.current_user else None,
         }
-
