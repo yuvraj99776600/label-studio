@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from django.core import serializers
 from django.db import models
@@ -88,28 +88,75 @@ class HsModel(models.Model):
                 changed[field.name] = (old_value, new_value)
         return changed
 
-    def _determine_fsm_transition(self) -> Optional[str]:
+    def _determine_fsm_transitions(self) -> list:
         """
-        Determine which FSM transition should be triggered based on model state.
+        Determine which FSM transitions should be triggered based on model state.
 
-        Override this in subclasses to provide entity-specific transition logic.
-        This method is called after save() completes successfully.
+        This method automatically discovers registered transitions for this entity
+        and checks which ones should execute based on their trigger metadata.
+
+        Override this method ONLY if you need custom transition logic beyond
+        what the declarative triggers provide.
 
         Returns:
-            The transition name to execute, or None if no transition needed
+            List of transition names to execute (in order)
 
-        Example:
-            def _determine_fsm_transition(self) -> Optional[str]:
-                if self._state.adding:
-                    return 'annotation_submitted'
+        Note:
+            In most cases, you don't need to override this. Just register transitions
+            with appropriate trigger metadata using @register_state_transition decorator.
 
-                changed = self._get_changed_fields()
-                if 'was_cancelled' in changed and changed['was_cancelled'][1]:
-                    return 'annotation_cancelled'
+        Example of custom override (if needed):
+            def _determine_fsm_transitions(self) -> list:
+                # Get default transitions
+                transitions = super()._determine_fsm_transitions()
 
-                return None
+                # Add custom logic
+                if self.some_complex_condition():
+                    transitions.append('custom_transition')
+
+                return transitions
         """
-        return None
+        from fsm.registry import transition_registry
+
+        entity_name = self._meta.model_name
+        is_creating = self._state.adding
+        changed_fields = {} if is_creating else self._get_changed_fields()
+
+        # Get all registered transitions for this entity
+        registered_transitions = transition_registry.get_transitions_for_entity(entity_name)
+        if not registered_transitions:
+            return []
+
+        transitions_to_execute = []
+
+        for transition_name, transition_class in registered_transitions.items():
+            # Check if this transition should execute
+            should_execute = False
+
+            # Check creation trigger
+            if is_creating and getattr(transition_class, '_triggers_on_create', False):
+                should_execute = True
+
+            # Check update triggers
+            elif not is_creating and getattr(transition_class, '_triggers_on_update', True):
+                trigger_fields = getattr(transition_class, '_trigger_fields', [])
+
+                # If no specific fields, check if transition has custom logic
+                if not trigger_fields:
+                    # Let the transition's should_execute method decide
+                    # We'll add it and let it validate later
+                    should_execute = True
+                else:
+                    # Check if any trigger fields changed
+                    for field in trigger_fields:
+                        if field in changed_fields:
+                            should_execute = True
+                            break
+
+            if should_execute:
+                transitions_to_execute.append(transition_name)
+
+        return transitions_to_execute
 
     def _get_fsm_transition_data(self) -> Dict[str, Any]:
         """
@@ -182,24 +229,37 @@ class HsModel(models.Model):
         # Perform the actual save
         result = super().save(*args, **kwargs)
 
-        # After successful save, trigger FSM transition if enabled and not skipped
+        # After successful save, trigger FSM transitions if enabled and not skipped
         if not skip_fsm and self._should_execute_fsm():
             try:
-                transition_name = self._determine_fsm_transition()
-                if transition_name:
-                    self._execute_fsm_transition(
-                        transition_name=transition_name, is_creating=is_creating, changed_fields=changed_fields
-                    )
+                transitions = self._determine_fsm_transitions()
+                for transition_name in transitions:
+                    try:
+                        self._execute_fsm_transition(
+                            transition_name=transition_name, is_creating=is_creating, changed_fields=changed_fields
+                        )
+                    except Exception as e:
+                        # Log error for this specific transition but continue with others
+                        logger.error(
+                            f'FSM transition {transition_name} failed for {self.__class__.__name__} {self.pk}',
+                            extra={
+                                'event': 'fsm.transition_failed_on_save',
+                                'entity_type': self.__class__.__name__,
+                                'entity_id': self.pk,
+                                'transition_name': transition_name,
+                                'error': str(e),
+                                'is_creating': is_creating,
+                            },
+                            exc_info=True,
+                        )
             except Exception as e:
-                # Log error but don't break the save operation
-                # The model save succeeded, FSM transition failure is non-critical
+                # Log error in determining transitions
                 logger.error(
-                    f'FSM transition failed for {self.__class__.__name__} {self.pk}',
+                    f'FSM transition discovery failed for {self.__class__.__name__} {self.pk}',
                     extra={
-                        'event': 'fsm.transition_failed_on_save',
+                        'event': 'fsm.transition_discovery_failed',
                         'entity_type': self.__class__.__name__,
                         'entity_id': self.pk,
-                        'transition_name': transition_name,
                         'error': str(e),
                         'is_creating': is_creating,
                     },

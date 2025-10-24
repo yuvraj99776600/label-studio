@@ -335,23 +335,26 @@ class ModelChangeTransition(BaseTransition, Generic[EntityType, StateModelType])
     - Access to changed fields (old vs new values)
     - Knowledge of whether entity is being created or updated
     - Automatic integration with HsModel lifecycle
+    - Declarative trigger field specification
 
     Example usage:
-        @register_transition('task', 'task_created')
+        @register_state_transition('task', 'task_created', triggers_on_create=True)
         class TaskCreatedTransition(ModelChangeTransition[Task, TaskState]):
             @property
             def target_state(self) -> str:
                 return 'CREATED'
 
-            def should_execute(self, context: TransitionContext) -> bool:
-                # Only execute on creation
-                return context.metadata.get('is_creating', False)
+            def transition(self, context: TransitionContext) -> Dict[str, Any]:
+                return {'reason': 'Task created'}
+
+        @register_state_transition('task', 'task_labeled', triggers_on=['is_labeled'])
+        class TaskLabeledTransition(ModelChangeTransition[Task, TaskState]):
+            @property
+            def target_state(self) -> str:
+                return 'ANNOTATION_COMPLETE'
 
             def transition(self, context: TransitionContext) -> Dict[str, Any]:
-                return {
-                    'reason': 'Task created',
-                    'project_id': context.entity.project_id
-                }
+                return {'reason': 'Task became labeled'}
     """
 
     # Additional fields specific to model changes
@@ -359,6 +362,11 @@ class ModelChangeTransition(BaseTransition, Generic[EntityType, StateModelType])
         default_factory=dict, description="Fields that changed: {field_name: {'old': value, 'new': value}}"
     )
     is_creating: bool = Field(default=False, description='Whether this is a new entity creation')
+
+    # Class-level metadata for trigger configuration (set by decorator)
+    _triggers_on_create: bool = False
+    _triggers_on_update: bool = True
+    _trigger_fields: list = []  # Fields that trigger this transition
 
     def should_execute(self, context: TransitionContext[EntityType, StateModelType]) -> bool:
         """

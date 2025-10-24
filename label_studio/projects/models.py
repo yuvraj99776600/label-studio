@@ -19,6 +19,7 @@ from core.label_config import (
     get_sample_task,
     validate_label_config,
 )
+from core.models import HsModel
 from core.utils.common import (
     create_hash,
     get_attr_or_item,
@@ -114,7 +115,7 @@ ProjectMixin = load_func(settings.PROJECT_MIXIN)
 recalculate_all_stats = load_func(settings.RECALCULATE_ALL_STATS)
 
 
-class Project(ProjectMixin, models.Model):
+class Project(ProjectMixin, HsModel):
     class SkipQueue(models.TextChoices):
         # requeue to the end of the same annotator’s queue => annotator gets this task at the end of the queue
         REQUEUE_FOR_ME = 'REQUEUE_FOR_ME', 'Requeue for me'
@@ -819,6 +820,12 @@ class Project(ProjectMixin, models.Model):
                     summary.reset()
                 elif self.num_annotations == 0 and self.num_drafts == 0:
                     summary.reset(tasks_data_based=False)
+
+    # ============================================================================
+    # FSM Integration
+    # ============================================================================
+    # Project uses HsModel for FSM integration. All transition logic is defined
+    # in projects/transitions.py with declarative triggers. No custom methods needed.
 
     def get_member_ids(self):
         if hasattr(self, 'team_link'):
