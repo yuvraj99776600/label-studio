@@ -13,7 +13,7 @@ from typing import Any, Dict
 
 from fsm.registry import register_state_transition
 from fsm.state_choices import AnnotationStateChoices
-from fsm.transitions import ModelChangeTransition, TransitionContext, StateModelType
+from fsm.transitions import ModelChangeTransition, StateModelType, TransitionContext
 
 
 @register_state_transition('annotation', 'annotation_submitted', triggers_on_create=True)
@@ -212,8 +212,8 @@ class AnnotationUpdatedTransition(ModelChangeTransition):
 
         # Check if annotation is in REJECTED state - skip task evaluation if so
         try:
-            from fsm.state_manager import get_state_manager
             from core.current_request import CurrentContext
+            from fsm.state_manager import get_state_manager
 
             StateManager = get_state_manager()
             annotation_state = StateManager.get_current_state(annotation)
@@ -244,4 +244,3 @@ class AnnotationUpdatedTransition(ModelChangeTransition):
                 },
                 exc_info=True,
             )
-

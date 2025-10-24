@@ -77,4 +77,3 @@ class AnnotationDraftAutoSavedTransition(ModelChangeTransition):
             'lead_time': draft.lead_time,
             'changed_fields': list(self.changed_fields.keys()),
         }
-

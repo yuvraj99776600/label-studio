@@ -51,4 +51,3 @@ class TaskCreatedTransition(ModelChangeTransition):
             'data_keys': list(task.data.keys()) if task.data else [],
             'overlap': task.overlap,
         }
-
