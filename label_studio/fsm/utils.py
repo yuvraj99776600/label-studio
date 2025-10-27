@@ -1,179 +1,209 @@
 """
 FSM utility functions.
 
-Core utilities used across the FSM system for organization resolution,
-state retrieval, and UUID7 generation.
+This module provides:
+1. UUID7 utilities for time-series optimization (uses uuid-utils library)
+2. FSM-specific helper functions for organization resolution and state management
+
+UUID7 provides natural time ordering and global uniqueness, making it ideal
+for INSERT-only architectures with millions of records.
 """
 
 import logging
-import secrets
-import time
 import uuid
 from datetime import datetime, timezone
 from typing import Optional, Tuple
 
+import uuid_utils
 from core.current_request import CurrentContext
 from core.feature_flags import flag_set
-from django.db.models import UUIDField
 
 logger = logging.getLogger(__name__)
 
 
 # =============================================================================
-# UUID7 Utilities
+# UUID7 Utilities (using uuid-utils library)
 # =============================================================================
-
-
-class UUID7Generator:
-    """
-    Generator for UUID7 (time-ordered UUIDs).
-
-    UUID7 provides:
-    - Natural time ordering for time-series data
-    - Millisecond precision timestamps
-    - Global uniqueness
-    - Optimal for INSERT-only workloads
-    """
-
-    @staticmethod
-    def generate() -> uuid.UUID:
-        """Generate a new UUID7."""
-        # Get current time in milliseconds
-        timestamp_ms = int(time.time() * 1000)
-
-        # UUID7 structure:
-        # - 48 bits: timestamp in milliseconds
-        # - 4 bits: version (7)
-        # - 12 bits: random
-        # - 2 bits: variant (10)
-        # - 62 bits: random
-
-        # Create timestamp bytes (48 bits = 6 bytes)
-        timestamp_bytes = timestamp_ms.to_bytes(6, byteorder='big')
-
-        # Generate random bytes for the rest
-        random_bytes = secrets.token_bytes(10)
-
-        # Combine: timestamp (6) + random (10) = 16 bytes
-        uuid_bytes = timestamp_bytes + random_bytes
-
-        # Create UUID and set version/variant bits
-        uuid_int = int.from_bytes(uuid_bytes, byteorder='big')
-
-        # Set version to 7 (0111 in binary)
-        uuid_int = (uuid_int & ~(0xF << 76)) | (7 << 76)
-
-        # Set variant to RFC 4122 (10 in binary)
-        uuid_int = (uuid_int & ~(0x3 << 62)) | (0x2 << 62)
-
-        return uuid.UUID(int=uuid_int)
 
 
 def generate_uuid7() -> uuid.UUID:
     """
-    Generate a new UUID7.
+    Generate a UUID7 with embedded timestamp for natural time ordering.
+
+    UUID7 embeds the timestamp in the first 48 bits, providing:
+    - Natural chronological ordering without additional indexes
+    - Global uniqueness across distributed systems
+    - Time-based partitioning capabilities
 
     Returns:
-        A UUID7 instance with natural time ordering
+        UUID7 instance with embedded timestamp
     """
-    return UUID7Generator.generate()
+    # Use uuid-utils library for RFC 9562 compliant UUID7 generation
+    # Convert to standard uuid.UUID to maintain type consistency
+    uuid7_obj = uuid_utils.uuid7()
+    return uuid.UUID(str(uuid7_obj))
 
 
-def timestamp_from_uuid7(uuid7: uuid.UUID) -> datetime:
+def timestamp_from_uuid7(uuid7_id: uuid.UUID) -> datetime:
     """
-    Extract timestamp from a UUID7.
+    Extract timestamp from UUID7 ID.
 
     Args:
-        uuid7: A UUID7 instance
+        uuid7_id: UUID7 instance to extract timestamp from
 
     Returns:
-        Datetime object representing when the UUID was created
+        datetime: Timestamp embedded in the UUID7
+
+    Example:
+        uuid7_id = generate_uuid7()
+        timestamp = timestamp_from_uuid7(uuid7_id)
+        # timestamp is when the UUID7 was generated
     """
-    # Extract the first 48 bits (timestamp in milliseconds)
-    uuid_int = uuid7.int
-    timestamp_ms = uuid_int >> 80  # Shift right 80 bits to get the first 48 bits
-
-    # Convert milliseconds to datetime
-    timestamp_seconds = timestamp_ms / 1000.0
-    return datetime.fromtimestamp(timestamp_seconds, tz=timezone.utc)
+    # UUID7 embeds timestamp in first 48 bits
+    timestamp_ms = (uuid7_id.int >> 80) & ((1 << 48) - 1)
+    # Return with millisecond precision (UUID7 spec)
+    return datetime.fromtimestamp(timestamp_ms / 1000, tz=timezone.utc)
 
 
-def uuid7_from_timestamp(dt: datetime) -> uuid.UUID:
-    """
-    Create a UUID7 from a specific timestamp.
-
-    Args:
-        dt: Datetime to encode in the UUID
-
-    Returns:
-        A UUID7 with the specified timestamp
-    """
-    # Convert datetime to milliseconds
-    timestamp_ms = int(dt.timestamp() * 1000)
-
-    # Create timestamp bytes
-    timestamp_bytes = timestamp_ms.to_bytes(6, byteorder='big')
-
-    # Generate random bytes for the rest
-    random_bytes = secrets.token_bytes(10)
-
-    # Combine
-    uuid_bytes = timestamp_bytes + random_bytes
-    uuid_int = int.from_bytes(uuid_bytes, byteorder='big')
-
-    # Set version to 7
-    uuid_int = (uuid_int & ~(0xF << 76)) | (7 << 76)
-
-    # Set variant to RFC 4122
-    uuid_int = (uuid_int & ~(0x3 << 62)) | (0x2 << 62)
-
-    return uuid.UUID(int=uuid_int)
-
-
-def uuid7_time_range(start_time: datetime, end_time: datetime) -> Tuple[uuid.UUID, uuid.UUID]:
+def uuid7_time_range(start_time: datetime, end_time: Optional[datetime] = None) -> Tuple[uuid.UUID, uuid.UUID]:
     """
     Generate UUID7 range for time-based queries.
 
+    Creates UUID7 boundaries for efficient time-range filtering without
+    requiring timestamp indexes.
+
     Args:
         start_time: Start of time range
-        end_time: End of time range
+        end_time: End of time range (defaults to now)
 
     Returns:
         Tuple of (start_uuid, end_uuid) for range queries
+
+    Example:
+        start_uuid, end_uuid = uuid7_time_range(
+            datetime(2024, 1, 1),
+            datetime(2024, 1, 2)
+        )
+        # Query: WHERE id >= start_uuid AND id <= end_uuid
     """
-    return uuid7_from_timestamp(start_time), uuid7_from_timestamp(end_time)
+    if end_time is None:
+        end_time = datetime.now(timezone.utc)
+
+    # Add a small buffer to account for timing precision issues
+    start_timestamp_ms = int(start_time.timestamp() * 1000) - 1  # 1ms buffer before
+    end_timestamp_ms = int(end_time.timestamp() * 1000) + 1  # 1ms buffer after
+
+    # Create UUID7 with specific timestamp using proper bit layout
+    # UUID7 format: timestamp_ms(48) + ver(4) + rand_a(12) + var(2) + rand_b(62)
+    start_uuid = uuid.UUID(int=(start_timestamp_ms << 80) | (0x7 << 76) | (0b10 << 62))
+    end_uuid = uuid.UUID(int=(end_timestamp_ms << 80) | (0x7 << 76) | (0b10 << 62) | ((1 << 62) - 1))
+
+    return start_uuid, end_uuid
+
+
+def uuid7_from_timestamp(timestamp: datetime) -> uuid.UUID:
+    """
+    Generate UUID7 from specific timestamp for range queries.
+
+    Args:
+        timestamp: Timestamp to embed in UUID7
+
+    Returns:
+        UUID7 with embedded timestamp
+
+    Example:
+        # Get all states from the last hour
+        start_time = timezone.now() - timedelta(hours=1)
+        start_uuid = uuid7_from_timestamp(start_time)
+        states = StateModel.objects.filter(id__gte=start_uuid)
+    """
+    # Convert to milliseconds since epoch as uuid-utils expects
+    timestamp_ms = int(timestamp.timestamp() * 1000)
+
+    # Use uuid-utils with specific timestamp for range queries
+    # This creates a UUID7 with the given timestamp and minimal random bits
+    # for consistent range boundaries
+    return uuid.UUID(int=(timestamp_ms << 80) | (0x7 << 76) | (0b10 << 62))
 
 
 def validate_uuid7(uuid_value: uuid.UUID) -> bool:
     """
-    Validate that a UUID is version 7.
+    Validate that a UUID is a valid UUID7.
 
     Args:
         uuid_value: UUID to validate
 
     Returns:
-        True if the UUID is version 7
+        True if valid UUID7, False otherwise
     """
     return uuid_value.version == 7
 
 
-class UUID7Field(UUIDField):
+class UUID7Field:
     """
-    Django model field for UUID7.
+    Custom field utilities for UUID7 handling in Django models.
 
-    Provides the same interface as Django's UUIDField but with
-    UUID7 as the default value generator.
+    Provides helper methods for UUID7-specific operations that can be
+    used by models inheriting from BaseState.
     """
 
-    def __init__(self, *args, **kwargs):
-        # Set default to generate_uuid7 if not provided
-        if 'default' not in kwargs:
-            kwargs['default'] = generate_uuid7
-        super().__init__(*args, **kwargs)
+    @staticmethod
+    def get_latest_by_uuid7(queryset):
+        """Get latest record using UUID7 natural ordering"""
+        return queryset.order_by('-id').first()
+
+    @staticmethod
+    def filter_by_time_range(queryset, start_time: datetime, end_time: Optional[datetime] = None):
+        """Filter queryset by time range using UUID7 embedded timestamps"""
+        start_uuid, end_uuid = uuid7_time_range(start_time, end_time)
+        return queryset.filter(id__gte=start_uuid, id__lte=end_uuid)
+
+    @staticmethod
+    def filter_since_time(queryset, since: datetime):
+        """Filter queryset for records since a specific time"""
+        start_uuid = uuid7_from_timestamp(since)
+        return queryset.filter(id__gte=start_uuid)
+
+
+class UUID7Generator:
+    """
+    UUID7 generator with optional custom timestamp.
+
+    Useful for testing or when you need to generate UUIDs with specific timestamps.
+    """
+
+    def __init__(self, base_timestamp: Optional[datetime] = None):
+        """
+        Initialize generator with optional base timestamp.
+
+        Args:
+            base_timestamp: Base timestamp to use (defaults to current time)
+        """
+        self.base_timestamp = base_timestamp or datetime.now(timezone.utc)
+        self._counter = 0
+
+    def generate(self, offset_ms: int = 0) -> uuid.UUID:
+        """
+        Generate UUID7 with timestamp offset.
+
+        Args:
+            offset_ms: Millisecond offset from base timestamp
+
+        Returns:
+            UUID7 with adjusted timestamp
+        """
+        # For offset timestamps, use manual construction for precise control
+        timestamp_ms = int(self.base_timestamp.timestamp() * 1000) + offset_ms
+        self._counter += 1
+
+        # Create UUID7 with specific timestamp and counter for monotonicity
+        # UUID7 format: timestamp_ms(48) + ver(4) + rand_a(12) + var(2) + rand_b(62)
+        uuid_int = (timestamp_ms << 80) | (0x7 << 76) | ((self._counter & 0xFFF) << 64) | (0b10 << 62)
+        return uuid.UUID(int=uuid_int)
 
 
 # =============================================================================
-# FSM Helper Functions
+# FSM Helper Utilities
 # =============================================================================
 
 
