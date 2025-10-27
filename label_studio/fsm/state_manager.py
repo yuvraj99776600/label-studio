@@ -221,7 +221,8 @@ class StateManager:
 
         current_state = cls.get_current_state_value(entity)
 
-        # Prevent same-state transitions - only create state records for actual changes
+        # Prevent same-state transitions - only create state records for actual state changes
+        # This avoids creating redundant data when the effective state doesn't change
         if current_state == new_state:
             return True
 

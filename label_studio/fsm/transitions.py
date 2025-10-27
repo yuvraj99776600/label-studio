@@ -10,11 +10,8 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Generic, Optional, TypeVar
 
-from django.contrib.auth import get_user_model
 from django.db.models import Model
 from pydantic import BaseModel, ConfigDict, Field
-
-User = get_user_model()
 
 if TYPE_CHECKING:
     from fsm.models import BaseState
@@ -135,10 +132,15 @@ class BaseTransition(BaseModel, ABC, Generic[EntityType, StateModelType]):
         """
         Name of this transition for audit purposes.
 
-        Defaults to the class name in snake_case.
+        Returns the registered transition name from the decorator, or falls back
+        to the class name in snake_case.
         """
+        # Use the registered name if available (set by @register_state_transition decorator)
+        if hasattr(self.__class__, '_transition_name'):
+            return self.__class__._transition_name
+
+        # Fallback to class name in snake_case for backward compatibility
         class_name = self.__class__.__name__
-        # Convert CamelCase to snake_case
         result = ''
         for i, char in enumerate(class_name):
             if char.isupper() and i > 0:

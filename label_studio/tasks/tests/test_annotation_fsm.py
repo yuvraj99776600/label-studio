@@ -35,22 +35,17 @@ class TestAnnotationFSMIntegration(TestCase):
         self.organization = Organization.objects.create(title='Test Org')
         self.user.active_organization = self.organization
         self.user.save()
-        
+
         self.project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user
+            title='Test Project', organization=self.organization, created_by=self.user
         )
-        
-        self.task = Task.objects.create(
-            project=self.project,
-            data={'text': 'Test task'}
-        )
+
+        self.task = Task.objects.create(project=self.project, data={'text': 'Test task'})
 
     def test_annotation_creation_triggers_fsm(self):
         """
         Test that creating an annotation triggers FSM transition.
-        
+
         This test validates:
         - Annotation creation triggers annotation_submitted transition
         - FSM state is set to SUBMITTED
@@ -59,10 +54,7 @@ class TestAnnotationFSMIntegration(TestCase):
         """
         # Create an annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Verify FSM state was created
@@ -79,7 +71,7 @@ class TestAnnotationFSMIntegration(TestCase):
     def test_annotation_created_from_draft_flag(self):
         """
         Test that annotation created from draft uses correct transition.
-        
+
         This test validates:
         - Annotation with _created_from_draft flag triggers annotation_created_from_draft
         - FSM state is set to PENDING
@@ -87,12 +79,9 @@ class TestAnnotationFSMIntegration(TestCase):
         """
         # Create an annotation with _created_from_draft flag
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
-        
+
         # Set the flag (normally done by draft conversion logic)
         annotation._created_from_draft = True
         annotation._source_draft_id = 123
@@ -101,10 +90,7 @@ class TestAnnotationFSMIntegration(TestCase):
         # Note: The transition happens on create, not update, so we need to test differently
         # Let's create a fresh annotation with the flag set before save
         annotation2 = Annotation(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label2'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label2'}}]
         )
         annotation2._created_from_draft = True
         annotation2._source_draft_id = 456
@@ -119,7 +105,7 @@ class TestAnnotationFSMIntegration(TestCase):
         self.assertEqual(len(history), 1)
         self.assertEqual(history[0].transition_name, 'annotation_created_from_draft')
         self.assertEqual(history[0].reason, 'Annotation created from draft')
-        
+
         # Verify context includes draft_id
         self.assertIn('draft_id', history[0].context_data)
         self.assertEqual(history[0].context_data['draft_id'], 456)
@@ -127,7 +113,7 @@ class TestAnnotationFSMIntegration(TestCase):
     def test_annotation_skip_fsm_flag(self):
         """
         Test that skip_fsm flag prevents FSM transitions.
-        
+
         This test validates:
         - Annotations created with skip_fsm=True don't create FSM states
         - Useful for bulk imports or system operations
@@ -148,7 +134,7 @@ class TestAnnotationFSMIntegration(TestCase):
     def test_annotation_update_triggers_fsm(self):
         """
         Test that updating an annotation triggers FSM transition.
-        
+
         This test validates:
         - Annotation updates trigger annotation_updated transition
         - FSM records the update
@@ -156,10 +142,7 @@ class TestAnnotationFSMIntegration(TestCase):
         """
         # Create an annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Update the annotation
@@ -169,10 +152,10 @@ class TestAnnotationFSMIntegration(TestCase):
         # Verify FSM recorded the update
         history = StateManager.get_state_history(annotation, limit=10)
         self.assertEqual(len(history), 2)
-        
+
         # First state should be SUBMITTED
         self.assertEqual(history[1].transition_name, 'annotation_submitted')
-        
+
         # Second state should be UPDATED
         self.assertEqual(history[0].transition_name, 'annotation_updated')
         self.assertEqual(history[0].state, AnnotationStateChoices.UPDATED)
@@ -181,7 +164,7 @@ class TestAnnotationFSMIntegration(TestCase):
     def test_annotation_state_metadata(self):
         """
         Test that FSM state records include proper metadata.
-        
+
         This test validates:
         - State record has correct state value
         - State record has transition_name
@@ -191,10 +174,7 @@ class TestAnnotationFSMIntegration(TestCase):
         """
         # Create an annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Get the state record
@@ -227,22 +207,17 @@ class TestAnnotationFSMTransitions(TestCase):
         self.reviewer.active_organization = self.organization
         self.user.save()
         self.reviewer.save()
-        
+
         self.project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user
+            title='Test Project', organization=self.organization, created_by=self.user
         )
-        
-        self.task = Task.objects.create(
-            project=self.project,
-            data={'text': 'Test task'}
-        )
+
+        self.task = Task.objects.create(project=self.project, data={'text': 'Test task'})
 
     def test_annotation_submitted_transition(self):
         """
         Test annotation_submitted transition details.
-        
+
         This test validates:
         - Transition records task_id, project_id, completed_by_id
         - Transition records lead_time if available
@@ -253,15 +228,15 @@ class TestAnnotationFSMTransitions(TestCase):
             project=self.project,
             completed_by=self.user,
             result=[{'value': {'text': 'label'}}],
-            lead_time=125.5
+            lead_time=125.5,
         )
 
         state_record = StateManager.get_current_state_object(annotation)
-        
+
         # Verify transition details
         self.assertEqual(state_record.transition_name, 'annotation_submitted')
         self.assertEqual(state_record.reason, 'Annotation submitted for review')
-        
+
         # Verify context
         self.assertEqual(state_record.context_data['task_id'], self.task.id)
         self.assertEqual(state_record.context_data['project_id'], self.project.id)
@@ -271,7 +246,7 @@ class TestAnnotationFSMTransitions(TestCase):
     def test_annotation_updated_transition(self):
         """
         Test annotation_updated transition details.
-        
+
         This test validates:
         - Transition is triggered on updates
         - Context includes changed_fields
@@ -279,10 +254,7 @@ class TestAnnotationFSMTransitions(TestCase):
         """
         # Create annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Update result
@@ -296,14 +268,14 @@ class TestAnnotationFSMTransitions(TestCase):
         # Verify it's an update transition
         self.assertEqual(latest_state.transition_name, 'annotation_updated')
         self.assertEqual(latest_state.state, AnnotationStateChoices.UPDATED)
-        
+
         # Verify context includes changed_fields
         self.assertIn('changed_fields', latest_state.context_data)
 
     def test_annotation_completed_via_execute_transition(self):
         """
         Test annotation_completed transition triggered programmatically.
-        
+
         This test validates:
         - annotation_completed can be triggered via StateManager.execute_transition
         - State changes to COMPLETED
@@ -311,10 +283,7 @@ class TestAnnotationFSMTransitions(TestCase):
         """
         # Create annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Simulate completion (e.g., from TaskCompletionStrategy)
@@ -335,7 +304,7 @@ class TestAnnotationFSMTransitions(TestCase):
     def test_annotation_accepted_via_execute_transition(self):
         """
         Test annotation_accepted transition.
-        
+
         This test validates:
         - annotation_accepted can be triggered during review
         - State changes to ACCEPTED
@@ -343,10 +312,7 @@ class TestAnnotationFSMTransitions(TestCase):
         """
         # Create annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Simulate review acceptance
@@ -371,7 +337,7 @@ class TestAnnotationFSMTransitions(TestCase):
     def test_annotation_rejected_via_execute_transition(self):
         """
         Test annotation_rejected transition.
-        
+
         This test validates:
         - annotation_rejected can be triggered during review
         - State changes to REJECTED
@@ -379,20 +345,14 @@ class TestAnnotationFSMTransitions(TestCase):
         """
         # Create annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Simulate review rejection
         success = StateManager.execute_transition(
             entity=annotation,
             transition_name='annotation_rejected',
-            transition_data={
-                'reviewer_id': self.reviewer.id,
-                'rejection_reason': 'Incorrect labels'
-            },
+            transition_data={'reviewer_id': self.reviewer.id, 'rejection_reason': 'Incorrect labels'},
             user=self.reviewer,
             organization_id=self.organization.id,
         )
@@ -406,7 +366,7 @@ class TestAnnotationFSMTransitions(TestCase):
     def test_annotation_ground_truth_set_via_execute_transition(self):
         """
         Test annotation_ground_truth_set transition.
-        
+
         This test validates:
         - annotation_ground_truth_set can be triggered
         - State changes to GROUND_TRUTH
@@ -414,10 +374,7 @@ class TestAnnotationFSMTransitions(TestCase):
         """
         # Create annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Simulate ground truth being set
@@ -438,7 +395,7 @@ class TestAnnotationFSMTransitions(TestCase):
     def test_annotation_ground_truth_unset_via_execute_transition(self):
         """
         Test annotation_ground_truth_unset transition.
-        
+
         This test validates:
         - annotation_ground_truth_unset can be triggered
         - State changes back to previous state
@@ -446,10 +403,7 @@ class TestAnnotationFSMTransitions(TestCase):
         """
         # Create annotation and set as ground truth
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         StateManager.execute_transition(
@@ -485,22 +439,17 @@ class TestAnnotationFSMPostTransitionHooks(TestCase):
         self.organization = Organization.objects.create(title='Test Org')
         self.user.active_organization = self.organization
         self.user.save()
-        
+
         self.project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user
+            title='Test Project', organization=self.organization, created_by=self.user
         )
-        
-        self.task = Task.objects.create(
-            project=self.project,
-            data={'text': 'Test task'}
-        )
+
+        self.task = Task.objects.create(project=self.project, data={'text': 'Test task'})
 
     def test_annotation_submitted_triggers_task_annotation_started(self):
         """
         Test that annotation submission triggers task state change.
-        
+
         This test validates:
         - When first annotation is submitted, task transitions to ANNOTATION_IN_PROGRESS
         - Post-transition hook calls StateManager.execute_transition for task
@@ -511,11 +460,8 @@ class TestAnnotationFSMPostTransitionHooks(TestCase):
         self.assertEqual(task_state, TaskStateChoices.CREATED)
 
         # Create first annotation
-        annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+        Annotation.objects.create(
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Verify task state changed (via post_transition_hook)
@@ -530,7 +476,7 @@ class TestAnnotationFSMPostTransitionHooks(TestCase):
     def test_annotation_from_draft_triggers_task_annotation_started(self):
         """
         Test that annotation from draft also triggers task state change.
-        
+
         This test validates:
         - Annotation created from draft triggers task transition
         - Post-transition hook works for both creation paths
@@ -541,10 +487,7 @@ class TestAnnotationFSMPostTransitionHooks(TestCase):
 
         # Create annotation from draft
         annotation = Annotation(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
         annotation._created_from_draft = True
         annotation.save()
@@ -556,30 +499,24 @@ class TestAnnotationFSMPostTransitionHooks(TestCase):
     def test_second_annotation_doesnt_retrigger_task_transition(self):
         """
         Test that subsequent annotations don't re-trigger task_annotation_started.
-        
+
         This test validates:
         - Only the first annotation triggers task_annotation_started
         - Subsequent annotations don't create duplicate transitions
         - Task state remains ANNOTATION_IN_PROGRESS
         """
         # Create first annotation
-        annotation1 = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label1'}}]
+        Annotation.objects.create(
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label1'}}]
         )
 
         # Get initial task history count
         initial_task_history = StateManager.get_state_history(self.task, limit=10)
-        initial_count = len(initial_task_history)
+        len(initial_task_history)
 
         # Create second annotation
-        annotation2 = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label2'}}]
+        Annotation.objects.create(
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label2'}}]
         )
 
         # Verify task state is still ANNOTATION_IN_PROGRESS
@@ -589,12 +526,9 @@ class TestAnnotationFSMPostTransitionHooks(TestCase):
         # Verify no new task state transition was created
         # (TaskCompletionStrategy might create one, but not task_annotation_started)
         final_task_history = StateManager.get_state_history(self.task, limit=10)
-        
+
         # Check that task_annotation_started wasn't called again
-        annotation_started_count = sum(
-            1 for h in final_task_history 
-            if h.transition_name == 'task_annotation_started'
-        )
+        annotation_started_count = sum(1 for h in final_task_history if h.transition_name == 'task_annotation_started')
         self.assertEqual(annotation_started_count, 1)
 
 
@@ -607,32 +541,22 @@ class TestAnnotationFSMEdgeCases(TestCase):
         self.organization = Organization.objects.create(title='Test Org')
         self.user.active_organization = self.organization
         self.user.save()
-        
+
         self.project = Project.objects.create(
-            title='Test Project',
-            organization=self.organization,
-            created_by=self.user
+            title='Test Project', organization=self.organization, created_by=self.user
         )
-        
-        self.task = Task.objects.create(
-            project=self.project,
-            data={'text': 'Test task'}
-        )
+
+        self.task = Task.objects.create(project=self.project, data={'text': 'Test task'})
 
     def test_annotation_with_empty_result(self):
         """
         Test annotation creation with empty result.
-        
+
         This test validates:
         - Annotations can be created with empty result list
         - FSM still records the transition
         """
-        annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[]
-        )
+        annotation = Annotation.objects.create(task=self.task, project=self.project, completed_by=self.user, result=[])
 
         # Verify FSM state was created
         state = StateManager.get_current_state_value(annotation)
@@ -641,16 +565,13 @@ class TestAnnotationFSMEdgeCases(TestCase):
     def test_annotation_without_completed_by(self):
         """
         Test annotation creation without completed_by user.
-        
+
         This test validates:
         - Annotations can be created without completed_by
         - FSM handles None completed_by_id gracefully
         """
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=None,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=None, result=[{'value': {'text': 'label'}}]
         )
 
         # Verify FSM state was created
@@ -665,7 +586,7 @@ class TestAnnotationFSMEdgeCases(TestCase):
     def test_multiple_annotations_on_same_task(self):
         """
         Test that multiple annotations on the same task have independent states.
-        
+
         This test validates:
         - Each annotation gets its own FSM state
         - States don't interfere with each other
@@ -673,36 +594,30 @@ class TestAnnotationFSMEdgeCases(TestCase):
         """
         # Create multiple annotations
         annotation1 = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label1'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label1'}}]
         )
-        
+
         annotation2 = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label2'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label2'}}]
         )
 
         # Verify both have independent states
         state1 = StateManager.get_current_state_value(annotation1)
         state2 = StateManager.get_current_state_value(annotation2)
-        
+
         self.assertEqual(state1, AnnotationStateChoices.SUBMITTED)
         self.assertEqual(state2, AnnotationStateChoices.SUBMITTED)
 
         # Verify they have separate state records
         history1 = StateManager.get_state_history(annotation1, limit=10)
         history2 = StateManager.get_state_history(annotation2, limit=10)
-        
+
         self.assertNotEqual(history1[0].id, history2[0].id)
 
     def test_annotation_state_history_after_multiple_updates(self):
         """
         Test that annotation state history tracks multiple updates correctly.
-        
+
         This test validates:
         - Each update creates a new state record
         - State history is ordered correctly (newest first)
@@ -710,10 +625,7 @@ class TestAnnotationFSMEdgeCases(TestCase):
         """
         # Create annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'v1'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'v1'}}]
         )
 
         # Multiple updates
@@ -725,10 +637,10 @@ class TestAnnotationFSMEdgeCases(TestCase):
 
         # Verify state history
         history = StateManager.get_state_history(annotation, limit=10)
-        
+
         # Should have 3 records: 1 submitted + 2 updated
         self.assertEqual(len(history), 3)
-        
+
         # Check order (newest first)
         self.assertEqual(history[0].transition_name, 'annotation_updated')
         self.assertEqual(history[1].transition_name, 'annotation_updated')
@@ -742,7 +654,7 @@ class TestAnnotationFSMEdgeCases(TestCase):
     def test_annotation_workflow_lifecycle(self):
         """
         Test complete annotation lifecycle workflow.
-        
+
         This test validates:
         - Annotation can go through complete lifecycle
         - submitted -> updated -> accepted -> completed
@@ -750,10 +662,7 @@ class TestAnnotationFSMEdgeCases(TestCase):
         """
         # Create annotation
         annotation = Annotation.objects.create(
-            task=self.task,
-            project=self.project,
-            completed_by=self.user,
-            result=[{'value': {'text': 'label'}}]
+            task=self.task, project=self.project, completed_by=self.user, result=[{'value': {'text': 'label'}}]
         )
 
         # Update annotation
@@ -789,4 +698,3 @@ class TestAnnotationFSMEdgeCases(TestCase):
         # Verify final state
         current_state = StateManager.get_current_state_value(annotation)
         self.assertEqual(current_state, AnnotationStateChoices.COMPLETED)
-

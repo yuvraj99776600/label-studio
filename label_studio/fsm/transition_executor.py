@@ -67,13 +67,16 @@ def execute_transition_with_state_manager(
     current_state = current_state_object.state if current_state_object else None
 
     # Build transition context
+    # Extract organization_id from context_kwargs if provided, otherwise use entity's org_id
+    organization_id = context_kwargs.pop('organization_id', getattr(entity, 'organization_id', None))
+
     context = TransitionContext(
         entity=entity,
         current_user=user,
         current_state_object=current_state_object,
         current_state=current_state,
         target_state=transition.target_state,
-        organization_id=getattr(entity, 'organization_id', None),
+        organization_id=organization_id,
         **context_kwargs,
     )
 

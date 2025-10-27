@@ -2,11 +2,7 @@
 FSM Transitions for Annotation model.
 
 This module defines declarative transitions for the Annotation entity.
-
-Note: Annotation transitions have complex logic including:
-- Task state updates via post_transition_hooks
-- TaskCompletionStrategy evaluation for task state changes
-- Review workflow integration
+Annotation transitions can update related task states via post_transition_hooks.
 """
 
 from typing import Any, Dict
@@ -50,50 +46,13 @@ class AnnotationSubmittedTransition(ModelChangeTransition):
         }
 
     def post_transition_hook(self, context: TransitionContext, state_record: StateModelType) -> None:
-        """Handle task state updates and completion strategy."""
-        annotation = context.entity
-        task = annotation.task
-        user = context.current_user
+        """
+        Post-transition hook for annotation submission.
 
-        # If this is the first annotation on the task, transition task state
-        try:
-            from fsm.state_manager import get_state_manager
-
-            StateManager = get_state_manager()
-            task_current_state = StateManager.get_current_state(task)
-
-            if task_current_state == 'CREATED':
-                # Task should transition to ANNOTATION_IN_PROGRESS
-                StateManager.execute_transition(
-                    entity=task,
-                    transition_name='task_annotation_started',
-                    transition_data={'annotation_id': annotation.id},
-                    user=user,
-                    organization_id=context.organization_id,
-                )
-        except Exception:
-            # Log error but don't fail the annotation transition
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.error(
-                'Failed to update task state on annotation submission',
-                extra={
-                    'event': 'fsm.task_state_update_failed',
-                    'annotation_id': annotation.id,
-                    'task_id': annotation.task_id,
-                },
-                exc_info=True,
-            )
-
-        # Use task completion strategy to evaluate if task state should change
-        try:
-            # Only in LSE
-            from lse_fsm.task_completion_strategy import TaskCompletionStrategy
-
-            TaskCompletionStrategy.handle_annotation_change(annotation, user=user)
-        except ImportError:
-            pass
+        In LSO, task state management is minimal. In LSE, task state changes
+        are handled by TaskCompletionStrategy.
+        """
+        pass
 
 
 @register_state_transition('annotation', 'annotation_created_from_draft', triggers_on_create=True)
@@ -102,13 +61,14 @@ class AnnotationCreatedFromDraftTransition(ModelChangeTransition):
     Transition when an annotation is created from a draft.
 
     This transition is used when an annotation has the _created_from_draft flag set.
+    The annotation is transitioned to SUBMITTED state.
 
     Trigger: Automatically on creation when _created_from_draft is True
     """
 
     @property
     def target_state(self) -> str:
-        return AnnotationStateChoices.PENDING
+        return AnnotationStateChoices.SUBMITTED
 
     def should_execute(self, context: TransitionContext) -> bool:
         """Only execute if created from draft."""
@@ -133,7 +93,7 @@ class AnnotationCreatedFromDraftTransition(ModelChangeTransition):
         return context_data
 
     def post_transition_hook(self, context: TransitionContext, state_record: StateModelType) -> None:
-        """Handle task state updates and completion strategy."""
+        """Handle task state updates."""
         annotation = context.entity
         task = annotation.task
         user = context.current_user
@@ -143,10 +103,10 @@ class AnnotationCreatedFromDraftTransition(ModelChangeTransition):
             from fsm.state_manager import get_state_manager
 
             StateManager = get_state_manager()
-            task_current_state = StateManager.get_current_state(task)
+            task_current_state = StateManager.get_current_state_value(task)
 
             if task_current_state == 'CREATED':
-                # Task should transition to ANNOTATION_IN_PROGRESS
+                # Task should transition to IN_PROGRESS
                 StateManager.execute_transition(
                     entity=task,
                     transition_name='task_annotation_started',
@@ -169,78 +129,33 @@ class AnnotationCreatedFromDraftTransition(ModelChangeTransition):
                 exc_info=True,
             )
 
-        # Use task completion strategy to evaluate if task state should change
-        try:
-            # Only in LSE
-            from lse_fsm.task_completion_strategy import TaskCompletionStrategy
-
-            TaskCompletionStrategy.handle_annotation_change(annotation, user=user)
-        except ImportError:
-            pass
-
 
 @register_state_transition('annotation', 'annotation_updated', triggers_on_create=False, triggers_on_update=True)
 class AnnotationUpdatedTransition(ModelChangeTransition):
     """
     Transition when an annotation is updated.
 
-    This transition is triggered on any annotation update.
+    Updates keep the annotation in SUBMITTED state.
 
     Trigger: On update (triggers_on_create=False, triggers_on_update=True)
     """
 
     @property
     def target_state(self) -> str:
-        return AnnotationStateChoices.UPDATED
+        return AnnotationStateChoices.SUBMITTED
 
     def transition(self, context: TransitionContext) -> Dict[str, Any]:
         """Execute annotation update transition."""
         annotation = context.entity
 
         return {
-            'reason': 'Annotation updated after review feedback',
+            'reason': 'Annotation updated',
             'task_id': annotation.task_id,
             'project_id': annotation.project_id,
             'updated_by_id': getattr(annotation, 'updated_by_id', None),
-            'changed_fields': list(self.changed_fields.keys()),
+            'changed_fields': list(self.changed_fields.keys()) if self.changed_fields else [],
         }
 
     def post_transition_hook(self, context: TransitionContext, state_record: StateModelType) -> None:
-        """Handle task completion strategy evaluation."""
-        annotation = context.entity
-        user = context.current_user
-
-        # Check if annotation is in REJECTED state - skip task evaluation if so
-        try:
-            from core.current_request import CurrentContext
-            from fsm.state_manager import get_state_manager
-
-            StateManager = get_state_manager()
-            annotation_state = StateManager.get_current_state(annotation)
-
-            # Also check for review rejection in progress
-            review_rejection_in_progress = CurrentContext.get('review_rejection_in_progress', False)
-
-            if annotation_state != AnnotationStateChoices.REJECTED and not review_rejection_in_progress:
-                # Use task completion strategy to evaluate if task state should change
-                try:
-                    # Only in LSE
-                    from lse_fsm.task_completion_strategy import TaskCompletionStrategy
-
-                    TaskCompletionStrategy.handle_annotation_change(annotation, user=user)
-                except ImportError:
-                    pass
-        except Exception:
-            # Log error but don't fail the annotation transition
-            import logging
-
-            logger = logging.getLogger(__name__)
-            logger.error(
-                'Failed to evaluate task completion strategy on annotation update',
-                extra={
-                    'event': 'fsm.task_completion_strategy_failed',
-                    'annotation_id': annotation.id,
-                    'task_id': annotation.task_id,
-                },
-                exc_info=True,
-            )
+        """Post-transition hook for annotation updates."""
+        pass

@@ -339,10 +339,11 @@ def register_state_transition(
     """
 
     def decorator(transition_class: 'BaseTransition') -> 'BaseTransition':
-        # Store trigger metadata on the class
+        # Store trigger metadata and transition name on the class
         transition_class._triggers_on_create = triggers_on_create
         transition_class._triggers_on_update = triggers_on_update
         transition_class._trigger_fields = triggers_on or []
+        transition_class._transition_name = transition_name  # Store the registered transition name
 
         transition_registry.register(entity_name, transition_name, transition_class)
         return transition_class

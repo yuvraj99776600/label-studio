@@ -52,8 +52,22 @@ class HsModel(models.Model):
         super().__init__(*args, **kwargs)
         # Track original field values for change detection
         self._original_values = {}
-        if self.pk:
-            self._capture_original_values()
+        # Always capture original values, even for new instances
+        # This prevents false positives when detecting changes
+        self._capture_original_values()
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        """
+        Override from_db to capture original values when loading from database.
+
+        Django calls this method instead of __init__ when loading models from the database.
+        We need to capture the original field values here for change detection.
+        """
+        instance = super().from_db(db, field_names, values)
+        instance._original_values = {}
+        instance._capture_original_values()
+        return instance
 
     def _capture_original_values(self):
         """
@@ -88,12 +102,16 @@ class HsModel(models.Model):
                 changed[field.name] = (old_value, new_value)
         return changed
 
-    def _determine_fsm_transitions(self) -> list:
+    def _determine_fsm_transitions(self, is_creating: bool = None, changed_fields: dict = None) -> list:
         """
         Determine which FSM transitions should be triggered based on model state.
 
         This method automatically discovers registered transitions for this entity
         and checks which ones should execute based on their trigger metadata.
+
+        Args:
+            is_creating: Whether this is a creation. If None, checks self._state.adding
+            changed_fields: Dict of changed fields. If None, computes them.
 
         Override this method ONLY if you need custom transition logic beyond
         what the declarative triggers provide.
@@ -106,9 +124,9 @@ class HsModel(models.Model):
             with appropriate trigger metadata using @register_state_transition decorator.
 
         Example of custom override (if needed):
-            def _determine_fsm_transitions(self) -> list:
+            def _determine_fsm_transitions(self, is_creating=None, changed_fields=None) -> list:
                 # Get default transitions
-                transitions = super()._determine_fsm_transitions()
+                transitions = super()._determine_fsm_transitions(is_creating, changed_fields)
 
                 # Add custom logic
                 if self.some_complex_condition():
@@ -119,8 +137,26 @@ class HsModel(models.Model):
         from fsm.registry import transition_registry
 
         entity_name = self._meta.model_name
-        is_creating = self._state.adding
-        changed_fields = {} if is_creating else self._get_changed_fields()
+
+        # Use provided is_creating, or fall back to checking _state.adding
+        if is_creating is None:
+            is_creating = self._state.adding
+
+        # Use provided changed_fields, or compute them
+        if changed_fields is None:
+            changed_fields = {} if is_creating else self._get_changed_fields()
+
+        # Debug logging for transition determination
+        if entity_name == 'project' and not is_creating:
+            logger.debug(
+                f'FSM: Determining transitions for {entity_name}',
+                extra={
+                    'entity_id': self.pk,
+                    'is_creating': is_creating,
+                    'changed_fields': list(changed_fields.keys()),
+                    'changed_fields_detail': changed_fields,
+                },
+            )
 
         # Get all registered transitions for this entity
         registered_transitions = transition_registry.get_transitions_for_entity(entity_name)
@@ -130,7 +166,7 @@ class HsModel(models.Model):
         transitions_to_execute = []
 
         for transition_name, transition_class in registered_transitions.items():
-            # Check if this transition should execute
+            # Check if this transition should execute based on trigger metadata
             should_execute = False
 
             # Check creation trigger
@@ -152,6 +188,67 @@ class HsModel(models.Model):
                         if field in changed_fields:
                             should_execute = True
                             break
+
+            # If trigger metadata says we should execute, also check the transition's should_execute() method
+            if should_execute:
+                try:
+                    # Instantiate the transition to check should_execute() if it exists
+                    # We need a minimal context to check should_execute
+                    from fsm.transitions import TransitionContext
+
+                    # Create a temporary transition instance with is_creating set
+                    temp_transition = transition_class()
+                    # Set is_creating for ModelChangeTransition instances
+                    if hasattr(temp_transition, 'is_creating'):
+                        temp_transition.is_creating = is_creating
+
+                    # Check if should_execute is overridden (not using the base implementation)
+                    # The base implementation always returns True, so we only check if it's been customized
+                    from fsm.transitions import BaseTransition
+
+                    should_execute_method = getattr(type(temp_transition), 'should_execute', None)
+                    base_should_execute = getattr(BaseTransition, 'should_execute', None)
+
+                    # Only call should_execute if it's been overridden in the subclass
+                    if should_execute_method and should_execute_method != base_should_execute:
+                        # Build a minimal context for should_execute check
+                        from fsm.utils import get_current_state_safe
+
+                        current_state_obj = get_current_state_safe(self)
+                        current_state = current_state_obj.state if current_state_obj else None
+
+                        context = TransitionContext(
+                            entity=self,
+                            current_user=None,  # Will be set properly during execution
+                            current_state_object=current_state_obj,
+                            current_state=current_state,
+                            target_state=temp_transition.target_state,
+                            organization_id=getattr(self, 'organization_id', None),
+                        )
+
+                        # Call should_execute to do final filtering
+                        if not temp_transition.should_execute(context):
+                            should_execute = False
+                            logger.debug(
+                                f'FSM: Transition {transition_name} filtered out by should_execute()',
+                                extra={
+                                    'entity_type': entity_name,
+                                    'entity_id': self.pk,
+                                    'transition_name': transition_name,
+                                },
+                            )
+                except Exception as e:
+                    # If should_execute check fails, log but still add the transition
+                    # Let it fail during actual execution with proper error handling
+                    logger.debug(
+                        f'FSM: Error checking should_execute for {transition_name}: {e}',
+                        extra={
+                            'entity_type': entity_name,
+                            'entity_id': self.pk,
+                            'transition_name': transition_name,
+                            'error': str(e),
+                        },
+                    )
 
             if should_execute:
                 transitions_to_execute.append(transition_name)
@@ -230,9 +327,29 @@ class HsModel(models.Model):
         result = super().save(*args, **kwargs)
 
         # After successful save, trigger FSM transitions if enabled and not skipped
-        if not skip_fsm and self._should_execute_fsm():
+        should_execute = self._should_execute_fsm()
+        logger.debug(
+            f'FSM check for {self.__class__.__name__} {self.pk}: skip_fsm={skip_fsm}, should_execute={should_execute}',
+            extra={
+                'entity_type': self.__class__.__name__,
+                'entity_id': self.pk,
+                'skip_fsm': skip_fsm,
+                'should_execute': should_execute,
+            },
+        )
+        if not skip_fsm and should_execute:
             try:
-                transitions = self._determine_fsm_transitions()
+                # Pass is_creating and changed_fields that were captured before save()
+                transitions = self._determine_fsm_transitions(is_creating=is_creating, changed_fields=changed_fields)
+                logger.debug(
+                    f'FSM transitions determined for {self.__class__.__name__} {self.pk}: {transitions}',
+                    extra={
+                        'entity_type': self.__class__.__name__,
+                        'entity_id': self.pk,
+                        'transitions': transitions,
+                        'is_creating': is_creating,
+                    },
+                )
                 for transition_name in transitions:
                     try:
                         self._execute_fsm_transition(
