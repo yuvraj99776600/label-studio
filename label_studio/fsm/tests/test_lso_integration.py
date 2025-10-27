@@ -530,3 +530,27 @@ class TestLSOFSMUtilities:
         for project in projects:
             state = StateManager.get_current_state_value(project)
             assert state == ProjectStateChoices.CREATED
+
+    def test_fsm_disabled_via_current_context(self):
+        """
+        Test CurrentContext.set_fsm_disabled() directly.
+
+        Validates:
+        - Can disable FSM via CurrentContext
+        - is_fsm_enabled() respects the flag
+        - State is properly restored
+        """
+        from core.current_request import CurrentContext
+
+        # Initially enabled
+        assert is_fsm_enabled() is True
+
+        # Disable FSM
+        CurrentContext.set_fsm_disabled(True)
+        assert is_fsm_enabled() is False
+        assert CurrentContext.is_fsm_disabled() is True
+
+        # Re-enable FSM
+        CurrentContext.set_fsm_disabled(False)
+        assert is_fsm_enabled() is True
+        assert CurrentContext.is_fsm_disabled() is False

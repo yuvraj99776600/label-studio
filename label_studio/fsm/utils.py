@@ -255,7 +255,11 @@ def resolve_organization_id(entity=None, user=None):
 
 def is_fsm_enabled(user=None) -> bool:
     """
-    Check if FSM is enabled via feature flags.
+    Check if FSM is enabled via feature flags and thread-local override.
+
+    The check order is:
+    1. Check thread-local override (for test cleanup, bulk operations)
+    2. Check feature flag
 
     Args:
         user: User for feature flag evaluation (optional)
@@ -263,6 +267,11 @@ def is_fsm_enabled(user=None) -> bool:
     Returns:
         True if FSM should be active
     """
+    # Check thread-local override first
+    if CurrentContext.is_fsm_disabled():
+        return False
+
+    # Then check feature flag
     return flag_set('fflag_feat_fit_568_finite_state_management', user=user)
 
 
