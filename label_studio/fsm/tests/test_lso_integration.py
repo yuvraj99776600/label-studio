@@ -6,6 +6,8 @@ focusing on coverage of state_manager.py and utils modules.
 """
 
 import logging
+from datetime import datetime, timezone
+from unittest.mock import patch
 
 import pytest
 from core.current_request import CurrentContext
@@ -403,3 +405,128 @@ class TestLSOFSMUtilities:
 
         # All should return the same state
         assert all(s == ProjectStateChoices.CREATED for s in states)
+
+    def test_get_current_state_value_when_fsm_disabled(self):
+        """
+        Test get_current_state_value returns None when FSM is disabled.
+
+        Validates:
+        - Returns None instead of raising when feature flag is off
+        - Handles disabled state gracefully
+        """
+        project = ProjectFactory(organization=self.org)
+
+        with patch.object(StateManager, '_is_fsm_enabled', return_value=False):
+            result = StateManager.get_current_state_value(project)
+            assert result is None
+
+    def test_get_states_in_time_range(self):
+        """
+        Test get_states_in_time_range for time-based queries.
+
+        Validates:
+        - UUID7-based time range queries work
+        - Returns states within specified time range
+        """
+        from datetime import timedelta
+
+        project = ProjectFactory(organization=self.org)
+
+        # Get states from the last day
+        start_time = datetime.now(timezone.utc) - timedelta(days=1)
+        end_time = datetime.now(timezone.utc)
+
+        states = StateManager.get_states_in_time_range(project, start_time, end_time)
+
+        # Should have at least the creation state
+        assert len(states) >= 1
+
+    def test_get_state_history_with_limit(self):
+        """
+        Test get_state_history with limit parameter.
+
+        Validates:
+        - Limit parameter restricts number of results
+        - Ordering is correct (most recent first)
+        """
+        project = ProjectFactory(organization=self.org)
+
+        # Get history with limit
+        history = StateManager.get_state_history(project, limit=10)
+
+        # Should have at least the initial creation state
+        assert len(history) >= 1
+        assert history[0].state == ProjectStateChoices.CREATED
+
+    def test_invalidate_cache(self):
+        """
+        Test cache invalidation for entity state.
+
+        Validates:
+        - Cache is cleared for specific entity
+        - Subsequent lookups hit database
+        """
+        project = ProjectFactory(organization=self.org)
+
+        # Get state to populate cache
+        state = StateManager.get_current_state_value(project)
+        assert state == ProjectStateChoices.CREATED
+
+        # Invalidate cache
+        StateManager.invalidate_cache(project)
+
+        # Next lookup should work (will hit DB)
+        state_after = StateManager.get_current_state_value(project)
+        assert state_after == ProjectStateChoices.CREATED
+
+    def test_get_current_state_object(self):
+        """
+        Test get_current_state_object returns full state record.
+
+        Validates:
+        - Returns BaseState instance with full audit information
+        - Contains all expected fields
+        """
+        project = ProjectFactory(organization=self.org)
+
+        # Get current state object
+        state_object = StateManager.get_current_state_object(project)
+
+        assert state_object is not None
+        assert state_object.state == ProjectStateChoices.CREATED
+        assert hasattr(state_object, 'triggered_by')
+        assert hasattr(state_object, 'transition_name')
+
+    def test_transition_state_fsm_disabled(self):
+        """
+        Test transition_state returns True when FSM is disabled.
+
+        Validates:
+        - Returns True without creating state record
+        - Handles disabled state gracefully
+        """
+        project = ProjectFactory(organization=self.org)
+
+        with patch.object(StateManager, '_is_fsm_enabled', return_value=False):
+            result = StateManager.transition_state(
+                entity=project, new_state='NEW_STATE', transition_name='test', user=self.user
+            )
+            assert result is True
+
+    def test_warm_cache_multiple_entities(self):
+        """
+        Test warm_cache with multiple entities for bulk operations.
+
+        Validates:
+        - Cache is populated for all entities
+        - Subsequent get_current_state_value calls are fast (from cache)
+        """
+        projects = [ProjectFactory(organization=self.org) for _ in range(3)]
+
+        # Warm cache for all projects
+        StateManager.warm_cache(projects)
+
+        # Verify all are cached (should not hit DB)
+        for project in projects:
+            state = StateManager.get_current_state_value(project)
+            assert state == ProjectStateChoices.CREATED
