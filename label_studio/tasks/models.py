@@ -775,24 +775,21 @@ class Annotation(AnnotationMixin, HsModel):
 
     def delete(self, *args, **kwargs):
         # Store task and project references before deletion
-        task = self.task
-        project = self.project
 
         result = super().delete(*args, **kwargs)
         self.update_task()
         self.on_delete_update_counters()
-
-        # FSM: Update task state if no annotations remain
-        self._update_task_state_after_deletion(task, project)
 
         return result
 
     def _update_task_state_after_deletion(self, task, project):
         from core.current_request import CurrentContext
         from fsm.state_choices import TaskStateChoices
-        from fsm.state_manager import StateManager
+        from fsm.state_manager import get_state_manager
         from fsm.utils import is_fsm_enabled
         from projects.transitions import update_project_state_after_task_change
+
+        StateManager = get_state_manager()
 
         # Get user from context for FSM
         user = CurrentContext.get_user()
