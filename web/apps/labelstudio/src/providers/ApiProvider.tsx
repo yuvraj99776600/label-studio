@@ -74,45 +74,6 @@ export const ApiProvider = forwardRef<ApiContextType, PropsWithChildren<Record<s
   const toast = useToast();
 
   /**
-   * Handles errors with Label Studio-specific logic including:
-   * - Toast notifications for 4xx errors
-   * - Modal errors for validation errors
-   * - Sentry logging for server errors
-   */
-  const handleError = useCallback(
-    (errorDetails: FormattedError, result: ApiResponse) => {
-      const status = result.$meta?.status;
-      const is4xx = status?.toString().startsWith("4");
-      const containsValidationErrors =
-        isDefined(result.response?.validation_errors) && Object.keys(result.response.validation_errors).length > 0;
-
-      // Log to Sentry for non-4xx or errors with stacktraces
-      if ((!is4xx || result.response?.exc_info) && result.error) {
-        captureException(new Error(result.error), {
-          extra: {
-            status,
-            server_stacktrace: result.response?.exc_info,
-            server_version: result.response?.version,
-          },
-        });
-      }
-
-      // Show toast for 4xx without validation errors
-      if (IMPROVE_GLOBAL_ERROR_MESSAGES && is4xx && !containsValidationErrors) {
-        toast?.show({
-          message: `${errorDetails.title}: ${errorDetails.message}`,
-          type: ToastType.error,
-          duration: API_ERROR_TOAST_DURATION,
-        });
-      } else {
-        // Show modal for validation errors or non-4xx
-        displayErrorModal(errorDetails);
-      }
-    },
-    [toast],
-  );
-
-  /**
    * Handles fatal errors like 401 and 404.
    */
   const handleFatalError = useCallback((errorDetails: FormattedError, result: ApiResponse) => {
@@ -140,6 +101,51 @@ export const ApiProvider = forwardRef<ApiContextType, PropsWithChildren<Record<s
       location.href = redirectUrl;
     }
   }, []);
+
+  /**
+   * Handles errors with Label Studio-specific logic including:
+   * - Toast notifications for 4xx errors
+   * - Modal errors for validation errors
+   * - Sentry logging for server errors
+   */
+  const handleError = useCallback(
+    (errorDetails: FormattedError, result: ApiResponse) => {
+      const status = result.$meta?.status;
+      const is4xx = status?.toString().startsWith("4");
+      const containsValidationErrors =
+        isDefined(result.response?.validation_errors) && Object.keys(result.response.validation_errors).length > 0;
+
+      // Handle fatal errors first (404, 401)
+      if (status === 404 || status === 401) {
+        handleFatalError(errorDetails, result);
+        return;
+      }
+
+      // Log to Sentry for non-4xx or errors with stacktraces
+      if ((!is4xx || result.response?.exc_info) && result.error) {
+        captureException(new Error(result.error), {
+          extra: {
+            status,
+            server_stacktrace: result.response?.exc_info,
+            server_version: result.response?.version,
+          },
+        });
+      }
+
+      // Show toast for 4xx without validation errors
+      if (IMPROVE_GLOBAL_ERROR_MESSAGES && is4xx && !containsValidationErrors) {
+        toast?.show({
+          message: `${errorDetails.title}: ${errorDetails.message}`,
+          type: ToastType.error,
+          duration: API_ERROR_TOAST_DURATION,
+        });
+      } else {
+        // Show modal for validation errors or non-4xx
+        displayErrorModal(errorDetails);
+      }
+    },
+    [toast, handleFatalError],
+  );
 
   // Check for redirect messages on mount
   useEffect(() => {
