@@ -306,6 +306,7 @@ def register_state_transition(
     triggers_on_create: bool = False,
     triggers_on_update: bool = True,
     triggers_on: list = None,
+    force_state_record: bool = False,
 ):
     """
     Decorator to register a state transition class with trigger metadata.
@@ -319,6 +320,7 @@ def register_state_transition(
         triggers_on_create: If True, triggers when entity is created
         triggers_on_update: If True, can trigger on updates (default: True)
         triggers_on: List of field names that trigger this transition
+        force_state_record: If True, creates state record even if state doesn't change (for audit trails)
 
     Example:
         # Trigger only on creation
@@ -344,6 +346,7 @@ def register_state_transition(
         transition_class._triggers_on_update = triggers_on_update
         transition_class._trigger_fields = triggers_on or []
         transition_class._transition_name = transition_name  # Store the registered transition name
+        transition_class._force_state_record = force_state_record  # Store whether to force state record creation
 
         transition_registry.register(entity_name, transition_name, transition_class)
         return transition_class

@@ -754,7 +754,7 @@ class Annotation(AnnotationMixin, HsModel):
             self.task.updated_by = request.user
             update_fields.append('updated_by')
 
-        self.task.save(update_fields=update_fields)
+        self.task.save(update_fields=update_fields, skip_fsm=True)
 
     def save(self, *args, update_fields=None, **kwargs):
         request = get_current_request()
@@ -774,13 +774,51 @@ class Annotation(AnnotationMixin, HsModel):
         return result
 
     def delete(self, *args, **kwargs):
+        # Store task and project references before deletion
+        task = self.task
+        project = self.project
+
         result = super().delete(*args, **kwargs)
         self.update_task()
         self.on_delete_update_counters()
+
+        # FSM: Update task state if no annotations remain
+        self._update_task_state_after_deletion(task, project)
+
         return result
+
+    def _update_task_state_after_deletion(self, task, project):
+        from core.current_request import CurrentContext
+        from fsm.state_choices import TaskStateChoices
+        from fsm.state_manager import StateManager
+        from fsm.utils import is_fsm_enabled
+        from projects.transitions import update_project_state_after_task_change
+
+        # Get user from context for FSM
+        user = CurrentContext.get_user()
+
+        if not is_fsm_enabled(user=user):
+            return
+
+        # Task is not labeled, move task back to IN_PROGRESS
+        current_task_state = StateManager.get_current_state_value(task)
+
+        if current_task_state == TaskStateChoices.COMPLETED and not task.is_labeled:
+
+            StateManager.execute_transition(entity=task, transition_name='task_in_progress', user=user)
+
+            # Update project state based on task changes
+            update_project_state_after_task_change(project, user=user)
+        elif current_task_state == TaskStateChoices.IN_PROGRESS and task.is_labeled:
+            StateManager.execute_transition(entity=task, transition_name='task_completed', user=user)
+
+            # Update project state based on task changes
+            update_project_state_after_task_change(project, user=user)
 
     def on_delete_update_counters(self):
         task = self.task
+        project = self.project
+
         logger.debug(f'Start updating counters for task {task.id}.')
         if self.was_cancelled:
             cancelled = task.annotations.all().filter(was_cancelled=True).count()
@@ -794,6 +832,9 @@ class Annotation(AnnotationMixin, HsModel):
         logger.debug(f'Update task stats for task={task}')
         task.update_is_labeled()
         Task.objects.filter(id=task.id).update(is_labeled=task.is_labeled)
+
+        # FSM: Update task state
+        self._update_task_state_after_deletion(task, project)
 
         # remove annotation counters in project summary followed by deleting an annotation
         logger.debug('Remove annotation counters in project summary followed by deleting an annotation')
@@ -998,7 +1039,7 @@ class Prediction(models.Model):
             self.task.updated_by = request.user
             update_fields.append('updated_by')
 
-        self.task.save(update_fields=update_fields)
+        self.task.save(update_fields=update_fields, skip_fsm=True)
 
     def save(self, *args, update_fields=None, **kwargs):
         if self.project_id is None and self.task_id:
@@ -1308,7 +1349,7 @@ def update_project_summary_annotations_and_is_labeled(sender, instance, created,
     else:
         instance.task.total_annotations = instance.task.annotations.all().filter(was_cancelled=False).count()
     instance.task.update_is_labeled()
-    instance.task.save(update_fields=['is_labeled', 'total_annotations', 'cancelled_annotations'])
+    instance.task.save(update_fields=['is_labeled', 'total_annotations', 'cancelled_annotations'], skip_fsm=True)
     logger.debug(f'Updated total_annotations and cancelled_annotations for {instance.task.id}.')
 
 

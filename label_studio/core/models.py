@@ -344,11 +344,25 @@ class HsModel(models.Model):
             # If no user in context (e.g., tests without explicit setup), return False
             try:
                 user = CurrentContext.get_user()
+                user_type = type(user).__name__ if user else None
+                user_authenticated = getattr(user, 'is_authenticated', None) if user else None
+                logger.info(
+                    f'FSM check for {self.__class__.__name__}(id={getattr(self, "pk", None)}): '
+                    f'user_type={user_type}, authenticated={user_authenticated}'
+                )
                 if user is None:
+                    logger.info(f'FSM check: User is None, skipping FSM for {self.__class__.__name__}')
+                    return False
+                # Check if user is authenticated (not AnonymousUser)
+                if not user.is_authenticated:
+                    logger.info(
+                        f'FSM check: User {user_type} not authenticated, skipping FSM for {self.__class__.__name__}'
+                    )
                     return False
             except Exception:
                 # CurrentContext not available or no user set
                 # This is expected in tests that don't set up context
+                logger.info(f'FSM check: Exception getting user, skipping FSM for {self.__class__.__name__}')
                 return False
 
             return is_fsm_enabled(user=user)

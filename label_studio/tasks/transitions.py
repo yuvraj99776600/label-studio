@@ -15,7 +15,7 @@ from fsm.state_choices import TaskStateChoices
 from fsm.transitions import ModelChangeTransition, TransitionContext
 
 
-@register_state_transition('task', 'task_created', triggers_on_create=True)
+@register_state_transition('task', 'task_created', triggers_on_create=True, triggers_on_update=False)
 class TaskCreatedTransition(ModelChangeTransition):
     """
     Transition when a new task is created.
@@ -53,5 +53,64 @@ class TaskCreatedTransition(ModelChangeTransition):
             'reason': 'Task created in the system',
             'project_id': task.project_id,
             'data_keys': list(task.data.keys()) if task.data else [],
-            'overlap': task.overlap,
+        }
+
+
+# Note: Task state transitions (COMPLETED, IN_PROGRESS) are triggered by annotation changes
+# via post_transition_hooks in annotation transitions, not by direct task model changes.
+
+
+@register_state_transition('task', 'task_completed', triggers_on_create=False, triggers_on_update=False)
+class TaskCompletedTransition(ModelChangeTransition):
+    """
+    Transition when task moves to COMPLETED state.
+
+    Triggered when: First annotation is submitted on this task
+    From: CREATED -> COMPLETED or IN_PROGRESS -> COMPLETED
+    """
+
+    @property
+    def target_state(self) -> str:
+        return TaskStateChoices.COMPLETED
+
+    def get_reason(self, context: TransitionContext) -> str:
+        return 'Task completed - annotation submitted'
+
+    def transition(self, context: TransitionContext) -> Dict[str, Any]:
+        task = context.entity
+        return {
+            'reason': 'Task completed - annotation submitted',
+            'task_id': task.id,
+            'project_id': task.project_id,
+            'total_annotations': task.total_annotations,
+            'cancelled_annotations': task.cancelled_annotations,
+            'is_labeled': task.is_labeled,
+        }
+
+
+@register_state_transition('task', 'task_in_progress', triggers_on_create=False, triggers_on_update=False)
+class TaskInProgressTransition(ModelChangeTransition):
+    """
+    Transition when task moves to IN_PROGRESS state.
+
+    Triggered when: All annotations are deleted from a completed task
+    From: COMPLETED -> IN_PROGRESS
+    """
+
+    @property
+    def target_state(self) -> str:
+        return TaskStateChoices.IN_PROGRESS
+
+    def get_reason(self, context: TransitionContext) -> str:
+        return 'Task moved to in progress - annotations deleted'
+
+    def transition(self, context: TransitionContext) -> Dict[str, Any]:
+        task = context.entity
+        return {
+            'reason': 'Task moved to in progress - annotations deleted',
+            'task_id': task.id,
+            'project_id': task.project_id,
+            'total_annotations': task.total_annotations,
+            'cancelled_annotations': task.cancelled_annotations,
+            'is_labeled': task.is_labeled,
         }

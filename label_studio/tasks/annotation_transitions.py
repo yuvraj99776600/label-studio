@@ -12,14 +12,14 @@ from fsm.state_choices import AnnotationStateChoices
 from fsm.transitions import ModelChangeTransition, StateModelType, TransitionContext
 
 
-@register_state_transition('annotation', 'annotation_submitted', triggers_on_create=True)
+@register_state_transition('annotation', 'annotation_submitted', triggers_on_create=True, triggers_on_update=False)
 class AnnotationSubmittedTransition(ModelChangeTransition):
     """
     Transition when an annotation is submitted.
 
     This is the default transition for newly created annotations.
 
-    Trigger: Automatically on creation (triggers_on_create=True)
+    Trigger: Automatically on creation only (triggers_on_create=True, triggers_on_update=False)
     """
 
     @property
@@ -46,20 +46,38 @@ class AnnotationSubmittedTransition(ModelChangeTransition):
         """
         Post-transition hook for annotation submission.
 
-        In LSO, task state management is minimal. In LSE, task state changes
-        are handled by TaskCompletionStrategy.
+        Updates task state to COMPLETED when annotation is submitted.
+        Then updates project state based on task completion status.
         """
-        pass
+        from fsm.state_choices import TaskStateChoices
+        from fsm.state_manager import StateManager
+        from projects.transitions import update_project_state_after_task_change
+
+        annotation = context.entity
+        task = annotation.task
+        project = annotation.project
+
+        # Get current task state
+        current_task_state = StateManager.get_current_state_value(task)
+
+        # Transition task to COMPLETED if not already
+        if current_task_state != TaskStateChoices.COMPLETED:
+            StateManager.execute_transition(entity=task, transition_name='task_completed', user=context.current_user)
+
+        # Update project state based on task changes
+        update_project_state_after_task_change(project, user=context.current_user)
 
 
-@register_state_transition('annotation', 'annotation_updated', triggers_on_create=False, triggers_on_update=True)
+@register_state_transition(
+    'annotation', 'annotation_updated', triggers_on_create=False, triggers_on_update=True, force_state_record=True
+)
 class AnnotationUpdatedTransition(ModelChangeTransition):
     """
     Transition when an annotation is updated.
 
-    Updates keep the annotation in SUBMITTED state.
+    Updates keep the annotation in SUBMITTED state but create audit trail records.
 
-    Trigger: On update (triggers_on_create=False, triggers_on_update=True)
+    Trigger: On update (triggers_on_create=False, triggers_on_update=True, force_state_record=True)
     """
 
     @property

@@ -176,6 +176,7 @@ class StateManager:
         organization_id=None,
         context: Dict[str, Any] = None,
         reason: str = '',
+        force_state_record: bool = False,
     ) -> bool:
         """
         Perform state transition with audit trail.
@@ -193,6 +194,7 @@ class StateManager:
             organization_id: Organization ID
             context: Additional context data
             reason: Human-readable reason for transition
+            force_state_record: If True, creates state record even if state doesn't change (for audit trails)
 
         Returns:
             True if transition succeeded, False otherwise
@@ -223,7 +225,8 @@ class StateManager:
 
         # Prevent same-state transitions - only create state records for actual state changes
         # This avoids creating redundant data when the effective state doesn't change
-        if current_state == new_state:
+        # However, allow forced state records for audit trails (e.g., annotation updates)
+        if current_state == new_state and not force_state_record:
             return True
 
         # Optimistic concurrency control using cache-based locking

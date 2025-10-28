@@ -121,6 +121,9 @@ def execute_transition_with_state_manager(
         transition.post_transition_hook(context, None)
         return None
 
+    # Check if this transition forces state record creation (for audit trails)
+    force_state_record = getattr(transition, '_force_state_record', False)
+
     success = state_manager_class.transition_state(
         entity=entity,
         new_state=transition.target_state,
@@ -128,6 +131,7 @@ def execute_transition_with_state_manager(
         user=user,
         context=transition_context_data,
         reason=transition.get_reason(context),
+        force_state_record=force_state_record,
     )
 
     if not success:

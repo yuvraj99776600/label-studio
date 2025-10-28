@@ -56,80 +56,147 @@ class ProjectCreatedTransition(ModelChangeTransition):
         }
 
 
-@register_state_transition(
-    'project',
-    'project_settings_changed',
-    triggers_on_create=False,
-    triggers_on=[
-        'maximum_annotations',
-        'overlap_cohort_percentage',
-        'show_overlap_first',
-        'skip_queue',
-    ],
-)
-class ProjectSettingsChangedTransition(ModelChangeTransition):
+# Note: Project state transitions (IN_PROGRESS, COMPLETED) are triggered by task state changes
+# via update_project_state_after_task_change() helper function, not by direct project model changes.
+
+
+@register_state_transition('project', 'project_in_progress', triggers_on_create=False, triggers_on_update=False)
+class ProjectInProgressTransition(ModelChangeTransition):
     """
-    Transition when project settings that affect task states change.
+    Transition when project moves to IN_PROGRESS state.
 
-    This transition is triggered when settings like maximum_annotations,
-    overlap_cohort_percentage, show_overlap_first, or skip_queue change,
-    as these affect how tasks are completed and their FSM states.
-
-    Trigger: Any of the state-affecting fields change (declaratively defined)
+    Triggered when: First annotation is submitted on any task
+    From: CREATED -> IN_PROGRESS
     """
 
     @property
     def target_state(self) -> str:
-        # Settings changes keep the current state
-        # We can't access context here as it's not set yet, so we default to CREATED
-        # The actual state record will reflect the proper before/after states
-        return ProjectStateChoices.CREATED
-
-    def should_execute(self, context: TransitionContext) -> bool:
-        """Only execute on updates, never on creation."""
-        return not self.is_creating
+        return ProjectStateChoices.IN_PROGRESS
 
     def get_reason(self, context: TransitionContext) -> str:
-        """Return detailed reason for project settings change."""
-        return 'Project settings changed'
+        return 'Project moved to in progress - first annotation submitted'
 
     def transition(self, context: TransitionContext) -> Dict[str, Any]:
-        """
-        Execute project settings change transition.
-
-        Args:
-            context: Transition context containing project and user information
-
-        Returns:
-            Context data including which fields changed
-        """
         project = context.entity
-
-        # Identify which state-affecting fields changed
-        changed_settings = {}
-        for field_name, field_data in self.changed_fields.items():
-            if field_name in [
-                'maximum_annotations',
-                'overlap_cohort_percentage',
-                'show_overlap_first',
-                'skip_queue',
-            ]:
-                changed_settings[field_name] = field_data
-
         return {
-            'reason': 'Project settings changed',
+            'reason': 'Project moved to in progress - first annotation submitted',
             'organization_id': project.organization_id,
-            'changed_settings': changed_settings,
-            'maximum_annotations': project.maximum_annotations,
-            'overlap_cohort_percentage': project.overlap_cohort_percentage,
-            'show_overlap_first': project.show_overlap_first,
-            'skip_queue': project.skip_queue,
+            'total_tasks': project.tasks.count(),
         }
 
-    def post_transition_hook(self, context: TransitionContext, state_record) -> None:
-        """
-        Post-transition hook for settings changes.
 
-        Settings changes are recorded but don't require additional processing in LSO.
-        """
-        pass
+@register_state_transition('project', 'project_completed', triggers_on_create=False, triggers_on_update=False)
+class ProjectCompletedTransition(ModelChangeTransition):
+    """
+    Transition when project moves to COMPLETED state.
+
+    Triggered when: All tasks in project are COMPLETED
+    From: IN_PROGRESS -> COMPLETED
+    """
+
+    @property
+    def target_state(self) -> str:
+        return ProjectStateChoices.COMPLETED
+
+    def get_reason(self, context: TransitionContext) -> str:
+        return 'Project completed - all tasks completed'
+
+    def transition(self, context: TransitionContext) -> Dict[str, Any]:
+        project = context.entity
+        return {
+            'reason': 'Project completed - all tasks completed',
+            'organization_id': project.organization_id,
+            'total_tasks': project.tasks.count(),
+        }
+
+
+@register_state_transition(
+    'project', 'project_in_progress_from_completed', triggers_on_create=False, triggers_on_update=False
+)
+class ProjectInProgressFromCompletedTransition(ModelChangeTransition):
+    """
+    Transition when project moves back to IN_PROGRESS from COMPLETED.
+
+    Triggered when: Any task becomes not COMPLETED (e.g., annotations deleted)
+    From: COMPLETED -> IN_PROGRESS
+    """
+
+    @property
+    def target_state(self) -> str:
+        return ProjectStateChoices.IN_PROGRESS
+
+    def get_reason(self, context: TransitionContext) -> str:
+        return 'Project moved back to in progress - task became incomplete'
+
+    def transition(self, context: TransitionContext) -> Dict[str, Any]:
+        project = context.entity
+        return {
+            'reason': 'Project moved back to in progress - task became incomplete',
+            'organization_id': project.organization_id,
+            'total_tasks': project.tasks.count(),
+        }
+
+
+def update_project_state_after_task_change(project, user=None):
+    """
+    Update project FSM state based on task states.
+
+    This helper function is called after any task state change to update the parent project's state.
+
+    State transition logic:
+    - CREATED -> IN_PROGRESS: When any task becomes COMPLETED
+    - IN_PROGRESS -> COMPLETED: When ALL tasks are COMPLETED
+    - COMPLETED -> IN_PROGRESS: When ANY task is not COMPLETED
+
+    Args:
+        project: Project instance to update
+        user: User triggering the change (for FSM context)
+    """
+    from fsm.state_choices import TaskStateChoices
+    from fsm.state_manager import StateManager
+
+    # Get current project state
+    current_project_state = StateManager.get_current_state_value(project)
+
+    # Get task state counts
+    from tasks.models import Task
+
+    tasks = Task.objects.filter(project=project)
+    total_tasks = tasks.count()
+
+    if total_tasks == 0:
+        # No tasks, keep project in CREATED state
+        return
+
+    # Count tasks by state
+    completed_tasks_count = 0
+    for task in tasks:
+        task_state = StateManager.get_current_state_value(task)
+        if task_state == TaskStateChoices.COMPLETED:
+            completed_tasks_count += 1
+
+    # Determine target project state
+    if completed_tasks_count == 0:
+        # No completed tasks -> should be CREATED
+        target_state = ProjectStateChoices.CREATED
+    elif completed_tasks_count == total_tasks:
+        # All tasks completed -> should be COMPLETED
+        target_state = ProjectStateChoices.COMPLETED
+    else:
+        # Some tasks completed -> should be IN_PROGRESS
+        target_state = ProjectStateChoices.IN_PROGRESS
+
+    # Execute appropriate transition if state should change
+    if current_project_state != target_state:
+        if current_project_state == ProjectStateChoices.CREATED and target_state == ProjectStateChoices.IN_PROGRESS:
+            StateManager.execute_transition(entity=project, transition_name='project_in_progress', user=user)
+        elif (
+            current_project_state == ProjectStateChoices.IN_PROGRESS and target_state == ProjectStateChoices.COMPLETED
+        ):
+            StateManager.execute_transition(entity=project, transition_name='project_completed', user=user)
+        elif (
+            current_project_state == ProjectStateChoices.COMPLETED and target_state == ProjectStateChoices.IN_PROGRESS
+        ):
+            StateManager.execute_transition(
+                entity=project, transition_name='project_in_progress_from_completed', user=user
+            )
