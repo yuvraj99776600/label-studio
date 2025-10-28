@@ -10,7 +10,6 @@ from django.db import models
 from django.db.models import QuerySet, UUIDField
 from fsm.registry import register_state_model
 from fsm.state_choices import (
-    AnnotationDraftStateChoices,
     AnnotationStateChoices,
     ProjectStateChoices,
     TaskStateChoices,
@@ -352,52 +351,3 @@ class ProjectState(BaseState):
     def is_terminal_state(self) -> bool:
         """Check if this is a terminal project state"""
         return self.state == ProjectStateChoices.COMPLETED
-
-
-@register_state_model('annotationdraft')
-class AnnotationDraftState(BaseState):
-    """
-    Annotation draft state tracking for Label Studio.
-    Provides draft state management with:
-    - Draft lifecycle tracking (CREATED → AUTO_SAVED → SUBMITTED/ABANDONED)
-    - Auto-save state tracking
-    """
-
-    # Entity Relationship
-    annotation_draft = models.ForeignKey(
-        'tasks.AnnotationDraft', on_delete=models.CASCADE, related_name='fsm_states', db_index=True
-    )
-
-    # Override state field to add choices constraint
-    state = models.CharField(max_length=50, choices=AnnotationDraftStateChoices.choices, db_index=True)
-
-    # Denormalized fields for performance
-    task_id = models.PositiveIntegerField(db_index=True, help_text='From draft.task_id - denormalized for performance')
-    created_by_id = models.PositiveIntegerField(
-        null=True, db_index=True, help_text='From draft.user_id - denormalized for performance'
-    )
-
-    class Meta:
-        app_label = 'fsm'
-        indexes = [
-            # Critical: Latest state lookup
-            models.Index(fields=['annotation_draft_id', '-id'], name='draft_current_state_idx'),
-            # Filtering and reporting
-            models.Index(fields=['task_id', 'state', '-id'], name='draft_task_state_idx'),
-            models.Index(fields=['created_by_id', 'state', '-id'], name='draft_user_report_idx'),
-        ]
-        ordering = ['-id']
-
-    @classmethod
-    def get_denormalized_fields(cls, entity):
-        """Get denormalized fields for AnnotationDraftState creation"""
-        return {
-            'task_id': entity.task_id,
-            'created_by_id': entity.user_id if hasattr(entity, 'user_id') and entity.user_id else None,
-        }
-
-    @property
-    def is_terminal_state(self) -> bool:
-        """Check if this is a terminal draft state"""
-        # Drafts don't really have a terminal state since they can be re-activated
-        return False
