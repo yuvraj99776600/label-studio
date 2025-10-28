@@ -709,6 +709,36 @@ def set_feature_flag_envvar():
     os.environ['fflag_feat_utc_210_prediction_validation_15082025'] = 'true'
 
 
+@pytest.fixture(name='enable_fsm', autouse=True)
+def enable_fsm():
+    """
+    Enable Finite State Machine (FSM) feature flag for all tests.
+    This can be disabled per-test by using the disable_fsm fixture.
+    """
+
+    def fake_is_fsm_enabled(*args, **kwargs):
+        return True
+
+    # Patch the main FSM check function
+    with mock.patch('fsm.utils.is_fsm_enabled', wraps=fake_is_fsm_enabled):
+        yield
+
+
+@pytest.fixture(name='disable_fsm')
+def disable_fsm():
+    """
+    Disable Finite State Machine (FSM) feature flag for specific tests.
+    Use this when you need to test behavior without FSM.
+    """
+
+    def fake_is_fsm_enabled(*args, **kwargs):
+        return False
+
+    # Patch the main FSM check function
+    with mock.patch('fsm.utils.is_fsm_enabled', wraps=fake_is_fsm_enabled):
+        yield
+
+
 @pytest.fixture(name='fflag_feat_back_lsdv_3958_server_side_encryption_for_target_storage_short_on')
 def fflag_feat_back_lsdv_3958_server_side_encryption_for_target_storage_short_on():
     from core.feature_flags import flag_set
