@@ -14,7 +14,8 @@ Task FSM Transitions:
 - task_reopened: When task is reopened after completion
 """
 
-from django.test import TestCase, override_settings
+from core.current_request import CurrentContext
+from django.test import TestCase
 from fsm.state_choices import TaskStateChoices
 from fsm.state_manager import StateManager
 from organizations.models import Organization
@@ -23,20 +24,27 @@ from tasks.models import Task
 from users.models import User
 
 
-@override_settings(FSM_SIGNALS_ENABLED=False)  # Ensure signals are disabled
 class TestTaskFSMIntegration(TestCase):
     """Test Task FSM integration via HsModel"""
 
     def setUp(self):
         """Set up test fixtures"""
         self.user = User.objects.create_user(email='test@example.com', password='test123')
-        self.organization = Organization.objects.create(title='Test Org')
+        self.organization = Organization.objects.create(title='Test Org', created_by=self.user)
         self.user.active_organization = self.organization
         self.user.save()
+
+        # Set up CurrentContext for FSM
+        CurrentContext.set_user(self.user)
+        CurrentContext.set_organization_id(self.organization.id)
 
         self.project = Project.objects.create(
             title='Test Project', organization=self.organization, created_by=self.user
         )
+
+    def tearDown(self):
+        """Clean up"""
+        CurrentContext.clear()
 
     def test_task_creation_triggers_fsm(self):
         """
@@ -96,12 +104,12 @@ class TestTaskFSMIntegration(TestCase):
         - Tasks created with skip_fsm=True don't create FSM states
         - Useful for bulk imports or system operations
         """
-        # Create a task with skip_fsm=True
-        task = Task.objects.create(
+        # Create a task with skip_fsm=True passed to save()
+        task = Task(
             project=self.project,
             data={'text': 'Bulk import task'},
-            skip_fsm=True,  # Skip FSM processing
         )
+        task.save(skip_fsm=True)  # Skip FSM processing
 
         # Verify no FSM state was created
         state = StateManager.get_current_state_value(task)
@@ -160,13 +168,21 @@ class TestTaskFSMTransitions(TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.user = User.objects.create_user(email='test@example.com', password='test123')
-        self.organization = Organization.objects.create(title='Test Org')
+        self.organization = Organization.objects.create(title='Test Org', created_by=self.user)
         self.user.active_organization = self.organization
         self.user.save()
+
+        # Set up CurrentContext for FSM
+        CurrentContext.set_user(self.user)
+        CurrentContext.set_organization_id(self.organization.id)
 
         self.project = Project.objects.create(
             title='Test Project', organization=self.organization, created_by=self.user
         )
+
+    def tearDown(self):
+        """Clean up"""
+        CurrentContext.clear()
 
     def test_task_created_transition_reason(self):
         """
@@ -390,13 +406,21 @@ class TestTaskFSMEdgeCases(TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.user = User.objects.create_user(email='test@example.com', password='test123')
-        self.organization = Organization.objects.create(title='Test Org')
+        self.organization = Organization.objects.create(title='Test Org', created_by=self.user)
         self.user.active_organization = self.organization
         self.user.save()
+
+        # Set up CurrentContext for FSM
+        CurrentContext.set_user(self.user)
+        CurrentContext.set_organization_id(self.organization.id)
 
         self.project = Project.objects.create(
             title='Test Project', organization=self.organization, created_by=self.user
         )
+
+    def tearDown(self):
+        """Clean up"""
+        CurrentContext.clear()
 
     def test_task_creation_with_empty_data(self):
         """
