@@ -105,8 +105,17 @@ class TestStateManager(TestCase):
     """Test StateManager functionality with mocked transaction support"""
 
     def setUp(self):
+        from core.current_request import CurrentContext
+
         self.user = UserFactory(email='test@example.com')
+
+        # Set up CurrentContext BEFORE creating entities that need FSM
+        CurrentContext.set_user(self.user)
+
         self.project = ProjectFactory(created_by=self.user)
+        if hasattr(self.project, 'organization') and self.project.organization:
+            CurrentContext.set_organization_id(self.project.organization.id)
+
         self.task = TaskFactory(project=self.project, data={'text': 'test'})
         self.StateManager = get_state_manager()
 
@@ -121,6 +130,11 @@ class TestStateManager(TestCase):
 
         if not state_model_registry.get_model('task'):
             state_model_registry.register_model('task', TaskState)
+
+    def tearDown(self):
+        from core.current_request import CurrentContext
+
+        CurrentContext.clear()
 
     def test_get_current_state_empty(self):
         """Test getting current state when task is created"""

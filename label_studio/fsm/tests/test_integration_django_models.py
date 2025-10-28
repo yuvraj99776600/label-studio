@@ -679,13 +679,15 @@ class TestBaseStatePropertiesCoverage(TestCase):
     def setUp(self):
         """Set up test fixtures"""
         self.user = User.objects.create(email='test_coverage@example.com')
-        self.org = Organization.objects.create(title='Test Org Coverage')
+        self.org = Organization.objects.create(title='Test Org Coverage', created_by=self.user)
+
+        # Set CurrentContext BEFORE creating entities that need FSM
+        CurrentContext.set_user(self.user)
+        CurrentContext.set_organization_id(self.org.id)
+
         self.project = Project.objects.create(
             title='Test Project Coverage', created_by=self.user, organization=self.org
         )
-
-        CurrentContext.set_user(self.user)
-        CurrentContext.set_organization_id(self.org.id)
 
     def tearDown(self):
         """Clean up after tests"""

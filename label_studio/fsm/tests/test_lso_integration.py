@@ -287,7 +287,6 @@ class TestLSOFSMIntegration:
             result=[{'test': 'data'}],
             was_cancelled=False,
         )
-        annotation._created_from_draft = True
         annotation.save()
 
         # Should be in SUBMITTED state

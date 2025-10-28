@@ -69,25 +69,3 @@ class ProjectStateChoices(models.TextChoices):
 
     # Terminal State
     COMPLETED = 'COMPLETED', _('Completed')
-
-
-@register_state_choices('annotationdraft')
-class AnnotationDraftStateChoices(models.TextChoices):
-    """
-    Draft annotation lifecycle states.
-    Handles the complete draft workflow from creation through auto-save to final submission.
-    Separate from annotation states to allow independent draft management.
-    """
-
-    # Creation States
-    CREATED = 'CREATED', _('Created')
-    AUTO_SAVED = 'AUTO_SAVED', _('Auto Saved')
-
-    # User Action States
-    ACTIVE = 'ACTIVE', _('Active')  # User actively editing
-    POSTPONED = 'POSTPONED', _('Postponed')  # User postponed draft
-
-    # Completion States
-    SUBMITTED = 'SUBMITTED', _('Submitted')  # Converted to annotation
-    DISCARDED = 'DISCARDED', _('Discarded')  # Draft discarded
-    EXPIRED = 'EXPIRED', _('Expired')  # Draft expired

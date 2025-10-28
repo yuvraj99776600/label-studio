@@ -51,8 +51,8 @@ class HsModel(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Track original field values for change detection
-        # Initialize as None - we'll capture lazily when needed
-        self._original_values = None
+        # Initialize as empty dict for safe access
+        self._original_values = {}
 
     @classmethod
     def from_db(cls, db, field_names, values):
@@ -63,8 +63,8 @@ class HsModel(models.Model):
         We need to capture the original field values here for change detection.
         """
         instance = super().from_db(db, field_names, values)
-        # Initialize as None - we'll capture lazily when needed
-        instance._original_values = None
+        # Initialize as empty dict for safe access
+        instance._original_values = {}
         return instance
 
     def _capture_original_values(self):
@@ -77,11 +77,8 @@ class HsModel(models.Model):
         For ForeignKey fields, we store the PK instead of the object to avoid
         circular references and recursion issues.
 
-        This is called lazily only when needed for FSM operations.
+        This is called after each save to refresh the baseline for the next save.
         """
-        if self._original_values is not None:
-            return  # Already captured
-
         self._original_values = {}
         for field in self._meta.fields:
             value = getattr(self, field.name, None)
@@ -129,9 +126,9 @@ class HsModel(models.Model):
                     # Task became labeled
                     pass
         """
-        # Ensure original values are captured
-        if self._original_values is None:
-            return {}  # No original values to compare
+        # If no original values captured yet, nothing has changed
+        if not self._original_values:
+            return {}
 
         changed = {}
         for field in self._meta.fields:

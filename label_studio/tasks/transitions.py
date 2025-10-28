@@ -33,6 +33,10 @@ class TaskCreatedTransition(ModelChangeTransition):
     def target_state(self) -> str:
         return TaskStateChoices.CREATED
 
+    def get_reason(self, context: TransitionContext) -> str:
+        """Return detailed reason for task creation."""
+        return 'Task created in the system'
+
     def transition(self, context: TransitionContext) -> Dict[str, Any]:
         """
         Execute task creation transition.

@@ -31,6 +31,10 @@ class ProjectCreatedTransition(ModelChangeTransition):
         """Only execute on creation, never on updates."""
         return self.is_creating
 
+    def get_reason(self, context: TransitionContext) -> str:
+        """Return detailed reason for project creation."""
+        return 'Project created'
+
     def transition(self, context: TransitionContext) -> Dict[str, Any]:
         """
         Execute project creation transition.
@@ -84,6 +88,10 @@ class ProjectSettingsChangedTransition(ModelChangeTransition):
     def should_execute(self, context: TransitionContext) -> bool:
         """Only execute on updates, never on creation."""
         return not self.is_creating
+
+    def get_reason(self, context: TransitionContext) -> str:
+        """Return detailed reason for project settings change."""
+        return 'Project settings changed'
 
     def transition(self, context: TransitionContext) -> Dict[str, Any]:
         """
