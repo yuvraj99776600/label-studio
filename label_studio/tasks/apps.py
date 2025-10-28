@@ -8,9 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class TasksConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
     name = 'tasks'
-    verbose_name = 'Label Studio Tasks'
 
     def ready(self):
         """
@@ -22,7 +20,6 @@ class TasksConfig(AppConfig):
         try:
             # Import transitions to register them with FSM
             from tasks import (
-                annotation_draft_transitions,  # noqa: F401
                 annotation_transitions,  # noqa: F401
                 transitions,  # noqa: F401
             )
