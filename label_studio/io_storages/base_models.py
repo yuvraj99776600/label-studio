@@ -474,7 +474,8 @@ class ImportStorage(Storage):
                 data.pop('data')
 
         with transaction.atomic():
-            task = Task.objects.create(
+            # Create task without skip_fsm (it's not a model field)
+            task = Task(
                 data=data,
                 project=project,
                 overlap=maximum_annotations,
@@ -484,6 +485,8 @@ class ImportStorage(Storage):
                 cancelled_annotations=cancelled_annotations,
                 inner_id=max_inner_id,
             )
+            # Save with skip_fsm flag to bypass FSM during bulk import
+            task.save(skip_fsm=True)
 
             link_class.create(task, storage=storage, **link_kwargs)
             logger.debug(f'Create {storage.__class__.__name__} link with {link_kwargs} for {task=}')

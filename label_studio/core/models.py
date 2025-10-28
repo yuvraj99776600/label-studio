@@ -51,10 +51,8 @@ class HsModel(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Track original field values for change detection
-        self._original_values = {}
-        # Always capture original values, even for new instances
-        # This prevents false positives when detecting changes
-        self._capture_original_values()
+        # Initialize as None - we'll capture lazily when needed
+        self._original_values = None
 
     @classmethod
     def from_db(cls, db, field_names, values):
@@ -65,8 +63,8 @@ class HsModel(models.Model):
         We need to capture the original field values here for change detection.
         """
         instance = super().from_db(db, field_names, values)
-        instance._original_values = {}
-        instance._capture_original_values()
+        # Initialize as None - we'll capture lazily when needed
+        instance._original_values = None
         return instance
 
     def _capture_original_values(self):
@@ -75,9 +73,45 @@ class HsModel(models.Model):
 
         This allows us to detect which fields changed during save operations,
         which is crucial for determining appropriate FSM transitions.
+
+        For ForeignKey fields, we store the PK instead of the object to avoid
+        circular references and recursion issues.
+
+        This is called lazily only when needed for FSM operations.
         """
+        if self._original_values is not None:
+            return  # Already captured
+
+        self._original_values = {}
         for field in self._meta.fields:
-            self._original_values[field.name] = getattr(self, field.name, None)
+            value = getattr(self, field.name, None)
+            # For ForeignKey fields, store PK to avoid circular references
+            if field.is_relation and field.many_to_one and value is not None:
+                self._original_values[field.name] = value.pk if hasattr(value, 'pk') else value
+            else:
+                self._original_values[field.name] = value
+
+    def __reduce_ex__(self, protocol):
+        """
+        Override serialization to exclude internal FSM tracking fields.
+
+        Django's serialization uses pickle which calls __reduce_ex__.
+        We exclude _original_values since it's only needed for runtime
+        change detection, not for serialization/restoration.
+        """
+        # Get the default reduction
+        reduction = super().__reduce_ex__(protocol)
+
+        # reduction is a tuple: (callable, args, state, ...)
+        # state is the instance __dict__
+        if len(reduction) >= 3 and isinstance(reduction[2], dict):
+            state = reduction[2].copy()
+            # Remove internal FSM fields from serialization
+            state.pop('_original_values', None)
+            # Return new reduction with cleaned state
+            return (reduction[0], reduction[1], state) + reduction[3:]
+
+        return reduction
 
     def _get_changed_fields(self) -> Dict[str, tuple]:
         """
@@ -85,6 +119,7 @@ class HsModel(models.Model):
 
         Returns:
             Dict mapping field names to (old_value, new_value) tuples
+            Note: For ForeignKey fields, old_value will be the PK, new_value will be the object
 
         Example:
             changed = self._get_changed_fields()
@@ -94,11 +129,21 @@ class HsModel(models.Model):
                     # Task became labeled
                     pass
         """
+        # Ensure original values are captured
+        if self._original_values is None:
+            return {}  # No original values to compare
+
         changed = {}
         for field in self._meta.fields:
             old_value = self._original_values.get(field.name)
             new_value = getattr(self, field.name, None)
-            if old_value != new_value:
+
+            # For ForeignKey fields, old_value is stored as PK, so compare PK to PK
+            if field.is_relation and field.many_to_one:
+                new_pk = new_value.pk if new_value and hasattr(new_value, 'pk') else new_value
+                if old_value != new_pk:
+                    changed[field.name] = (old_value, new_value)
+            elif old_value != new_value:
                 changed[field.name] = (old_value, new_value)
         return changed
 
@@ -212,16 +257,13 @@ class HsModel(models.Model):
                     # Only call should_execute if it's been overridden in the subclass
                     if should_execute_method and should_execute_method != base_should_execute:
                         # Build a minimal context for should_execute check
-                        from fsm.utils import get_current_state_safe
-
-                        current_state_obj = get_current_state_safe(self)
-                        current_state = current_state_obj.state if current_state_obj else None
-
+                        # NOTE: We skip getting current state here to avoid recursion issues
+                        # The actual state will be retrieved during transition execution
                         context = TransitionContext(
                             entity=self,
                             current_user=None,  # Will be set properly during execution
-                            current_state_object=current_state_obj,
-                            current_state=current_state,
+                            current_state_object=None,  # Skip to avoid recursion
+                            current_state=None,  # Skip to avoid recursion
                             target_state=temp_transition.target_state,
                             organization_id=getattr(self, 'organization_id', None),
                         )
@@ -279,20 +321,42 @@ class HsModel(models.Model):
         """
         Check if FSM processing should be executed.
 
-        Can be overridden in subclasses to add custom logic for when
-        FSM should be skipped (e.g., during bulk operations).
+        Returns False if:
+        - Feature flag is disabled
+        - User context is unavailable (tests must set CurrentContext explicitly)
+        - Explicitly skipped via instance attribute
 
         Returns:
             True if FSM should execute, False otherwise
+
+        Note:
+            CurrentContext is available in web requests and background jobs.
+            In tests, it must be set explicitly for the user/organization.
         """
-        # Check if FSM is globally enabled via feature flag
+        # Check for instance-level skip flag
+        if getattr(self, '_skip_fsm', False):
+            return False
+
+        # Use the centralized FSM enabled check from utils
+        # This handles feature flag and thread-local overrides
         try:
             from core.current_request import CurrentContext
-            from core.feature_flags import flag_set
+            from fsm.utils import is_fsm_enabled
 
-            user = CurrentContext.get_user()
-            return flag_set('fflag_feat_fit_568_finite_state_management', user=user)
-        except Exception:
+            # Get user from CurrentContext - don't fall back to AnonymousUser
+            # If no user in context (e.g., tests without explicit setup), return False
+            try:
+                user = CurrentContext.get_user()
+                if user is None:
+                    return False
+            except Exception:
+                # CurrentContext not available or no user set
+                # This is expected in tests that don't set up context
+                return False
+
+            return is_fsm_enabled(user=user)
+        except Exception as e:
+            logger.debug(f'FSM check failed: {e}')
             return False
 
     def save(self, *args, **kwargs):
@@ -319,6 +383,11 @@ class HsModel(models.Model):
 
         # Check if this is a creation vs update
         is_creating = self._state.adding
+
+        # Capture original values before save if FSM will be used
+        # This is lazy - only captured when FSM is enabled
+        if not skip_fsm and not is_creating:
+            self._capture_original_values()
 
         # Capture changed fields before save (only for updates)
         changed_fields = {} if is_creating else self._get_changed_fields()
@@ -401,11 +470,17 @@ class HsModel(models.Model):
             transition_name: Name of the registered transition to execute
             is_creating: Whether this is a new model creation
             changed_fields: Dict of changed fields (field_name -> (old, new))
+
+        Note:
+            This is only called after _should_execute_fsm() returns True,
+            so CurrentContext should be available with a valid user.
         """
         from core.current_request import CurrentContext
         from fsm.state_manager import get_state_manager
 
         StateManager = get_state_manager()
+
+        # Get context - should be available since _should_execute_fsm passed
         user = CurrentContext.get_user()
         org_id = CurrentContext.get_organization_id()
 
