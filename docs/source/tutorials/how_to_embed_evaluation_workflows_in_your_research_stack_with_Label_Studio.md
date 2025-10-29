@@ -1,7 +1,6 @@
 ---
 title: How to Embed Evaluation Workflows in Your Research Stack with Label Studio
 hide_sidebar: true
-github_path: https://raw.githubusercontent.com/HumanSignal/awesome-label-studio-tutorials/refs/heads/main/tutorials/how-to-embed-evaluation-workflows-in-your-research-stack-with-label-studio/how_to_embed_evaluation_workflows_in_your_research_stack_with_Label_Studio.ipynb
 order: 999
 open_in_collab: true
 tutorial: true

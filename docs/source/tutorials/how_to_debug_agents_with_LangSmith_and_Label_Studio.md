@@ -1,7 +1,6 @@
 ---
 title: How to Debug Agents with LangSmith and Label Studio
 hide_sidebar: true
-github_path: https://raw.githubusercontent.com/HumanSignal/awesome-label-studio-tutorials/refs/heads/main/tutorials/how-to-debug-agents-with-LangSmith-and-Label-Studio/how_to_debug_agents_with_LangSmith_and_Label_Studio.ipynb
 order: 1000
 open_in_collab: true
 tutorial: true
