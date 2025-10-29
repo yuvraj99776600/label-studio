@@ -22,7 +22,7 @@ class FsmConfig(AppConfig):
         """
         # Import models to trigger @register_state_model decorators
         # Import state_choices to trigger @register_state_choices decorators
-        from fsm import (
+        from . import (
             models,  # noqa: F401
             state_choices,  # noqa: F401
         )
