@@ -789,28 +789,45 @@ class Annotation(AnnotationMixin, HsModel):
         from fsm.utils import is_fsm_enabled
         from projects.transitions import update_project_state_after_task_change
 
-        StateManager = get_state_manager()
-
         # Get user from context for FSM
         user = CurrentContext.get_user()
 
         if not is_fsm_enabled(user=user):
             return
 
-        # Task is not labeled, move task back to IN_PROGRESS
-        current_task_state = StateManager.get_current_state_value(task)
+        try:
+            StateManager = get_state_manager()
 
-        if current_task_state == TaskStateChoices.COMPLETED and not task.is_labeled:
+            # Get current state - may be None if entity has no state record yet
+            current_task_state = StateManager.get_current_state_value(task)
 
-            StateManager.execute_transition(entity=task, transition_name='task_in_progress', user=user)
+            # Determine what the state should be based on task's labeled status
+            expected_state = TaskStateChoices.COMPLETED if task.is_labeled else TaskStateChoices.IN_PROGRESS
 
-            # Update project state based on task changes
-            update_project_state_after_task_change(project, user=user)
-        elif current_task_state == TaskStateChoices.IN_PROGRESS and task.is_labeled:
-            StateManager.execute_transition(entity=task, transition_name='task_completed', user=user)
+            # If no state exists, initialize it based on current condition
+            if current_task_state is None:
+                # Initialize state for entities that existed before FSM was deployed
+                if task.is_labeled:
+                    StateManager.execute_transition(entity=task, transition_name='task_completed', user=user)
+                else:
+                    StateManager.execute_transition(entity=task, transition_name='task_in_progress', user=user)
+                # Update project state based on task changes
+                update_project_state_after_task_change(project, user=user)
+            # If state exists but doesn't match the task's labeled status, fix it
+            elif current_task_state != expected_state:
+                if expected_state == TaskStateChoices.IN_PROGRESS:
+                    StateManager.execute_transition(entity=task, transition_name='task_in_progress', user=user)
+                else:
+                    StateManager.execute_transition(entity=task, transition_name='task_completed', user=user)
+                # Update project state based on task changes
+                update_project_state_after_task_change(project, user=user)
 
-            # Update project state based on task changes
-            update_project_state_after_task_change(project, user=user)
+        except Exception as e:
+            # Final safety net - log but don't break annotation deletion
+            logger.warning(
+                f'FSM state update failed during annotation deletion: {str(e)}',
+                extra={'task_id': task.id, 'project_id': project.id},
+            )
 
     def on_delete_update_counters(self):
         task = self.task

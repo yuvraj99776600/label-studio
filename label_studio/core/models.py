@@ -127,7 +127,8 @@ class HsModel(models.Model):
                     pass
         """
         # If no original values captured yet, nothing has changed
-        if not self._original_values:
+        # Use hasattr check to handle cases where _original_values doesn't exist
+        if not hasattr(self, '_original_values') or not self._original_values:
             return {}
 
         changed = {}
