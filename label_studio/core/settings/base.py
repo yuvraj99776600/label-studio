@@ -216,14 +216,14 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'drf_generators',
-    'fsm.apps.FsmConfig',  # MUST be before apps that register FSM transitions (projects, tasks)
+    'fsm',  # MUST be before apps that register FSM transitions (projects, tasks)
     'core',
     'users',
     'organizations',
     'data_import',
     'data_export',
-    'projects.apps.ProjectsConfig',  # Registers FSM transitions - needs fsm loaded first
-    'tasks.apps.TasksConfig',  # Registers FSM transitions - needs fsm loaded first
+    'projects',  # Registers FSM transitions - needs fsm loaded first
+    'tasks',  # Registers FSM transitions - needs fsm loaded first
     'data_manager',
     'io_storages',
     'ml',
