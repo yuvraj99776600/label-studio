@@ -221,8 +221,8 @@ INSTALLED_APPS = [
     'organizations',
     'data_import',
     'data_export',
-    'projects',
-    'tasks',
+    'projects.apps.ProjectsConfig',  # Use full path to ensure AppConfig.ready() is called for FSM
+    'tasks.apps.TasksConfig',  # Use full path to ensure AppConfig.ready() is called for FSM
     'data_manager',
     'io_storages',
     'ml',
@@ -232,7 +232,7 @@ INSTALLED_APPS = [
     'ml_model_providers',
     'jwt_auth',
     'session_policy',
-    'fsm',
+    'fsm.apps.FsmConfig',  # Use full path to ensure AppConfig.ready() is called
 ]
 
 MIDDLEWARE = [

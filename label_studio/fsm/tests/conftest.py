@@ -4,8 +4,6 @@ FSM Test Configuration.
 Ensures proper test isolation for FSM tests.
 """
 
-from copy import deepcopy
-
 import pytest
 from django.core.cache import cache
 
@@ -20,19 +18,12 @@ def fsm_test_isolation():
     This prevents test leakage when tests clear the registry for their own purposes.
     """
     from core.current_request import CurrentContext
-    from fsm.registry import transition_registry
-
-    # Save original registry state
-    original_transitions = deepcopy(transition_registry._transitions)
 
     # Clear context and cache before test
     CurrentContext.clear()
     cache.clear()
 
     yield
-
-    # Restore registry state to prevent leakage
-    transition_registry._transitions = original_transitions
 
     # Clear context and cache after test
     CurrentContext.clear()

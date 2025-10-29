@@ -12,10 +12,6 @@ This test file focuses on LSO-specific functionality:
 LSE-specific transitions (reviews, project settings, annotation drafts) are tested in LSE.
 """
 
-# Import FSM modules at module level to ensure registration happens early
-# This is critical for CI environments where test execution order varies
-import fsm.models  # noqa: F401 - triggers @register_state_model decorators
-import fsm.state_choices  # noqa: F401 - triggers @register_state_choices decorators
 import pytest
 from fsm.state_choices import AnnotationStateChoices, ProjectStateChoices, TaskStateChoices
 from fsm.state_manager import StateManager
