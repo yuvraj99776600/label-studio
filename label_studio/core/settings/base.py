@@ -219,10 +219,11 @@ INSTALLED_APPS = [
     'core',
     'users',
     'organizations',
+    'fsm.apps.FsmConfig',  # MUST be before apps that register FSM transitions (projects, tasks)
     'data_import',
     'data_export',
-    'projects.apps.ProjectsConfig',  # Use full path to ensure AppConfig.ready() is called for FSM
-    'tasks.apps.TasksConfig',  # Use full path to ensure AppConfig.ready() is called for FSM
+    'projects.apps.ProjectsConfig',  # Registers FSM transitions - needs fsm loaded first
+    'tasks.apps.TasksConfig',  # Registers FSM transitions - needs fsm loaded first
     'data_manager',
     'io_storages',
     'ml',
@@ -232,7 +233,6 @@ INSTALLED_APPS = [
     'ml_model_providers',
     'jwt_auth',
     'session_policy',
-    'fsm.apps.FsmConfig',  # Use full path to ensure AppConfig.ready() is called
 ]
 
 MIDDLEWARE = [
