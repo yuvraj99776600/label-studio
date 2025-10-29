@@ -199,13 +199,6 @@ class TransitionUtilsTests(TestCase):
     """Tests for transition_utils module edge cases and error handling"""
 
     def setUp(self):
-        # Clear registries to ensure clean state
-        from fsm.registry import state_choices_registry, state_model_registry
-
-        state_choices_registry.clear()
-        state_model_registry.clear()
-        transition_registry.clear()
-
         self.entity = MockEntity()
 
     def test_transition_utils_unexpected_validation_error(self):

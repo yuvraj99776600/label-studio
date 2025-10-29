@@ -12,7 +12,7 @@ from core.current_request import CurrentContext
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from fsm.models import TaskState
-from fsm.registry import register_state_transition, transition_registry
+from fsm.registry import register_state_transition
 from fsm.state_choices import AnnotationStateChoices, TaskStateChoices
 from fsm.transitions import BaseTransition, TransitionContext, TransitionValidationError
 from organizations.models import Organization
@@ -75,8 +75,6 @@ class DjangoModelIntegrationTests(TestCase):
         self.user = Mock()
         self.user.id = 123
         self.user.username = 'integration_test_user'
-
-        transition_registry.clear()
 
     @patch('fsm.registry.get_state_model_for_entity')
     @patch('fsm.state_manager.StateManager.get_current_state_object')
