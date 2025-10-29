@@ -3,11 +3,13 @@ title: How to Debug Agents with LangSmith and Label Studio
 hide_sidebar: true
 github_path: https://raw.githubusercontent.com/HumanSignal/awesome-label-studio-tutorials/refs/heads/main/tutorials/how-to-debug-agents-with-LangSmith-and-Label-Studio/how_to_debug_agents_with_LangSmith_and_Label_Studio.ipynb
 order: 1000
+open_in_collab: true
+tutorial: true
 community_author: niklub
-ipynb_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/refs/heads/main/tutorials/how-to-debug-agents-with-LangSmith-and-Label-Studio/how_to_debug_agents_with_LangSmith_and_Label_Studio.ipynb
-
+ipynb_repo_path: tutorials/how-to-debug-agents-with-LangSmith-and-Label-Studio/how_to_debug_agents_with_LangSmith_and_Label_Studio.ipynb
+repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-debug-agents-with-LangSmith-and-Label-Studio
+report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
 ---
-
 ## 0. Label Studio Requirements
 
 After section 5, this tutorial showcases one or more features available only in Label Studio paid products. We recommend [creating a Starter Cloud trial](https://app.humansignal.com/user/cloud-trial?offer=d9a5&) to follow the tutorial.
