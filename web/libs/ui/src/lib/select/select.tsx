@@ -87,6 +87,8 @@ export const Select = forwardRef(
       pageSize = VARIABLE_LIST_PAGE_SIZE,
       page = 1,
       itemCount,
+      onClose,
+      onOpen,
       ...props
     }: SelectProps<T, A>,
     _ref: ForwardedRef<HTMLSelectElement>,
@@ -143,7 +145,10 @@ export const Select = forwardRef(
           valueRef.current = val;
           setValue(val);
         }
-        !multiple && setIsOpen(false);
+        if (!multiple) {
+          setIsOpen(false);
+          onClose?.();
+        }
         props?.onChange?.(valueRef.current);
         setTimeout(() => {
           const changeEvent = new Event("change", {
@@ -186,7 +191,17 @@ export const Select = forwardRef(
     );
 
     const selectedOptions = useMemo(() => {
-      return flatOptions.filter((option) => isSelected(option));
+      const allSelected = flatOptions.filter((option) => isSelected(option));
+
+      const uniqueSelected = new Map();
+      allSelected.forEach((option) => {
+        const optionValue = option?.value ?? option;
+        if (!uniqueSelected.has(optionValue)) {
+          uniqueSelected.set(optionValue, option);
+        }
+      });
+
+      return Array.from(uniqueSelected.values());
     }, [flatOptions, isSelected, value, multiple]);
 
     const onSearchInputHandler = useCallback(
@@ -300,7 +315,13 @@ export const Select = forwardRef(
     }, [_options, multiple, isSelected, _onChange]);
 
     const combobox = (
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover
+        open={isOpen}
+        onOpenChange={(_isOpen) => {
+          setIsOpen(_isOpen);
+          _isOpen ? onOpen?.() : onClose?.();
+        }}
+      >
         <PopoverTrigger asChild={true} disabled={disabled}>
           <button
             variant="outline"
@@ -511,7 +532,7 @@ const Option = ({
         data-disabled={disabled}
       >
         {multiple && <Checkbox tabIndex={-1} checked={isOptionSelected} indeterminate={isIndeterminate} readOnly />}
-        <div data-testid="select-option-label" className="w-full">
+        <div data-testid="select-option-label" className="w-full min-w-0 truncate">
           {label}
         </div>
       </div>

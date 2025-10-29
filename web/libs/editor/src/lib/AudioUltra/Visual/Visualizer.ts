@@ -1,3 +1,4 @@
+import { ff } from "@humansignal/core";
 import type { WaveformAudio } from "../Media/WaveformAudio";
 import { BROWSER_SCROLLBAR_WIDTH, clamp, debounce, warn } from "../Common/Utils";
 import type { Waveform, WaveformOptions } from "../Waveform";
@@ -26,6 +27,8 @@ import { RateLimitedRenderer } from "./Renderer/RateLimitedRenderer";
 import { InteractionManager } from "../Interaction/InteractionManager";
 import type { LayerInfo } from "../Interaction/InteractionManager";
 import type { Interactive } from "../Interaction/Interactive";
+
+const isSyncedBuffering = ff.isActive(ff.FF_SYNCED_BUFFERING);
 
 interface VisualizerEvents {
   draw: (visualizer: Visualizer) => void;
@@ -114,6 +117,8 @@ export class Visualizer extends Events<VisualizerEvents> {
   private renderers: Renderer[] = [];
   private rateLimitedTransfer: RateLimitedRenderer;
   private interactionManager!: InteractionManager;
+  private initialSpectrogramHeight: number;
+  private initialWaveformHeight: number;
 
   constructor(options: VisualizerOptions, waveform: Waveform) {
     super();
@@ -128,7 +133,10 @@ export class Visualizer extends Events<VisualizerEvents> {
     this.autoCenter = options.autoCenter ?? this.autoCenter;
     this.splitChannels = options.splitChannels ?? this.splitChannels;
     this.waveformHeight = options.waveformHeight ?? options.height ?? options.waveHeight ?? 32;
-    this.spectrogramHeight = options.spectrogramHeight ?? options.height ?? 32;
+    this.spectrogramHeight = options.spectrogramHeight ?? options.height ?? options.waveHeight ?? 32;
+    // Save initial height for computing adaptive max height during resize
+    this.initialWaveformHeight = this.waveformHeight;
+    this.initialSpectrogramHeight = this.spectrogramHeight;
     this.timelineHeight = options.timelineHeight ?? options.timeline?.height ?? 20;
     this.timelinePlacement = options?.timeline?.placement ?? this.timelinePlacement;
     this.gridColor = options.gridColor ? rgba(options.gridColor) : this.gridColor;
@@ -297,21 +305,29 @@ export class Visualizer extends Events<VisualizerEvents> {
       regionsLayer.height = this.height;
     }
 
-    // Set renderers array
-    this.renderers = [this.waveformRenderer];
-    if (this.waveformResizeRenderer) {
-      this.renderers.push(this.waveformResizeRenderer);
-    }
-    if (isFF(FF_AUDIO_SPECTROGRAMS) && this.spectrogramRenderer) {
-      this.renderers.push(this.spectrogramRenderer);
-      if (this.spectrogramResizeRenderer) {
-        this.renderers.push(this.spectrogramResizeRenderer);
-      }
-    }
+    // Check if we have decoded data
+    const hasDecodedData = this.wf.params.decoderType !== "none";
 
-    // Dynamically set maxZoom so you can zoom to 1:1 (one sample per pixel)
-    if (this.audio && this.width > 0) {
-      this.maxZoom = Math.max(1, Math.ceil(this.audio.dataLength / this.width));
+    if (hasDecodedData) {
+      // Set renderers array - only add waveform renderers if we have decoded data
+      this.renderers = [this.waveformRenderer];
+      if (this.waveformResizeRenderer) {
+        this.renderers.push(this.waveformResizeRenderer);
+      }
+      if (isFF(FF_AUDIO_SPECTROGRAMS) && this.spectrogramRenderer) {
+        this.renderers.push(this.spectrogramRenderer);
+        if (this.spectrogramResizeRenderer) {
+          this.renderers.push(this.spectrogramResizeRenderer);
+        }
+      }
+
+      // Dynamically set maxZoom so you can zoom to 1:1 (one sample per pixel)
+      if (this.audio && this.width > 0) {
+        this.maxZoom = Math.max(1, Math.ceil(this.audio.dataLength / this.width));
+      }
+    } else {
+      // No decoded data
+      this.renderers = [];
     }
 
     // Compose all layers together so that we cache the composition of the layers.
@@ -461,7 +477,26 @@ export class Visualizer extends Events<VisualizerEvents> {
     this.seekLocked = false;
   }
 
+  drawRequestId: number | null = null;
+  drawRequestDry = true;
   draw(dry = false) {
+    if (!isSyncedBuffering) {
+      this._draw(dry);
+      return;
+    }
+    if (this.drawRequestId) {
+      this.drawRequestDry = this.drawRequestDry && dry;
+    } else {
+      this.drawRequestDry = dry;
+      this.drawRequestId = requestAnimationFrame(() => {
+        this.drawRequestId = null;
+        if (this.isDestroyed) return;
+        this._draw(this.drawRequestDry);
+      });
+    }
+  }
+
+  _draw(dry = false) {
     if (this.isDestroyed) return;
     if (!dry) {
       // Center to the current time if playing and autoCenter are enabled
@@ -558,14 +593,14 @@ export class Visualizer extends Events<VisualizerEvents> {
     return this.container.clientWidth;
   }
 
-  get computedWaveformHeight() {
+  get waveformLayerHeight() {
     if (this.splitChannels && this.audio?.channelCount) {
       return this.waveformHeight * this.audio.channelCount;
     }
     return this.waveformHeight;
   }
 
-  get computedSpectrogramHeight() {
+  get spectrogramLayerHeight() {
     if (this.splitChannels && this.audio?.channelCount) {
       return this.spectrogramHeight * this.audio.channelCount;
     }
@@ -584,8 +619,8 @@ export class Visualizer extends Events<VisualizerEvents> {
 
     // If the timeline layer doesn't exist yet, assume it's visible and use timelineHeight
     height += timelineLayer === undefined ? this.timelineHeight : timelineLayer.isVisible ? this.timelineHeight : 0;
-    height += waveformLayer?.isVisible ? this.computedWaveformHeight : 0;
-    height += spectrogramLayer?.isVisible ? this.computedSpectrogramHeight : 0; // Use computedSpectrogramHeight!
+    height += waveformLayer?.isVisible ? this.waveformLayerHeight : 0;
+    height += spectrogramLayer?.isVisible ? this.spectrogramLayerHeight : 0;
 
     return height;
   }
@@ -629,13 +664,24 @@ export class Visualizer extends Events<VisualizerEvents> {
     this.wrapper.style.height = "100%";
 
     const mainLayer = this.createLayer({ name: "main" });
-    this.createLayer({ name: "background", offscreen: true, zIndex: 0, isVisible: false, height: this.waveformHeight });
-    this.createLayer({ name: "waveform", offscreen: true, zIndex: 100, height: this.waveformHeight });
+    this.createLayer({
+      name: "background",
+      offscreen: true,
+      zIndex: 0,
+      isVisible: false,
+      height: this.waveformLayerHeight,
+    });
+    this.createLayer({
+      name: "waveform",
+      offscreen: true,
+      zIndex: 100,
+      height: this.waveformLayerHeight,
+    });
     this.createLayer({
       name: "waveform-resize",
       offscreen: true,
       zIndex: 200,
-      height: this.waveformHeight,
+      height: this.waveformLayerHeight,
       compositeOperation: "difference", // Use blend mode for better visibility
     });
 
@@ -646,23 +692,29 @@ export class Visualizer extends Events<VisualizerEvents> {
         offscreen: true,
         zIndex: 100,
         isVisible: true,
-        height: this.spectrogramHeight,
+        height: this.spectrogramLayerHeight,
       });
       this.createLayer({
         name: "spectrogram-resize",
         offscreen: true,
         zIndex: 200,
         isVisible: true,
-        height: this.spectrogramHeight,
+        height: this.spectrogramLayerHeight,
         compositeOperation: "difference", // Use blend mode for better visibility
       });
-      this.createLayer({ name: "progress", offscreen: true, zIndex: 1020, isVisible: true, height: 0 });
+      this.createLayer({
+        name: "progress",
+        offscreen: true,
+        zIndex: 1020,
+        isVisible: true,
+        height: 0,
+      });
       this.createLayer({
         name: "spectrogram-grid",
         offscreen: true,
         zIndex: 1100,
         isVisible: true,
-        height: this.spectrogramHeight,
+        height: this.spectrogramLayerHeight,
       });
     }
 
@@ -1078,15 +1130,15 @@ export class Visualizer extends Events<VisualizerEvents> {
       if (layer.name !== "main") {
         layer.pixelRatio = this.pixelRatio;
         layer.width = this.width;
-        // Update height for layers that should match the waveform height
+        // Update height for layers according to their type
         if (layer.name === "waveform") {
-          layer.height = this.waveformHeight;
+          layer.height = this.waveformLayerHeight;
         } else if (layer.name === "waveform-resize") {
-          layer.height = this.waveformHeight;
+          layer.height = this.waveformLayerHeight;
         } else if (layer.name === "spectrogram" || layer.name === "spectrogram-grid") {
-          layer.height = this.spectrogramHeight;
+          layer.height = this.spectrogramLayerHeight;
         } else if (layer.name === "spectrogram-resize") {
-          layer.height = this.spectrogramHeight;
+          layer.height = this.spectrogramLayerHeight;
         }
         // Update regions layer height to match the full visualizer height
         if (layer.name === "regions") {
@@ -1221,13 +1273,6 @@ export class Visualizer extends Events<VisualizerEvents> {
     const spectrogramLayer = this.getLayer("spectrogram");
     if (!spectrogramLayer?.isVisible) return 0;
 
-    const channelCount = this.audio?.channelCount ?? 1;
-
-    if (this.splitChannels) {
-      // Each channel gets an equal split of the spectrogram area
-      return this.spectrogramHeight / channelCount;
-    }
-    // Spectrogram uses the full height when not split
     return this.spectrogramHeight;
   }
 
@@ -1269,7 +1314,7 @@ export class Visualizer extends Events<VisualizerEvents> {
     if (componentName === "spectrogram") {
       // Spectrogram comes after waveform in the vertical stack
       if (waveformLayer?.isVisible) {
-        offsetY += this.computedWaveformHeight;
+        offsetY += this.waveformLayerHeight;
       }
     }
 
@@ -1278,9 +1323,9 @@ export class Visualizer extends Events<VisualizerEvents> {
     let height = 0;
 
     if (componentName === "waveform") {
-      height = this.computedWaveformHeight;
+      height = this.waveformLayerHeight;
     } else if (componentName === "spectrogram") {
-      height = this.computedSpectrogramHeight;
+      height = this.spectrogramLayerHeight;
     }
 
     return {
@@ -1295,40 +1340,54 @@ export class Visualizer extends Events<VisualizerEvents> {
    * Handle height changes from ResizeRenderer
    */
   private handleHeightChange = (componentName: string, newHeight: number): void => {
+    let initialHeight = 0;
+    if (componentName === "waveform") {
+      initialHeight = this.initialWaveformHeight * ((this.splitChannels && this.audio?.channelCount) || 1);
+    } else if (componentName === "spectrogram") {
+      initialHeight = this.initialSpectrogramHeight * ((this.splitChannels && this.audio?.channelCount) || 1);
+    }
     const minHeight = 50;
-    const maxHeight = 500;
+    const maxHeight = Math.max(500, initialHeight);
     const clampedHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
 
     if (componentName === "waveform") {
-      this.waveformHeight = clampedHeight;
+      if (this.splitChannels && this.audio?.channelCount) {
+        this.waveformHeight = clampedHeight / this.audio.channelCount;
+      } else {
+        this.waveformHeight = clampedHeight;
+      }
       // Update the waveform-related layers
       const waveformLayer = this.getLayer("waveform");
       const waveformResizeLayer = this.getLayer("waveform-resize");
       const backgroundLayer = this.getLayer("background");
 
-      if (waveformLayer) waveformLayer.height = clampedHeight;
-      if (waveformResizeLayer) waveformResizeLayer.height = clampedHeight;
-      if (backgroundLayer) backgroundLayer.height = clampedHeight;
+      if (waveformLayer) waveformLayer.height = this.waveformLayerHeight;
+      if (waveformResizeLayer) waveformResizeLayer.height = this.waveformLayerHeight;
+      if (backgroundLayer) backgroundLayer.height = this.waveformLayerHeight;
 
       // Update WaveformRenderer configuration
       if (this.waveformRenderer) {
         // For height changes, we only need to update the waveHeight config
         // without triggering expensive redraws
-        this.waveformRenderer.config.waveHeight = clampedHeight;
+        this.waveformRenderer.config.waveHeight = this.waveformHeight;
 
         // Don't call resetRenderState - it forces expensive redraw
         // The waveform data doesn't change, just the rendering height
       }
     } else if (componentName === "spectrogram") {
-      this.spectrogramHeight = clampedHeight;
+      if (this.splitChannels && this.audio?.channelCount) {
+        this.spectrogramHeight = clampedHeight / this.audio.channelCount;
+      } else {
+        this.spectrogramHeight = clampedHeight;
+      }
       // Update the spectrogram-related layers
       const spectrogramLayer = this.getLayer("spectrogram");
       const spectrogramResizeLayer = this.getLayer("spectrogram-resize");
       const spectrogramGridLayer = this.getLayer("spectrogram-grid");
 
-      if (spectrogramLayer) spectrogramLayer.height = clampedHeight;
-      if (spectrogramResizeLayer) spectrogramResizeLayer.height = clampedHeight;
-      if (spectrogramGridLayer) spectrogramGridLayer.height = clampedHeight;
+      if (spectrogramLayer) spectrogramLayer.height = this.spectrogramLayerHeight;
+      if (spectrogramResizeLayer) spectrogramResizeLayer.height = this.spectrogramLayerHeight;
+      if (spectrogramGridLayer) spectrogramGridLayer.height = this.spectrogramLayerHeight;
 
       // Update SpectrogramRenderer configuration
       if (this.spectrogramRenderer) {

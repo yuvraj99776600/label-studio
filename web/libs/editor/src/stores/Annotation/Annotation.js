@@ -1,5 +1,6 @@
-import throttle from "lodash.throttle";
+import throttle from "lodash/throttle";
 import { destroy, detach, flow, getEnv, getParent, getRoot, isAlive, onSnapshot, types } from "mobx-state-tree";
+import { ff } from "@humansignal/core";
 import { errorBuilder } from "../../core/DataValidator/ConfigValidator";
 import { guidGenerator } from "../../core/Helpers";
 import { Hotkey } from "../../core/Hotkey";
@@ -80,14 +81,23 @@ const hotkeys = Hotkey("Annotations", "Annotations");
  * @param value {Object} object to fix
  * @returns {Object} new object without value fields
  */
-function omitValueFields(value) {
-  const newValue = { ...value };
+const omitValueFields = ff.isActive(ff.FF_CUSTOM_TAGS)
+  ? (value) => {
+      // @todo describe that we only omit `text` from TextArea
+      if (Array.isArray(value.text)) {
+        const { text: _, ...newValue } = value;
+        return newValue;
+      }
 
-  Result.properties.value.propertyNames.forEach((propName) => {
-    delete newValue[propName];
-  });
-  return newValue;
-}
+      return value;
+    }
+  : (value) => {
+      const newValue = { ...value };
+      Result.properties.value.propertyNames.forEach((propName) => {
+        delete newValue[propName];
+      });
+      return newValue;
+    };
 
 const TrackedState = types.model("TrackedState", {
   areas: types.map(Area),
@@ -629,7 +639,7 @@ const _Annotation = types
 
       self.relationStore.deleteNodeRelation(region);
 
-      if (region.type === "polygonregion") {
+      if (region.type === "polygonregion" || region.type === "vectorregion") {
         detach(region);
       }
 
@@ -966,7 +976,7 @@ const _Annotation = types
       Hotkey.setScope(Hotkey.DEFAULT_SCOPE);
     },
 
-    createResult(areaValue, resultValue, control, object, skipAfrerCreate = false) {
+    createResult(areaValue, resultValue, control, object, skipAfrerCreate = false, additionalStates = []) {
       // Without correct validation object may be null, but it it shouldn't be so in results - so we should find any
       if (!object && control.type === "textarea") {
         object = self.objects[0];
@@ -999,6 +1009,13 @@ const _Annotation = types
       objectTag?.afterResultCreated?.(area);
 
       if (!area) return;
+
+      if (ff.isActive(ff.FF_MULTIPLE_LABELS_REGIONS)) {
+        // Add additional states before any deselection happens
+        additionalStates.forEach((state) => {
+          area.setValue(state);
+        });
+      }
 
       // This is added mostly for the reason of updating indexes in labels
       // for the elements (like highlights in text) that won't be dynamically changed

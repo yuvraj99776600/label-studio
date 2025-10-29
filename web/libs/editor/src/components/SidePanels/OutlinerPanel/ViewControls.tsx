@@ -8,24 +8,23 @@ import {
   IconPredictions,
   IconSortDown,
   IconSortUp,
+  IconTimelineRegion,
 } from "@humansignal/icons";
 import { Button } from "@humansignal/ui";
-import { type FC, useCallback, useContext, useMemo } from "react";
+import { type FC, useCallback, useContext, useEffect, useMemo } from "react";
 import { Dropdown } from "../../../common/Dropdown/Dropdown";
 // eslint-disable-next-line
 // @ts-ignore
 import { Menu } from "../../../common/Menu/Menu";
-import { BemWithSpecifiContext } from "../../../utils/bem";
+import { cn } from "../../../utils/bem";
 import { SidePanelsContext } from "../SidePanelsContext";
 import "./ViewControls.scss";
 import { observer } from "mobx-react";
 import { FF_DEV_3873, isFF } from "../../../utils/feature-flags";
 
-const { Block, Elem } = BemWithSpecifiContext();
-
 export type GroupingOptions = "manual" | "label" | "type";
 
-export type OrderingOptions = "score" | "date";
+export type OrderingOptions = "score" | "date" | "mediaStartTime";
 
 export type OrderingDirection = "asc" | "desc";
 
@@ -35,13 +34,39 @@ interface ViewControlsProps {
   regions: any;
   onOrderingChange: (ordering: OrderingOptions) => void;
   onGroupingChange: (grouping: GroupingOptions) => void;
-  onFilterChange: (filter: any) => void;
 }
 
+const mediaStartTimeSupportedTags = [
+  ["labels", "audio"],
+  ["labels", "videorectangle", "video"],
+  ["timelinelabels", "video"],
+  ["timeserieslabels", "timeseries"],
+];
+
 export const ViewControls: FC<ViewControlsProps> = observer(
-  ({ ordering, regions, orderingDirection, onOrderingChange, onGroupingChange, onFilterChange }) => {
+  ({ ordering, regions, orderingDirection, onOrderingChange, onGroupingChange }) => {
     const grouping = regions.group;
     const context = useContext(SidePanelsContext);
+
+    // Check labeling configuration for media-time-capable object tags
+    const mediaTimeSupport: boolean | null = useMemo(() => {
+      const names = regions.annotation?.names;
+      if (!names || names.size === 0) return null;
+
+      const tags = Array.from(names.values());
+      // Check if all tag types from the tuple exist in the configuration
+      return mediaStartTimeSupportedTags.some((requiredTagTypes) => {
+        return requiredTagTypes.every((requiredType) => tags.some((tag: any) => tag?.type === requiredType));
+      });
+    }, [regions.annotation?.names]);
+
+    // Auto-fallback to "date" if current ordering is "mediaStartTime" but no media-time support in config
+    useEffect(() => {
+      if (ordering === "mediaStartTime" && mediaTimeSupport === false) {
+        onOrderingChange("date");
+      }
+    }, [ordering, mediaTimeSupport, onOrderingChange]);
+
     const getGroupingLabels = useCallback((value: GroupingOptions): LabelInfo => {
       switch (value) {
         case "manual":
@@ -102,13 +127,23 @@ export const ViewControls: FC<ViewControlsProps> = observer(
             selectedLabel: "By Score",
             icon: <IconPredictions width={16} height={16} />,
           };
+        case "mediaStartTime":
+          return {
+            label: (
+              <>
+                <IconTimelineRegion /> Order by Media Start Time
+              </>
+            ),
+            selectedLabel: "By Media Start Time",
+            icon: <IconTimelineRegion width={16} height={16} />,
+          };
       }
     }, []);
 
     const renderOrderingDirectionIcon = orderingDirection === "asc" ? <IconSortUp /> : <IconSortDown />;
 
     return (
-      <Block name="view-controls" mod={{ collapsed: context.locked }}>
+      <div className={cn("view-controls").mod({ collapsed: context.locked }).toClassName()}>
         <Grouping
           value={grouping}
           options={["manual", "type", "label"]}
@@ -116,20 +151,21 @@ export const ViewControls: FC<ViewControlsProps> = observer(
           readableValueForKey={getGroupingLabels}
         />
         {grouping === "manual" && (
-          <Elem name="sort">
+          <div className={cn("view-controls").elem("sort").toClassName()}>
             <Grouping
               value={ordering}
               direction={orderingDirection}
-              options={["score", "date"]}
+              options={mediaTimeSupport ? ["score", "date", "mediaStartTime"] : ["score", "date"]}
               onChange={(value) => onOrderingChange(value)}
               readableValueForKey={getOrderingLabels}
               allowClickSelected
               extraIcon={renderOrderingDirectionIcon}
+              width={230}
             />
-          </Elem>
+          </div>
         )}
         <ToggleRegionsVisibilityButton regions={regions} />
-      </Block>
+      </div>
     );
   },
 );
@@ -149,6 +185,7 @@ interface GroupingProps<T extends string> {
   onChange: (value: T) => void;
   readableValueForKey: (value: T) => LabelInfo;
   extraIcon?: JSX.Element;
+  width?: number;
 }
 
 const Grouping = <T extends string>({
@@ -159,6 +196,7 @@ const Grouping = <T extends string>({
   onChange,
   readableValueForKey,
   extraIcon,
+  width = 200,
 }: GroupingProps<T>) => {
   const readableValue = useMemo(() => {
     return readableValueForKey(value);
@@ -166,15 +204,15 @@ const Grouping = <T extends string>({
 
   const optionsList: [T, LabelInfo][] = useMemo(() => {
     return options.map((key) => [key, readableValueForKey(key)]);
-  }, []);
+  }, [options, readableValueForKey]);
 
   const dropdownContent = useMemo(() => {
     return (
       <Menu
         size="medium"
         style={{
-          width: 200,
-          minWidth: 200,
+          width,
+          minWidth: width,
           borderRadius: isFF(FF_DEV_3873) && 4,
         }}
         selectedKeys={[value]}
@@ -195,7 +233,7 @@ const Grouping = <T extends string>({
   }, [value, optionsList, readableValue, direction, onChange]);
 
   return (
-    <Dropdown.Trigger content={dropdownContent} style={{ width: 200 }}>
+    <Dropdown.Trigger content={dropdownContent} style={{ width }}>
       <Button
         variant="neutral"
         size="smaller"
@@ -227,10 +265,10 @@ interface GroupingMenuItemProps<T extends string> {
 const GroupingMenuItem = <T extends string>({ value, name, label, direction, onChange }: GroupingMenuItemProps<T>) => {
   return (
     <Menu.Item name={name} onClick={() => onChange(name)}>
-      <Elem name="label">
+      <div className={cn("view-controls").elem("label").toClassName()}>
         {label.label}
         <DirectionIndicator direction={direction} name={name} value={value} />
-      </Elem>
+      </div>
     </Menu.Item>
   );
 };

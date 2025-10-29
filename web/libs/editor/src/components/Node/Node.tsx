@@ -3,6 +3,7 @@ import { getType } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { ApartmentOutlined, AudioOutlined, LineChartOutlined, MessageOutlined } from "@ant-design/icons";
 
+import Registry from "../../core/Registry";
 import "./Node.scss";
 import {
   IconBrushTool,
@@ -97,6 +98,12 @@ const NodeViews: Record<string, NodeViewProps> = {
     altIcon: IconPolygonToolSmart,
   },
 
+  VectorRegionModel: {
+    name: "Vector",
+    icon: IconPolygonTool,
+    altIcon: IconPolygonToolSmart,
+  },
+
   EllipseRegionModel: {
     name: "Ellipse",
     icon: IconCircleTool,
@@ -136,6 +143,10 @@ const NodeViews: Record<string, NodeViewProps> = {
     name: "Timeline Span",
     icon: IconTimelineRegion,
   },
+
+  ...Object.fromEntries(
+    Registry.customTags.filter((tag) => tag.region).map((tag) => [tag.region.name, tag.region.nodeView]),
+  ),
 };
 
 const NodeIcon: FC<any> = observer(({ node, ...props }) => {

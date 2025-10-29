@@ -232,6 +232,7 @@ INSTALLED_APPS = [
     'ml_model_providers',
     'jwt_auth',
     'session_policy',
+    'fsm',
 ]
 
 MIDDLEWARE = [
@@ -369,6 +370,9 @@ RQ_QUEUES = {
     },
 }
 
+# How long to keep failed RQ jobs (in seconds); default is 30 days
+RQ_FAILED_JOB_TTL = int(get_env('RQ_FAILED_JOB_TTL', 30 * 24 * 60 * 60))
+
 # drf-spectacular settings for OpenAPI 3.0 schema generation
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Label Studio API',
@@ -385,6 +389,12 @@ SPECTACULAR_SETTINGS = {
     },
     'AUTHENTICATION_WHITELIST': [
         'jwt_auth.auth.TokenAuthenticationPhaseout',
+    ],
+    'SERVERS': [
+        {
+            'url': HOSTNAME,
+            'description': 'Label Studio',
+        },
     ],
     'CONTACT': {'url': 'https://labelstud.io'},
     'X_LOGO': {'url': '../../static/icons/logo-black.svg'},
@@ -557,6 +567,8 @@ MAX_TASK_BATCH_SIZE = int(get_env('MAX_TASK_BATCH_SIZE', 1000))
 TASK_DATA_PER_BATCH = int(get_env('TASK_DATA_PER_BATCH', 50 * 1024 * 1024))  # 50 MB in bytes
 # Batch size for streaming reimport operations to reduce memory usage
 REIMPORT_BATCH_SIZE = int(get_env('REIMPORT_BATCH_SIZE', 1000))
+# Batch size for streaming import operations to reduce memory usage
+IMPORT_BATCH_SIZE = int(get_env('IMPORT_BATCH_SIZE', 500))
 # Batch size for processing prediction imports to avoid memory issues with large datasets
 PREDICTION_IMPORT_BATCH_SIZE = int(get_env('PREDICTION_IMPORT_BATCH_SIZE', 500))
 PROJECT_TITLE_MIN_LEN = 3
@@ -569,7 +581,7 @@ DATA_UNDEFINED_NAME = '$undefined$'
 LICENSE = {}
 VERSIONS = {}
 VERSION_EDITION = 'Community'
-LATEST_VERSION_CHECK = True
+LATEST_VERSION_CHECK = get_bool_env('LATEST_VERSION_CHECK', True)
 VERSIONS_CHECK_TIME = 0
 ALLOW_ORGANIZATION_WEBHOOKS = get_bool_env('ALLOW_ORGANIZATION_WEBHOOKS', False)
 CONVERTER_DOWNLOAD_RESOURCES = get_bool_env('CONVERTER_DOWNLOAD_RESOURCES', True)
@@ -590,6 +602,7 @@ CREATE_ORGANIZATION = 'organizations.functions.create_organization'
 SAVE_USER = 'users.functions.save_user'
 POST_PROCESS_REIMPORT = 'core.utils.common.empty'
 USER_SERIALIZER = 'users.serializers.BaseUserSerializer'
+WHOAMI_USER_SERIALIZER = 'users.serializers.BaseWhoAmIUserSerializer'
 USER_SERIALIZER_UPDATE = 'users.serializers.BaseUserSerializerUpdate'
 TASK_SERIALIZER = 'tasks.serializers.BaseTaskSerializer'
 EXPORT_DATA_SERIALIZER = 'data_export.serializers.BaseExportDataSerializer'
@@ -598,12 +611,14 @@ DATA_MANAGER_ANNOTATIONS_MAP = {}
 DATA_MANAGER_ACTIONS = {}
 DATA_MANAGER_CUSTOM_FILTER_EXPRESSIONS = 'data_manager.functions.custom_filter_expressions'
 DATA_MANAGER_PREPROCESS_FILTER = 'data_manager.functions.preprocess_filter'
+DATA_MANAGER_CHECK_ACTION_PERMISSION = 'data_manager.actions.check_action_permission'
 BULK_UPDATE_IS_LABELED = 'tasks.functions.bulk_update_is_labeled_by_overlap'
 USER_LOGIN_FORM = 'users.forms.LoginForm'
 PROJECT_MIXIN = 'projects.mixins.ProjectMixin'
 TASK_MIXIN = 'tasks.mixins.TaskMixin'
 LSE_PROJECT = None
 GET_TASKS_AGREEMENT_QUERYSET = None
+SHOULD_ATTEMPT_GROUND_TRUTH_FIRST = None
 ANNOTATION_MIXIN = 'tasks.mixins.AnnotationMixin'
 ORGANIZATION_MIXIN = 'organizations.mixins.OrganizationMixin'
 USER_MIXIN = 'users.mixins.UserMixin'
@@ -616,10 +631,10 @@ STORAGE_ANNOTATION_SERIALIZER = 'io_storages.serializers.StorageAnnotationSerial
 TASK_SERIALIZER_BULK = 'tasks.serializers.BaseTaskSerializerBulk'
 PREPROCESS_FIELD_NAME = 'data_manager.functions.preprocess_field_name'
 INTERACTIVE_DATA_SERIALIZER = 'data_export.serializers.BaseExportDataSerializerForInteractive'
-STORAGE_PERMISSION = 'io_storages.permissions.StoragePermission'
 PROJECT_IMPORT_PERMISSION = 'projects.permissions.ProjectImportPermission'
 DELETE_TASKS_ANNOTATIONS_POSTPROCESS = None
 FEATURE_FLAGS_GET_USER_REPR = 'core.feature_flags.utils.get_user_repr'
+FEATURE_FLAGS_GET_USER_REPR_FROM_ORGANIZATION = 'core.feature_flags.utils.get_user_repr_from_organization'
 
 # Test factories
 ORGANIZATION_FACTORY = 'organizations.tests.factories.OrganizationFactory'
@@ -644,7 +659,7 @@ USER_AUTH = user_auth
 COLLECT_VERSIONS = collect_versions_dummy
 
 WEBHOOK_TIMEOUT = float(get_env('WEBHOOK_TIMEOUT', 1.0))
-WEBHOOK_BATCH_SIZE = int(get_env('WEBHOOK_BATCH_SIZE', 100))
+WEBHOOK_BATCH_SIZE = int(get_env('WEBHOOK_BATCH_SIZE', 5000))
 WEBHOOK_SERIALIZERS = {
     'project': 'webhooks.serializers_for_hooks.ProjectWebhookSerializer',
     'task': 'webhooks.serializers_for_hooks.TaskWebhookSerializer',
@@ -696,6 +711,7 @@ FUTURE_SAVE_TASK_TO_STORAGE_JSON_EXT = get_bool_env('FUTURE_SAVE_TASK_TO_STORAGE
 STORAGE_IN_PROGRESS_TIMER = float(get_env('STORAGE_IN_PROGRESS_TIMER', 5.0))
 STORAGE_EXPORT_CHUNK_SIZE = int(get_env('STORAGE_EXPORT_CHUNK_SIZE', 100))
 DEFAULT_STORAGE_LIST_LIMIT = int(get_env('DEFAULT_STORAGE_LIST_LIMIT', 100))
+STORAGE_EXISTED_COUNT_BATCH_SIZE = int(get_env('STORAGE_EXISTED_COUNT_BATCH_SIZE', 1000))
 
 USE_NGINX_FOR_EXPORT_DOWNLOADS = get_bool_env('USE_NGINX_FOR_EXPORT_DOWNLOADS', False)
 USE_NGINX_FOR_UPLOADS = get_bool_env('USE_NGINX_FOR_UPLOADS', True)
@@ -875,6 +891,16 @@ USER_ACTIVITY_BATCH_SIZE = int(get_env('USER_ACTIVITY_BATCH_SIZE', '100'))
 USER_ACTIVITY_SYNC_THRESHOLD = int(get_env('USER_ACTIVITY_SYNC_THRESHOLD', '500'))
 USER_ACTIVITY_REDIS_TTL = int(get_env('USER_ACTIVITY_REDIS_TTL', '86400'))  # 24 hours
 
+# QuerySet iterator settings
+QS_ITERATOR_DEFAULT_CHUNK_SIZE = int(get_env('QS_ITERATOR_DEFAULT_CHUNK_SIZE', 1000))
+
 # Data Manager
 # Max number of users to display in the Data Manager in Annotators/Reviewers/Comment Authors, etc
 DM_MAX_USERS_TO_DISPLAY = int(get_env('DM_MAX_USERS_TO_DISPLAY', 10))
+
+# Base FSM (Finite State Machine) Configuration for Label Studio
+FSM_CACHE_TTL = 300  # Cache TTL in seconds (5 minutes)
+
+# Used for async migrations. In LSE this is set to a real queue name, including here so we
+# can use settings.SERVICE_QUEUE_NAME in async migrations in LSO
+SERVICE_QUEUE_NAME = get_env('SERVICE_QUEUE_NAME', 'default')

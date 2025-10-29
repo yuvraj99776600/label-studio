@@ -1,8 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "../../utils/bem";
 import { absoluteURL } from "../../utils/helpers";
-import { Tooltip } from "@humansignal/ui";
-import { useMemo } from "react";
 
 export const MenuItem = ({
   children,
@@ -38,9 +36,7 @@ export const MenuItem = ({
   if (className) classList.push(className);
 
   const linkContent = isIconMenuItem ? (
-    <span className={rootClass.elem("item-icon")}>
-      {icon}
-    </span>
+    <span className={rootClass.elem("item-icon")}>{icon}</span>
   ) : (
     <>
       {icon && <span className={rootClass.elem("item-icon")}>{icon}</span>}
@@ -74,7 +70,11 @@ export const MenuItem = ({
       ) : (
         <span {...linkAttributes}>{linkContent}</span>
       )}
-      {isIconMenuItem && <div className="text-center text-[10px] font-medium text-neutral-surface-subtle pointer">{children ?? label}</div>}
+      {isIconMenuItem && (
+        <div className="text-center text-[10px] font-medium text-neutral-surface-subtle pointer">
+          {children ?? label}
+        </div>
+      )}
     </li>
   );
 };

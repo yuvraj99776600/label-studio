@@ -267,7 +267,9 @@ class ImportAPI(generics.CreateAPIView):
 
         if preannotated_from_fields:
             # turn flat task JSONs {"column1": value, "column2": value} into {"data": {"column1"..}, "predictions": [{..."column2"}]
-            parsed_data = reformat_predictions(parsed_data, preannotated_from_fields, project)
+            raise_errors = flag_set('fflag_feat_utc_210_prediction_validation_15082025', user='auto')
+            logger.info(f'Reformatting predictions with raise_errors: {raise_errors}')
+            parsed_data = reformat_predictions(parsed_data, preannotated_from_fields, project, raise_errors)
 
         # Conditionally validate predictions: skip when label config is default during project creation
         if project.label_config_is_not_default:
@@ -291,7 +293,12 @@ class ImportAPI(generics.CreateAPIView):
                 for error in validation_errors:
                     error_message += f'- {error}\n'
 
-                raise ValidationError({'predictions': [error_message]})
+                if flag_set('fflag_feat_utc_210_prediction_validation_15082025', user='auto'):
+                    raise ValidationError({'predictions': [error_message]})
+                else:
+                    logger.error(
+                        f'Prediction validation failed, not raising error - ({len(validation_errors)} errors):\n{error_message}'
+                    )
 
         if commit_to_project:
             # Immediately create project tasks and update project states and counters
@@ -408,7 +415,48 @@ class ImportAPI(generics.CreateAPIView):
 
 
 # Import
-@extend_schema(exclude=True)
+@method_decorator(
+    name='post',
+    decorator=extend_schema(
+        tags=['Import'],
+        summary='Import predictions',
+        description='Import model predictions for tasks in the specified project.',
+        parameters=[
+            OpenApiParameter(
+                name='id',
+                type=OpenApiTypes.INT,
+                location='path',
+                description='A unique integer value identifying this project.',
+            ),
+        ],
+        request=PredictionSerializer(many=True),
+        responses={
+            201: OpenApiResponse(
+                description='Predictions successfully imported',
+                response={
+                    'title': 'Predictions import response',
+                    'description': 'Import result',
+                    'type': 'object',
+                    'properties': {
+                        'created': {
+                            'title': 'created',
+                            'description': 'Number of predictions created',
+                            'type': 'integer',
+                        }
+                    },
+                },
+            ),
+            400: OpenApiResponse(
+                description='Bad Request',
+            ),
+        },
+        extensions={
+            'x-fern-sdk-group-name': 'projects',
+            'x-fern-sdk-method-name': 'import_predictions',
+            'x-fern-audiences': ['public'],
+        },
+    ),
+)
 class ImportPredictionsAPI(generics.CreateAPIView):
     """
     API for importing predictions to a project.
@@ -519,10 +567,17 @@ class ImportPredictionsAPI(generics.CreateAPIView):
         for i, item in enumerate(self.request.data):
             # Validate task ID
             if item.get('task') not in tasks_ids:
-                validation_errors.append(
-                    f'Prediction {i}: Invalid task ID {item.get("task")} - task not found in project'
-                )
-                continue
+                if flag_set('fflag_feat_utc_210_prediction_validation_15082025', user='auto'):
+                    validation_errors.append(
+                        f'Prediction {i}: Invalid task ID {item.get("task")} - task not found in project'
+                    )
+                    continue
+                else:
+                    # Before change we raised only here
+                    raise ValidationError(
+                        f'{item} contains invalid "task" field: corresponding task ID couldn\'t be retrieved '
+                        f'from project {project} tasks'
+                    )
 
             # Validate prediction using LabelInterface only
             try:
@@ -556,7 +611,10 @@ class ImportPredictionsAPI(generics.CreateAPIView):
 
         # If there are validation errors, raise them before creating any predictions
         if validation_errors:
-            raise ValidationError(validation_errors)
+            if flag_set('fflag_feat_utc_210_prediction_validation_15082025', user='auto'):
+                raise ValidationError(validation_errors)
+            else:
+                logger.error(f'Prediction validation failed ({len(validation_errors)} errors):\n{validation_errors}')
 
         predictions_obj = Prediction.objects.bulk_create(predictions, batch_size=settings.BATCH_SIZE)
         start_job_async_or_sync(update_tasks_counters, Task.objects.filter(id__in=tasks_ids))

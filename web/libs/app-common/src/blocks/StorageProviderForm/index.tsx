@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useState } from "react";
-import { useModalControls } from "apps/labelstudio/src/components/Modal/ModalPopup";
+import { useModalControls } from "@humansignal/ui/lib/modal";
 import { Stepper, ProviderSelectionStep, ProviderDetailsStep, PreviewStep, ReviewStep } from "./Steps";
 import { FormHeader } from "./components/form-header";
 import { FormFooter } from "./components/form-footer";
@@ -21,12 +21,16 @@ interface StorageProviderFormProps {
     name: string;
   }[];
   providers: Record<string, ProviderConfig>;
+  defaultValues?: Record<string, Record<string, any>>;
   onClose?: () => void;
   onHide?: () => void;
 }
 
 export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>(
-  ({ onSubmit, target, project, storage, title, storageTypes, providers, onClose = () => {}, onHide }, ref) => {
+  (
+    { onSubmit, target, project, storage, title, storageTypes, providers, defaultValues, onClose = () => {}, onHide },
+    ref,
+  ) => {
     const modal = useModalControls();
     const [type, setType] = useState<string | undefined>(storage?.type || storage?.provider || "s3");
     const [filesPreview, setFilesPreview] = useState<any[] | null>(null);
@@ -55,7 +59,10 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
     const effectiveTarget = target || "import"; // Default to import if target is undefined
     const steps = isEditMode
       ? [
-          { title: "Configure Connection", schema: getProviderSchema(type || "s3", isEditMode, effectiveTarget) },
+          {
+            title: "Configure Connection",
+            schema: getProviderSchema(type || "s3", isEditMode, effectiveTarget),
+          },
           // Only include preview and review steps for import storages
           ...(effectiveTarget === "import"
             ? [{ title: "Import Settings & Preview" }, { title: "Review & Confirm" }]
@@ -63,7 +70,10 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
         ]
       : [
           { title: "Select Provider", schema: step1Schema },
-          { title: "Configure Connection", schema: getProviderSchema(type || "s3", isEditMode, effectiveTarget) },
+          {
+            title: "Configure Connection",
+            schema: getProviderSchema(type || "s3", isEditMode, effectiveTarget),
+          },
           // Only include preview and review steps for import storages
           ...(effectiveTarget === "import"
             ? [{ title: "Import Settings & Preview" }, { title: "Review & Confirm" }]
@@ -88,6 +98,7 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
       isEditMode,
       steps: currentSteps,
       storage,
+      defaultValues,
     });
 
     const { currentStep, formData } = formState;
@@ -337,6 +348,7 @@ export const StorageProviderForm = forwardRef<unknown, StorageProviderFormProps>
             isLoading: saveStorageMutation.isLoading,
           }}
           target={effectiveTarget}
+          isProviderDisabled={providers[formData.provider]?.disabled || false}
         />
       </div>
     );

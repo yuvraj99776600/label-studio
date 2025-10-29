@@ -10,14 +10,13 @@ import {
   IconTerminal,
   IconDoor,
   IconGithub,
-  IconSettings,
   IconSlack,
 } from "@humansignal/icons";
 import { LSLogo } from "../../assets/images";
 import { Button, Userpic, ThemeToggle } from "@humansignal/ui";
 import { useConfig } from "../../providers/ConfigProvider";
 import { useContextComponent, useFixedLocation } from "../../providers/RoutesProvider";
-import { useCurrentUser } from "../../providers/CurrentUser";
+import { useAuth } from "@humansignal/core/providers/AuthProvider";
 import { cn } from "../../utils/bem";
 import { absoluteURL, isDefined } from "../../utils/helpers";
 import { Breadcrumbs } from "../Breadcrumbs/Breadcrumbs";
@@ -58,7 +57,7 @@ const RightContextMenu = ({ className, ...props }) => {
 export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSidebarToggle, onSidebarPin }) => {
   const menuDropdownRef = useRef();
   const useMenuRef = useRef();
-  const { user, fetch, isInProgress } = useCurrentUser();
+  const { user, isLoading } = useAuth();
   const location = useFixedLocation();
 
   const config = useConfig();
@@ -183,7 +182,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
             content={
               <Menu>
                 <Menu.Item
-                  icon={<IconSettings />}
+                  icon={<IconPersonInCircle />}
                   label="Account &amp; Settings"
                   href={pages.AccountSettingsPage.path}
                 />
@@ -202,7 +201,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
             }
           >
             <div title={user?.email} className={menubarClass.elem("user")}>
-              <Userpic user={user} isInProgress={isInProgress} />
+              <Userpic user={user} isInProgress={isLoading} />
               {showNewsletterDot && <div className={menubarClass.elem("userpic-badge")} />}
             </div>
           </Dropdown.Trigger>
@@ -220,9 +219,25 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
               className={[sidebarClass, sidebarClass.mod({ floating: !sidebarPinned, iconMenu: isIconMenu })].join(" ")}
             >
               <Menu>
-                {isFF(FF_HOMEPAGE) && <Menu.Item label="Home" isIconMenuItem={isIconMenu} to="/" icon={<IconHome />} data-external exact />}
-                <Menu.Item label="Projects" isIconMenuItem={isIconMenu} to="/projects" icon={<IconFolder />} data-external exact />
-                <Menu.Item label="Organization" isIconMenuItem={isIconMenu} to="/organization" icon={<IconPersonInCircle />} data-external exact />
+                {isFF(FF_HOMEPAGE) && (
+                  <Menu.Item label="Home" isIconMenuItem={isIconMenu} to="/" icon={<IconHome />} data-external exact />
+                )}
+                <Menu.Item
+                  label="Projects"
+                  isIconMenuItem={isIconMenu}
+                  to="/projects"
+                  icon={<IconFolder />}
+                  data-external
+                  exact
+                />
+                <Menu.Item
+                  label="Organization"
+                  isIconMenuItem={isIconMenu}
+                  to="/organization"
+                  icon={<IconPersonInCircle />}
+                  data-external
+                  exact
+                />
 
                 <Menu.Spacer />
 
@@ -235,7 +250,13 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
                   icon={<IconTerminal />}
                   target="_blank"
                 />
-                <Menu.Item label="Docs" isIconMenuItem={isIconMenu} href="https://labelstud.io/guide" icon={<IconBook />} target="_blank" />
+                <Menu.Item
+                  label="Docs"
+                  isIconMenuItem={isIconMenu}
+                  href="https://labelstud.io/guide"
+                  icon={<IconBook />}
+                  target="_blank"
+                />
                 <Menu.Item
                   isIconMenuItem={isIconMenu}
                   label="GitHub"
@@ -257,7 +278,7 @@ export const Menubar = ({ enabled, defaultOpened, defaultPinned, children, onSid
 
                 {!isIconMenu && <Menu.Divider />}
 
-                {!isIconMenu &&(
+                {!isIconMenu && (
                   <Menu.Item
                     isIconMenuItem={isIconMenu}
                     icon={<IconPin />}

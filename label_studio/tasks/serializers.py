@@ -3,6 +3,7 @@
 import logging
 
 import ujson as json
+from core.current_request import get_current_request
 from core.feature_flags import flag_set
 from core.label_config import replace_task_data_undefined_with_config_field
 from core.utils.common import load_func, retry_database_locked
@@ -76,16 +77,21 @@ class PredictionSerializer(ModelSerializer):
 
     def validate(self, data):
         """Validate prediction using LabelInterface against project configuration"""
-        # Only validate if we're updating the result field
-        if 'result' not in data:
-            return data
-
-        # Get the project from the task or directly from data
         project = None
         if 'task' in data:
             project = data['task'].project
         elif 'project' in data:
             project = data['project']
+        ff_user = project.organization.created_by if project else 'auto'
+
+        if not flag_set('fflag_feat_utc_210_prediction_validation_15082025', user=ff_user):
+            # Skip validation if feature flag is not set
+            logger.info(f'Skipping prediction validation in PredictionSerializer for user {ff_user}')
+            return super().validate(data)
+
+        # Only validate if we're updating the result field
+        if 'result' not in data:
+            return data
 
         if not project:
             raise ValidationError('Project is required for prediction validation')
@@ -185,7 +191,7 @@ class TaskSimpleSerializer(ModelSerializer):
 
     class Meta:
         model = Task
-        fields = '__all__'
+        exclude = ('precomputed_agreement',)
 
 
 class BaseTaskSerializer(FlexFieldsModelSerializer):
@@ -206,8 +212,23 @@ class BaseTaskSerializer(FlexFieldsModelSerializer):
 
     def validate(self, task):
         instance = self.instance if hasattr(self, 'instance') else None
+
+        project = self.project(task=instance)
+
+        current_request = get_current_request()
+        if current_request and current_request.method == 'POST' and not project:
+            # raise ValidationError for the project field with standard DRF message
+            try:
+                self.fields['project'].fail('required')
+            except ValidationError as exc:
+                raise ValidationError(
+                    {
+                        'project': exc.detail,
+                    }
+                )
+
         validator = TaskValidator(
-            self.project(task=instance),
+            project,
             instance=instance if 'data' not in task else None,
         )
         return validator.validate(task)
@@ -227,7 +248,7 @@ class BaseTaskSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = Task
-        fields = '__all__'
+        exclude = ('precomputed_agreement',)
 
 
 class BaseTaskSerializerBulk(serializers.ListSerializer):
@@ -423,8 +444,12 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
             db_annotations = self.add_annotations(task_annotations, user)
             prediction_errors = self.add_predictions(task_predictions)
 
+            raise_prediction_errors = True
+            if not flag_set('fflag_feat_utc_210_prediction_validation_15082025', user=ff_user):
+                raise_prediction_errors = False
+
             # If there are prediction validation errors, raise them
-            if prediction_errors:
+            if prediction_errors and raise_prediction_errors:
                 raise ValidationError({'predictions': prediction_errors})
 
         self.post_process_annotations(user, db_annotations, 'imported')
@@ -448,7 +473,9 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
         db_predictions = []
         validation_errors = []
 
-        should_validate = self.project.label_config_is_not_default
+        should_validate = self.project.label_config_is_not_default and flag_set(
+            'fflag_feat_utc_210_prediction_validation_15082025', user=self.project.organization.created_by
+        )
 
         # add predictions
         last_model_version = None

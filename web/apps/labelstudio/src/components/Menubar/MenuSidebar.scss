@@ -13,15 +13,18 @@
   .main-menu {
     background: none;
     border-right: none;
+
     &__item {
       padding: 0;
       width: 100%;
       background: var(--color-neutral-background);
       border: 1px solid var(--color-neutral-border);
     }
+
     &__item_active:not(.sidebar__pin){
       background: var(--color-neutral-emphasis);
     }
+
     &__item-icon {
       width: 100%;
       justify-content: center;
@@ -92,12 +95,15 @@
     .main-menu {
       &__item {
         --item-size: 40px;
+
         height: var(--item-size);
         width: var(--item-size);
       }
+
       &__item-icon {
         svg {
           --icon-size: 30px;
+
           width: var(--icon-size);
           height: var(--icon-size);
         }
