@@ -48,17 +48,26 @@ class AnnotationSubmittedTransition(ModelChangeTransition):
 
         Updates task state to COMPLETED when annotation is submitted.
         Then updates project state based on task completion status.
+        Handles "cold start" scenarios where task may not have state record yet.
         """
         from fsm.state_choices import TaskStateChoices
         from fsm.state_manager import StateManager
+        from fsm.utils import get_or_initialize_state
         from projects.transitions import update_project_state_after_task_change
 
         annotation = context.entity
         task = annotation.task
         project = annotation.project
 
-        # Get current task state
+        # Get current task state (initialize if needed)
         current_task_state = StateManager.get_current_state_value(task)
+
+        if current_task_state is None:
+            # Task has no state record - initialize it
+            # Since annotation was just submitted, task should be COMPLETED
+            current_task_state = get_or_initialize_state(
+                task, user=context.current_user, inferred_state=TaskStateChoices.COMPLETED
+            )
 
         # Transition task to COMPLETED if not already
         if current_task_state != TaskStateChoices.COMPLETED:

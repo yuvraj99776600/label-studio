@@ -142,6 +142,7 @@ def update_project_state_after_task_change(project, user=None):
     Update project FSM state based on task states.
 
     This helper function is called after any task state change to update the parent project's state.
+    It handles "cold start" scenarios where tasks or the project may not have state records yet.
 
     State transition logic:
     - CREATED -> IN_PROGRESS: When any task becomes COMPLETED
@@ -152,11 +153,9 @@ def update_project_state_after_task_change(project, user=None):
         project: Project instance to update
         user: User triggering the change (for FSM context)
     """
-    from fsm.state_choices import TaskStateChoices
+    from fsm.state_choices import ProjectStateChoices, TaskStateChoices
     from fsm.state_manager import StateManager
-
-    # Get current project state
-    current_project_state = StateManager.get_current_state_value(project)
+    from fsm.utils import get_or_initialize_state, infer_entity_state_from_data
 
     # Get task state counts
     from tasks.models import Task
@@ -165,13 +164,26 @@ def update_project_state_after_task_change(project, user=None):
     total_tasks = tasks.count()
 
     if total_tasks == 0:
-        # No tasks, keep project in CREATED state
+        # No tasks - ensure project is in CREATED state
+        current_project_state = get_or_initialize_state(project, user=user)
         return
 
-    # Count tasks by state
+    # Count completed tasks - handle both tasks with and without state records
     completed_tasks_count = 0
+
     for task in tasks:
+        # Get or initialize task state
         task_state = StateManager.get_current_state_value(task)
+
+        if task_state is None:
+            # Task has no state record - infer from data
+            task_state = infer_entity_state_from_data(task)
+
+            # Initialize the task state
+            if task_state:
+                get_or_initialize_state(task, user=user, inferred_state=task_state)
+
+        # Count completed tasks
         if task_state == TaskStateChoices.COMPLETED:
             completed_tasks_count += 1
 
@@ -185,6 +197,14 @@ def update_project_state_after_task_change(project, user=None):
     else:
         # Some tasks completed -> should be IN_PROGRESS
         target_state = ProjectStateChoices.IN_PROGRESS
+
+    # Get current project state (initialize if needed)
+    current_project_state = StateManager.get_current_state_value(project)
+
+    if current_project_state is None:
+        # Project has no state - initialize with target state
+        get_or_initialize_state(project, user=user, inferred_state=target_state)
+        return
 
     # Execute appropriate transition if state should change
     if current_project_state != target_state:

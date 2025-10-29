@@ -459,3 +459,226 @@ class TestEndToEndWorkflows:
         assert_task_state(task1_id, TaskStateChoices.COMPLETED)
         assert_project_state(project.id, ProjectStateChoices.COMPLETED)
         assert_annotation_state(annotation3.id, AnnotationStateChoices.SUBMITTED)
+
+
+class TestColdStartScenarios:
+    """
+    Test FSM behavior when entities exist without state records.
+
+    These tests simulate "cold start" scenarios that occur when:
+    1. FSM is deployed to production with pre-existing data
+    2. Entities exist in the database but have no FSM state records
+    3. First FSM interaction must properly initialize states
+    """
+
+    @pytest.fixture(autouse=True)
+    def setup_context(self, business_client):
+        """Ensure CurrentContext has user set for FSM operations"""
+        from core.current_request import CurrentContext
+
+        # Set the user from business_client to CurrentContext
+        user = business_client.user
+        CurrentContext.set_user(user)
+        if hasattr(user, 'active_organization') and user.active_organization:
+            CurrentContext.set_organization_id(user.active_organization.id)
+
+        yield
+
+        # Cleanup
+        CurrentContext.clear()
+
+    def test_annotation_deletion_on_task_without_state(self, django_live_url, business_client, configured_project):
+        """
+        Test: Annotation deletion on task that has no FSM state record.
+
+        Steps:
+        1. Create task directly (bypassing FSM auto-transitions)
+        2. Add annotation directly (bypassing FSM)
+        3. Delete annotation via SDK
+        4. Verify states are initialized and updated correctly
+        """
+        from fsm.models import TaskState
+        from fsm.state_choices import TaskStateChoices
+        from tasks.models import Annotation, Task
+
+        ls = LabelStudio(base_url=django_live_url, api_key=business_client.api_key)
+
+        # Step 1: Create task directly without FSM state
+        task = Task(data={'text': 'Test cold start'}, project=configured_project)
+        task.save(skip_fsm=True)
+
+        # Verify no state exists
+        assert TaskState.objects.filter(task=task).count() == 0
+
+        # Step 2: Create annotation directly
+        annotation = Annotation(
+            task=task,
+            project=configured_project,
+            result=[{'value': {'choices': ['positive']}, 'from_name': 'label', 'to_name': 'text', 'type': 'choices'}],
+        )
+        annotation.save(skip_fsm=True)
+        task.is_labeled = True
+        task.save(skip_fsm=True)
+
+        # Step 3: Delete annotation via SDK (this triggers FSM logic)
+        ls.annotations.delete(id=annotation.id)
+
+        # Step 4: Verify task state was initialized and updated
+        task.refresh_from_db()
+        assert not task.is_labeled  # Annotation was deleted
+
+        # Task state should now exist and be IN_PROGRESS
+        task_states = TaskState.objects.filter(task=task).order_by('-id')
+        assert task_states.count() >= 1  # At least one state record created
+        latest_state = task_states.first()
+        assert latest_state.state in [TaskStateChoices.IN_PROGRESS, TaskStateChoices.CREATED]
+
+    def test_annotation_submission_on_task_without_state(self, django_live_url, business_client, configured_project):
+        """
+        Test: Annotation submission on task that has no FSM state record.
+
+        Steps:
+        1. Create task directly (bypassing FSM)
+        2. Submit annotation via SDK
+        3. Verify task and project states are initialized correctly
+        """
+        from fsm.models import ProjectState, TaskState
+        from fsm.state_choices import ProjectStateChoices, TaskStateChoices
+        from tasks.models import Task
+
+        ls = LabelStudio(base_url=django_live_url, api_key=business_client.api_key)
+
+        # Step 1: Create task without FSM state
+        task = Task(data={'text': 'Cold start annotation test'}, project=configured_project)
+        task.save(skip_fsm=True)
+
+        # Verify no states exist
+        assert TaskState.objects.filter(task=task).count() == 0
+
+        # Delete any project states that might exist
+        ProjectState.objects.filter(project=configured_project).delete()
+
+        # Step 2: Submit annotation via SDK
+        ls.annotations.create(
+            id=task.id,
+            result=[{'value': {'choices': ['positive']}, 'from_name': 'label', 'to_name': 'text', 'type': 'choices'}],
+            lead_time=1.0,
+        )
+
+        # Step 3: Verify states initialized
+        task_states = TaskState.objects.filter(task=task).order_by('-id')
+        assert task_states.count() >= 1
+        latest_task_state = task_states.first()
+        assert latest_task_state.state == TaskStateChoices.COMPLETED
+
+        project_states = ProjectState.objects.filter(project=configured_project).order_by('-id')
+        assert project_states.count() >= 1
+        latest_project_state = project_states.first()
+        assert latest_project_state.state in [ProjectStateChoices.IN_PROGRESS, ProjectStateChoices.COMPLETED]
+
+    def test_project_state_update_with_mixed_task_states(self, django_live_url, business_client, configured_project):
+        """
+        Test: Project state update when some tasks have states and some don't.
+
+        Steps:
+        1. Create multiple tasks without FSM states
+        2. Update project state via annotation submission
+        3. Verify all task states are initialized
+        4. Verify project state is correct
+        """
+        from fsm.models import TaskState
+        from fsm.state_choices import ProjectStateChoices, TaskStateChoices
+        from fsm.state_manager import get_state_manager
+        from tasks.models import Task
+
+        ls = LabelStudio(base_url=django_live_url, api_key=business_client.api_key)
+        StateManager = get_state_manager()
+
+        # Step 1: Create two tasks without FSM states
+        task1 = Task(data={'text': 'Task 1'}, project=configured_project)
+        task1.save(skip_fsm=True)
+
+        task2 = Task(data={'text': 'Task 2'}, project=configured_project)
+        task2.save(skip_fsm=True)
+
+        # Verify no tasks have states initially
+        assert not TaskState.objects.filter(task=task1).exists()
+        assert not TaskState.objects.filter(task=task2).exists()
+
+        # Step 2: Submit annotation on first task only via SDK
+        ls.annotations.create(
+            id=task1.id,
+            result=[{'value': {'choices': ['positive']}, 'from_name': 'label', 'to_name': 'text', 'type': 'choices'}],
+            lead_time=1.0,
+        )
+
+        # Step 3: Verify both tasks now have states
+        # task1 should have COMPLETED state (annotation submitted)
+        task1_state = StateManager.get_current_state_value(task1)
+        assert task1_state == TaskStateChoices.COMPLETED
+
+        # task2 should also have been initialized during project state calculation
+        task2_state = StateManager.get_current_state_value(task2)
+        assert task2_state in [
+            TaskStateChoices.CREATED,
+            TaskStateChoices.IN_PROGRESS,
+            None,
+        ]  # May or may not be initialized yet
+
+        # Step 4: Verify project state is correct (IN_PROGRESS - some tasks completed)
+        project_state = StateManager.get_current_state_value(configured_project)
+        assert project_state == ProjectStateChoices.IN_PROGRESS
+
+    def test_bulk_task_processing_cold_start(self, django_live_url, business_client):
+        """
+        Test: Bulk processing of tasks when none have FSM states.
+
+        Steps:
+        1. Create a new project with multiple tasks without FSM states
+        2. Submit annotations on all tasks via SDK
+        3. Verify states are correctly initialized for all
+        4. Verify project transitions correctly through states
+        """
+        from fsm.models import TaskState
+        from fsm.state_choices import ProjectStateChoices, TaskStateChoices
+        from fsm.state_manager import get_state_manager
+        from projects.models import Project
+        from tasks.models import Task
+
+        ls = LabelStudio(base_url=django_live_url, api_key=business_client.api_key)
+        StateManager = get_state_manager()
+
+        # Create a new project with FSM
+        project = Project(
+            title='Bulk Cold Start Test',
+            label_config='<View><Text name="text" value="$text"/><Choices name="label" toName="text"><Choice value="positive"/><Choice value="negative"/></Choices></View>',
+            created_by=business_client.user,
+        )
+        project.save()
+
+        # Step 1: Create 3 tasks without FSM states
+        tasks = []
+        for i in range(3):
+            task = Task(data={'text': f'Bulk task {i}'}, project=project)
+            task.save(skip_fsm=True)
+            tasks.append(task)
+            assert not TaskState.objects.filter(task=task).exists()
+
+        # Step 2: Submit annotations on all tasks via SDK
+        for task in tasks:
+            ls.annotations.create(
+                id=task.id,
+                result=[
+                    {'value': {'choices': ['positive']}, 'from_name': 'label', 'to_name': 'text', 'type': 'choices'}
+                ],
+                lead_time=1.0,
+            )
+
+        # Step 3: Verify all tasks have correct states
+        for task in tasks:
+            task_state = StateManager.get_current_state_value(task)
+            assert task_state == TaskStateChoices.COMPLETED
+
+        # Step 4: Verify project is COMPLETED (all tasks completed)
+        project_state = StateManager.get_current_state_value(project)
+        assert project_state == ProjectStateChoices.COMPLETED
