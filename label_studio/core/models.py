@@ -80,10 +80,22 @@ class HsModel(models.Model):
         For ForeignKey fields, we store the PK instead of the object to avoid
         circular references and recursion issues.
 
+        Deferred fields (not yet loaded from DB) are skipped to prevent infinite
+        recursion when accessing them would trigger refresh_from_db().
+
         This is called after each save to refresh the baseline for the next save.
         """
         self._original_values = {}
+
+        # Get deferred fields to avoid triggering recursive database loads
+        # Deferred fields haven't been loaded yet, so they can't have changed
+        deferred_fields = self.get_deferred_fields()
+
         for field in self._meta.fields:
+            # Skip deferred fields to prevent recursion via refresh_from_db()
+            if field.attname in deferred_fields:
+                continue
+
             value = getattr(self, field.name, None)
             # For ForeignKey fields, store PK to avoid circular references
             if field.is_relation and field.many_to_one and value is not None:
@@ -136,7 +148,13 @@ class HsModel(models.Model):
 
         changed = {}
         for field in self._meta.fields:
-            old_value = self._original_values.get(field.name)
+            # Only check fields that were captured in _original_values
+            # Fields that were deferred during capture won't be in _original_values
+            # and should be considered unchanged
+            if field.name not in self._original_values:
+                continue
+
+            old_value = self._original_values[field.name]
             new_value = getattr(self, field.name, None)
 
             # For ForeignKey fields, old_value is stored as PK, so compare PK to PK
