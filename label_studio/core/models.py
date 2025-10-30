@@ -417,6 +417,12 @@ class HsModel(models.Model):
         # Check for explicit FSM skip flag
         skip_fsm = kwargs.pop('skip_fsm', False)
 
+        # Also check CurrentContext for skip_fsm flag (for context manager usage)
+        if not skip_fsm:
+            from core.current_request import CurrentContext
+
+            skip_fsm = CurrentContext.get('skip_fsm', False)
+
         # Check if this is a creation vs update
         is_creating = self._state.adding
 
