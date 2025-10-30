@@ -73,10 +73,6 @@ class CurrentContext:
         return cls.get('fsm_disabled', False)
 
     @classmethod
-    def is_async_job(cls) -> bool:
-        return cls.get_request() is None
-
-    @classmethod
     def get_job_data(cls) -> dict:
         """
         This data will be shared to jobs spawned by the current thread.

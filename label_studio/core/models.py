@@ -62,9 +62,12 @@ class HsModel(models.Model):
         Django calls this method instead of __init__ when loading models from the database.
         We need to capture the original field values here for change detection.
         """
-        instance = super().from_db(db, field_names, values)
+        instance = super().from_db(cls, field_names, values)
         # Initialize as empty dict for safe access
         instance._original_values = {}
+        # Capture original values immediately after loading from DB
+        # This ensures we have the baseline for change detection on the first save
+        instance._capture_original_values()
         return instance
 
     def _capture_original_values(self):
@@ -239,11 +242,14 @@ class HsModel(models.Model):
                     # We need a minimal context to check should_execute
                     from fsm.transitions import TransitionContext
 
-                    # Create a temporary transition instance with is_creating set
-                    temp_transition = transition_class()
-                    # Set is_creating for ModelChangeTransition instances
-                    if hasattr(temp_transition, 'is_creating'):
-                        temp_transition.is_creating = is_creating
+                    # Create a temporary transition instance with full context
+                    # Convert changed_fields to the format expected by ModelChangeTransition
+                    formatted_changed_fields = {k: {'old': v[0], 'new': v[1]} for k, v in changed_fields.items()}
+
+                    # Create transition with all relevant data for should_execute() check
+                    temp_transition = transition_class(
+                        is_creating=is_creating, changed_fields=formatted_changed_fields
+                    )
 
                     # Check if should_execute is overridden (not using the base implementation)
                     # The base implementation always returns True, so we only check if it's been customized
@@ -396,12 +402,8 @@ class HsModel(models.Model):
         # Check if this is a creation vs update
         is_creating = self._state.adding
 
-        # Capture original values before save if FSM will be used
-        # This is lazy - only captured when FSM is enabled
-        if not skip_fsm and not is_creating:
-            self._capture_original_values()
-
         # Capture changed fields before save (only for updates)
+        # Note: _original_values should already be populated by from_db() or previous save()
         changed_fields = {} if is_creating else self._get_changed_fields()
 
         # Perform the actual save
