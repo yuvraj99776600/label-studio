@@ -116,44 +116,6 @@ def _capture_context() -> dict:
     return context_data
 
 
-def _restore_context(context_data: dict) -> None:
-    """
-    Restore context from captured data.
-    Used for both sync and async job execution.
-    """
-    if not context_data:
-        return
-
-    try:
-        from django.contrib.auth import get_user_model
-
-        # Set all context data
-        for key, value in context_data.items():
-            if key != 'user_id':  # We'll handle user_id specially
-                CurrentContext.set(key, value)
-
-        # If we have a user_id, load the user object
-        if user_id := context_data.get('user_id'):
-            User = get_user_model()
-            try:
-                user = User.objects.get(pk=user_id)
-                CurrentContext.set('user', user)
-                # If organization_id is not set, try to get it from the user
-                if (
-                    CurrentContext.get_organization_id() is None
-                    and hasattr(user, 'active_organization_id')
-                    and user.active_organization_id
-                ):
-                    CurrentContext.set_organization_id(user.active_organization_id)
-            except User.DoesNotExist:
-                logger.warning(f'User {user_id} not found when restoring context')
-
-        logger.debug(f'Restored context with keys: {list(context_data.keys())}')
-
-    except Exception as e:
-        logger.error(f'Failed to restore context: {e}')
-
-
 def redis_get(key):
     if not redis_healthcheck():
         return
@@ -238,11 +200,7 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
         )
         return job
     else:
-        # Sync execution - context should already be available from the calling thread
-        # In tests, context persists across all sync job calls within the same test
-        # Remove meta from kwargs as job functions don't accept it
         on_failure = kwargs.pop('on_failure', None)
-        kwargs.pop('meta', None)
 
         try:
             result = job(*args, **kwargs)

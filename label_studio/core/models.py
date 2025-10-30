@@ -62,7 +62,7 @@ class HsModel(models.Model):
         Django calls this method instead of __init__ when loading models from the database.
         We need to capture the original field values here for change detection.
         """
-        instance = super().from_db(cls, field_names, values)
+        instance = super().from_db(db, field_names, values)
         # Initialize as empty dict for safe access
         instance._original_values = {}
         # Capture original values immediately after loading from DB
@@ -410,7 +410,8 @@ class HsModel(models.Model):
         result = super().save(*args, **kwargs)
 
         # After successful save, trigger FSM transitions if enabled and not skipped
-        should_execute = self._should_execute_fsm()
+        should_execute = not skip_fsm and self._should_execute_fsm()
+
         logger.debug(
             f'FSM check for {self.__class__.__name__} {self.pk}: skip_fsm={skip_fsm}, should_execute={should_execute}',
             extra={
