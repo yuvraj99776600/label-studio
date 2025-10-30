@@ -250,6 +250,8 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
     pointStroke = DEFAULT_POINT_STROKE,
     pointStrokeSelected = DEFAULT_POINT_STROKE_SELECTED,
     pointStrokeWidth = DEFAULT_POINT_STROKE_WIDTH,
+    // Optional: marks this vector as the active one for interactions and ghost line
+    isActive = true,
   } = props;
 
   // Normalize input points to BezierPoint format
@@ -1489,6 +1491,27 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
     pointCreationManager,
   });
 
+  // Attach Stage-level listeners for cursor tracking (always active when not disabled)
+  // This allows drawing over other regions while maintaining ghost line functionality
+  useEffect(() => {
+    if (disabled) return;
+    const group = stageRef.current as unknown as Konva.Node | null;
+    const stage = group?.getStage();
+    if (!stage) return;
+
+    const ns = `.${instanceId}`;
+    const onMouseMove = (e: any) => {
+      // Only handle mousemove for cursor tracking - let other regions handle their own events
+      eventHandlers.handleLayerMouseMove?.(e);
+    };
+
+    stage.on(`mousemove${ns}`, onMouseMove);
+
+    return () => {
+      stage.off(`mousemove${ns}`);
+    };
+  }, [disabled, eventHandlers, instanceId]);
+
   return (
     <Group
       ref={stageRef}
@@ -1513,17 +1536,7 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
             }
       }
     >
-      {/* Invisible rectangle - always render to capture mouse events for cursor position updates */}
-      {!disabled && (
-        <Shape
-          sceneFunc={(ctx, shape) => {
-            ctx.beginPath();
-            ctx.rect(0, 0, width, height);
-            ctx.fillShape(shape);
-          }}
-          fill={INVISIBLE_SHAPE_OPACITY}
-        />
-      )}
+      {/* Invisible rectangle removed - cursor tracking now handled by stage-level listeners */}
 
       {/* Unified vector shape - renders all lines based on id-prevPointId relationships */}
       <VectorShape
@@ -1589,7 +1602,8 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
       />
 
       {/* Ghost line - preview from last point to cursor */}
-      <GhostLine
+      {isActive && (
+        <GhostLine
         initialPoints={initialPoints}
         cursorPosition={cursorPosition}
         draggedControlPoint={draggedControlPoint}
@@ -1608,7 +1622,8 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
         stroke={stroke}
         pixelSnapping={pixelSnapping}
         drawingDisabled={drawingDisabled}
-      />
+        />
+      )}
 
       {/* Control points - render first so lines appear under main points */}
       {!disabled && (

@@ -327,14 +327,14 @@ const Model = types
         });
       },
 
-      isHovered() {
-        const stage = self.groupRef.getStage();
-        const pointer = stage.getPointerPosition();
-
-        // Convert to pixel coords in the canvas backing the image
-        const { x, y } = self.parent?.layerZoomScalePosition ?? { x: 0, y: 0 };
-        return self.vectorRef.isPointOverShape(pointer.x, pointer.y);
-      },
+      // isHovered() {
+      //   const stage = self.groupRef.getStage();
+      //   const pointer = stage.getPointerPosition();
+      //
+      //   // Convert to pixel coords in the canvas backing the image
+      //   const { x, y } = self.parent?.layerZoomScalePosition ?? { x: 0, y: 0 };
+      //   return self.vectorRef.isPointOverShape(pointer.x, pointer.y);
+      // },
 
       // Checks is the region is being transformed or at least in
       // transformable state (has at least 2 points selected)
@@ -501,6 +501,7 @@ const HtxVectorView = observer(({ item, suggestion }) => {
         <KonvaVector
           ref={(kv) => item.setKonvaVectorRef(kv)}
           initialPoints={Array.from(item.vertices)}
+          isActive={item.isDrawing || item.selected}
           onFinish={(e) => {
             e.evt.stopPropagation();
             e.evt.preventDefault();

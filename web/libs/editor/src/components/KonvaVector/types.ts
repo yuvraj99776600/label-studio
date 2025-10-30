@@ -102,6 +102,8 @@ export interface KonvaVectorRef {
 export interface KonvaVectorProps {
   /** Initial points in either simple [[x,y],...] or complex {x,y,isBezier,...} format */
   initialPoints?: PointInput[];
+  /** Whether this instance is the active one for interactions and ghost line */
+  isActive?: boolean;
   /** Called when points array changes */
   onPointsChange?: (points: BezierPoint[]) => void;
   /** Called when a new point is added */
