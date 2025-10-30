@@ -9,7 +9,11 @@ from django.conf import settings
 from django.db import models
 from django.db.models import QuerySet, UUIDField
 from fsm.registry import register_state_model
-from fsm.state_choices import AnnotationStateChoices, ProjectStateChoices, TaskStateChoices
+from fsm.state_choices import (
+    AnnotationStateChoices,
+    ProjectStateChoices,
+    TaskStateChoices,
+)
 from fsm.utils import UUID7Field, generate_uuid7, timestamp_from_uuid7
 
 

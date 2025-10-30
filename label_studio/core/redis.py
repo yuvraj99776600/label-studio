@@ -113,7 +113,7 @@ def _capture_context() -> dict:
         if key not in ['user', 'request'] and _is_serializable(value):
             context_data[key] = value
 
-        return context_data
+    return context_data
 
 
 def redis_get(key):
@@ -200,11 +200,11 @@ def start_job_async_or_sync(job, *args, in_seconds=0, **kwargs):
         )
         return job
     else:
-        # Sync execution - context is already available from request thread
-        # No need to wrap or modify the job function
         on_failure = kwargs.pop('on_failure', None)
+
         try:
-            return job(*args, **kwargs)
+            result = job(*args, **kwargs)
+            return result
         except Exception:
             exc_info = sys.exc_info()
             if on_failure:

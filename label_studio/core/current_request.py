@@ -50,8 +50,27 @@ class CurrentContext:
             cls.set_organization_id(user.active_organization_id)
 
     @classmethod
-    def is_async_job(cls) -> bool:
-        return cls.get_request() is None
+    def set_fsm_disabled(cls, disabled: bool):
+        """
+        Temporarily disable/enable FSM for the current thread.
+
+        This is useful for test cleanup and bulk operations where FSM state
+        tracking is not needed and would cause performance issues.
+
+        Args:
+            disabled: True to disable FSM, False to enable it
+        """
+        cls.set('fsm_disabled', disabled)
+
+    @classmethod
+    def is_fsm_disabled(cls) -> bool:
+        """
+        Check if FSM is disabled for the current thread.
+
+        Returns:
+            True if FSM is disabled, False otherwise
+        """
+        return cls.get('fsm_disabled', False)
 
     @classmethod
     def get_job_data(cls) -> dict:
