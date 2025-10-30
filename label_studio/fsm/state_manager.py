@@ -225,8 +225,14 @@ class StateManager:
         # Prevent same-state transitions - only create state records for actual state changes
         # This avoids creating redundant data when the effective state doesn't change
         # However, allow forced state records for audit trails (e.g., annotation updates)
+        # IMPORTANT: Also check if a state record exists in DB - if not, we must create one
+        # even if inferred state matches target state (to persist the inferred state)
         if current_state == new_state and not force_state_record:
-            return True
+            # Verify a state record actually exists in DB (not just inferred)
+            state_record_exists = state_model.objects.filter(**{entity._meta.model_name: entity}).exists()
+            if state_record_exists:
+                return True  # Skip transition - record exists and state unchanged
+            # else: No record exists (state was inferred), continue to create record
 
         # Optimistic concurrency control using cache-based locking
         cache_key = cls.get_cache_key(entity)
