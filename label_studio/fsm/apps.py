@@ -19,12 +19,33 @@ class FsmConfig(AppConfig):
         The @register_state_model and @register_state_choices decorators run during
         module import, so we must import these modules to populate the registries.
         This ensures state models are available throughout the application lifecycle.
+
+        CENTRALIZED TRANSITION REGISTRATION:
+        This is the ONLY place in LSO where FSM transitions should be imported.
+        When running LSE, transitions are skipped here and registered in lse_fsm/apps.py instead.
         """
-        # Import models to trigger @register_state_model decorators
-        # Import state_choices to trigger @register_state_choices decorators
+        from core.utils.common import is_community
+
+        # Always import base models and state_choices (needed for registry)
         from . import (
             models,  # noqa: F401
             state_choices,  # noqa: F401
         )
 
         logger.debug('FSM models and state choices registered')
+
+        # Only import LSO transitions when running community edition
+        # When running LSE, skip these entirely - LSE provides its own transitions
+        if is_community():
+            # Import all LSO transitions centrally - ONLY place to do this
+            from projects import transitions as project_transitions  # noqa: F401
+            from tasks import (
+                annotation_transitions,  # noqa: F401
+            )
+            from tasks import (
+                transitions as task_transitions,  # noqa: F401
+            )
+
+            logger.info('LSO FSM: Registered LSO transitions (community edition)')
+        else:
+            logger.info('LSO FSM: Skipping LSO transitions (running LSE)')

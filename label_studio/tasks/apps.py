@@ -12,19 +12,9 @@ class TasksConfig(AppConfig):
 
     def ready(self):
         """
-        Import FSM transitions after Django app registry is ready.
+        Tasks app initialization.
 
-        This prevents circular imports by ensuring all models are
-        loaded before transitions reference them.
+        Note: FSM transitions are now registered centrally in fsm/apps.py.
+        Do NOT import transitions here to avoid duplicate registration.
         """
-        try:
-            # Import transitions to register them with FSM
-            from tasks import (
-                annotation_transitions,  # noqa: F401
-                transitions,  # noqa: F401
-            )
-
-            logger.debug('FSM transitions registered for tasks app')
-        except ImportError as e:
-            # FSM may not be available in all configurations
-            logger.debug(f'FSM transitions not available for tasks: {e}')
+        pass
