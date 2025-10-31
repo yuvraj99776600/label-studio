@@ -18,7 +18,7 @@ import django_rq
 import rq
 import rq.exceptions
 from core.feature_flags import flag_set
-from core.redis import is_job_in_queue, is_job_on_worker, redis_connected
+from core.redis import is_job_in_queue, is_job_on_worker, redis_connected, start_job_async_or_sync
 from core.utils.common import load_func
 from core.utils.iterators import iterate_queryset
 from data_export.serializers import ExportDataSerializer
@@ -643,6 +643,36 @@ class ImportStorage(Storage):
                 self.project.organization, self.project, WebhookAction.TASKS_CREATED, tasks_for_webhook
             )
 
+        # Create initial FSM states for all tasks created during storage sync
+        # CurrentContext is now available because we use start_job_async_or_sync
+        if tasks_created > 0:
+            try:
+                from lse_fsm.state_inference import backfill_state_for_entity
+                from tasks.models import Task
+
+                # Get tasks created in this sync
+                task_ids = list(
+                    link_class.objects.filter(storage=self.id)
+                    .order_by('-created_at')[:tasks_created]
+                    .values_list('task_id', flat=True)
+                )
+
+                tasks = Task.objects.filter(id__in=task_ids)
+
+                logger.info(f'Storage sync: creating initial FSM states for {len(task_ids)} tasks')
+
+                # Backfill initial CREATED state for each task
+                for task in tasks:
+                    backfill_state_for_entity(task, 'task', create_record=True)
+
+                logger.info(f'Storage sync: FSM states created for {len(task_ids)} tasks')
+            except ImportError:
+                # LSE not available (OSS), skip FSM sync
+                pass
+            except Exception as e:
+                # Don't fail storage sync if FSM sync fails
+                logger.error(f'FSM sync after storage sync failed: {e}', exc_info=True)
+
         self.project.update_tasks_states(
             maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True
         )
@@ -668,10 +698,13 @@ class ImportStorage(Storage):
             ):
                 if not self.info_set_queued():
                     return
-                sync_job = queue.enqueue(
+                # Use start_job_async_or_sync to automatically capture and restore CurrentContext
+                # This ensures user_id, organization_id, and request_id are available in the worker
+                sync_job = start_job_async_or_sync(
                     import_sync_background,
                     self.__class__,
                     self.id,
+                    queue_name='low',
                     meta=meta,
                     project_id=self.project.id,
                     organization_id=self.project.organization.id,
