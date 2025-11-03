@@ -855,7 +855,7 @@ class Annotation(AnnotationMixin, HsModel):
         self.decrease_project_summary_counters()
 
 
-class TaskLock(models.Model):
+class TaskLock(HsModel):
     task = models.ForeignKey(
         'tasks.Task',
         on_delete=models.CASCADE,
