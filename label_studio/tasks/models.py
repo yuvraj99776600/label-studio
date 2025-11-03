@@ -923,9 +923,8 @@ class TaskLockManager(models.Manager):
         return self.get_queryset().annotate_fsm_state()
 
 
-class TaskLock(models.Model):
+class TaskLock(HsModel):
     objects = TaskLockManager()
-
     task = models.ForeignKey(
         'tasks.Task',
         on_delete=models.CASCADE,
