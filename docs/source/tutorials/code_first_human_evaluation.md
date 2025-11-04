@@ -1,5 +1,5 @@
 ---
-title: "A Code-First approach to Human Evaluation — how to A/B Compare Two Models with Label Studio "
+title: "How to Compare Two AI Models with Label Studio"
 hide_sidebar: true
 order: 1002
 open_in_collab: true

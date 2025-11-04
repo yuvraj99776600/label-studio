@@ -1,7 +1,7 @@
 ---
-title: "Agreement & Consensus: Measuring Trust in Human Feedback"
+title: "How to Measure Inter-Annotator Agreement and Build Human Consensus with Label Studio"
 hide_sidebar: true
-order: 1001
+order: 1004
 open_in_collab: true
 tutorial: true
 community_author: hakan458
