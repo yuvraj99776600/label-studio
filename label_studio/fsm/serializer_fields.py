@@ -16,8 +16,12 @@ Usage:
             fields = ['id', 'data', 'state', ...]
 
 Note:
-    All state serialization functionality is guarded by the FSM feature flag
-    ('fflag_feat_fit_568_finite_state_management'). When disabled, fields return None.
+    All state serialization functionality is guarded by TWO feature flags:
+    1. 'fflag_feat_fit_568_finite_state_management' - Controls FSM background calculations
+    2. 'fflag_feat_fit_710_fsm_state_fields' - Controls state field display in APIs
+
+    When either flag is disabled, fields return None. This allows enabling FSM background
+    work while keeping state fields hidden during incremental rollout and testing.
 
     Both feature flag and StateManager imports are done at function level to avoid
     circular imports during Django initialization (feature_flags imports models).
@@ -76,7 +80,7 @@ class FSMStateField(serializers.ReadOnlyField):
             instance: The model instance being serialized
 
         Returns:
-            str or None: The current state value (None if feature flag disabled)
+            str or None: The current state value (None if either feature flag disabled)
         """
         # Import at function level to avoid circular imports during Django initialization
         # (both feature_flags and StateManager import models which aren't ready during app loading)
@@ -84,10 +88,13 @@ class FSMStateField(serializers.ReadOnlyField):
         from core.feature_flags import flag_set
         from fsm.state_manager import StateManager
 
-        # Check feature flag directly (works for both core and enterprise)
-        # Using flag_set directly instead of is_fsm_enabled to work in enterprise context
+        # Check both feature flags (works for both core and enterprise)
+        # 1. General FSM functionality (background calculations)
+        # 2. State field display control (API exposure)
         user = CurrentContext.get_user()
         if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
+            return None
+        if not flag_set('fflag_feat_fit_710_fsm_state_fields', user=user):
             return None
 
         if instance is None:
@@ -171,7 +178,7 @@ class FSMStateMetadataField(serializers.Field):
             value: The model instance
 
         Returns:
-            dict or None: State metadata dictionary (None if feature flag disabled)
+            dict or None: State metadata dictionary (None if either feature flag disabled)
         """
         # Import at function level to avoid circular imports during Django initialization
         # (both feature_flags and StateManager import models which aren't ready during app loading)
@@ -179,10 +186,13 @@ class FSMStateMetadataField(serializers.Field):
         from core.feature_flags import flag_set
         from fsm.state_manager import StateManager
 
-        # Check feature flag directly (works for both core and enterprise)
-        # Using flag_set directly instead of is_fsm_enabled to work in enterprise context
+        # Check both feature flags (works for both core and enterprise)
+        # 1. General FSM functionality (background calculations)
+        # 2. State field display control (API exposure)
         user = CurrentContext.get_user()
         if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
+            return None
+        if not flag_set('fflag_feat_fit_710_fsm_state_fields', user=user):
             return None
 
         instance = (
