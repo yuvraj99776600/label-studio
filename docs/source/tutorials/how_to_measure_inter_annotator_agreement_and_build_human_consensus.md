@@ -5,8 +5,8 @@ order: 1004
 open_in_collab: true
 tutorial: true
 community_author: hakan458
-ipynb_repo_path: tutorials/agreement-and-consensus/Agreement_and_Consensus_Tutorial.ipynb
-repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/agreement-and-consensus
+ipynb_repo_path: tutorials/how-to-measure-inter-annotator-agreement-and-build-human-consensus/how-to-measure-inter-annotator-agreement-and-build-human-consensus.ipynb
+repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-measure-inter-annotator-agreement-and-build-human-consensus
 report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
 thumbnail: 
 ---
