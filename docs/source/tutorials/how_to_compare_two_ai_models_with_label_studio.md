@@ -5,7 +5,7 @@ order: 1003
 open_in_collab: true
 tutorial: true
 community_author: nass600
-ipynb_repo_path: tutorials/how-to-compare-two-ai-models-with-label-studio/how_to_compare_two_ai_models_with_label_studio.ipynb.ipynb
+ipynb_repo_path: tutorials/how-to-compare-two-ai-models-with-label-studio/how_to_compare_two_ai_models_with_label_studio.ipynb
 repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-compare-two-ai-models-with-label-studio
 report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
 thumbnail: 
