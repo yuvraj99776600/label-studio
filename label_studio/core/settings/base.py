@@ -222,8 +222,8 @@ INSTALLED_APPS = [
     'organizations',
     'data_import',
     'data_export',
-    'projects',  # Registers FSM transitions - needs fsm loaded first
-    'tasks',  # Registers FSM transitions - needs fsm loaded first
+    'projects',
+    'tasks',
     'data_manager',
     'io_storages',
     'ml',
