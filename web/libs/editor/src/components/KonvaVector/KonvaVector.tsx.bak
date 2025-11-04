@@ -1807,24 +1807,6 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
                 return;
               }
 
-              // Check if the click target is a Path (shape) - if so, let it propagate to parent handlers
-              // This allows region selection to work when clicking on the shape itself
-              const target = e.target;
-              const targetName = target?.name?.() || "";
-              const isPathClick = target?.getType?.() === "Path" || targetName.includes("path-");
-              
-              // If clicking on the shape (not a point), let the onClick prop handle it directly
-              // This ensures region selection works properly
-              if (isPathClick) {
-                // Reset the flag and let the event propagate
-                pointSelectionHandled.current = false;
-                // Call the onClick prop directly if provided (for region selection)
-                if (onClick) {
-                  onClick(e);
-                }
-                return;
-              }
-
               // For the first point in drawing mode, we need to ensure the click handler works
               // The issue is that the flag logic is interfering with first point creation
               // Let's try calling the drawing mode click handler directly for the first point
@@ -2004,16 +1986,8 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
                 }
               }
 
-              // For region selection, call onClick prop directly without debouncing
-              // This ensures clicks on the shape itself trigger region selection immediately
-              if (onClick) {
-                onClick(e);
-              }
-
-              // Use debouncing for double-click detection only
-              if (onDblClick) {
-                handleClickWithDebouncing(e, undefined, onDblClick);
-              }
+              // Use debouncing for click/double-click detection
+              handleClickWithDebouncing(e, onClick, onDblClick);
             }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
@@ -2145,8 +2119,6 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
                   }
                 }
 
-                // Call the original onClick handler if provided
-                onClick?.(e);
 
                 // Mark that we handled selection and prevent all other handlers from running
                 pointSelectionHandled.current = true;
@@ -2253,16 +2225,8 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
                 }
               }
 
-              // For region selection, call onClick prop directly without debouncing
-              // This ensures clicks on the shape itself trigger region selection immediately
-              if (onClick) {
-                onClick(e);
-              }
-
-              // Use debouncing for double-click detection only
-              if (onDblClick) {
-                handleClickWithDebouncing(e, undefined, onDblClick);
-              }
+              // Use debouncing for click/double-click detection
+              handleClickWithDebouncing(e, onClick, onDblClick);
             }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
@@ -2322,22 +2286,6 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
             onPointClick={(e, pointIndex) => {
               // Handle Alt+click point deletion FIRST (before other checks)
               if (e.evt.altKey && !e.evt.shiftKey && !disabled) {
-                // Clear multi-selection if the deleted point was selected
-                if (selectedPoints.has(pointIndex)) {
-                  const newSelection = new Set(selectedPoints);
-                  newSelection.delete(pointIndex);
-                  // Adjust indices for points after the deleted one
-                  const adjustedSelection = new Set<number>();
-                  for (const idx of Array.from(newSelection)) {
-                    if (idx > pointIndex) {
-                      adjustedSelection.add(idx - 1);
-                    } else {
-                      adjustedSelection.add(idx);
-                    }
-                  }
-                  tracker.selectPoints(instanceId, adjustedSelection);
-                }
-
                 deletePoint(
                   pointIndex,
                   initialPoints,
@@ -2351,8 +2299,6 @@ export const KonvaVector = forwardRef<KonvaVectorRef, KonvaVectorProps>((props, 
                   lastAddedPointId,
                 );
                 pointSelectionHandled.current = true;
-                // Stop event propagation to prevent path closing or other handlers from firing
-                e.evt.stopImmediatePropagation();
                 return; // Successfully deleted point
               }
 

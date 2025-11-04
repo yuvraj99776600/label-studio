@@ -232,6 +232,20 @@ export const deletePoint = (
     }
   }
 
+  // Ensure path stays open after deletion (prevent accidental closing)
+  // Check if the first point's prevPointId points to the last point, and if so, clear it
+  if (newPoints.length > 0) {
+    const firstPoint = newPoints[0];
+    const lastPoint = newPoints[newPoints.length - 1];
+    // If the path was closed (first point's prevPointId points to last point), open it
+    if (firstPoint.prevPointId === lastPoint.id) {
+      newPoints[0] = {
+        ...firstPoint,
+        prevPointId: undefined,
+      };
+    }
+  }
+
   // Remove from visible control points if it was there
   setVisibleControlPoints((prev) => {
     const newSet = new Set(prev);

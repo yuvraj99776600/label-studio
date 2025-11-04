@@ -11,10 +11,11 @@ export function shouldClosePathOnPointClick(
   event: KonvaEventObject<MouseEvent>,
 ): boolean {
   return (
-    (pointIndex === 0 || pointIndex === props.initialPoints.length - 1) &&
+    pointIndex === 0 && // Only allow closing when clicking on the first point
     props.allowClose &&
     !props.isPathClosed &&
-    !event.evt.shiftKey
+    !event.evt.shiftKey &&
+    !event.evt.altKey // Don't close when Alt is pressed (for deletion)
   );
 }
 
@@ -91,6 +92,11 @@ function isNearClosingTarget(cursorPos: { x: number; y: number }, props: EventHa
 }
 
 export function handlePointSelection(e: KonvaEventObject<MouseEvent>, props: EventHandlerProps): boolean {
+  // Don't handle selection when Alt is pressed (for deletion)
+  if (e.evt.altKey) {
+    return false;
+  }
+
   const pos = e.target.getStage()?.getPointerPosition();
   if (!pos) return false;
 
@@ -112,14 +118,14 @@ export function handlePointSelection(e: KonvaEventObject<MouseEvent>, props: Eve
     const point = props.initialPoints[i];
 
     if (isPointInHitRadius(imagePos, point, hitRadius)) {
-      // Check if we're clicking on the first or last point to close the path
-      // But only if the active point is also the first or last point
-      // But don't close if Shift is held (to allow Shift+click functionality)
+      // Check if we're clicking on the first point to close the path
+      // But only if the active point is also the first point
+      // But don't close if Shift or Alt is held (to allow Shift+click functionality and Alt+click deletion)
       // This should take priority over normal point selection
       if (shouldClosePathOnPointClick(i, props, e) && isActivePointEligibleForClosing(props)) {
-        // Determine which point to close to
-        const fromPointIndex = i;
-        const toPointIndex = i === 0 ? props.initialPoints.length - 1 : 0;
+        // Determine which point to close to (always from first to last)
+        const fromPointIndex = 0;
+        const toPointIndex = props.initialPoints.length - 1;
 
         // Use the bidirectional closePath function
         return closePathBetweenFirstAndLast(props, fromPointIndex, toPointIndex);

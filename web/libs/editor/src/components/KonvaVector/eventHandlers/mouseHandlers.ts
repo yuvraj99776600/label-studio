@@ -754,7 +754,8 @@ export function createMouseUpHandler(props: EventHandlerProps) {
 
     // Handle point selection if we clicked but didn't drag
     // Note: cmd-clicks are handled in mousedown and return early, so draggedPointIndex is never set for them
-    if (props.draggedPointIndex !== null && !props.isDragging.current) {
+    // Skip path closing if Alt key is pressed (for deletion)
+    if (props.draggedPointIndex !== null && !props.isDragging.current && !e.evt.altKey) {
       // Check if this point click should trigger path closing instead of selection
       const pointIndex = props.draggedPointIndex;
       const shouldClose = shouldClosePathOnPointClick(pointIndex, props, e) && isActivePointEligibleForClosing(props);
