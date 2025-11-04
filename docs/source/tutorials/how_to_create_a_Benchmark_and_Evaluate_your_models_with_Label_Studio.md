@@ -1,5 +1,5 @@
 ---
-title: How to Create a Benchmark and Evaluate Your Models with Label Studio
+title: How to Create an AI Benchmark and Evaluate Your Models with Label Studio
 hide_sidebar: true
 order: 1002
 open_in_collab: true
@@ -8,7 +8,7 @@ community_author: mcanu
 ipynb_repo_path: tutorials/how-to-create-benchmark-and-evaluate-your-models/how_to_create_a_Benchmark_and_Evaluate_your_models_with_Label_Studio.ipynb
 repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-create-benchmark-and-evaluate-your-models
 report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
-thumbnail: 
+thumbnail: /images/tutorials/tutorials-ai-benchmark-and-eval.png
 ---
 Evaluating models is only as good as the benchmark you test them against.  
 In this tutorial, you'll learn how to use **Label Studio** to create a high-quality benchmark dataset, label it with human expertise, and then evaluate multiple AI models against it — all using the **Label Studio SDK**.  
