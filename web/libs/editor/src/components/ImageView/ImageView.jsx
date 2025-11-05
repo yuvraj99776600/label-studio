@@ -594,8 +594,6 @@ export default observer(
         return reg.isHovered?.() ?? false;
       });
 
-      console.log(hoveredRegion);
-
       if (hoveredRegion && !evt.defaultPrevented) {
         tool?.disable();
         hoveredRegion.onClickRegion(e);

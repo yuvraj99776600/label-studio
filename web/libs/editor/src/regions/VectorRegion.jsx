@@ -167,6 +167,10 @@ const Model = types
       const tool = self.parent?.getToolsManager().findSelectedTool();
       return (tool?.disabled ?? false) || self.isReadOnly() || (!self.selected && !self.isDrawing);
     },
+    get isEditingAnyRegion() {
+      const isEditing = self.parent.annotation.regionStore.regions.some((r) => !r.transformMode);
+      return isEditing || !self.transformMode;
+    },
   }))
   .actions((self) => {
     return {
@@ -333,14 +337,16 @@ const Model = types
         });
       },
 
-      // isHovered() {
-      //   const stage = self.groupRef.getStage();
-      //   const pointer = stage.getPointerPosition();
-      //
-      //   // Convert to pixel coords in the canvas backing the image
-      //   const { x, y } = self.parent?.layerZoomScalePosition ?? { x: 0, y: 0 };
-      //   return self.vectorRef.isPointOverShape(pointer.x, pointer.y);
-      // },
+      isHovered() {
+        if (self.isEditingAnyRegion) return false;
+
+        const stage = self.groupRef.getStage();
+        const pointer = stage.getPointerPosition();
+
+        // Convert to pixel coords in the canvas backing the image
+        const { x, y } = self.parent?.layerZoomScalePosition ?? { x: 0, y: 0 };
+        return self.vectorRef.isPointOverShape(pointer.x, pointer.y);
+      },
 
       // Checks is the region is being transformed or at least in
       // transformable state (has at least 2 points selected)
@@ -634,7 +640,6 @@ const HtxVectorView = observer(({ item, suggestion }) => {
             if (item.parent.getSkipInteractions()) return;
             if (item.isDrawing) return;
             if (e.evt.altKey || e.evt.ctrlKey || e.evt.shiftKey || e.evt.metaKey) return;
-
             e.cancelBubble = true;
 
             // Allow selection regardless of whether the path is closed
@@ -644,7 +649,7 @@ const HtxVectorView = observer(({ item, suggestion }) => {
             }
 
             item.setHighlight(false);
-            item.onClickRegion(e);
+            if (!item.isEditingAnyRegion) item.onClickRegion(e);
           }}
           onMouseEnter={() => {
             if (store.annotationStore.selected.isLinkingMode) {
