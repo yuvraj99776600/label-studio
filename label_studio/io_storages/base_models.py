@@ -645,33 +645,9 @@ class ImportStorage(Storage):
 
         # Create initial FSM states for all tasks created during storage sync
         # CurrentContext is now available because we use start_job_async_or_sync
-        if tasks_created > 0:
-            try:
-                from lse_fsm.state_inference import backfill_state_for_entity
-                from tasks.models import Task
+        from fsm.functions import backfill_fsm_states_for_tasks
 
-                # Get tasks created in this sync
-                task_ids = list(
-                    link_class.objects.filter(storage=self.id)
-                    .order_by('-created_at')[:tasks_created]
-                    .values_list('task_id', flat=True)
-                )
-
-                tasks = Task.objects.filter(id__in=task_ids)
-
-                logger.info(f'Storage sync: creating initial FSM states for {len(task_ids)} tasks')
-
-                # Backfill initial CREATED state for each task
-                for task in tasks:
-                    backfill_state_for_entity(task, 'task', create_record=True)
-
-                logger.info(f'Storage sync: FSM states created for {len(task_ids)} tasks')
-            except ImportError:
-                # LSE not available (OSS), skip FSM sync
-                pass
-            except Exception as e:
-                # Don't fail storage sync if FSM sync fails
-                logger.error(f'FSM sync after storage sync failed: {e}', exc_info=True)
+        backfill_fsm_states_for_tasks(self.id, tasks_created, link_class)
 
         self.project.update_tasks_states(
             maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True

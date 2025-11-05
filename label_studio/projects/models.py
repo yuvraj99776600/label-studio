@@ -19,7 +19,6 @@ from core.label_config import (
     get_sample_task,
     validate_label_config,
 )
-from core.models import HsModel
 from core.utils.common import (
     create_hash,
     get_attr_or_item,
@@ -35,6 +34,7 @@ from django.db.models import Avg, BooleanField, Case, Count, GeneratedField, JSO
 from django.db.models.expressions import RawSQL
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
+from fsm.models import FsmHistoryStateModel
 from fsm.queryset_mixins import FSMStateQuerySetMixin
 from label_studio_sdk._extensions.label_studio_tools.core.label_config import parse_config
 from labels_manager.models import Label
@@ -163,7 +163,7 @@ ProjectMixin = load_func(settings.PROJECT_MIXIN)
 recalculate_all_stats = load_func(settings.RECALCULATE_ALL_STATS)
 
 
-class Project(ProjectMixin, HsModel):
+class Project(ProjectMixin, FsmHistoryStateModel):
     class SkipQueue(models.TextChoices):
         # requeue to the end of the same annotator’s queue => annotator gets this task at the end of the queue
         REQUEUE_FOR_ME = 'REQUEUE_FOR_ME', 'Requeue for me'
@@ -893,7 +893,7 @@ class Project(ProjectMixin, HsModel):
     # ============================================================================
     # FSM Integration
     # ============================================================================
-    # Project uses HsModel for FSM integration. All transition logic is defined
+    # Project uses FsmHistoryStateModel for FSM integration. All transition logic is defined
     # in projects/transitions.py with declarative triggers. No custom methods needed.
 
     def get_member_ids(self):

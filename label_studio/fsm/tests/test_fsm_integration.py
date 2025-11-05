@@ -8,8 +8,8 @@ from datetime import datetime
 from unittest.mock import patch
 
 from django.test import TestCase
-from fsm.models import AnnotationState, ProjectState, TaskState
 from fsm.state_manager import get_state_manager
+from fsm.state_models import AnnotationState, ProjectState, TaskState
 from projects.tests.factories import ProjectFactory
 from tasks.tests.factories import AnnotationFactory, TaskFactory
 from users.tests.factories import UserFactory
@@ -125,8 +125,8 @@ class TestStateManager(TestCase):
         cache.clear()
 
         # Ensure registry is properly initialized for TaskState
-        from fsm.models import TaskState
         from fsm.registry import state_model_registry
+        from fsm.state_models import TaskState
 
         if not state_model_registry.get_model('task'):
             state_model_registry.register_model('task', TaskState)
@@ -138,9 +138,9 @@ class TestStateManager(TestCase):
 
     def test_get_current_state_empty(self):
         """Test getting current state when task is created"""
-        # With HsModel, tasks automatically get a state on creation
+        # With FsmHistoryStateModel, tasks automatically get a state on creation
         current_state = self.StateManager.get_current_state_value(self.task)
-        assert current_state == 'CREATED'  # HsModel auto-creates state
+        assert current_state == 'CREATED'  # FsmHistoryStateModel auto-creates state
 
     @patch('fsm.state_manager.flag_set')
     def test_transition_state(self, mock_flag_set):
@@ -411,7 +411,7 @@ class TestStateManager(TestCase):
         assert current_state == 'CREATED'
 
         # Get initial state count
-        from fsm.models import TaskState
+        from fsm.state_models import TaskState
 
         initial_count = TaskState.objects.filter(task=self.task).count()
         assert initial_count == 1

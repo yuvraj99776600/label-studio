@@ -14,7 +14,7 @@ from django.db.models import Model
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from fsm.models import BaseState
+    from fsm.state_models import BaseState
 
     # Type variables for generic transition context
     EntityType = TypeVar('EntityType', bound=Model)
@@ -331,12 +331,12 @@ class ModelChangeTransition(BaseTransition, Generic[EntityType, StateModelType])
     Specialized transition class for model-triggered state changes.
 
     This class extends BaseTransition with additional context about model changes,
-    making it ideal for transitions triggered by HsModel.save() operations.
+    making it ideal for transitions triggered by FsmHistoryStateModel.save() operations.
 
     Features:
     - Access to changed fields (old vs new values)
     - Knowledge of whether entity is being created or updated
-    - Automatic integration with HsModel lifecycle
+    - Automatic integration with FsmHistoryStateModel lifecycle
     - Declarative trigger field specification
 
     Example usage:
@@ -430,7 +430,7 @@ class ModelChangeTransition(BaseTransition, Generic[EntityType, StateModelType])
         """
         Factory method to create a transition from model change data.
 
-        This is called by HsModel when a transition needs to be executed.
+        This is called by FsmHistoryStateModel when a transition needs to be executed.
 
         Args:
             is_creating: Whether the model is being created

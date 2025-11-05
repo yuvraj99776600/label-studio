@@ -11,9 +11,9 @@ from unittest.mock import Mock, patch
 from core.current_request import CurrentContext
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from fsm.models import TaskState
 from fsm.registry import register_state_transition
 from fsm.state_choices import AnnotationStateChoices, TaskStateChoices
+from fsm.state_models import TaskState
 from fsm.transitions import BaseTransition, TransitionContext, TransitionValidationError
 from organizations.models import Organization
 from projects.models import Project
@@ -693,7 +693,7 @@ class TestBaseStatePropertiesCoverage(TestCase):
 
     def test_base_state_entity_property(self):
         """Test BaseState.entity property retrieves related entity"""
-        from fsm.models import ProjectState
+        from fsm.state_models import ProjectState
 
         # Get the auto-created state
         state_record = ProjectState.objects.filter(project=self.project).first()
@@ -705,7 +705,7 @@ class TestBaseStatePropertiesCoverage(TestCase):
 
     def test_base_state_timestamp_from_uuid(self):
         """Test BaseState.timestamp_from_uuid property extracts timestamp from UUID7"""
-        from fsm.models import ProjectState
+        from fsm.state_models import ProjectState
 
         before = datetime.now(timezone.utc)
         state_record = ProjectState.objects.filter(project=self.project).first()

@@ -10,8 +10,8 @@ import logging
 from typing import Any, Dict, Type
 
 from django.db.models import Model
-from fsm.models import BaseState
 from fsm.registry import get_state_model_for_entity, transition_registry
+from fsm.state_models import BaseState
 from fsm.transitions import TransitionContext
 
 logger = logging.getLogger(__name__)
