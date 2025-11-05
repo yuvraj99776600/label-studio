@@ -1,4 +1,3 @@
-import { getRoot, isAlive, types } from "mobx-state-tree";
 import NormalizationMixin from "../mixins/Normalization";
 import RegionsMixin from "../mixins/Regions";
 import Registry from "../core/Registry";
@@ -674,7 +673,7 @@ const HtxVectorView = observer(({ item, suggestion }) => {
           transform={{ zoom: item.parent.stageZoom, offsetX, offsetY }}
           fitScale={item.parent.zoomScale}
           allowClose={item.control?.closable ?? false}
-          allowBezier={item.control?.curves ?? false}
+          // allowBezier={item.control?.curves ?? false}
           minPoints={item.minPoints}
           maxPoints={item.maxPoints}
           skeletonEnabled={item.control?.skeleton ?? false}
