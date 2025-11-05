@@ -365,4 +365,3 @@ class ProjectState(BaseState):
     def is_terminal_state(self) -> bool:
         """Check if this is a terminal project state"""
         return self.state == ProjectStateChoices.COMPLETED
-

@@ -81,10 +81,10 @@ def update_task_state_after_annotation_deletion(task, project):
         - Will initialize state if task has no FSM state record yet
     """
     from core.current_request import CurrentContext
+    from fsm.project_transitions import update_project_state_after_task_change
     from fsm.state_choices import TaskStateChoices
     from fsm.state_manager import get_state_manager
     from fsm.utils import is_fsm_enabled
-    from fsm.project_transitions import update_project_state_after_task_change
 
     # Get user from context for FSM
     user = CurrentContext.get_user()
@@ -125,4 +125,3 @@ def update_task_state_after_annotation_deletion(task, project):
             f'FSM state update failed during annotation deletion: {str(e)}',
             extra={'task_id': task.id, 'project_id': project.id},
         )
-

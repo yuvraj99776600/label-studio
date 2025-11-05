@@ -50,10 +50,10 @@ class AnnotationSubmittedTransition(ModelChangeTransition):
         Then updates project state based on task completion status.
         Handles "cold start" scenarios where task may not have state record yet.
         """
+        from fsm.project_transitions import update_project_state_after_task_change
         from fsm.state_choices import TaskStateChoices
         from fsm.state_manager import StateManager
         from fsm.utils import get_or_initialize_state
-        from fsm.project_transitions import update_project_state_after_task_change
 
         annotation = context.entity
         task = annotation.task
