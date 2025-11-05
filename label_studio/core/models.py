@@ -9,8 +9,19 @@ from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
+# Import FsmHistoryStateModel from fsm module
+from fsm.models import FsmHistoryStateModel
 
-class HsModel(models.Model):
+# DEPRECATED: HsModel is now an alias for FsmHistoryStateModel
+# All new code should use FsmHistoryStateModel from fsm.models
+# This alias is maintained for backward compatibility only
+HsModel = FsmHistoryStateModel
+
+# Original HsModel code has been moved to fsm.models.FsmHistoryStateModel
+# The code below is kept for historical reference only and is not used
+
+
+class _DeprecatedHsModel(models.Model):
     """
     History State Model - Base class for models that participate in FSM state tracking.
 

@@ -14,7 +14,7 @@ from django.db.models import Model
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from fsm.models import BaseState
+    from fsm.state_models import BaseState
 
     # Type variables for generic transition context
     EntityType = TypeVar('EntityType', bound=Model)

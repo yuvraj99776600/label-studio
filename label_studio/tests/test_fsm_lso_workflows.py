@@ -497,8 +497,8 @@ class TestColdStartScenarios:
         3. Delete annotation via SDK
         4. Verify states are initialized and updated correctly
         """
-        from fsm.models import TaskState
         from fsm.state_choices import TaskStateChoices
+        from fsm.state_models import TaskState
         from tasks.models import Annotation, Task
 
         ls = LabelStudio(base_url=django_live_url, api_key=business_client.api_key)
@@ -542,8 +542,8 @@ class TestColdStartScenarios:
         2. Submit annotation via SDK
         3. Verify task and project states are initialized correctly
         """
-        from fsm.models import ProjectState, TaskState
         from fsm.state_choices import ProjectStateChoices, TaskStateChoices
+        from fsm.state_models import ProjectState, TaskState
         from tasks.models import Task
 
         ls = LabelStudio(base_url=django_live_url, api_key=business_client.api_key)
@@ -586,9 +586,9 @@ class TestColdStartScenarios:
         3. Verify all task states are initialized
         4. Verify project state is correct
         """
-        from fsm.models import TaskState
         from fsm.state_choices import ProjectStateChoices, TaskStateChoices
         from fsm.state_manager import get_state_manager
+        from fsm.state_models import TaskState
         from tasks.models import Task
 
         ls = LabelStudio(base_url=django_live_url, api_key=business_client.api_key)
@@ -639,9 +639,9 @@ class TestColdStartScenarios:
         3. Verify states are correctly initialized for all
         4. Verify project transitions correctly through states
         """
-        from fsm.models import TaskState
         from fsm.state_choices import ProjectStateChoices, TaskStateChoices
         from fsm.state_manager import get_state_manager
+        from fsm.state_models import TaskState
         from projects.models import Project
         from tasks.models import Task
 

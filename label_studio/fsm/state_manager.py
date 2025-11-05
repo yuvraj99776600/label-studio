@@ -14,8 +14,8 @@ from core.feature_flags import flag_set
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Model, QuerySet
-from fsm.models import BaseState
 from fsm.registry import get_state_model_for_entity
+from fsm.state_models import BaseState
 from fsm.transition_executor import execute_transition_with_state_manager
 
 logger = logging.getLogger(__name__)

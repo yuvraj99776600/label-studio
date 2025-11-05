@@ -28,22 +28,29 @@ class FsmConfig(AppConfig):
 
         # Always import base models and state_choices (needed for registry)
         from . import (
-            models,  # noqa: F401
-            state_choices,  # noqa: F401
+            models,  # noqa: F401  - FsmHistoryStateModel base class
+            state_choices,  # noqa: F401  - State choice definitions
         )
+
+        # Import state models only in community edition
+        # LSE will register its own extended state models in lse_fsm/apps.py
+        if is_community():
+            from . import (
+                state_models,  # noqa: F401  - OSS state models (TaskState, AnnotationState, etc.)
+            )
+
+            logger.debug('FSM: Registered OSS state models')
 
         logger.debug('FSM models and state choices registered')
 
         # Only import LSO transitions when running community edition
         # When running LSE, skip these entirely - LSE provides its own transitions
         if is_community():
-            # Import all LSO transitions centrally - ONLY place to do this
-            from projects import transitions as project_transitions  # noqa: F401
-            from tasks import (
+            # Import all LSO transitions centrally from fsm/ - ONLY place to do this
+            from . import (
                 annotation_transitions,  # noqa: F401
-            )
-            from tasks import (
-                transitions as task_transitions,  # noqa: F401
+                project_transitions,  # noqa: F401
+                task_transitions,  # noqa: F401
             )
 
             logger.info('LSO FSM: Registered LSO transitions (community edition)')

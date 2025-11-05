@@ -13,9 +13,9 @@ import pytest
 from core.current_request import CurrentContext
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from fsm.models import AnnotationState, ProjectState, TaskState
 from fsm.state_choices import AnnotationStateChoices, ProjectStateChoices, TaskStateChoices
 from fsm.state_manager import StateManager, StateManagerError
+from fsm.state_models import AnnotationState, ProjectState, TaskState
 from fsm.utils import get_current_state_safe, is_fsm_enabled, resolve_organization_id
 from organizations.tests.factories import OrganizationFactory
 from projects.tests.factories import ProjectFactory

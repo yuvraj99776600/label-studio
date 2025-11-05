@@ -12,7 +12,7 @@ from typing import Dict, Optional, Type
 from django.db.models import Model, TextChoices
 
 if typing.TYPE_CHECKING:
-    from fsm.models import BaseState
+    from fsm.state_models import BaseState
     from fsm.transitions import BaseTransition
 
 logger = logging.getLogger(__name__)

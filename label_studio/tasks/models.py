@@ -16,7 +16,6 @@ from core.bulk_update_utils import bulk_update
 from core.current_request import get_current_request
 from core.feature_flags import flag_set
 from core.label_config import SINGLE_VALUED_TAGS
-from core.models import HsModel
 from core.redis import start_job_async_or_sync
 from core.utils.common import (
     find_first_one_to_one_related_field_by_prefix,
@@ -38,6 +37,7 @@ from django.urls import reverse
 from django.utils.timesince import timesince
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+from fsm.models import FsmHistoryStateModel
 from label_studio_sdk.label_interface.objects import PredictionValue
 from rest_framework.exceptions import ValidationError
 from tasks.choices import ActionType
@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 TaskMixin = load_func(settings.TASK_MIXIN)
 
 
-class Task(TaskMixin, HsModel):
+class Task(TaskMixin, FsmHistoryStateModel):
     """Business tasks from project"""
 
     id = models.AutoField(
@@ -585,7 +585,7 @@ with tt as (
 AnnotationMixin = load_func(settings.ANNOTATION_MIXIN)
 
 
-class Annotation(AnnotationMixin, HsModel):
+class Annotation(AnnotationMixin, FsmHistoryStateModel):
     """Annotations & Labeling results"""
 
     objects = AnnotationManager()
@@ -783,51 +783,10 @@ class Annotation(AnnotationMixin, HsModel):
         return result
 
     def _update_task_state_after_deletion(self, task, project):
-        from core.current_request import CurrentContext
-        from fsm.state_choices import TaskStateChoices
-        from fsm.state_manager import get_state_manager
-        from fsm.utils import is_fsm_enabled
-        from projects.transitions import update_project_state_after_task_change
+        """Update task FSM state after annotation deletion."""
+        from fsm.functions import update_task_state_after_annotation_deletion
 
-        # Get user from context for FSM
-        user = CurrentContext.get_user()
-
-        if not is_fsm_enabled(user=user):
-            return
-
-        try:
-            StateManager = get_state_manager()
-
-            # Get current state - may be None if entity has no state record yet
-            current_task_state = StateManager.get_current_state_value(task)
-
-            # Determine what the state should be based on task's labeled status
-            expected_state = TaskStateChoices.COMPLETED if task.is_labeled else TaskStateChoices.IN_PROGRESS
-
-            # If no state exists, initialize it based on current condition
-            if current_task_state is None:
-                # Initialize state for entities that existed before FSM was deployed
-                if task.is_labeled:
-                    StateManager.execute_transition(entity=task, transition_name='task_completed', user=user)
-                else:
-                    StateManager.execute_transition(entity=task, transition_name='task_in_progress', user=user)
-                # Update project state based on task changes
-                update_project_state_after_task_change(project, user=user)
-            # If state exists but doesn't match the task's labeled status, fix it
-            elif current_task_state != expected_state:
-                if expected_state == TaskStateChoices.IN_PROGRESS:
-                    StateManager.execute_transition(entity=task, transition_name='task_in_progress', user=user)
-                else:
-                    StateManager.execute_transition(entity=task, transition_name='task_completed', user=user)
-                # Update project state based on task changes
-                update_project_state_after_task_change(project, user=user)
-
-        except Exception as e:
-            # Final safety net - log but don't break annotation deletion
-            logger.warning(
-                f'FSM state update failed during annotation deletion: {str(e)}',
-                extra={'task_id': task.id, 'project_id': project.id},
-            )
+        update_task_state_after_annotation_deletion(task, project)
 
     def on_delete_update_counters(self):
         task = self.task
@@ -855,7 +814,7 @@ class Annotation(AnnotationMixin, HsModel):
         self.decrease_project_summary_counters()
 
 
-class TaskLock(HsModel):
+class TaskLock(FsmHistoryStateModel):
     task = models.ForeignKey(
         'tasks.Task',
         on_delete=models.CASCADE,
@@ -873,7 +832,7 @@ class TaskLock(HsModel):
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Creation time', null=True)
 
 
-class AnnotationDraft(HsModel):
+class AnnotationDraft(FsmHistoryStateModel):
     result = JSONField(_('result'), help_text='Draft result in JSON format')
     lead_time = models.FloatField(
         _('lead time'),
