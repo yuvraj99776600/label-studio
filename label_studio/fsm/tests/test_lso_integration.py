@@ -53,7 +53,7 @@ class TestLSOFSMIntegration:
         Test that creating a project automatically generates a state record.
 
         Validates:
-        - Project model extends HsModel
+        - Project model extends FsmHistoryStateModel
         - Automatic state transition on creation
         - State is CREATED for new projects
         """
@@ -74,7 +74,7 @@ class TestLSOFSMIntegration:
         Test that creating a task automatically generates a state record.
 
         Validates:
-        - Task model extends HsModel
+        - Task model extends FsmHistoryStateModel
         - Automatic state transition on creation
         - State is CREATED for new tasks
         """
@@ -95,7 +95,7 @@ class TestLSOFSMIntegration:
         Test that creating an annotation automatically generates a state record.
 
         Validates:
-        - Annotation model extends HsModel
+        - Annotation model extends FsmHistoryStateModel
         - Automatic state transition on creation
         - State is SUBMITTED for new annotations in LSO
         """

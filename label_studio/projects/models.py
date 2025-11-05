@@ -856,7 +856,7 @@ class Project(ProjectMixin, FsmHistoryStateModel):
     # ============================================================================
     # FSM Integration
     # ============================================================================
-    # Project uses HsModel for FSM integration. All transition logic is defined
+    # Project uses FsmHistoryStateModel for FSM integration. All transition logic is defined
     # in projects/transitions.py with declarative triggers. No custom methods needed.
 
     def get_member_ids(self):

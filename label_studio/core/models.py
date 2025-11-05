@@ -8,13 +8,6 @@ from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
-# Import FsmHistoryStateModel from fsm module
-from fsm.models import FsmHistoryStateModel
-
-# Backward-compatible alias for existing code
-# New code should import directly: from fsm.models import FsmHistoryStateModel
-HsModel = FsmHistoryStateModel
-
 
 class AsyncMigrationStatus(models.Model):
     meta = JSONField(
