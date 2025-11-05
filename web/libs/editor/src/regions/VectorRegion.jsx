@@ -673,6 +673,7 @@ const HtxVectorView = observer(({ item, suggestion }) => {
           transform={{ zoom: item.parent.stageZoom, offsetX, offsetY }}
           fitScale={item.parent.zoomScale}
           allowClose={item.control?.closable ?? false}
+          // Temporarily disabled due to buggy behavior
           // allowBezier={item.control?.curves ?? false}
           minPoints={item.minPoints}
           maxPoints={item.maxPoints}
