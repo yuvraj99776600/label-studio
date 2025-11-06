@@ -615,12 +615,6 @@ class AnnotationManager(models.Manager):
         return res
 
 
-GET_UNIQUE_IDS = """
-with tt as (
-    select jsonb_array_elements(tch.result) as item from task_completion_history tch
-    where task=%(t_id)s and task_annotation=%(tc_id)s
-) select count( distinct tt.item -> 'id') from tt"""
-
 AnnotationMixin = load_func(settings.ANNOTATION_MIXIN)
 
 
@@ -901,6 +895,7 @@ class TaskLock(FsmHistoryStateModel):
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Creation time', null=True)
 
 
+<<<<<<< HEAD
 class AnnotationDraftQuerySet(models.QuerySet):
     """Custom QuerySet for AnnotationDraft model"""
 
@@ -932,6 +927,9 @@ class AnnotationDraftManager(models.Manager):
 
 class AnnotationDraft(FsmHistoryStateModel):
     objects = AnnotationDraftManager()
+=======
+class AnnotationDraft(FsmHistoryStateModel):
+>>>>>>> origin/develop
     result = JSONField(_('result'), help_text='Draft result in JSON format')
     lead_time = models.FloatField(
         _('lead time'),
