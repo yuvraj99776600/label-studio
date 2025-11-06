@@ -37,7 +37,6 @@ from django.urls import reverse
 from django.utils.timesince import timesince
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from fsm.models import FsmHistoryStateModel
 from label_studio_sdk.label_interface.objects import PredictionValue
 from rest_framework.exceptions import ValidationError
 from tasks.choices import ActionType
@@ -47,7 +46,7 @@ logger = logging.getLogger(__name__)
 TaskMixin = load_func(settings.TASK_MIXIN)
 
 
-class Task(TaskMixin, FsmHistoryStateModel):
+class Task(TaskMixin, models.Model):
     """Business tasks from project"""
 
     id = models.AutoField(
@@ -585,7 +584,7 @@ with tt as (
 AnnotationMixin = load_func(settings.ANNOTATION_MIXIN)
 
 
-class Annotation(AnnotationMixin, FsmHistoryStateModel):
+class Annotation(AnnotationMixin, models.Model):
     """Annotations & Labeling results"""
 
     objects = AnnotationManager()
@@ -754,7 +753,7 @@ class Annotation(AnnotationMixin, FsmHistoryStateModel):
             self.task.updated_by = request.user
             update_fields.append('updated_by')
 
-        self.task.save(update_fields=update_fields, skip_fsm=True)
+        self.task.save(update_fields=update_fields)
 
     def save(self, *args, update_fields=None, **kwargs):
         request = get_current_request()
@@ -774,24 +773,13 @@ class Annotation(AnnotationMixin, FsmHistoryStateModel):
         return result
 
     def delete(self, *args, **kwargs):
-        # Store task and project references before deletion
-
         result = super().delete(*args, **kwargs)
         self.update_task()
         self.on_delete_update_counters()
-
         return result
-
-    def _update_task_state_after_deletion(self, task, project):
-        """Update task FSM state after annotation deletion."""
-        from fsm.functions import update_task_state_after_annotation_deletion
-
-        update_task_state_after_annotation_deletion(task, project)
 
     def on_delete_update_counters(self):
         task = self.task
-        project = self.project
-
         logger.debug(f'Start updating counters for task {task.id}.')
         if self.was_cancelled:
             cancelled = task.annotations.all().filter(was_cancelled=True).count()
@@ -806,15 +794,12 @@ class Annotation(AnnotationMixin, FsmHistoryStateModel):
         task.update_is_labeled()
         Task.objects.filter(id=task.id).update(is_labeled=task.is_labeled)
 
-        # FSM: Update task state
-        self._update_task_state_after_deletion(task, project)
-
         # remove annotation counters in project summary followed by deleting an annotation
         logger.debug('Remove annotation counters in project summary followed by deleting an annotation')
         self.decrease_project_summary_counters()
 
 
-class TaskLock(FsmHistoryStateModel):
+class TaskLock(models.Model):
     task = models.ForeignKey(
         'tasks.Task',
         on_delete=models.CASCADE,
@@ -832,7 +817,7 @@ class TaskLock(FsmHistoryStateModel):
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Creation time', null=True)
 
 
-class AnnotationDraft(FsmHistoryStateModel):
+class AnnotationDraft(models.Model):
     result = JSONField(_('result'), help_text='Draft result in JSON format')
     lead_time = models.FloatField(
         _('lead time'),
@@ -1012,7 +997,7 @@ class Prediction(models.Model):
             self.task.updated_by = request.user
             update_fields.append('updated_by')
 
-        self.task.save(update_fields=update_fields, skip_fsm=True)
+        self.task.save(update_fields=update_fields)
 
     def save(self, *args, update_fields=None, **kwargs):
         if self.project_id is None and self.task_id:
@@ -1322,7 +1307,7 @@ def update_project_summary_annotations_and_is_labeled(sender, instance, created,
     else:
         instance.task.total_annotations = instance.task.annotations.all().filter(was_cancelled=False).count()
     instance.task.update_is_labeled()
-    instance.task.save(update_fields=['is_labeled', 'total_annotations', 'cancelled_annotations'], skip_fsm=True)
+    instance.task.save(update_fields=['is_labeled', 'total_annotations', 'cancelled_annotations'])
     logger.debug(f'Updated total_annotations and cancelled_annotations for {instance.task.id}.')
 
 

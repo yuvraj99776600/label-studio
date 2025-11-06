@@ -34,8 +34,6 @@ class APIIntegrationExampleTests(TestCase):
     """
 
     def setUp(self):
-        from copy import deepcopy
-
         self.mock_entity = Mock()
         self.mock_entity.pk = 1
         self.mock_entity._meta.model_name = 'task'
@@ -45,13 +43,8 @@ class APIIntegrationExampleTests(TestCase):
         self.mock_user.id = 42
         self.mock_user.username = 'api_user'
 
-        # Save registry state and clear for this test
-        self._original_transitions = deepcopy(transition_registry._transitions)
+        # Clear registry
         transition_registry._transitions.clear()
-
-    def tearDown(self):
-        # Restore original transition registry to prevent test leakage
-        transition_registry._transitions = self._original_transitions
 
     def test_rest_api_task_assignment_example(self):
         """

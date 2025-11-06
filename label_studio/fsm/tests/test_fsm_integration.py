@@ -4,12 +4,13 @@ Tests the complete FSM functionality including models, state management,
 and API endpoints.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
+import pytest
 from django.test import TestCase
+from fsm.models import AnnotationState, ProjectState, TaskState
 from fsm.state_manager import get_state_manager
-from fsm.state_models import AnnotationState, ProjectState, TaskState
 from projects.tests.factories import ProjectFactory
 from tasks.tests.factories import AnnotationFactory, TaskFactory
 from users.tests.factories import UserFactory
@@ -105,17 +106,8 @@ class TestStateManager(TestCase):
     """Test StateManager functionality with mocked transaction support"""
 
     def setUp(self):
-        from core.current_request import CurrentContext
-
         self.user = UserFactory(email='test@example.com')
-
-        # Set up CurrentContext BEFORE creating entities that need FSM
-        CurrentContext.set_user(self.user)
-
         self.project = ProjectFactory(created_by=self.user)
-        if hasattr(self.project, 'organization') and self.project.organization:
-            CurrentContext.set_organization_id(self.project.organization.id)
-
         self.task = TaskFactory(project=self.project, data={'text': 'test'})
         self.StateManager = get_state_manager()
 
@@ -125,32 +117,29 @@ class TestStateManager(TestCase):
         cache.clear()
 
         # Ensure registry is properly initialized for TaskState
+        from fsm.models import TaskState
         from fsm.registry import state_model_registry
-        from fsm.state_models import TaskState
 
         if not state_model_registry.get_model('task'):
             state_model_registry.register_model('task', TaskState)
 
-    def tearDown(self):
-        from core.current_request import CurrentContext
-
-        CurrentContext.clear()
-
     def test_get_current_state_empty(self):
-        """Test getting current state when task is created"""
-        # With FsmHistoryStateModel, tasks automatically get a state on creation
+        """Test getting current state when no states exist"""
         current_state = self.StateManager.get_current_state_value(self.task)
-        assert current_state == 'CREATED'  # FsmHistoryStateModel auto-creates state
+        assert current_state is None
 
-    @patch('fsm.state_manager.flag_set')
-    def test_transition_state(self, mock_flag_set):
-        """Test state transition functionality with immediate cache updates"""
+    @patch('django.db.transaction.on_commit')
+    def test_transition_state(self, mock_on_commit):
+        """Test state transition functionality with mocked transaction.on_commit"""
         from django.core.cache import cache
 
         cache.clear()
 
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
+        # Mock transaction.on_commit to immediately execute the callback
+        def execute_callback(callback):
+            callback()
+
+        mock_on_commit.side_effect = execute_callback
 
         # Initial transition
         success = self.StateManager.transition_state(
@@ -162,8 +151,10 @@ class TestStateManager(TestCase):
         )
 
         assert success
+        # Verify transaction.on_commit was called once for cache update
+        assert mock_on_commit.call_count == 1
 
-        # Check current state - should work with immediate cache update
+        # Check current state - should work with mocked cache update
         current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'CREATED'
 
@@ -177,25 +168,33 @@ class TestStateManager(TestCase):
         )
 
         assert success
+        # Verify transaction.on_commit was called again (total 2 times)
+        assert mock_on_commit.call_count == 2
 
         current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'IN_PROGRESS'
 
-    @patch('fsm.state_manager.flag_set')
-    def test_get_current_state_object(self, mock_flag_set):
+    @patch('django.db.transaction.on_commit')
+    def test_get_current_state_object(self, mock_on_commit):
         """Test getting current state object with full details"""
         from django.core.cache import cache
 
         cache.clear()
 
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
+        # Mock transaction.on_commit to immediately execute the callback
+        def execute_callback(callback):
+            callback()
+
+        mock_on_commit.side_effect = execute_callback
 
         # Create some state transitions
         self.StateManager.transition_state(entity=self.task, new_state='CREATED', user=self.user)
         self.StateManager.transition_state(
             entity=self.task, new_state='IN_PROGRESS', user=self.user, context={'test': 'data'}
         )
+
+        # Verify transaction.on_commit was called twice (once per transition)
+        assert mock_on_commit.call_count == 2
 
         current_state_obj = self.StateManager.get_current_state_object(self.task)
 
@@ -205,15 +204,18 @@ class TestStateManager(TestCase):
         assert current_state_obj.triggered_by == self.user
         assert current_state_obj.context_data == {'test': 'data'}
 
-    @patch('fsm.state_manager.flag_set')
-    def test_get_state_history(self, mock_flag_set):
+    @patch('django.db.transaction.on_commit')
+    def test_get_state_history(self, mock_on_commit):
         """Test state history retrieval"""
         from django.core.cache import cache
 
         cache.clear()
 
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
+        # Mock transaction.on_commit to immediately execute the callback
+        def execute_callback(callback):
+            callback()
+
+        mock_on_commit.side_effect = execute_callback
 
         transitions = [('CREATED', 'create_task'), ('IN_PROGRESS', 'start_work'), ('COMPLETED', 'finish_work')]
 
@@ -221,6 +223,9 @@ class TestStateManager(TestCase):
             self.StateManager.transition_state(
                 entity=self.task, new_state=state, user=self.user, transition_name=transition
             )
+
+        # Verify transaction.on_commit was called 3 times (once per transition)
+        assert mock_on_commit.call_count == 3
 
         history = self.StateManager.get_state_history(self.task, limit=10)
 
@@ -236,35 +241,52 @@ class TestStateManager(TestCase):
         assert history[1].previous_state == 'CREATED'
         assert history[0].previous_state == 'IN_PROGRESS'
 
-    @patch('fsm.state_manager.flag_set')
-    def test_get_states_in_time_range(self, mock_flag_set):
-        """Test time-based state queries using StateManager"""
+    @patch('django.db.transaction.on_commit')
+    def test_get_states_in_time_range(self, mock_on_commit):
+        """Test time-based state queries using UUID7"""
         from django.core.cache import cache
 
         cache.clear()
 
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
+        # Mock transaction.on_commit to immediately execute the callback
+        def execute_callback(callback):
+            callback()
+
+        mock_on_commit.side_effect = execute_callback
+
+        before_time = datetime.now(timezone.utc) - timedelta(seconds=1)
 
         # Create some states
         self.StateManager.transition_state(entity=self.task, new_state='CREATED', user=self.user)
         self.StateManager.transition_state(entity=self.task, new_state='IN_PROGRESS', user=self.user)
 
-        # Get state history (which gives us states ordered by time)
-        states = self.StateManager.get_state_history(self.task)
+        # Verify transaction.on_commit was called twice (once per transition)
+        assert mock_on_commit.call_count == 2
 
-        # Should have at least the states we created
-        assert len(states) >= 2
+        # Record time after creating states
+        after_time = datetime.now(timezone.utc) + timedelta(seconds=1)
 
-    @patch('fsm.state_manager.flag_set')
-    def test_immediate_cache_update_success_case(self, mock_flag_set):
-        """Test that cache is updated immediately on successful transitions"""
+        # Query states in time range
+        states_in_range = self.StateManager.get_states_in_time_range(self.task, before_time, after_time)
+
+        # Should find both states
+        assert len(states_in_range) == 2
+
+    @patch('django.db.transaction.on_commit')
+    def test_transaction_on_commit_success_case(self, mock_on_commit):
+        """Test that transaction.on_commit is called exactly once per successful transition"""
         from django.core.cache import cache
 
         cache.clear()
 
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
+        # Track callback executions
+        callbacks_executed = []
+
+        def track_and_execute(callback):
+            callbacks_executed.append(callback)
+            callback()  # Execute the callback
+
+        mock_on_commit.side_effect = track_and_execute
 
         # Perform a successful transition
         success = self.StateManager.transition_state(
@@ -275,8 +297,12 @@ class TestStateManager(TestCase):
             reason='Initial task creation',
         )
 
-        # Verify success and immediate cache update
+        # Verify success and transaction.on_commit was called
         assert success
+        assert mock_on_commit.call_count == 1
+        assert len(callbacks_executed) == 1
+
+        # Verify the cache was properly updated by executing the callback
         current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'CREATED'
 
@@ -289,62 +315,78 @@ class TestStateManager(TestCase):
         )
 
         assert success
+        assert mock_on_commit.call_count == 2
+        assert len(callbacks_executed) == 2
+
         current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'IN_PROGRESS'
 
-    @patch('fsm.state_manager.flag_set')
-    def test_transaction_on_commit_success_case(self, mock_flag_set):
-        """Test successful state transitions"""
+    @patch('django.db.transaction.on_commit')
+    @patch('fsm.state_manager.get_state_model_for_entity')
+    def test_transaction_on_commit_failure_case(self, mock_get_state_model, mock_on_commit):
+        """Test that transaction.on_commit is NOT called when transition fails"""
         from django.core.cache import cache
 
         cache.clear()
 
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
+        # Mock get_state_model_for_entity to return None (no state model found)
+        mock_get_state_model.return_value = None
 
-        # Perform a successful transition
-        success = self.StateManager.transition_state(
-            entity=self.task,
-            new_state='CREATED',
-            user=self.user,
-            transition_name='create_task',
-        )
+        # Attempt a transition that should fail due to missing state model
+        with pytest.raises(Exception):  # Should raise StateManagerError
+            self.StateManager.transition_state(
+                entity=self.task,
+                new_state='CREATED',
+                user=self.user,
+                transition_name='create_task',
+                reason='This should fail',
+            )
 
-        # Verify transition succeeded
-        assert success
-        assert self.StateManager.get_current_state_value(self.task) == 'CREATED'
+        # Verify transaction.on_commit was NOT called since transition failed
+        assert mock_on_commit.call_count == 0
 
-    @patch('fsm.state_manager.flag_set')
-    def test_transaction_on_commit_database_failure_case(self, mock_flag_set):
-        """Test state transitions work correctly"""
+        # Verify cache was not updated (should raise exception)
+        with pytest.raises(Exception):  # Should raise StateManagerError
+            self.StateManager.get_current_state_value(self.task)
+
+    @patch('django.db.transaction.on_commit')
+    @patch('fsm.models.TaskState.objects.create')
+    def test_transaction_on_commit_database_failure_case(self, mock_create, mock_on_commit):
+        """Test that transaction.on_commit is NOT called when database operation fails"""
         from django.core.cache import cache
 
         cache.clear()
 
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
+        # Mock database create operation to fail
+        mock_create.side_effect = Exception('Database constraint violation')
 
-        # Perform a transition
-        self.StateManager.transition_state(
-            entity=self.task,
-            new_state='CREATED',
-            user=self.user,
-            transition_name='create_task',
-        )
+        # Attempt a transition that should fail due to database error
+        with pytest.raises(Exception):  # Should raise StateManagerError
+            self.StateManager.transition_state(
+                entity=self.task,
+                new_state='CREATED',
+                user=self.user,
+                transition_name='create_task',
+                reason='This should fail in DB',
+            )
 
-        # Verify state was set correctly
+        # Verify transaction.on_commit was NOT called since transaction failed
+        assert mock_on_commit.call_count == 0
+
+        # Verify cache was deleted due to failure (cache.delete should be called)
         current_state = self.StateManager.get_current_state_value(self.task)
-        assert current_state == 'CREATED'
+        assert current_state is None
 
-    @patch('fsm.state_manager.flag_set')
-    def test_immediate_cache_update_content(self, mock_flag_set):
-        """Test that cache is immediately updated during transition"""
+    @patch('django.db.transaction.on_commit')
+    def test_transaction_on_commit_callback_content(self, mock_on_commit):
+        """Test that the transaction.on_commit callback properly updates the cache"""
         from django.core.cache import cache
 
         cache.clear()
 
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
+        # Capture the callback without executing it
+        captured_callbacks = []
+        mock_on_commit.side_effect = lambda callback: captured_callbacks.append(callback)
 
         # Perform a transition
         success = self.StateManager.transition_state(
@@ -354,81 +396,20 @@ class TestStateManager(TestCase):
         )
 
         assert success
+        assert len(captured_callbacks) == 1
 
-        # Cache should be immediately updated during transition
+        # Before executing callback, cache should be empty
         cache_key = self.StateManager.get_cache_key(self.task)
+        cached_state = cache.get(cache_key)
+        assert cached_state is None
+
+        # Execute the callback manually
+        captured_callbacks[0]()
+
+        # After callback execution, cache should be updated
         cached_state = cache.get(cache_key)
         assert cached_state == 'CREATED'
 
         # Verify get_current_state_value uses the cached value
-        current_state = self.StateManager.get_current_state_value(self.task)
-        assert current_state == 'CREATED'
-
-    @patch('fsm.state_manager.flag_set')
-    def test_cache_cleanup_on_transaction_rollback(self, mock_flag_set):
-        """Test cache behavior with state transitions"""
-        from django.core.cache import cache
-
-        cache.clear()
-
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
-
-        # Create a state transition
-        self.StateManager.transition_state(
-            entity=self.task,
-            new_state='CREATED',
-            user=self.user,
-            transition_name='create_task',
-            reason='Test transition',
-        )
-
-        # Verify cache contains the state
-        cache_key = self.StateManager.get_cache_key(self.task)
-        cached_state = cache.get(cache_key)
-        assert cached_state == 'CREATED'
-
-    @patch('fsm.state_manager.flag_set')
-    def test_same_state_transition_prevention(self, mock_flag_set):
-        """Test that same-state transitions are prevented"""
-        from django.core.cache import cache
-
-        cache.clear()
-
-        # Enable FSM feature flag
-        mock_flag_set.return_value = True
-
-        # Create initial state
-        success = self.StateManager.transition_state(
-            entity=self.task,
-            new_state='CREATED',
-            user=self.user,
-        )
-        assert success
-
-        # Verify initial state is set
-        current_state = self.StateManager.get_current_state_value(self.task)
-        assert current_state == 'CREATED'
-
-        # Get initial state count
-        from fsm.state_models import TaskState
-
-        initial_count = TaskState.objects.filter(task=self.task).count()
-        assert initial_count == 1
-
-        # Attempt same-state transition (should be skipped)
-        success = self.StateManager.transition_state(
-            entity=self.task,
-            new_state='CREATED',  # Same state as current
-            user=self.user,
-            reason='This should be skipped',
-        )
-        assert success  # Returns True but doesn't create new record
-
-        # Verify no new state record was created
-        final_count = TaskState.objects.filter(task=self.task).count()
-        assert final_count == initial_count  # Should still be 1
-
-        # Verify state is still CREATED
         current_state = self.StateManager.get_current_state_value(self.task)
         assert current_state == 'CREATED'

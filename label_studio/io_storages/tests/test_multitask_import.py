@@ -72,9 +72,6 @@ def _test_storage_import(project, storage_class, task_data, **storage_kwargs):
     # Setup storage with required credentials
     storage = storage_class(project=project, **storage_kwargs)
 
-    # Save the storage to the database before syncing
-    storage.save()
-
     # Validate connection before sync
     try:
         storage.validate_connection()
@@ -82,11 +79,8 @@ def _test_storage_import(project, storage_class, task_data, **storage_kwargs):
         pytest.fail(f'Storage connection validation failed: {str(e)}')
 
     # Sync storage
-    # Mock redis_connected to force synchronous execution in tests
-    import mock
-
-    with mock.patch('io_storages.base_models.redis_connected', return_value=False):
-        storage.sync()
+    # Don't have to wait for sync to complete because it's blocking without rq
+    storage.sync()
 
     # Validate tasks were imported correctly
     tasks_response = client.get(f'/api/tasks?project={project.id}')
