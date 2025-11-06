@@ -895,7 +895,6 @@ class TaskLock(FsmHistoryStateModel):
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Creation time', null=True)
 
 
-<<<<<<< HEAD
 class AnnotationDraftQuerySet(models.QuerySet):
     """Custom QuerySet for AnnotationDraft model"""
 
@@ -927,9 +926,6 @@ class AnnotationDraftManager(models.Manager):
 
 class AnnotationDraft(FsmHistoryStateModel):
     objects = AnnotationDraftManager()
-=======
-class AnnotationDraft(FsmHistoryStateModel):
->>>>>>> origin/develop
     result = JSONField(_('result'), help_text='Draft result in JSON format')
     lead_time = models.FloatField(
         _('lead time'),

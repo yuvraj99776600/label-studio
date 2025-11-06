@@ -22,11 +22,11 @@ Note:
 
     When either flag is disabled, fields return None. This allows enabling FSM background
     work while keeping state fields hidden during incremental rollout and testing.
-
-    Both feature flag and StateManager imports are done at function level to avoid
-    circular imports during Django initialization (feature_flags imports models).
 """
 
+from core.current_request import CurrentContext
+from core.feature_flags import flag_set
+from fsm.state_manager import StateManager
 from rest_framework import serializers
 
 
@@ -82,19 +82,14 @@ class FSMStateField(serializers.ReadOnlyField):
         Returns:
             str or None: The current state value (None if either feature flag disabled)
         """
-        # Import at function level to avoid circular imports during Django initialization
-        # (both feature_flags and StateManager import models which aren't ready during app loading)
-        from core.current_request import CurrentContext
-        from core.feature_flags import flag_set
-        from fsm.state_manager import StateManager
-
         # Check both feature flags (works for both core and enterprise)
         # 1. General FSM functionality (background calculations)
         # 2. State field display control (API exposure)
         user = CurrentContext.get_user()
-        if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
-            return None
-        if not flag_set('fflag_feat_fit_710_fsm_state_fields', user=user):
+        if not (
+            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
+        ):
             return None
 
         if instance is None:
@@ -180,19 +175,14 @@ class FSMStateMetadataField(serializers.Field):
         Returns:
             dict or None: State metadata dictionary (None if either feature flag disabled)
         """
-        # Import at function level to avoid circular imports during Django initialization
-        # (both feature_flags and StateManager import models which aren't ready during app loading)
-        from core.current_request import CurrentContext
-        from core.feature_flags import flag_set
-        from fsm.state_manager import StateManager
-
         # Check both feature flags (works for both core and enterprise)
         # 1. General FSM functionality (background calculations)
         # 2. State field display control (API exposure)
         user = CurrentContext.get_user()
-        if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
-            return None
-        if not flag_set('fflag_feat_fit_710_fsm_state_fields', user=user):
+        if not (
+            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
+        ):
             return None
 
         instance = (

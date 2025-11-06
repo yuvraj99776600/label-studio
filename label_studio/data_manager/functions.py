@@ -11,6 +11,7 @@ from core.utils.common import int_from_request
 from data_manager.models import View
 from data_manager.prepare_params import PrepareParams
 from django.conf import settings
+from fsm.registry import get_state_choices
 from rest_framework.generics import get_object_or_404
 from tasks.models import Task
 
@@ -114,8 +115,6 @@ def get_all_columns(project, *_):
     if flag_set('fflag_feat_fit_568_finite_state_management', user='auto') and flag_set(
         'fflag_feat_fit_710_fsm_state_fields', user='auto'
     ):
-        from fsm.registry import get_state_choices
-
         # Get state choices for tasks
         task_state_choices = get_state_choices('task')
         state_schema = {}
