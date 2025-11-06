@@ -7,6 +7,7 @@ from functools import reduce
 from typing import ClassVar
 
 import ujson as json
+from core.current_request import CurrentContext
 from core.feature_flags import flag_set
 from core.utils.db import fast_first
 from data_manager.prepare_params import ConjunctionEnum
@@ -718,16 +719,15 @@ def annotate_state(queryset):
     the current state without causing N+1 queries. Aliases 'current_state' to
     'state' to match the Data Manager column name.
 
-    Both feature flags must be enabled:
+    Both feature flags must be enabled and have a current user in context:
     1. fflag_feat_fit_568_finite_state_management - Controls FSM background calculations
     2. fflag_feat_fit_710_fsm_state_fields - Controls state field display in APIs/UI
     """
-    # Get user from queryset.request if available, otherwise use 'auto'
-    user = getattr(queryset, 'request', None)
-    if user and hasattr(user, 'user'):
-        user = user.user
-    else:
-        user = 'auto'
+
+    user = CurrentContext.get_user()
+    # If no user in context, return unmodified queryset
+    if user is None:
+        return queryset
 
     # Only annotate if both FSM feature flags are enabled
     # This prevents unnecessary DB queries when state shouldn't be visible
