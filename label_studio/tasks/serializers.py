@@ -3,7 +3,7 @@
 import logging
 
 import ujson as json
-from core.current_request import get_current_request
+from core.current_request import CurrentContext, get_current_request
 from core.feature_flags import flag_set
 from core.label_config import replace_task_data_undefined_with_config_field
 from core.utils.common import load_func, retry_database_locked
@@ -176,6 +176,17 @@ class AnnotationSerializer(FlexFieldsModelSerializer):
 
         name += f' {user.email}, {user.id}'
         return name
+
+    def to_representation(self, obj):
+        """Remove state field if feature flags are disabled"""
+        ret = super().to_representation(obj)
+        user = CurrentContext.get_user()
+        if not (
+            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
+        ):
+            ret.pop('state', None)
+        return ret
 
     class Meta:
         model = Annotation
@@ -742,6 +753,17 @@ class AnnotationDraftSerializer(ModelSerializer):
             name = name + ' ' + last_name
         name += (' ' if name else '') + f'{user.email}, {user.id}'
         return name
+
+    def to_representation(self, obj):
+        """Remove state field if feature flags are disabled"""
+        ret = super().to_representation(obj)
+        user = CurrentContext.get_user()
+        if not (
+            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
+        ):
+            ret.pop('state', None)
+        return ret
 
     class Meta:
         model = AnnotationDraft

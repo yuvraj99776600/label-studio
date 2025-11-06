@@ -3,6 +3,8 @@
 import os
 
 import ujson as json
+from core.current_request import CurrentContext
+from core.feature_flags import flag_set
 from data_manager.models import Filter, FilterGroup, View
 from django.conf import settings
 from django.db import transaction
@@ -480,6 +482,13 @@ class DataManagerTaskSerializer(TaskSerializer):
             ret.pop('annotations', None)
         if not self.context.get('predictions'):
             ret.pop('predictions', None)
+        # Remove state field if feature flags are disabled
+        user = CurrentContext.get_user()
+        if not (
+            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
+        ):
+            ret.pop('state', None)
         return ret
 
     def _pretty_results(self, task, field, unique=False):
