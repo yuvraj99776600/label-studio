@@ -8,7 +8,7 @@ community_author: wesleylima
 ipynb_repo_path: tutorials/how-to-multi-turn-chat-evals-with-chainlit-and-label-studio/how_to_multi_turn_chat_evals_with_chainlit_and_label_studio.ipynb
 repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-multi-turn-chat-evals-with-chainlit-and-label-studio
 report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
-thumbnail: 
+thumbnail: /images/tutorials/tutorials-eval-multi-turn-chainlit.png
 ---
 This notebook demonstrates how to create a Label Studio project for evaluating chatbot conversations using the Chatbot Evaluation template.
 
