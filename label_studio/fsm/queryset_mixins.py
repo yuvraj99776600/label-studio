@@ -16,13 +16,12 @@ Note:
     All state annotation functionality is guarded by the FSM feature flag
     ('fflag_feat_fit_568_finite_state_management'). When disabled, no annotation
     is performed and there is zero performance impact.
-
-    The feature flag check import is done at function level to avoid circular
-    imports during Django initialization (feature_flags imports models).
 """
 
 import logging
 
+from core.current_request import CurrentContext
+from core.feature_flags import flag_set
 from django.db.models import OuterRef, Subquery
 from fsm.registry import get_state_model
 
@@ -73,11 +72,6 @@ class FSMStateQuerySetMixin:
             - If no state exists for an entity, `current_state` will be None
             - The state is read-only and should not be modified directly
         """
-        # Import at function level to avoid circular imports during Django initialization
-        # (feature_flags imports models which aren't ready during app loading)
-        from core.current_request import CurrentContext
-        from core.feature_flags import flag_set
-
         # Check feature flag directly (works for both core and enterprise)
         # Using flag_set directly instead of is_fsm_enabled to work in enterprise context
         user = CurrentContext.get_user()
@@ -149,10 +143,6 @@ class FSMMultiStateQuerySetMixin(FSMStateQuerySetMixin):
         Note:
             If FSM feature flag is disabled, returns queryset unchanged (zero impact)
         """
-        # Import at function level to avoid circular imports during Django initialization
-        from core.current_request import CurrentContext
-        from core.feature_flags import flag_set
-
         # Check feature flag directly (works for both core and enterprise)
         user = CurrentContext.get_user()
         if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
@@ -198,10 +188,6 @@ class FSMMultiStateQuerySetMixin(FSMStateQuerySetMixin):
         Note:
             If FSM feature flag is disabled, returns empty queryset (safe fallback)
         """
-        # Import at function level to avoid circular imports during Django initialization
-        from core.current_request import CurrentContext
-        from core.feature_flags import flag_set
-
         # Check feature flag directly (works for both core and enterprise)
         user = CurrentContext.get_user()
         if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
