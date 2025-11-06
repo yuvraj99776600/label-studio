@@ -717,6 +717,10 @@ def annotate_state(queryset):
     Uses FSMStateQuerySetMixin.annotate_fsm_state() to efficiently annotate
     the current state without causing N+1 queries. Aliases 'current_state' to
     'state' to match the Data Manager column name.
+
+    Both feature flags must be enabled:
+    1. fflag_feat_fit_568_finite_state_management - Controls FSM background calculations
+    2. fflag_feat_fit_710_fsm_state_fields - Controls state field display in APIs/UI
     """
     from core.feature_flags import flag_set
     from django.db.models import F
@@ -728,8 +732,11 @@ def annotate_state(queryset):
     else:
         user = 'auto'
 
-    # Only annotate if FSM is enabled
+    # Only annotate if both FSM feature flags are enabled
+    # This prevents unnecessary DB queries when state shouldn't be visible
     if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
+        return queryset
+    if not flag_set('fflag_feat_fit_710_fsm_state_fields', user=user):
         return queryset
 
     # Use the mixin's annotate_fsm_state() method which creates 'current_state' annotation

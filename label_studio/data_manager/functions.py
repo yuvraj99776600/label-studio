@@ -108,7 +108,12 @@ def get_all_columns(project, *_):
     ]
 
     # Add FSM state column if FSM is enabled
-    if flag_set('fflag_feat_fit_568_finite_state_management', user='auto'):
+    # Both feature flags must be enabled:
+    # 1. fflag_feat_fit_568_finite_state_management - Controls FSM background calculations
+    # 2. fflag_feat_fit_710_fsm_state_fields - Controls state field display in APIs/UI
+    if flag_set('fflag_feat_fit_568_finite_state_management', user='auto') and flag_set(
+        'fflag_feat_fit_710_fsm_state_fields', user='auto'
+    ):
         from fsm.registry import get_state_choices
 
         # Get state choices for tasks
