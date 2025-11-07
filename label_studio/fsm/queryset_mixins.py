@@ -16,7 +16,7 @@ Note:
     All state annotation functionality is guarded by TWO feature flags:
     1. 'fflag_feat_fit_568_finite_state_management' - Controls FSM background calculations
     2. 'fflag_feat_fit_710_fsm_state_fields' - Controls state field display in APIs
-    
+
     When disabled, no annotation is performed and there is zero performance impact.
 """
 
