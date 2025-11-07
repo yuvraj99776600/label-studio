@@ -75,7 +75,10 @@ class FSMStateQuerySetMixin:
         # Check feature flag directly (works for both core and enterprise)
         # Using flag_set directly instead of is_fsm_enabled to work in enterprise context
         user = CurrentContext.get_user()
-        if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
+        if not (
+            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
+        ):
             logger.debug('FSM feature flag disabled, skipping state annotation')
             return self
 
@@ -145,7 +148,10 @@ class FSMMultiStateQuerySetMixin(FSMStateQuerySetMixin):
         """
         # Check feature flag directly (works for both core and enterprise)
         user = CurrentContext.get_user()
-        if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
+        if not (
+            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
+        ):
             logger.debug('FSM feature flag disabled, skipping state metadata annotation')
             return self
 
@@ -190,7 +196,10 @@ class FSMMultiStateQuerySetMixin(FSMStateQuerySetMixin):
         """
         # Check feature flag directly (works for both core and enterprise)
         user = CurrentContext.get_user()
-        if not flag_set('fflag_feat_fit_568_finite_state_management', user=user):
+        if not (
+            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
+        ):
             logger.debug('FSM feature flag disabled, returning empty queryset for state filter')
             return self.none()
 
