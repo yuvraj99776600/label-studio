@@ -420,6 +420,53 @@ const Configurator = ({
     if (value === "visual") loadVisual(true);
   };
 
+  // Calculate line count for dynamic optimization
+  const lineCount = React.useMemo(() => config.split('\n').length, [config]);
+
+  // Memoize autocomplete functions to prevent recreating options on every render
+  const completeAfter = React.useCallback((cm, pred) => {
+    if (!pred || pred()) {
+      setTimeout(() => {
+        if (!cm.state.completionActive) cm.showHint({ completeSingle: false });
+      }, 100);
+    }
+    return CM.Pass;
+  }, []);
+
+  const completeIfInTag = React.useCallback((cm) => {
+    return completeAfter(cm, () => {
+      const token = cm.getTokenAt(cm.getCursor());
+
+      if (token.type === "string" && (!/['"]$/.test(token.string) || token.string.length === 1)) return false;
+
+      const inner = CM.innerMode(cm.getMode(), token.state).state;
+
+      return inner.tagName;
+    });
+  }, [completeAfter]);
+
+  // Dynamic CodeMirror options based on document size
+  const dynamicCodeMirrorOptions = React.useMemo(() => {
+    const isLargeDocument = lineCount > 50;
+
+    return {
+      mode: "xml",
+      theme: "default",
+      lineNumbers: !isLargeDocument,
+      viewportMargin: isLargeDocument ? 10 : Infinity,
+      extraKeys: {
+        "'<'": completeAfter,
+        "' '": completeIfInTag,
+        "'='": completeIfInTag,
+        "Ctrl-Space": "autocomplete",
+      },
+      hintOptions: { schemaInfo: tags },
+    };
+  }, [lineCount, completeAfter, completeIfInTag]);
+
+  // Key to force CodeMirror recreation when crossing threshold
+  const editorKey = React.useMemo(() => lineCount > 50 ? 'large' : 'small', [lineCount]);
+
   const onChange = React.useCallback(
     (config) => {
       try {
@@ -450,27 +497,6 @@ const Configurator = ({
     }
     return res;
   };
-
-  function completeAfter(cm, pred) {
-    if (!pred || pred()) {
-      setTimeout(() => {
-        if (!cm.state.completionActive) cm.showHint({ completeSingle: false });
-      }, 100);
-    }
-    return CM.Pass;
-  }
-
-  function completeIfInTag(cm) {
-    return completeAfter(cm, () => {
-      const token = cm.getTokenAt(cm.getCursor());
-
-      if (token.type === "string" && (!/['"]$/.test(token.string) || token.string.length === 1)) return false;
-
-      const inner = CM.innerMode(cm.getMode(), token.state).state;
-
-      return inner.tagName;
-    });
-  }
 
   const extra = (
     <p className={configClass.elem("tags-link")}>
@@ -504,6 +530,7 @@ const Configurator = ({
           {configure === "code" && (
             <div className={configClass.elem("code")} style={{ display: configure === "code" ? undefined : "none" }}>
               <CodeEditor
+                key={editorKey}
                 name="code"
                 id="edit_code"
                 value={config}
@@ -512,20 +539,7 @@ const Configurator = ({
                 detach
                 border
                 extensions={["hint", "xml-hint"]}
-                options={{
-                  mode: "xml",
-                  theme: "default",
-                  lineNumbers: true,
-                  extraKeys: {
-                    "'<'": completeAfter,
-                    // "'/'": completeIfAfterLt,
-                    "' '": completeIfInTag,
-                    "'='": completeIfInTag,
-                    "Ctrl-Space": "autocomplete",
-                  },
-                  hintOptions: { schemaInfo: tags },
-                }}
-                // don't close modal with Escape while editing config
+                options={dynamicCodeMirrorOptions}
                 onKeyDown={(editor, e) => {
                   if (e.code === "Escape") e.stopPropagation();
                 }}
