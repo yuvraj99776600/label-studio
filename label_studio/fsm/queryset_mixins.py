@@ -13,9 +13,11 @@ Usage:
             return TaskQuerySet(self.model, using=self._db).annotate_fsm_state()
 
 Note:
-    All state annotation functionality is guarded by the FSM feature flag
-    ('fflag_feat_fit_568_finite_state_management'). When disabled, no annotation
-    is performed and there is zero performance impact.
+    All state annotation functionality is guarded by TWO feature flags:
+    1. 'fflag_feat_fit_568_finite_state_management' - Controls FSM background calculations
+    2. 'fflag_feat_fit_710_fsm_state_fields' - Controls state field display in APIs
+    
+    When disabled, no annotation is performed and there is zero performance impact.
 """
 
 import logging
