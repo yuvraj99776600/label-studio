@@ -21,11 +21,14 @@ _api_urlpatterns = [
         api.AnnotationDraftListAPI.as_view(),
         name='task-annotations-drafts',
     ),
+    # State history
+    path('<int:pk>/state-history/', api.TaskStateHistoryAPI.as_view(), name='task-state-history'),
 ]
 
 _api_annotations_urlpatterns = [
     path('<int:pk>/', api.AnnotationAPI.as_view(), name='annotation-detail'),
     path('<int:pk>/convert-to-draft', api.AnnotationConvertAPI.as_view(), name='annotation-convert-to-draft'),
+    path('<int:pk>/state-history/', api.AnnotationStateHistoryAPI.as_view(), name='annotation-state-history'),
 ]
 
 _api_drafts_urlpatterns = [

@@ -1,6 +1,5 @@
 import { isDefined } from "../../utils/utils";
-import { Badge } from "@humansignal/ui";
-import { Tooltip } from "@humansignal/ui";
+import { StateChip } from "./StateChip";
 
 // Map state values to human-readable labels
 const stateLabels = {
@@ -58,7 +57,7 @@ const colorToClasses = {
 };
 
 export const TaskState = (cell) => {
-  const { value } = cell;
+  const { value, original } = cell;
 
   if (!isDefined(value) || value === null || value === "") {
     return null;
@@ -69,13 +68,20 @@ export const TaskState = (cell) => {
   const color = STATE_COLORS[value] || "grey";
   const colorClasses = colorToClasses[color];
 
+  // Extract task ID from the original row data
+  const taskId = original?.id;
+
   return (
     <div className="flex items-center">
-      <Tooltip title={description}>
-        <span>
-          <Badge className={colorClasses}>{label}</Badge>
-        </span>
-      </Tooltip>
+      <StateChip
+        state={value}
+        label={label}
+        description={description}
+        colorClasses={colorClasses}
+        entityType="task"
+        entityId={taskId}
+        interactive={!!taskId}
+      />
     </div>
   );
 };

@@ -903,3 +903,131 @@ class AnnotationConvertAPI(generics.RetrieveAPIView):
         emit_webhooks_for_instance(organization, project, WebhookAction.ANNOTATIONS_DELETED, [pk])
         data = AnnotationDraftSerializer(instance=draft).data
         return Response(status=201, data=data)
+
+
+@method_decorator(
+    name='get',
+    decorator=extend_schema(
+        tags=['Tasks'],
+        summary='Get task state history',
+        description='Retrieve the complete state transition history for a task.',
+        parameters=[
+            OpenApiParameter(name='pk', type=OpenApiTypes.INT, location='path', description='Task ID'),
+        ],
+        responses={
+            '200': OpenApiResponse(
+                description='State history',
+            )
+        },
+        extensions={
+            'x-fern-audiences': ['internal'],
+        },
+    ),
+)
+class TaskStateHistoryAPI(generics.RetrieveAPIView):
+    """
+    API endpoint to retrieve state transition history for a task.
+    """
+
+    permission_required = all_permissions.tasks_view
+    queryset = Task.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        from fsm.state_manager import StateManager
+
+        task = self.get_object()
+
+        try:
+            # Get state history from the FSM state manager
+            history = StateManager.get_state_history(task, limit=100)
+
+            # Serialize the history
+            results = []
+            for state_record in history:
+                triggered_by_data = None
+                if state_record.triggered_by:
+                    triggered_by_data = {
+                        'first_name': state_record.triggered_by.first_name,
+                        'last_name': state_record.triggered_by.last_name,
+                        'email': state_record.triggered_by.email,
+                    }
+
+                results.append(
+                    {
+                        'state': state_record.state,
+                        'previous_state': state_record.previous_state,
+                        'created_at': state_record.created_at.isoformat(),
+                        'triggered_by': triggered_by_data,
+                        'transition_name': state_record.transition_name,
+                        'reason': state_record.reason,
+                    }
+                )
+
+            return Response({'results': results})
+        except Exception as e:
+            logger.error(f'Error fetching state history for task {task.id}: {e}')
+            return Response({'results': []}, status=200)
+
+
+@method_decorator(
+    name='get',
+    decorator=extend_schema(
+        tags=['Annotations'],
+        summary='Get annotation state history',
+        description='Retrieve the complete state transition history for an annotation.',
+        parameters=[
+            OpenApiParameter(name='pk', type=OpenApiTypes.INT, location='path', description='Annotation ID'),
+        ],
+        responses={
+            '200': OpenApiResponse(
+                description='State history',
+            )
+        },
+        extensions={
+            'x-fern-audiences': ['internal'],
+        },
+    ),
+)
+class AnnotationStateHistoryAPI(generics.RetrieveAPIView):
+    """
+    API endpoint to retrieve state transition history for an annotation.
+    """
+
+    permission_required = all_permissions.annotations_view
+    queryset = Annotation.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        from fsm.state_manager import StateManager
+
+        annotation = self.get_object()
+
+        try:
+            # Get state history from the FSM state manager
+            history = StateManager.get_state_history(annotation, limit=100)
+
+            # Serialize the history
+            results = []
+            for state_record in history:
+                triggered_by_data = None
+                if state_record.triggered_by:
+                    triggered_by_data = {
+                        'first_name': state_record.triggered_by.first_name,
+                        'last_name': state_record.triggered_by.last_name,
+                        'email': state_record.triggered_by.email,
+                    }
+
+                results.append(
+                    {
+                        'state': state_record.state,
+                        'previous_state': state_record.previous_state,
+                        'created_at': state_record.created_at.isoformat(),
+                        'triggered_by': triggered_by_data,
+                        'transition_name': state_record.transition_name,
+                        'reason': state_record.reason,
+                    }
+                )
+
+            return Response({'results': results})
+        except Exception as e:
+            logger.error(f'Error fetching state history for annotation {annotation.id}: {e}')
+            return Response({'results': []}, status=200)
