@@ -2,7 +2,7 @@ from core.permissions import all_permissions
 from django.shortcuts import get_object_or_404
 from django_filters import CharFilter, DateTimeFilter, FilterSet, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from fsm.registry import get_state_model
+from fsm.registry import get_state_model, state_model_registry
 from fsm.serializers import StateModelSerializer
 from fsm.state_manager import get_state_manager
 from rest_framework import generics
@@ -48,9 +48,8 @@ class FSMEntityHistoryAPI(generics.ListAPIView):
     def get_permission_required(self):
         entity_name = self.kwargs['entity_name']
         permission = self.permission_map.get(entity_name)
-        # This validates the entity name is valid
         if not permission:
-            raise NotFound()
+            raise ValueError(f'Invalid entity name: {entity_name}')
         return permission
 
     def get_entity(self):
@@ -71,3 +70,9 @@ class FSMEntityHistoryAPI(generics.ListAPIView):
         qs = qs.filter(organization_id=self.request.user.active_organization_id)
         qs = qs.prefetch_related('triggered_by__om_through')
         return qs
+
+    def list(self, request, *args, **kwargs):
+        entity_name = kwargs['entity_name']
+        if entity_name not in state_model_registry.get_all_models():
+            raise NotFound()
+        return super().list(request, *args, **kwargs)
