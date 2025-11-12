@@ -210,6 +210,12 @@ class BaseState(models.Model):
         return {}
 
     @classmethod
+    def get_entity_model(cls) -> models.Model:
+        """Get the entity model for the state model"""
+        field_name = cls._get_entity_field_name()
+        return cls._meta.get_field(field_name).related_model
+
+    @classmethod
     def _get_entity_field_name(cls) -> str:
         """Get the foreign key field name for the entity"""
         model_name = cls.__name__

@@ -1,9 +1,12 @@
 from core.permissions import all_permissions
+from django.shortcuts import get_object_or_404
 from django_filters import CharFilter, DateTimeFilter, FilterSet, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from fsm.registry import get_state_model
 from fsm.serializers import StateModelSerializer
+from fsm.state_manager import get_state_manager
 from rest_framework import generics
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -31,17 +34,40 @@ class FSMEntityHistoryFilterSet(FilterSet):
 
 
 class FSMEntityHistoryAPI(generics.ListAPIView):
-    # TODO: Manage permissions per entity correctly, including per object permissions.
-    # Ex: Task state history only for users with permissions to that task
-    permission_required = all_permissions.organizations_view
     serializer_class = StateModelSerializer
     pagination_class = FSMEntityHistoryPagination
     filter_backends = [DjangoFilterBackend]   # Removes other backends like OrderingFilter
     filterset_class = FSMEntityHistoryFilterSet
 
-    def get_queryset(self):
+    permission_map = {
+        'task': all_permissions.tasks_view,
+        'annotation': all_permissions.annotations_view,
+        'project': all_permissions.projects_view,
+    }
+
+    def get_permission_required(self):
+        entity_name = self.kwargs['entity_name']
+        permission = self.permission_map.get(entity_name)
+        # This validates the entity name is valid
+        if not permission:
+            raise NotFound()
+        return permission
+
+    def get_entity(self):
         state_model = get_state_model(self.kwargs['entity_name'])
-        qs = state_model.get_state_history(self.kwargs['entity_id'])
+        entity_model = state_model.get_entity_model()
+        entity = get_object_or_404(entity_model.objects, id=self.kwargs['entity_id'])
+        try:
+            self.check_object_permissions(self.request, entity)
+        except PermissionDenied as e:
+            # Returning 404 instead of 403 to avoid leaking information about the existence of the entity
+            raise NotFound() from e
+        return entity
+
+    def get_queryset(self):
+        entity = self.get_entity()
+        state_manager = get_state_manager()
+        qs = state_manager.get_state_history(entity)
         qs = qs.filter(organization_id=self.request.user.active_organization_id)
         qs = qs.prefetch_related('triggered_by__om_through')
         return qs
