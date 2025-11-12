@@ -7,6 +7,7 @@ from fsm.serializers import StateModelSerializer
 from fsm.state_manager import get_state_manager
 from rest_framework import generics
 from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.filters import OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -36,8 +37,9 @@ class FSMEntityHistoryFilterSet(FilterSet):
 class FSMEntityHistoryAPI(generics.ListAPIView):
     serializer_class = StateModelSerializer
     pagination_class = FSMEntityHistoryPagination
-    filter_backends = [DjangoFilterBackend]   # Removes other backends like OrderingFilter
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = FSMEntityHistoryFilterSet
+    ordering_fields = ['id']   # Only allow ordering by id
 
     permission_map = {
         'task': all_permissions.tasks_view,

@@ -56,11 +56,17 @@ class FSMEntityHistoryAPITests(APITestCase):
         response = self.client.get(f'/api/fsm/entities/project/{self.project.id}/history')
         assert response.status_code == 200
         assert len(response.json()['results']) == 3
-
-        # Test ordering
         assert response.json()['results'][0]['id'] == str(state_3.id)
         assert response.json()['results'][1]['id'] == str(state_2.id)
         assert response.json()['results'][2]['id'] == str(state_1.id)
+
+        # Test ordering
+        response = self.client.get(f'/api/fsm/entities/project/{self.project.id}/history?ordering=id')
+        assert response.status_code == 200
+        assert len(response.json()['results']) == 3
+        assert response.json()['results'][0]['id'] == str(state_1.id)
+        assert response.json()['results'][1]['id'] == str(state_2.id)
+        assert response.json()['results'][2]['id'] == str(state_3.id)
 
         # Test state filtering
         response = self.client.get(
@@ -134,11 +140,17 @@ class FSMEntityHistoryAPITests(APITestCase):
         response = self.client.get(f'/api/fsm/entities/task/{self.task.id}/history')
         assert response.status_code == 200
         assert len(response.json()['results']) == 3
-
-        # Test ordering
         assert response.json()['results'][0]['id'] == str(state_3.id)
         assert response.json()['results'][1]['id'] == str(state_2.id)
         assert response.json()['results'][2]['id'] == str(state_1.id)
+
+        # Test ordering
+        response = self.client.get(f'/api/fsm/entities/task/{self.task.id}/history?ordering=id')
+        assert response.status_code == 200
+        assert len(response.json()['results']) == 3
+        assert response.json()['results'][0]['id'] == str(state_1.id)
+        assert response.json()['results'][1]['id'] == str(state_2.id)
+        assert response.json()['results'][2]['id'] == str(state_3.id)
 
         # Test state filtering
         response = self.client.get(f'/api/fsm/entities/task/{self.task.id}/history?state={TaskStateChoices.COMPLETED}')
@@ -203,10 +215,15 @@ class FSMEntityHistoryAPITests(APITestCase):
         response = self.client.get(f'/api/fsm/entities/annotation/{self.annotation.id}/history')
         assert response.status_code == 200
         assert len(response.json()['results']) == 2
-
-        # Test ordering
         assert response.json()['results'][0]['id'] == str(state_2.id)
         assert response.json()['results'][1]['id'] == str(state_1.id)
+
+        # Test ordering
+        response = self.client.get(f'/api/fsm/entities/annotation/{self.annotation.id}/history?ordering=id')
+        assert response.status_code == 200
+        assert len(response.json()['results']) == 2
+        assert response.json()['results'][0]['id'] == str(state_1.id)
+        assert response.json()['results'][1]['id'] == str(state_2.id)
 
         # Test state filtering
         response = self.client.get(
