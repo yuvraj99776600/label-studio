@@ -1,5 +1,4 @@
 import hashlib
-import io
 import json
 import logging
 import pathlib
@@ -239,6 +238,9 @@ class ExportMixin:
 
     @staticmethod
     def eval_md5(file):
+        # Compute MD5 over the full content while preserving the current file position
+        current_position = file.tell()
+        file.seek(0)
         md5_object = hashlib.md5()   # nosec
         block_size = 128 * md5_object.block_size
         chunk = file.read(block_size)
@@ -246,6 +248,7 @@ class ExportMixin:
             md5_object.update(chunk)
             chunk = file.read(block_size)
         md5 = md5_object.hexdigest()
+        file.seek(current_position)
         return md5
 
     def save_file(self, file, md5):
@@ -338,8 +341,8 @@ class ExportMixin:
             input_name = pathlib.Path(self.file.name).name
             input_file_path = pathlib.Path(tmp_dir) / input_name
 
-            with open(input_file_path, 'wb') as file_:
-                file_.write(self.file.open().read())
+            with open(input_file_path, 'wb') as dst, self.file.open('rb') as src:
+                shutil.copyfileobj(src, dst, length=1024 * 1024)
 
             converter.convert(input_file_path, out_dir, to_format, is_dir=False)
 
@@ -356,12 +359,7 @@ class ExportMixin:
                 output_file = pathlib.Path(tmp_dir) / (str(out_dir.stem) + '.zip')
                 filename = pathlib.Path(input_name).stem + '.zip'
 
-            # TODO(jo): can we avoid the `f.read()` here?
-            with open(output_file, mode='rb') as f:
-                return File(
-                    io.BytesIO(f.read()),
-                    name=filename,
-                )
+            return File(open(output_file, 'rb'), name=filename)
 
 
 def export_background(
