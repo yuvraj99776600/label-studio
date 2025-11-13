@@ -7,7 +7,7 @@ import type React from "react";
 import { Popover } from "@humansignal/ui";
 import { Badge } from "@humansignal/ui";
 import { IconSync, IconError, IconHistoryRewind } from "@humansignal/icons";
-import { useStateHistory, type StateHistoryItem } from "./useStateHistory";
+import { useStateHistory, type StateHistoryItem } from "@humansignal/app-common";
 import { formatStateName, formatTimestamp, formatUserName } from "./formatters";
 
 interface StateHistoryPopoverProps {
@@ -68,7 +68,7 @@ export function StateHistoryPopover({
 
   return (
     <Popover trigger={trigger} open={open} onOpenChange={onOpenChange} align="start" sideOffset={8}>
-      <div 
+      <div
         className="flex flex-col w-[320px] max-h-[400px] bg-white dark:bg-gray-900 rounded-lg shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >

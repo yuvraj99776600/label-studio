@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { Badge, Tooltip, Popover } from "@humansignal/ui";
 import { IconSync, IconError, IconHistoryRewind } from "@humansignal/icons";
-import { useQuery } from "@tanstack/react-query";
+import { useStateHistory, type StateHistoryItem } from "@humansignal/app-common";
 
 interface StateChipProps {
   state: string;
@@ -15,23 +15,6 @@ interface StateChipProps {
   entityType: "task" | "annotation" | "project";
   entityId?: number;
   interactive?: boolean;
-}
-
-interface StateHistoryItem {
-  state: string;
-  created_at: string;
-  triggered_by: {
-    first_name?: string;
-    last_name?: string;
-    email?: string;
-  } | null;
-  previous_state?: string;
-  transition_name?: string;
-  reason?: string;
-}
-
-interface StateHistoryResponse {
-  results: StateHistoryItem[];
 }
 
 // State color mapping following the 4-color system
@@ -138,31 +121,10 @@ export function StateChip({
   const [open, setOpen] = useState(false);
 
   // Fetch state history when popover is opened
-  const queryKey = ["state-history", entityType, entityId];
-
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey,
-    queryFn: async () => {
-      const endpoint = `/api/${entityType}s/${entityId}/state-history/`;
-
-      const response = await fetch(endpoint, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch state history: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      return result as StateHistoryResponse;
-    },
+  const { data, isLoading, isError, error, refetch } = useStateHistory({
+    entityType,
+    entityId: entityId || 0,
     enabled: open && !!entityId && interactive,
-    staleTime: 30 * 1000,
-    cacheTime: 5 * 60 * 1000,
-    retry: 2,
   });
 
   const history = (data?.results || []) as StateHistoryItem[];
@@ -195,7 +157,10 @@ export function StateChip({
 
   return (
     <Popover trigger={trigger} open={open} onOpenChange={setOpen} align="start" sideOffset={8}>
-      <div className="flex flex-col w-[320px] max-h-[400px] bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+      <div
+        className="flex flex-col w-[320px] max-h-[400px] bg-white dark:bg-gray-900 rounded-lg shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
@@ -221,7 +186,10 @@ export function StateChip({
                 {error instanceof Error ? error.message : "Unknown error"}
               </span>
               <button
-                onClick={() => refetch()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  refetch();
+                }}
                 className="mt-2 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
                 type="button"
               >
