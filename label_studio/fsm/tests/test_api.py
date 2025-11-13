@@ -1,3 +1,4 @@
+from datetime import timedelta
 from urllib.parse import quote
 
 from fsm.state_choices import AnnotationStateChoices, ProjectStateChoices, TaskStateChoices
@@ -39,6 +40,8 @@ class FSMEntityHistoryAPITests(APITestCase):
 
     def test_project_history(self):
         state_1 = ProjectStateFactory(project=self.project, state=ProjectStateChoices.CREATED)
+        state_1.created_at = state_1.created_at - timedelta(seconds=10)
+        state_1.save()
         state_2 = ProjectStateFactory(
             project=self.project,
             state=ProjectStateChoices.IN_PROGRESS,
@@ -100,7 +103,7 @@ class FSMEntityHistoryAPITests(APITestCase):
         assert response.json()['results'][0]['triggered_by']['id'] == self.user.id
 
         # Test date filtering
-        created_at_from = state_2.created_at.isoformat()
+        created_at_from = (state_2.created_at - timedelta(seconds=1)).isoformat()
         created_at_to = state_3.created_at.isoformat()
         response = self.client.get(
             f'/api/fsm/entities/project/{self.project.id}/history?created_at_from={quote(created_at_from)}&created_at_to={quote(created_at_to)}'
@@ -123,6 +126,8 @@ class FSMEntityHistoryAPITests(APITestCase):
 
     def test_task_history(self):
         state_1 = TaskStateFactory(task=self.task, state=TaskStateChoices.CREATED)
+        state_1.created_at = state_1.created_at - timedelta(seconds=10)
+        state_1.save()
         state_2 = TaskStateFactory(
             task=self.task,
             state=TaskStateChoices.IN_PROGRESS,
@@ -180,7 +185,7 @@ class FSMEntityHistoryAPITests(APITestCase):
         assert response.json()['results'][0]['triggered_by']['id'] == self.user.id
 
         # Test date filtering
-        created_at_from = state_2.created_at.isoformat()
+        created_at_from = (state_2.created_at - timedelta(seconds=1)).isoformat()
         created_at_to = state_3.created_at.isoformat()
         response = self.client.get(
             f'/api/fsm/entities/task/{self.task.id}/history?created_at_from={quote(created_at_from)}&created_at_to={quote(created_at_to)}'
@@ -203,6 +208,8 @@ class FSMEntityHistoryAPITests(APITestCase):
 
     def test_annotation_history(self):
         state_1 = AnnotationStateFactory(annotation=self.annotation, state=AnnotationStateChoices.SUBMITTED)
+        state_1.created_at = state_1.created_at - timedelta(seconds=10)
+        state_1.save()
         state_2 = AnnotationStateFactory(
             annotation=self.annotation,
             state=AnnotationStateChoices.COMPLETED,
@@ -259,11 +266,11 @@ class FSMEntityHistoryAPITests(APITestCase):
         assert response.json()['results'][0]['triggered_by']['id'] == self.user.id
 
         # Test date filtering
-        created_at_from = state_1.created_at.isoformat()
-        created_at_to = state_1.created_at.isoformat()
+        created_at_from = (state_2.created_at - timedelta(seconds=1)).isoformat()
+        created_at_to = state_2.created_at.isoformat()
         response = self.client.get(
             f'/api/fsm/entities/annotation/{self.annotation.id}/history?created_at_from={quote(created_at_from)}&created_at_to={quote(created_at_to)}'
         )
         assert response.status_code == 200
         assert len(response.json()['results']) == 1
-        assert response.json()['results'][0]['id'] == str(state_1.id)
+        assert response.json()['results'][0]['id'] == str(state_2.id)
