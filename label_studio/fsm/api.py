@@ -47,7 +47,7 @@ class FSMEntityHistoryFilterSet(FilterSet):
         extensions={
             'x-fern-sdk-group-name': 'fsm',
             'x-fern-sdk-method-name': 'state_history',
-            'x-fern-audiences': ['public'],
+            'x-fern-audiences': ['internal'],
             'x-fern-pagination': {
                 'offset': '$request.page',
                 'results': '$response.results',
