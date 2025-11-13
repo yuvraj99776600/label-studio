@@ -42,28 +42,15 @@ export function useStateHistory({ entityType, entityId, enabled = true }: UseSta
     queryFn: async () => {
       const api = getApiInstance();
 
-      // Construct the endpoint based on entity type
-      const endpoint = `/api/${entityType}s/${entityId}/state-history/`;
+      // Use the API provider to make the request
+      const result = await api.invoke<StateHistoryResponse>("fsmStateHistory", { entityType, entityId });
 
-      try {
-        const response = await fetch(endpoint, {
-          headers: {
-            "Content-Type": "application/json",
-            // Add any necessary auth headers
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch state history: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        return result as StateHistoryResponse;
-      } catch (error) {
-        console.error("Error fetching state history:", error);
-        throw error;
+      // Handle API errors
+      if (result?.error || !result?.$meta?.ok) {
+        throw new Error(result?.error || "Failed to fetch state history");
       }
+
+      return result as StateHistoryResponse;
     },
     enabled: enabled && !!entityId,
     staleTime: 30 * 1000, // Cache for 30 seconds

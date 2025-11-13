@@ -68,7 +68,10 @@ export function StateHistoryPopover({
 
   return (
     <Popover trigger={trigger} open={open} onOpenChange={onOpenChange} align="start" sideOffset={8}>
-      <div className="flex flex-col w-[320px] max-h-[400px] bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+      <div 
+        className="flex flex-col w-[320px] max-h-[400px] bg-white dark:bg-gray-900 rounded-lg shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2">
@@ -94,7 +97,10 @@ export function StateHistoryPopover({
                 {error instanceof Error ? error.message : "Unknown error"}
               </span>
               <button
-                onClick={() => refetch()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  refetch();
+                }}
                 className="mt-2 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
               >
                 Retry
