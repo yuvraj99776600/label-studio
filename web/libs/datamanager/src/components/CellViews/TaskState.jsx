@@ -2,7 +2,7 @@ import { isDefined } from "../../utils/utils";
 import { StateChip } from "./StateChip";
 
 // Map state values to human-readable labels
-const stateLabels = {
+export const stateLabels = {
   CREATED: "Created",
   ANNOTATION_IN_PROGRESS: "Annotating",
   ANNOTATION_COMPLETE: "Annotated",
@@ -29,7 +29,7 @@ const stateDescriptions = {
 
 // State color mapping following the 4-color system
 // Grey: Initial states, Blue: In-progress, Yellow: Attention/Churn, Green: Terminal/Complete
-const STATE_COLORS = {
+export const STATE_COLORS = {
   // Grey - Initial
   CREATED: "grey",
 
@@ -49,7 +49,7 @@ const STATE_COLORS = {
 };
 
 // Map colors to Tailwind CSS classes for chip styling
-const colorToClasses = {
+export const colorToClasses = {
   grey: "bg-neutral-emphasis border-neutral-border text-neutral-content",
   blue: "bg-primary-emphasis border-primary-border-subtlest text-primary-content",
   yellow: "bg-warning-emphasis border-warning-border-subtlest text-warning-content",
