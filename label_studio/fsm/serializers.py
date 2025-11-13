@@ -2,6 +2,11 @@ from rest_framework import serializers
 from users.serializers import UserSerializer
 
 
+class TriggeredBySerializer(UserSerializer):
+    class Meta(UserSerializer.Meta):
+        fields = ['id', 'email']
+
+
 class StateModelSerializer(serializers.Serializer):
     """
     Serializer for FSM state models.
@@ -14,6 +19,6 @@ class StateModelSerializer(serializers.Serializer):
     state = serializers.CharField(read_only=True)
     previous_state = serializers.CharField(read_only=True, allow_null=True)
     transition_name = serializers.CharField(read_only=True, allow_null=True)
-    triggered_by = UserSerializer(read_only=True, allow_null=True, include=['id', 'email'])
+    triggered_by = TriggeredBySerializer(read_only=True, allow_null=True)
     created_at = serializers.DateTimeField(read_only=True)
     context_data = serializers.JSONField(read_only=True)

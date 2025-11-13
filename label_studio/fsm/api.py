@@ -1,7 +1,10 @@
 from core.permissions import all_permissions
+from core.utils.filterset_to_openapi_params import filterset_to_openapi_params
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
 from django_filters import CharFilter, DateTimeFilter, FilterSet, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from fsm.registry import get_state_model, state_model_registry
 from fsm.serializers import StateModelSerializer
 from fsm.state_manager import get_state_manager
@@ -34,6 +37,24 @@ class FSMEntityHistoryFilterSet(FilterSet):
     triggered_by = NumberFilter(field_name='triggered_by', lookup_expr='exact')
 
 
+@method_decorator(
+    name='get',
+    decorator=extend_schema(
+        tags=['FSM'],
+        summary='Get entity state history',
+        description='Get the state history of an entity',
+        parameters=filterset_to_openapi_params(FSMEntityHistoryFilterSet),
+        extensions={
+            'x-fern-sdk-group-name': 'fsm',
+            'x-fern-sdk-method-name': 'state_history',
+            'x-fern-audiences': ['public'],
+            'x-fern-pagination': {
+                'offset': '$request.page',
+                'results': '$response.results',
+            },
+        },
+    ),
+)
 class FSMEntityHistoryAPI(generics.ListAPIView):
     serializer_class = StateModelSerializer
     pagination_class = FSMEntityHistoryPagination
