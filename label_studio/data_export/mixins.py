@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import hashlib
 import json
 import logging
@@ -323,6 +324,7 @@ class ExportMixin:
                 serialization_options=serialization_options,
             )
 
+    @contextmanager
     def convert_file(self, to_format, download_resources=False, hostname=None):
         with get_temp_dir() as tmp_dir:
             OUT = 'out'
@@ -359,7 +361,7 @@ class ExportMixin:
                 output_file = pathlib.Path(tmp_dir) / (str(out_dir.stem) + '.zip')
                 filename = pathlib.Path(input_name).stem + '.zip'
 
-            return File(open(output_file, 'rb'), name=filename)
+            yield File(open(output_file, 'rb'), name=filename)
 
 
 def export_background(

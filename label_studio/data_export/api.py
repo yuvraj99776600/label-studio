@@ -1,5 +1,6 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+from contextlib import contextmanager
 import logging
 import os
 import traceback as tb
@@ -561,20 +562,25 @@ class ExportDownloadAPI(generics.RetrieveAPIView):
                 response['filename'] = os.path.basename(file.name)
                 return response
         else:
-            if export_type is None:
-                file_ = snapshot.file
-            else:
-                file_ = snapshot.convert_file(export_type)
 
-            if file_ is None:
-                return HttpResponse("Can't get file", status=404)
+            @contextmanager
+            def _yield_file(export_type):
+                if export_type is None:
+                    yield snapshot.file
+                else:
+                    # NOTE: contextmanager is needed because convert_file returns a file object located in a temp dir.
+                    yield snapshot.convert_file(export_type)
 
-            ext = file_.name.split('.')[-1]
+            with _yield_file(export_type) as file_:
+                if file_ is None:
+                    return HttpResponse("Can't get file", status=404)
 
-            response = RangedFileResponse(request, file_, content_type=f'application/{ext}')
-            response['Content-Disposition'] = f'attachment; filename="{file_.name}"'
-            response['filename'] = file_.name
-            return response
+                ext = file_.name.split('.')[-1]
+
+                response = RangedFileResponse(request, file_, content_type=f'application/{ext}')
+                response['Content-Disposition'] = f'attachment; filename="{file_.name}"'
+                response['filename'] = file_.name
+                return response
 
 
 def async_convert(converted_format_id, export_type, project, hostname, download_resources=False, **kwargs):
@@ -591,19 +597,24 @@ def async_convert(converted_format_id, export_type, project, hostname, download_
         converted_format.save(update_fields=['status'])
 
     snapshot = converted_format.export
-    converted_file = snapshot.convert_file(export_type, download_resources=download_resources, hostname=hostname)
-    if converted_file is None:
-        raise ValidationError('No converted file found, probably there are no annotations in the export snapshot')
-    md5 = Export.eval_md5(converted_file)
-    ext = converted_file.name.split('.')[-1]
+    # NOTE: contextmanager is needed because convert_file returns a file object located in a temp dir.
+    with snapshot.convert_file(
+        export_type, download_resources=download_resources, hostname=hostname
+    ) as converted_file:
+        if converted_file is None:
+            raise ValidationError('No converted file found, probably there are no annotations in the export snapshot')
+        md5 = Export.eval_md5(converted_file)
+        ext = converted_file.name.split('.')[-1]
 
-    now = datetime.now()
-    file_name = f'project-{project.id}-at-{now.strftime("%Y-%m-%d-%H-%M")}-{md5[0:8]}.{ext}'
-    file_path = f'{project.id}/{file_name}'  # finally file will be in settings.DELAYED_EXPORT_DIR/project.id/file_name
-    file_ = File(converted_file, name=file_path)
-    converted_format.file.save(file_path, file_)
-    converted_format.status = ConvertedFormat.Status.COMPLETED
-    converted_format.save(update_fields=['file', 'status'])
+        now = datetime.now()
+        file_name = f'project-{project.id}-at-{now.strftime("%Y-%m-%d-%H-%M")}-{md5[0:8]}.{ext}'
+        file_path = (
+            f'{project.id}/{file_name}'  # finally file will be in settings.DELAYED_EXPORT_DIR/project.id/file_name
+        )
+        file_ = File(converted_file, name=file_path)
+        converted_format.file.save(file_path, file_)
+        converted_format.status = ConvertedFormat.Status.COMPLETED
+        converted_format.save(update_fields=['file', 'status'])
 
 
 def set_convert_background_failure(job, connection, type, value, traceback_obj):
