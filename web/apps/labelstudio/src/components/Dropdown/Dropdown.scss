@@ -1,46 +1,29 @@
 /* Position-try fallback definitions for anchor positioning */
+
 /* These use implicit anchor references via position-anchor set in JS */
 @position-try --dropdown-ls-bottom-left {
-  bottom: auto;
-  top: anchor(bottom);
-  left: anchor(left);
-  right: auto;
+  inset: anchor(bottom) auto auto anchor(left);
 }
 
 @position-try --dropdown-ls-bottom-right {
-  bottom: auto;
-  top: anchor(bottom);
-  right: anchor(right);
-  left: auto;
+  inset: anchor(bottom) anchor(right) auto auto;
 }
 
 @position-try --dropdown-ls-bottom-center {
-  bottom: auto;
-  top: anchor(bottom);
-  left: anchor(center);
-  right: auto;
+  inset: anchor(bottom) auto auto anchor(center);
   translate: -50% 0;
 }
 
 @position-try --dropdown-ls-top-left {
-  top: auto;
-  bottom: anchor(top);
-  left: anchor(left);
-  right: auto;
+  inset: auto auto anchor(top) anchor(left);
 }
 
 @position-try --dropdown-ls-top-right {
-  top: auto;
-  bottom: anchor(top);
-  right: anchor(right);
-  left: auto;
+  inset: auto anchor(right) anchor(top) auto;
 }
 
 @position-try --dropdown-ls-top-center {
-  top: auto;
-  bottom: anchor(top);
-  left: anchor(center);
-  right: auto;
+  inset: auto auto anchor(top) anchor(center);
   translate: -50% 0;
 }
 
@@ -48,7 +31,6 @@
   /* Default positioning for fallback (no anchor support) */
   position: absolute;
   top: calc(100% + 1px);
-
   z-index: 500;
   display: none;
   box-sizing: border-box;
@@ -67,11 +49,9 @@
     position: fixed;
 
     /* position-anchor is set dynamically via JavaScript for each dropdown instance */
+
     /* Default position - anchor() uses the position-anchor value when no name specified */
-    top: anchor(bottom);
-    left: anchor(left);
-    bottom: auto;
-    right: auto;
+    inset: anchor(bottom) auto auto anchor(left);
 
     /* Automatic fallback positioning when overflowing */
     position-try-fallbacks:

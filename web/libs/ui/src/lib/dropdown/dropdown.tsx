@@ -18,7 +18,6 @@ import { cn } from "@humansignal/core/lib/utils/bem";
 import { alignElements, type Align } from "@humansignal/core/lib/utils/dom";
 import { aroundTransition } from "@humansignal/core/lib/utils/transition";
 import { DropdownContext } from "./dropdown-context";
-import styles from "./dropdown.module.scss";
 
 let zIndexCounter = 0;
 
@@ -67,9 +66,7 @@ export interface DropdownProps {
    * Render dropdown relative to a different element instead of the trigger (from Enterprise)
    * When used with inline mode, dropdown will be portaled inside this element
    */
-  relativeToElement?:
-    | RefObject<HTMLElement | undefined>
-    | MutableRefObject<HTMLElement | undefined>;
+  relativeToElement?: RefObject<HTMLElement | undefined> | MutableRefObject<HTMLElement | undefined>;
   /**
    * Recalculate dropdown position when dropdown content resizes (from Enterprise)
    * Uses ResizeObserver to track content dimension changes
@@ -125,19 +122,11 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
           dropdown.current.style.width = `${triggerRef.current.offsetWidth}px`;
         }
       }
-    }, [
-      supportsAnchorPositioning,
-      anchorName,
-      visibility,
-      props.syncWidth,
-      triggerRef,
-    ]);
+    }, [supportsAnchorPositioning, anchorName, visibility, props.syncWidth, triggerRef]);
 
     const calculatePosition = useCallback(() => {
       const dropdownEl = dropdown.current!;
-      const parent = (props.relativeToElement?.current ??
-        triggerRef?.current ??
-        dropdownEl.parentNode) as HTMLElement;
+      const parent = (props.relativeToElement?.current ?? triggerRef?.current ?? dropdownEl.parentNode) as HTMLElement;
 
       // If using relativeToElement with inline mode, use simple positioning
       if (props.inline && props.relativeToElement?.current) {
@@ -261,8 +250,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
 
     // Follow resize: recalculate position when dropdown content resizes (Enterprise feature)
     useEffect(() => {
-      if (!dropdown.current || !currentVisible || props.followResize !== true)
-        return;
+      if (!dropdown.current || !currentVisible || props.followResize !== true) return;
 
       const elem = dropdown.current;
       const observer = new ResizeObserver(() => {
@@ -279,11 +267,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
 
     useEffect(() => {
       // Only calculate position manually if anchor positioning is not supported
-      if (
-        !isInline &&
-        visibility === "before-appear" &&
-        !supportsAnchorPositioning
-      ) {
+      if (!isInline && visibility === "before-appear" && !supportsAnchorPositioning) {
         calculatePosition();
       }
     }, [visibility, calculatePosition, isInline, supportsAnchorPositioning]);
@@ -335,21 +319,13 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
         ...(!supportsAnchorPositioning ? (offset ?? {}) : {}),
         zIndex: (minIndex ?? 0) + dropdownZIndex,
       };
-    }, [
-      props.style,
-      dropdownZIndex,
-      minIndex,
-      offset,
-      supportsAnchorPositioning,
-    ]);
+    }, [props.style, dropdownZIndex, minIndex, offset, supportsAnchorPositioning]);
 
     const result = (
       <div
         ref={dropdown as any}
         data-testid={props.dataTestId}
-        className={rootName
-          .mix(props.className, dropdownClassName, visibilityClasses)
-          .toClassName()}
+        className={rootName.mix(props.className, dropdownClassName, visibilityClasses).toClassName()}
         style={compositeStyles}
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >

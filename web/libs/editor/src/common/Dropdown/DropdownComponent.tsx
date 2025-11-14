@@ -90,13 +90,8 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
 
     const calculatePosition = useCallback(() => {
       const dropdownEl = dropdown.current!;
-      const parent = (triggerRef?.current ??
-        dropdownEl.parentNode) as HTMLElement;
-      const { left, top } = alignElements(
-        parent!,
-        dropdownEl,
-        props.alignment || "bottom-left",
-      );
+      const parent = (triggerRef?.current ?? dropdownEl.parentNode) as HTMLElement;
+      const { left, top } = alignElements(parent!, dropdownEl, props.alignment || "bottom-left");
 
       setOffset({ left, top });
     }, [triggerRef, minIndex]);
@@ -194,11 +189,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
 
     useEffect(() => {
       // Only calculate position manually if anchor positioning is not supported
-      if (
-        !isInline &&
-        visibility === "before-appear" &&
-        !supportsAnchorPositioning
-      ) {
+      if (!isInline && visibility === "before-appear" && !supportsAnchorPositioning) {
         calculatePosition();
       }
     }, [visibility, calculatePosition, isInline, supportsAnchorPositioning]);
@@ -250,21 +241,13 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
         ...(!supportsAnchorPositioning ? (offset ?? {}) : {}),
         zIndex: (minIndex ?? 0) + dropdownZIndex,
       };
-    }, [
-      props.style,
-      dropdownZIndex,
-      minIndex,
-      offset,
-      supportsAnchorPositioning,
-    ]);
+    }, [props.style, dropdownZIndex, minIndex, offset, supportsAnchorPositioning]);
 
     const result = (
       <div
         ref={dropdown as any}
         data-testid={props.dataTestId}
-        className={rootName
-          .mix(props.className, visibilityClasses)
-          .toClassName()}
+        className={rootName.mix(props.className, visibilityClasses).toClassName()}
         style={{
           ...compositeStyles,
           borderRadius: isFF(FF_DEV_3873) && 4,
