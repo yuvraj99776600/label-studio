@@ -6,6 +6,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -19,7 +20,7 @@ import "./Dropdown.scss";
 import { DropdownContext } from "./DropdownContext";
 import { FF_DEV_3873, isFF } from "../../utils/feature-flags";
 
-let lastIndex = 1;
+let zIndexCounter = 0;
 
 export interface DropdownRef {
   dropdown: HTMLElement;
@@ -55,10 +56,47 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
     const [offset, setOffset] = useState({});
     const [visibility, setVisibility] = useState(visible ? "visible" : null);
 
+    // Check if browser supports CSS anchor positioning
+    const supportsAnchorPositioning = useMemo(() => {
+      if (!CSS.supports) return false;
+      return (
+        CSS.supports("anchor-name: --test") ||
+        CSS.supports("anchor-name", "--test") ||
+        CSS.supports("position-anchor", "--test") ||
+        CSS.supports("position-anchor: --test")
+      );
+    }, []);
+
+    // Generate stable unique ID for this dropdown instance using React.useId()
+    const dropdownId = useId();
+    const anchorName = `--dropdown-trigger-${dropdownId.replace(/:/g, "-")}`;
+
+    // Generate stable z-index for stacking
+    const dropdownZIndex = useRef(1000 + zIndexCounter++).current;
+
+    // Set anchor-name on trigger element for CSS anchor positioning
+    useEffect(() => {
+      if (supportsAnchorPositioning && triggerRef?.current) {
+        (triggerRef.current as HTMLElement).style.anchorName = anchorName;
+      }
+    }, [supportsAnchorPositioning, triggerRef, anchorName]);
+
+    // Set position-anchor on dropdown element dynamically
+    useEffect(() => {
+      if (supportsAnchorPositioning && dropdown.current) {
+        (dropdown.current as HTMLElement).style.positionAnchor = anchorName;
+      }
+    }, [supportsAnchorPositioning, anchorName, visibility]);
+
     const calculatePosition = useCallback(() => {
       const dropdownEl = dropdown.current!;
-      const parent = (triggerRef?.current ?? dropdownEl.parentNode) as HTMLElement;
-      const { left, top } = alignElements(parent!, dropdownEl, props.alignment || "bottom-left");
+      const parent = (triggerRef?.current ??
+        dropdownEl.parentNode) as HTMLElement;
+      const { left, top } = alignElements(
+        parent!,
+        dropdownEl,
+        props.alignment || "bottom-left",
+      );
 
       setOffset({ left, top });
     }, [triggerRef, minIndex]);
@@ -159,10 +197,15 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
     }, [visible]);
 
     useEffect(() => {
-      if (!isInline && visibility === "before-appear") {
+      // Only calculate position manually if anchor positioning is not supported
+      if (
+        !isInline &&
+        visibility === "before-appear" &&
+        !supportsAnchorPositioning
+      ) {
         calculatePosition();
       }
-    }, [visibility, calculatePosition, isInline]);
+    }, [visibility, calculatePosition, isInline, supportsAnchorPositioning]);
 
     useEffect(() => {
       if (props.enabled === false) performAnimation(false);
@@ -207,16 +250,25 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
     const compositeStyles = useMemo(() => {
       return {
         ...(props.style ?? {}),
-        ...(offset ?? {}),
-        zIndex: (minIndex ?? 1000) + dropdownIndex,
+        // Only apply JS-calculated offset when anchor positioning is not supported
+        ...(!supportsAnchorPositioning ? (offset ?? {}) : {}),
+        zIndex: (minIndex ?? 0) + dropdownZIndex,
       };
-    }, [props.style, dropdownIndex, minIndex, offset]);
+    }, [
+      props.style,
+      dropdownZIndex,
+      minIndex,
+      offset,
+      supportsAnchorPositioning,
+    ]);
 
     const result = (
       <div
         ref={dropdown as any}
         data-testid={props.dataTestId}
-        className={rootName.mix(props.className, visibilityClasses).toClassName()}
+        className={rootName
+          .mix(props.className, visibilityClasses)
+          .toClassName()}
         style={{
           ...compositeStyles,
           borderRadius: isFF(FF_DEV_3873) && 4,
