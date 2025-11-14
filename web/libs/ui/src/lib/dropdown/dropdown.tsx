@@ -57,6 +57,8 @@ export interface DropdownProps {
   openUpwardForShortViewport?: boolean;
   /** Constrain dropdown height to prevent overflow (from DataManager) */
   constrainHeight?: boolean;
+  /** Sync dropdown width to trigger width (from Enterprise) */
+  syncWidth?: boolean;
 }
 
 export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
@@ -101,12 +103,24 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
     useEffect(() => {
       if (supportsAnchorPositioning && dropdown.current) {
         (dropdown.current as HTMLElement).style.positionAnchor = anchorName;
+
+        // Sync width to trigger if requested (Enterprise feature)
+        if (props.syncWidth && triggerRef?.current) {
+          dropdown.current.style.width = `${triggerRef.current.offsetWidth}px`;
+        }
       }
-    }, [supportsAnchorPositioning, anchorName, visibility]);
+    }, [
+      supportsAnchorPositioning,
+      anchorName,
+      visibility,
+      props.syncWidth,
+      triggerRef,
+    ]);
 
     const calculatePosition = useCallback(() => {
       const dropdownEl = dropdown.current!;
-      const parent = (triggerRef?.current ?? dropdownEl.parentNode) as HTMLElement;
+      const parent = (triggerRef?.current ??
+        dropdownEl.parentNode) as HTMLElement;
       const { left, top } = alignElements(
         parent!,
         dropdownEl,
@@ -116,6 +130,11 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
         props.openUpwardForShortViewport ?? true,
       );
 
+      // Sync width to trigger if requested (Enterprise feature)
+      if (props.syncWidth && parent) {
+        dropdownEl.style.width = `${parent.offsetWidth}px`;
+      }
+
       setOffset({ left, top });
     }, [
       triggerRef,
@@ -123,6 +142,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
       props.alignment,
       props.constrainHeight,
       props.openUpwardForShortViewport,
+      props.syncWidth,
     ]);
 
     const performAnimation = useCallback(
@@ -211,7 +231,11 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
 
     useEffect(() => {
       // Only calculate position manually if anchor positioning is not supported
-      if (!isInline && visibility === "before-appear" && !supportsAnchorPositioning) {
+      if (
+        !isInline &&
+        visibility === "before-appear" &&
+        !supportsAnchorPositioning
+      ) {
         calculatePosition();
       }
     }, [visibility, calculatePosition, isInline, supportsAnchorPositioning]);
@@ -263,13 +287,21 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
         ...(!supportsAnchorPositioning ? (offset ?? {}) : {}),
         zIndex: (minIndex ?? 0) + dropdownZIndex,
       };
-    }, [props.style, dropdownZIndex, minIndex, offset, supportsAnchorPositioning]);
+    }, [
+      props.style,
+      dropdownZIndex,
+      minIndex,
+      offset,
+      supportsAnchorPositioning,
+    ]);
 
     const result = (
       <div
         ref={dropdown as any}
         data-testid={props.dataTestId}
-        className={rootName.mix(props.className, dropdownClassName, visibilityClasses).toClassName()}
+        className={rootName
+          .mix(props.className, dropdownClassName, visibilityClasses)
+          .toClassName()}
         style={compositeStyles}
         onClick={(e: MouseEvent) => e.stopPropagation()}
       >
