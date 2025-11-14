@@ -40,22 +40,24 @@ export function getStateColorClass(state: string): string {
   return colorToClasses[color];
 }
 
+// Human-readable labels for task states
+export const stateLabels: Record<string, string> = {
+  CREATED: "Created",
+  ANNOTATION_IN_PROGRESS: "Annotating",
+  ANNOTATION_COMPLETE: "Annotated",
+  REVIEW_IN_PROGRESS: "In Review",
+  REVIEW_COMPLETE: "Reviewed",
+  ARBITRATION_NEEDED: "Needs Arbitration",
+  ARBITRATION_IN_PROGRESS: "In Arbitration",
+  ARBITRATION_COMPLETE: "Arbitrated",
+  COMPLETED: "Done",
+  IN_PROGRESS: "In Progress",
+};
+
 /**
  * Format state name to human-readable label
  */
 export function formatStateName(state: string): string {
-  const stateLabels: Record<string, string> = {
-    CREATED: "Created",
-    ANNOTATION_IN_PROGRESS: "Annotating",
-    ANNOTATION_COMPLETE: "Annotated",
-    REVIEW_IN_PROGRESS: "In Review",
-    REVIEW_COMPLETE: "Reviewed",
-    ARBITRATION_NEEDED: "Needs Arbitration",
-    ARBITRATION_IN_PROGRESS: "In Arbitration",
-    ARBITRATION_COMPLETE: "Arbitrated",
-    COMPLETED: "Done",
-    IN_PROGRESS: "In Progress",
-  };
 
   if (stateLabels[state]) {
     return stateLabels[state];

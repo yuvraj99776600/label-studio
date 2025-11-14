@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import { Select, Badge } from "@humansignal/ui";
-import { stateLabels, STATE_COLORS, colorToClasses } from "../../CellViews/TaskState";
+import { stateLabels, STATE_COLORS, colorToClasses } from "@humansignal/app-common";
 import { useMemo } from "react";
 
 const BaseInput = observer(({ value, onChange, placeholder }) => {
