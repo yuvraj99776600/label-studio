@@ -25,6 +25,8 @@ let zIndexCounter = 0;
 export interface DropdownRef {
   dropdown: HTMLElement;
   visible: boolean;
+  /** Whether dropdown is fully opened (after animation completes) - from Enterprise */
+  opened: boolean;
   toggle(newState?: boolean, disableAnimation?: boolean): void;
   open(disableAnimation?: boolean): void;
   close(disableAnimation?: boolean): void;
@@ -240,6 +242,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
       const refValue: DropdownRef = {
         dropdown: dropdown.current!,
         visible: visibility !== null,
+        opened: currentVisible && visibility === "visible",
         toggle,
         open,
         close,
@@ -250,7 +253,7 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
       } else {
         ref.current = refValue;
       }
-    }, [close, open, ref, toggle, dropdown, visibility]);
+    }, [close, open, ref, toggle, dropdown, visibility, currentVisible]);
 
     useEffect(() => {
       setVisible(visible);
