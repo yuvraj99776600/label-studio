@@ -12,12 +12,12 @@ export interface AnnotationStateChipProps {
    * Current state of the annotation
    */
   state: string;
-  
+
   /**
    * Annotation ID for fetching state history
    */
   annotationId?: number;
-  
+
   /**
    * Whether the chip should be interactive (show history popover)
    */
@@ -26,15 +26,15 @@ export interface AnnotationStateChipProps {
 
 export function AnnotationStateChip({ state, annotationId, interactive = true }: AnnotationStateChipProps) {
   const [open, setOpen] = useState(false);
-  
+
   const label = formatStateName(state);
   const description = getStateDescription(state);
   const colorClasses = getStateColorClass(state);
-  
+
   const popoverContent = annotationId ? (
     <StateHistoryPopoverContent entityType="annotation" entityId={annotationId} isOpen={open} />
   ) : undefined;
-  
+
   return (
     <StateChip
       label={label}
@@ -47,4 +47,3 @@ export function AnnotationStateChip({ state, annotationId, interactive = true }:
     />
   );
 }
-

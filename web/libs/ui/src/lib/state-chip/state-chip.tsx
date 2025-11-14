@@ -1,6 +1,6 @@
 /**
  * StateChip - Base interactive state display component
- * 
+ *
  * A reusable chip component that displays a state with optional popover interaction.
  * This base component provides the visual display and interactive behavior,
  * while entity-specific implementations handle state logic and history.
@@ -14,32 +14,32 @@ export interface StateChipProps {
    * Visual label to display in the chip
    */
   label: string;
-  
+
   /**
    * Description for the tooltip when not interactive
    */
   description?: string;
-  
+
   /**
    * Tailwind CSS classes for styling the chip
    */
   colorClasses: string;
-  
+
   /**
    * Whether the chip should be interactive (clickable with popover)
    */
   interactive?: boolean;
-  
+
   /**
    * Content to display in the popover when interactive
    */
   popoverContent?: ReactNode;
-  
+
   /**
    * Controlled open state for the popover
    */
   open?: boolean;
-  
+
   /**
    * Callback when popover open state changes
    */
@@ -56,7 +56,7 @@ export function StateChip({
   onOpenChange,
 }: StateChipProps) {
   const [internalOpen, setInternalOpen] = useState(false);
-  
+
   // Use controlled state if provided, otherwise use internal state
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
@@ -93,4 +93,3 @@ export function StateChip({
     </Popover>
   );
 }
-

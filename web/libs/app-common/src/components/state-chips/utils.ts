@@ -7,16 +7,16 @@
 export const STATE_COLORS: Record<string, string> = {
   // Grey - Initial
   CREATED: "grey",
-  
+
   // Blue - In Progress
   ANNOTATION_IN_PROGRESS: "blue",
   REVIEW_IN_PROGRESS: "blue",
   ARBITRATION_IN_PROGRESS: "blue",
   IN_PROGRESS: "blue",
-  
+
   // Yellow - Attention/Churn
   ARBITRATION_NEEDED: "yellow",
-  
+
   // Green - Complete/Terminal
   ANNOTATION_COMPLETE: "green",
   REVIEW_COMPLETE: "green",
@@ -133,4 +133,3 @@ export function formatUserName(
 
   return "System";
 }
-

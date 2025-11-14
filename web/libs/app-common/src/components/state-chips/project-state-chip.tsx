@@ -12,12 +12,12 @@ export interface ProjectStateChipProps {
    * Current state of the project
    */
   state: string;
-  
+
   /**
    * Project ID for fetching state history
    */
   projectId?: number;
-  
+
   /**
    * Whether the chip should be interactive (show history popover)
    */
@@ -26,15 +26,15 @@ export interface ProjectStateChipProps {
 
 export function ProjectStateChip({ state, projectId, interactive = true }: ProjectStateChipProps) {
   const [open, setOpen] = useState(false);
-  
+
   const label = formatStateName(state);
   const description = getStateDescription(state);
   const colorClasses = getStateColorClass(state);
-  
+
   const popoverContent = projectId ? (
     <StateHistoryPopoverContent entityType="project" entityId={projectId} isOpen={open} />
   ) : undefined;
-  
+
   return (
     <StateChip
       label={label}
@@ -47,4 +47,3 @@ export function ProjectStateChip({ state, projectId, interactive = true }: Proje
     />
   );
 }
-

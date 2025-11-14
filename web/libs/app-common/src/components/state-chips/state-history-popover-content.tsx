@@ -91,4 +91,3 @@ export function StateHistoryPopoverContent({ entityType, entityId, isOpen }: Sta
     </div>
   );
 }
-

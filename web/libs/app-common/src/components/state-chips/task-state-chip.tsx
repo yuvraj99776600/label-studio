@@ -12,12 +12,12 @@ export interface TaskStateChipProps {
    * Current state of the task
    */
   state: string;
-  
+
   /**
    * Task ID for fetching state history
    */
   taskId?: number;
-  
+
   /**
    * Whether the chip should be interactive (show history popover)
    */
@@ -26,15 +26,15 @@ export interface TaskStateChipProps {
 
 export function TaskStateChip({ state, taskId, interactive = true }: TaskStateChipProps) {
   const [open, setOpen] = useState(false);
-  
+
   const label = formatStateName(state);
   const description = getStateDescription(state);
   const colorClasses = getStateColorClass(state);
-  
+
   const popoverContent = taskId ? (
     <StateHistoryPopoverContent entityType="task" entityId={taskId} isOpen={open} />
   ) : undefined;
-  
+
   return (
     <StateChip
       label={label}
@@ -47,4 +47,3 @@ export function TaskStateChip({ state, taskId, interactive = true }: TaskStateCh
     />
   );
 }
-

@@ -3,4 +3,3 @@ export { AnnotationStateChip, type AnnotationStateChipProps } from "./annotation
 export { ProjectStateChip, type ProjectStateChipProps } from "./project-state-chip";
 export { StateHistoryPopoverContent, type StateHistoryPopoverContentProps } from "./state-history-popover-content";
 export * from "./utils";
-
