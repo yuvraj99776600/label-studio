@@ -1,11 +1,15 @@
-import { IconChevronDown, IconChevronRight, IconTrash } from "@humansignal/icons";
+import {
+  IconChevronDown,
+  IconChevronRight,
+  IconTrash,
+} from "@humansignal/icons";
 import { Button, Spinner, Tooltip } from "@humansignal/ui";
 import { inject, observer } from "mobx-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useActions } from "../../../hooks/useActions";
 import { cn } from "../../../utils/bem";
 import { FF_LOPS_E_3, isFF } from "../../../utils/feature-flags";
-import { Dropdown } from "../../Common/Dropdown/DropdownComponent";
+import { Dropdown } from "@humansignal/ui";
 import Form from "../../Common/Form/Form";
 import { Menu } from "../../Common/Menu/Menu";
 import { Modal } from "../../Common/Modal/ModalPopup";
@@ -39,7 +43,9 @@ const DialogContent = ({ text, form, formRef, store, action }) => {
 
   return (
     <div className={cn("dialog-content").toClassName()}>
-      <div className={cn("dialog-content").elem("text").toClassName()}>{text}</div>
+      <div className={cn("dialog-content").elem("text").toClassName()}>
+        {text}
+      </div>
       {isLoading && (
         <div
           className={cn("dialog-content").elem("loading").toClassName()}
@@ -49,8 +55,16 @@ const DialogContent = ({ text, form, formRef, store, action }) => {
         </div>
       )}
       {formData && (
-        <div className={cn("dialog-content").elem("form").toClassName()} style={{ paddingTop: 16 }}>
-          <Form.Builder ref={formRef} fields={fields} autosubmit={false} withActions={false} />
+        <div
+          className={cn("dialog-content").elem("form").toClassName()}
+          style={{ paddingTop: 16 }}
+        >
+          <Form.Builder
+            ref={formRef}
+            fields={fields}
+            autosubmit={false}
+            withActions={false}
+          />
         </div>
       )}
     </div>
@@ -71,7 +85,14 @@ const ActionButton = ({ action, parentRef, store, formRef }) => {
         : invokeAction(action, isDeleteAction, store, formRef);
       parentRef?.current?.close?.();
     },
-    [store.currentView?.selected, action, isDeleteAction, parentRef, store, formRef],
+    [
+      store.currentView?.selected,
+      action,
+      isDeleteAction,
+      parentRef,
+      store,
+      formRef,
+    ],
   );
 
   const titleContainer = (
@@ -95,8 +116,14 @@ const ActionButton = ({ action, parentRef, store, formRef }) => {
         className={cn("actionButton").elem("titleContainer").toClassName()}
         {...(action.disabled ? { title: action.disabledReason } : {})}
       >
-        <div className={cn("actionButton").elem("title").toClassName()}>{action.title}</div>
-        {hasChildren ? <IconChevronRight className={cn("actionButton").elem("icon").toClassName()} /> : null}
+        <div className={cn("actionButton").elem("title").toClassName()}>
+          {action.title}
+        </div>
+        {hasChildren ? (
+          <IconChevronRight
+            className={cn("actionButton").elem("icon").toClassName()}
+          />
+        ) : null}
       </div>
     </Menu.Item>
   );
@@ -128,7 +155,12 @@ const ActionButton = ({ action, parentRef, store, formRef }) => {
   }
 
   return (
-    <Tooltip key={action.id} title={action.disabled_reason} disabled={!action.disabled} alignment="bottom-center">
+    <Tooltip
+      key={action.id}
+      title={action.disabled_reason}
+      disabled={!action.disabled}
+      alignment="bottom-center"
+    >
       <div>
         <Menu.Item
           size="small"
@@ -171,7 +203,9 @@ const invokeAction = (action, destructive, store, formRef) => {
         delete_ground_truths: "ground truths",
       };
 
-      const objectType = objectMap[action.id] || action.title.toLowerCase().replace("delete ", "");
+      const objectType =
+        objectMap[action.id] ||
+        action.title.toLowerCase().replace("delete ", "");
       dialogTitle = `Delete selected ${objectType}?`;
 
       // Convert to title case for button text
@@ -184,13 +218,27 @@ const invokeAction = (action, destructive, store, formRef) => {
 
     if (destructive && !form) {
       // Use standardized warning message for simple delete actions
-      const objectType = dialogTitle ? dialogTitle.replace("Delete selected ", "").replace("?", "") : "items";
+      const objectType = dialogTitle
+        ? dialogTitle.replace("Delete selected ", "").replace("?", "")
+        : "items";
       dialogText = `You are about to delete the selected ${objectType}.\n\nThis can't be undone.`;
     }
 
     dialog({
-      title: dialogTitle ? dialogTitle : destructive ? "Destructive action" : "Confirm action",
-      body: <DialogContent text={dialogText} form={form} formRef={formRef} store={store} action={action} />,
+      title: dialogTitle
+        ? dialogTitle
+        : destructive
+          ? "Destructive action"
+          : "Confirm action",
+      body: (
+        <DialogContent
+          text={dialogText}
+          form={form}
+          formRef={formRef}
+          store={store}
+          action={action}
+        />
+      ),
       buttonLook: destructive ? "negative" : "primary",
       okText: destructive ? okButtonText : undefined,
       onOk() {
@@ -223,12 +271,21 @@ export const ActionsButton = injector(
     });
 
     const actions = useMemo(() => {
-      return [...store.availableActions, ...serverActions].filter((a) => !a.hidden).sort((a, b) => a.order - b.order);
+      return [...store.availableActions, ...serverActions]
+        .filter((a) => !a.hidden)
+        .sort((a, b) => a.order - b.order);
     }, [store.availableActions, serverActions]);
     const actionButtons = actions.map((action) => (
-      <ActionButton key={action.id} action={action} parentRef={formRef} store={store} formRef={formRef} />
+      <ActionButton
+        key={action.id}
+        action={action}
+        parentRef={formRef}
+        store={store}
+        formRef={formRef}
+      />
     ));
-    const recordTypeLabel = isFFLOPSE3 && store.SDK.type === "DE" ? "Record" : "Task";
+    const recordTypeLabel =
+      isFFLOPSE3 && store.SDK.type === "DE" ? "Record" : "Task";
 
     return (
       <Dropdown.Trigger
@@ -256,7 +313,9 @@ export const ActionsButton = injector(
           aria-label="Tasks Actions"
           {...rest}
         >
-          {selectedCount > 0 ? `${selectedCount} ${recordTypeLabel}${selectedCount > 1 ? "s" : ""}` : "Actions"}
+          {selectedCount > 0
+            ? `${selectedCount} ${recordTypeLabel}${selectedCount > 1 ? "s" : ""}`
+            : "Actions"}
         </Button>
       </Dropdown.Trigger>
     );

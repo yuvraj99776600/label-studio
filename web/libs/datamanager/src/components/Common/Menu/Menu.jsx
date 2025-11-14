@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import clsx from "clsx";
 import { cn } from "../../../utils/bem";
-import { useDropdown } from "../Dropdown/DropdownTrigger";
+import { useDropdown } from "@humansignal/ui";
 import "./Menu.scss";
 import { MenuContext } from "./MenuContext";
 import { MenuItem } from "./MenuItem";
@@ -9,7 +9,17 @@ import { MenuItem } from "./MenuItem";
 const menuCN = cn("menu-dm");
 
 export const Menu = React.forwardRef(
-  ({ children, className, style, size, selectedKeys, closeDropdownOnItemClick }, ref) => {
+  (
+    {
+      children,
+      className,
+      style,
+      size,
+      selectedKeys,
+      closeDropdownOnItemClick,
+    },
+    ref,
+  ) => {
     const dropdown = useDropdown();
 
     const selected = useMemo(() => {
@@ -35,7 +45,11 @@ export const Menu = React.forwardRef(
       <MenuContext.Provider value={{ selected }}>
         <ul
           ref={ref}
-          className={clsx(menuCN.toString(), menuCN.mod({ size, collapsed }).toString(), className)}
+          className={clsx(
+            menuCN.toString(),
+            menuCN.mod({ size, collapsed }).toString(),
+            className,
+          )}
           style={style}
           onClick={clickHandler}
         >

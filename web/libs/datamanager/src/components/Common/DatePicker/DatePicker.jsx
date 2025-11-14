@@ -4,7 +4,7 @@ import { default as DP } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { cn } from "../../../utils/bem";
 import { isDefined } from "../../../utils/utils";
-import { Dropdown } from "../Dropdown/Dropdown";
+import { Dropdown } from "@humansignal/ui";
 import Input from "../Input/Input";
 import "./DatePicker.global.scss";
 import "./DatePicker.scss";
@@ -37,7 +37,9 @@ export const DatePicker = ({
     return "";
   };
 
-  const [initialStartDate, initialEndDate] = selectRange ? value : [].concat(value);
+  const [initialStartDate, initialEndDate] = selectRange
+    ? value
+    : [].concat(value);
 
   const [realStartDate, setRealStartDate] = useState(initialStartDate ?? null);
   const [realEndDate, setRealEndDate] = useState(initialEndDate ?? null);
@@ -50,7 +52,11 @@ export const DatePicker = ({
 
     dateSetter?.(date);
 
-    if (isDefined(date) && isMatch(date, finalFormat) && date.length === finalFormat.length) {
+    if (
+      isDefined(date) &&
+      isMatch(date, finalFormat) &&
+      date.length === finalFormat.length
+    ) {
       const realDate = new Date(date || null);
 
       if (isValid(realDate)) realDateSetter?.(realDate);
@@ -120,11 +126,17 @@ export const DatePicker = ({
         }
         style={{ backgroundColor: "transparent", borderRadius: "1em" }}
       >
-        <div className={cn("datepicker").elem("output").mod({ range: selectRange })}>
+        <div
+          className={cn("datepicker")
+            .elem("output")
+            .mod({ range: selectRange })}
+        >
           <Input
             size={size}
             value={startDate || ""}
-            onChange={(e) => updateDate(e.target.value, setStartDate, setRealStartDate)}
+            onChange={(e) =>
+              updateDate(e.target.value, setStartDate, setRealStartDate)
+            }
           />
           {selectRange && (
             <>
@@ -132,7 +144,9 @@ export const DatePicker = ({
               <Input
                 size={size}
                 value={endDate || ""}
-                onChange={(e) => updateDate(e.target.value, setEndDate, setRealEndDate)}
+                onChange={(e) =>
+                  updateDate(e.target.value, setEndDate, setRealEndDate)
+                }
               />
             </>
           )}

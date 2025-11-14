@@ -2,7 +2,7 @@ import { Button, Checkbox } from "@humansignal/ui";
 import { inject, observer } from "mobx-react";
 import React from "react";
 import { cn } from "../../utils/bem";
-import { Dropdown } from "./Dropdown/Dropdown";
+import { Dropdown } from "@humansignal/ui";
 import { Menu } from "./Menu/Menu";
 
 const injector = inject(({ store }) => {
@@ -11,50 +11,61 @@ const injector = inject(({ store }) => {
   };
 });
 
-const FieldsMenu = observer(({ columns, WrapperComponent, onClick, onReset, selected, resetTitle }) => {
-  const MenuItem = (col, onClick) => {
+const FieldsMenu = observer(
+  ({ columns, WrapperComponent, onClick, onReset, selected, resetTitle }) => {
+    const MenuItem = (col, onClick) => {
+      return (
+        <Menu.Item
+          key={col.key}
+          name={col.key}
+          onClick={onClick}
+          disabled={col.disabled}
+        >
+          {WrapperComponent && col.wra !== false ? (
+            <WrapperComponent column={col} disabled={col.disabled}>
+              {col.title}
+            </WrapperComponent>
+          ) : (
+            col.title
+          )}
+        </Menu.Item>
+      );
+    };
+
     return (
-      <Menu.Item key={col.key} name={col.key} onClick={onClick} disabled={col.disabled}>
-        {WrapperComponent && col.wra !== false ? (
-          <WrapperComponent column={col} disabled={col.disabled}>
-            {col.title}
-          </WrapperComponent>
-        ) : (
-          col.title
-        )}
-      </Menu.Item>
+      <Menu
+        size="small"
+        selectedKeys={selected ? [selected] : ["none"]}
+        closeDropdownOnItemClick={false}
+      >
+        {onReset &&
+          MenuItem(
+            {
+              key: "none",
+              title: resetTitle ?? "Default",
+              wrap: false,
+            },
+            onReset,
+          )}
+
+        {columns.map((col) => {
+          if (col.children) {
+            return (
+              <Menu.Group key={col.key} title={col.title}>
+                {col.children.map((col) => MenuItem(col, () => onClick?.(col)))}
+              </Menu.Group>
+            );
+          }
+          if (!col.parent) {
+            return MenuItem(col, () => onClick?.(col));
+          }
+
+          return null;
+        })}
+      </Menu>
     );
-  };
-
-  return (
-    <Menu size="small" selectedKeys={selected ? [selected] : ["none"]} closeDropdownOnItemClick={false}>
-      {onReset &&
-        MenuItem(
-          {
-            key: "none",
-            title: resetTitle ?? "Default",
-            wrap: false,
-          },
-          onReset,
-        )}
-
-      {columns.map((col) => {
-        if (col.children) {
-          return (
-            <Menu.Group key={col.key} title={col.title}>
-              {col.children.map((col) => MenuItem(col, () => onClick?.(col)))}
-            </Menu.Group>
-          );
-        }
-        if (!col.parent) {
-          return MenuItem(col, () => onClick?.(col));
-        }
-
-        return null;
-      })}
-    </Menu>
-  );
-});
+  },
+);
 
 export const FieldsButton = injector(
   ({
@@ -78,7 +89,10 @@ export const FieldsButton = injector(
   }) => {
     const content = [];
 
-    if (title) content.push(<React.Fragment key="f-button-title">{title}</React.Fragment>);
+    if (title)
+      content.push(
+        <React.Fragment key="f-button-title">{title}</React.Fragment>,
+      );
 
     const renderButton = () => {
       return (
@@ -112,7 +126,10 @@ export const FieldsButton = injector(
         openUpwardForShortViewport={openUpwardForShortViewport}
       >
         {tooltip ? (
-          <div className={`${cn("field-button").toClassName()} h-[40px] flex items-center`} style={{ zIndex: 1000 }}>
+          <div
+            className={`${cn("field-button").toClassName()} h-[40px] flex items-center`}
+            style={{ zIndex: 1000 }}
+          >
             <Button
               tooltip={tooltip}
               variant="neutral"
