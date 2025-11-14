@@ -3,13 +3,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { IconZoomIn } from "@humansignal/icons";
 import { Button } from "@humansignal/ui";
-import { Dropdown } from "../../../common/Dropdown/Dropdown";
+import { Dropdown } from "@humansignal/ui";
 import { Menu } from "../../../common/Menu/Menu";
 import { ErrorMessage } from "../../../components/ErrorMessage/ErrorMessage";
 import ObjectTag from "../../../components/Tags/Object";
 import { VideoConfigControl } from "../../../components/Timeline/Controls/VideoConfigControl";
 import { Timeline } from "../../../components/Timeline/Timeline";
-import { clampZoom, VideoCanvas } from "../../../components/VideoCanvas/VideoCanvas";
+import {
+  clampZoom,
+  VideoCanvas,
+} from "../../../components/VideoCanvas/VideoCanvas";
 import {
   MAX_ZOOM_WHEEL,
   MIN_ZOOM_WHEEL,
@@ -89,7 +92,9 @@ function useZoom(videoDimensions, canvasDimentions, shouldClampPan) {
 
   const setZoom = useCallback((value) => {
     return setZoomState(({ zoom, pan }) => {
-      const nextZoom = clampZoom(value instanceof Function ? value(zoom) : value);
+      const nextZoom = clampZoom(
+        value instanceof Function ? value(zoom) : value,
+      );
 
       return {
         zoom: nextZoom,
@@ -144,7 +149,11 @@ const HtxVideoView = ({ item, store }) => {
   const [position, _setPosition] = useState(1);
 
   const [videoSize, setVideoSize] = useState(null);
-  const [videoDimensions, setVideoDimensions] = useState({ width: 0, height: 0, ratio: 1 });
+  const [videoDimensions, setVideoDimensions] = useState({
+    width: 0,
+    height: 0,
+    ratio: 1,
+  });
   const [{ zoom, pan }, { setZoomAndPan, setZoom, setPan }] = useZoom(
     videoDimensions,
     item.ref.current
@@ -156,7 +165,8 @@ const HtxVideoView = ({ item, store }) => {
     limitCanvasDrawingBoundaries,
   );
   const [panMode, setPanMode] = useState(false);
-  const [isFullScreen, enterFullscreen, exitFullscren, handleFullscreenToggle] = useToggle(false);
+  const [isFullScreen, enterFullscreen, exitFullscren, handleFullscreenToggle] =
+    useToggle(false);
   const fullscreen = useFullscreen({
     onEnterFullscreen() {
       enterFullscreen();
@@ -236,7 +246,10 @@ const HtxVideoView = ({ item, store }) => {
     document.addEventListener("keydown", onKeyDown);
 
     const observer = new ResizeObserver(() => onResize());
-    const [vContainer, vBlock] = [videoContainerRef.current, videoBlockRef.current];
+    const [vContainer, vBlock] = [
+      videoContainerRef.current,
+      videoBlockRef.current,
+    ];
 
     observer.observe(vContainer);
     observer.observe(vBlock);
@@ -296,7 +309,10 @@ const HtxVideoView = ({ item, store }) => {
       const startY = e.pageY;
 
       const onMouseMove = (e) => {
-        const position = item.ref.current.adjustPan(pan.x + (e.pageX - startX), pan.y + (e.pageY - startY));
+        const position = item.ref.current.adjustPan(
+          pan.x + (e.pageX - startX),
+          pan.y + (e.pageY - startY),
+        );
 
         requestAnimationFrame(() => {
           setPan(position);
@@ -420,7 +436,9 @@ const HtxVideoView = ({ item, store }) => {
 
   const handleAction = useCallback(
     (_, action, data) => {
-      const regions = item.regs.filter((reg) => reg.selected || reg.inSelection);
+      const regions = item.regs.filter(
+        (reg) => reg.selected || reg.inSelection,
+      );
 
       regions.forEach((region) => {
         switch (action) {
@@ -460,7 +478,8 @@ const HtxVideoView = ({ item, store }) => {
   );
 
   const regions = item.regs.map((reg) => {
-    const color = reg.style?.fillcolor ?? reg.tag?.fillcolor ?? defaultStyle.fillcolor;
+    const color =
+      reg.style?.fillcolor ?? reg.tag?.fillcolor ?? defaultStyle.fillcolor;
     const label = reg.labels.join(", ") || "Empty";
     const timeline = reg.type.includes("timeline");
     const sequence = reg.sequence;
@@ -482,7 +501,11 @@ const HtxVideoView = ({ item, store }) => {
   if (item.timelineControl) regions.reverse();
 
   // when label is selected and user is ready to draw a new region, we create a labeled empty line at the top
-  if (item.timelineControl?.selectedLabels?.length && !item.annotation.selectionSize && !item.drawingRegion) {
+  if (
+    item.timelineControl?.selectedLabels?.length &&
+    !item.annotation.selectionSize &&
+    !item.drawingRegion
+  ) {
     const label = item.timelineControl.selectedLabels[0];
     regions.unshift({
       id: "new",
@@ -497,12 +520,22 @@ const HtxVideoView = ({ item, store }) => {
 
   return (
     <ObjectTag item={item}>
-      <div className={cn("video-segmentation").mod({ fullscreen: isFullScreen }).toClassName()} ref={mainContentRef}>
+      <div
+        className={cn("video-segmentation")
+          .mod({ fullscreen: isFullScreen })
+          .toClassName()}
+        ref={mainContentRef}
+      >
         {item.errors?.map((error, i) => (
           <ErrorMessage key={`err-${i}`} error={error} />
         ))}
 
-        <div className={cn("video").mod({ fullscreen: isFullScreen }).toClassName()} ref={videoBlockRef}>
+        <div
+          className={cn("video")
+            .mod({ fullscreen: isFullScreen })
+            .toClassName()}
+          ref={videoBlockRef}
+        >
           <div
             className={cn("video").elem("main").toClassName()}
             ref={videoContainerRef}
@@ -522,7 +555,9 @@ const HtxVideoView = ({ item, store }) => {
                     width={videoSize[0]}
                     height={videoSize[1]}
                     workingArea={videoDimensions}
-                    allowRegionsOutsideWorkingArea={!limitCanvasDrawingBoundaries}
+                    allowRegionsOutsideWorkingArea={
+                      !limitCanvasDrawingBoundaries
+                    }
                     stageRef={stageRef}
                   />
                 )}
@@ -559,7 +594,11 @@ const HtxVideoView = ({ item, store }) => {
         {loaded && (
           <Timeline
             className={cn("video-segmentation").elem("timeline").toClassName()}
-            playing={isSyncedBuffering && item.isBuffering ? item.wasPlayingBeforeBuffering : playing}
+            playing={
+              isSyncedBuffering && item.isBuffering
+                ? item.wasPlayingBeforeBuffering
+                : playing
+            }
             buffering={isSyncedBuffering ? item.isBuffering : false}
             length={videoLength}
             position={position}
@@ -587,7 +626,9 @@ const HtxVideoView = ({ item, store }) => {
                           <Menu size="auto" closeDropdownOnItemClick={false}>
                             <Menu.Item onClick={zoomIn}>Zoom In</Menu.Item>
                             <Menu.Item onClick={zoomOut}>Zoom Out</Menu.Item>
-                            <Menu.Item onClick={zoomToFit}>Zoom To Fit</Menu.Item>
+                            <Menu.Item onClick={zoomToFit}>
+                              Zoom To Fit
+                            </Menu.Item>
                             <Menu.Item onClick={zoomReset}>Zoom 100%</Menu.Item>
                           </Menu>
                         }

@@ -101,10 +101,6 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
       setOffset({ left, top });
     }, [triggerRef, minIndex]);
 
-    const dropdownIndex = useMemo(() => {
-      return lastIndex++;
-    }, []);
-
     const performAnimation = useCallback(
       async (visible = false, disableAnimation?: boolean) => {
         if (props.enabled === false && visible === true) return;
