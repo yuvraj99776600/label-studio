@@ -68,6 +68,11 @@ export interface DropdownProps {
   relativeToElement?:
     | RefObject<HTMLElement | undefined>
     | MutableRefObject<HTMLElement | undefined>;
+  /**
+   * Recalculate dropdown position when dropdown content resizes (from Enterprise)
+   * Uses ResizeObserver to track content dimension changes
+   */
+  followResize?: boolean;
 }
 
 export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
@@ -250,6 +255,24 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
     useEffect(() => {
       setVisible(visible);
     }, [visible]);
+
+    // Follow resize: recalculate position when dropdown content resizes (Enterprise feature)
+    useEffect(() => {
+      if (!dropdown.current || !currentVisible || props.followResize !== true)
+        return;
+
+      const elem = dropdown.current;
+      const observer = new ResizeObserver(() => {
+        calculatePosition();
+      });
+
+      observer.observe(elem);
+
+      return () => {
+        observer.unobserve(elem);
+        observer.disconnect();
+      };
+    }, [calculatePosition, currentVisible, props.followResize]);
 
     useEffect(() => {
       // Only calculate position manually if anchor positioning is not supported
