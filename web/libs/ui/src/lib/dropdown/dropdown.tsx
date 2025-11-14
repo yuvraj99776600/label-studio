@@ -3,12 +3,14 @@ import {
   type CSSProperties,
   forwardRef,
   type MouseEvent,
+  type MutableRefObject,
   useCallback,
   useContext,
   useEffect,
   useId,
   useMemo,
   useRef,
+  type RefObject,
   useState,
 } from "react";
 import { createPortal } from "react-dom";
@@ -59,6 +61,13 @@ export interface DropdownProps {
   constrainHeight?: boolean;
   /** Sync dropdown width to trigger width (from Enterprise) */
   syncWidth?: boolean;
+  /**
+   * Render dropdown relative to a different element instead of the trigger (from Enterprise)
+   * When used with inline mode, dropdown will be portaled inside this element
+   */
+  relativeToElement?:
+    | RefObject<HTMLElement | undefined>
+    | MutableRefObject<HTMLElement | undefined>;
 }
 
 export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
@@ -119,8 +128,19 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
 
     const calculatePosition = useCallback(() => {
       const dropdownEl = dropdown.current!;
-      const parent = (triggerRef?.current ??
+      const parent = (props.relativeToElement?.current ??
+        triggerRef?.current ??
         dropdownEl.parentNode) as HTMLElement;
+
+      // If using relativeToElement with inline mode, use simple positioning
+      if (props.inline && props.relativeToElement?.current) {
+        setOffset({
+          left: (props.alignment?.includes("right") ?? false) ? "100%" : 0,
+          top: "100%",
+        });
+        return;
+      }
+
       const { left, top } = alignElements(
         parent!,
         dropdownEl,
@@ -143,6 +163,8 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
       props.constrainHeight,
       props.openUpwardForShortViewport,
       props.syncWidth,
+      props.relativeToElement,
+      props.inline,
     ]);
 
     const performAnimation = useCallback(
@@ -309,7 +331,12 @@ export const Dropdown = forwardRef<DropdownRef, DropdownProps>(
       </div>
     );
 
-    return props.inline === true ? result : createPortal(result, document.body);
+    // Handle different rendering modes
+    if (props.inline === true) return result;
+    if (props.relativeToElement?.current) {
+      return createPortal(result, props.relativeToElement.current);
+    }
+    return createPortal(result, document.body);
   },
 );
 
