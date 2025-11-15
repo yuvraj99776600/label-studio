@@ -81,7 +81,6 @@ export function StateHistoryPopoverContent({ entityType, entityId, isOpen }: Sta
                 </div>
                 <div className="text-xs text-gray-600 dark:text-gray-400">
                   <div>By: {formatUserName(item.triggered_by)}</div>
-                  {item.transition_name && <div className="mt-1 text-gray-500">{item.transition_name}</div>}
                 </div>
               </div>
             ))}
