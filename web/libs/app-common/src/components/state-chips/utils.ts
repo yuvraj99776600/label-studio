@@ -58,7 +58,6 @@ export const stateLabels: Record<string, string> = {
  * Format state name to human-readable label
  */
 export function formatStateName(state: string): string {
-
   if (stateLabels[state]) {
     return stateLabels[state];
   }
