@@ -1,61 +1,55 @@
 /**
- * General helper to wait for a condition to be met in the browser context.
- * This is the core utility that all other wait helpers should use.
- *
- * @example
- * // Wait for an element to have a specific class
- * await waitForCondition(
- *   I,
- *   (className) => document.querySelector('.target')?.classList.contains(className),
- *   ['active'],
- *   { timeout: 3000, timeoutMessage: 'Element did not become active' }
- * );
- *
+ * Wait for a Konva transformer or rotator to be in a specific state
  * @param {Object} I - CodeceptJS I object
- * @param {Function} conditionFn - Function that returns true when condition is met.
- *                                 Will be executed in browser context.
- *                                 Should be a pure function with no external dependencies.
- * @param {Array} args - Arguments to pass to the condition function
+ * @param {boolean} expectedState - Expected state (true = should exist, false = should not exist)
+ * @param {string} checkType - Type to check: "transformer" or "rotator"
  * @param {Object} options - Configuration options
  * @param {number} options.timeout - Timeout in milliseconds (default: 5000)
  * @param {number} options.pollInterval - Polling interval in milliseconds (default: 50)
- * @param {string} options.timeoutMessage - Custom timeout error message
- * @returns {Promise<void>}
  */
-const waitForCondition = (I, conditionFn, args = [], options = {}) => {
-  const { timeout = 5000, pollInterval = 50, timeoutMessage = "Timeout waiting for condition" } = options;
+const waitForTransformerState = (I, expectedState, checkType = "transformer", options = {}) => {
+  const timeout = options.timeout || 5000;
+  const pollInterval = options.pollInterval || 50;
+  const timeoutMessage = `Timeout waiting for ${checkType} state to be ${expectedState}`;
 
-  // CodeceptJS automatically serializes functions and arguments when passing to executeScript
-  // This follows the same pattern as existing helpers like waitTicks
+  // Define everything inline so Playwright can serialize it properly
   return I.executeScript(
-    (conditionFn, args, timeout, pollInterval, timeoutMessage) => {
+    (expectedState, checkType, timeout, pollInterval, timeoutMessage) => {
       return new Promise((resolve, reject) => {
         const startTime = Date.now();
 
-        const checkCondition = () => {
+        const poll = () => {
           if (Date.now() - startTime > timeout) {
             reject(new Error(timeoutMessage));
             return;
           }
 
           try {
-            const result = conditionFn(...args);
-            if (result) {
+            const stage = window.Konva?.stages?.[0];
+            if (!stage) {
+              setTimeout(poll, pollInterval);
+              return;
+            }
+
+            const selector = checkType === "transformer" ? "._anchor" : ".rotater";
+            const elements = stage.find(selector).filter((shape) => shape.getAttr("visible") !== false);
+            const exists = !!elements.length;
+
+            if (exists === expectedState) {
               resolve();
             } else {
-              setTimeout(checkCondition, pollInterval);
+              setTimeout(poll, pollInterval);
             }
           } catch (error) {
-            // If condition throws, keep polling (might be accessing not-yet-available objects)
-            setTimeout(checkCondition, pollInterval);
+            setTimeout(poll, pollInterval);
           }
         };
 
-        checkCondition();
+        poll();
       });
     },
-    conditionFn,
-    args,
+    expectedState,
+    checkType,
     timeout,
     pollInterval,
     timeoutMessage,
@@ -63,57 +57,68 @@ const waitForCondition = (I, conditionFn, args = [], options = {}) => {
 };
 
 /**
- * Wait for a Konva transformer or rotator to be in a specific state
- * @param {Object} I - CodeceptJS I object
- * @param {boolean} expectedState - Expected state (true = should exist, false = should not exist)
- * @param {string} checkType - Type to check: "transformer" or "rotator"
- * @param {Object} options - Configuration options (passed to waitForCondition)
- */
-const waitForTransformerState = (I, expectedState, checkType = "transformer", options = {}) => {
-  const conditionFn = (expectedState, checkType) => {
-    const stage = window.Konva?.stages?.[0];
-    if (!stage) return false;
-
-    const selector = checkType === "transformer" ? "._anchor" : ".rotater";
-    const elements = stage.find(selector).filter((shape) => shape.getAttr("visible") !== false);
-    const exists = !!elements.length;
-    return exists === expectedState;
-  };
-
-  return waitForCondition(I, conditionFn, [expectedState, checkType], {
-    timeoutMessage: `Timeout waiting for ${checkType} state to be ${expectedState}`,
-    ...options,
-  });
-};
-
-/**
  * Wait for meta data to be saved in an annotation region
  * @param {Object} I - CodeceptJS I object
  * @param {number} regionIndex - Index of the region to check
  * @param {string} expectedText - Text that should be present in the meta
- * @param {Object} options - Configuration options (passed to waitForCondition)
+ * @param {Object} options - Configuration options
+ * @param {number} options.timeout - Timeout in milliseconds (default: 5000)
+ * @param {number} options.pollInterval - Polling interval in milliseconds (default: 50)
  */
 const waitForMetaSaved = (I, regionIndex, expectedText, options = {}) => {
-  const conditionFn = (regionIndex, expectedText) => {
-    const annotations = window.Htx?.annotationStore?.annotations;
-    if (!annotations || annotations.length === 0) return false;
+  const timeout = options.timeout || 5000;
+  const pollInterval = options.pollInterval || 50;
+  const timeoutMessage = `Timeout waiting for meta to be saved in region ${regionIndex}`;
 
-    const annotation = annotations[0];
-    const regions = annotation?.regions;
-    if (!regions || regions.length <= regionIndex) return false;
+  // Define everything inline so Playwright can serialize it properly
+  return I.executeScript(
+    (regionIndex, expectedText, timeout, pollInterval, timeoutMessage) => {
+      return new Promise((resolve, reject) => {
+        const startTime = Date.now();
 
-    const region = regions[regionIndex];
-    return region?.meta?.text && region.meta.text.some((t) => t.includes(expectedText));
-  };
+        const poll = () => {
+          if (Date.now() - startTime > timeout) {
+            reject(new Error(timeoutMessage));
+            return;
+          }
 
-  return waitForCondition(I, conditionFn, [regionIndex, expectedText], {
-    timeoutMessage: `Timeout waiting for meta to be saved in region ${regionIndex}`,
-    ...options,
-  });
+          try {
+            const annotations = window.Htx?.annotationStore?.annotations;
+            if (!annotations || annotations.length === 0) {
+              setTimeout(poll, pollInterval);
+              return;
+            }
+
+            const annotation = annotations[0];
+            const regions = annotation?.regions;
+            if (!regions || regions.length <= regionIndex) {
+              setTimeout(poll, pollInterval);
+              return;
+            }
+
+            const region = regions[regionIndex];
+            if (region?.meta?.text && region.meta.text.some((t) => t.includes(expectedText))) {
+              resolve();
+            } else {
+              setTimeout(poll, pollInterval);
+            }
+          } catch (error) {
+            setTimeout(poll, pollInterval);
+          }
+        };
+
+        poll();
+      });
+    },
+    regionIndex,
+    expectedText,
+    timeout,
+    pollInterval,
+    timeoutMessage,
+  );
 };
 
 module.exports = {
-  waitForCondition,
   waitForTransformerState,
   waitForMetaSaved,
 };
