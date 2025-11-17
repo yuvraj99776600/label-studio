@@ -13,7 +13,7 @@
  *
  * @param {Object} I - CodeceptJS I object
  * @param {Function} conditionFn - Function that returns true when condition is met.
- *                                 Will be serialized and executed in browser context.
+ *                                 Will be executed in browser context.
  *                                 Should be a pure function with no external dependencies.
  * @param {Array} args - Arguments to pass to the condition function
  * @param {Object} options - Configuration options
@@ -25,11 +25,11 @@
 const waitForCondition = (I, conditionFn, args = [], options = {}) => {
   const { timeout = 5000, pollInterval = 50, timeoutMessage = "Timeout waiting for condition" } = options;
 
+  // CodeceptJS automatically serializes functions and arguments when passing to executeScript
+  // This follows the same pattern as existing helpers like waitTicks
   return I.executeScript(
-    (conditionFnStr, args, timeout, pollInterval, timeoutMessage) => {
+    (conditionFn, args, timeout, pollInterval, timeoutMessage) => {
       return new Promise((resolve, reject) => {
-        // Reconstruct the condition function from string
-        const conditionFn = eval(`(${conditionFnStr})`);
         const startTime = Date.now();
 
         const checkCondition = () => {
@@ -54,7 +54,7 @@ const waitForCondition = (I, conditionFn, args = [], options = {}) => {
         checkCondition();
       });
     },
-    conditionFn.toString(),
+    conditionFn,
     args,
     timeout,
     pollInterval,
