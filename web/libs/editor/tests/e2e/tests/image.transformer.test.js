@@ -1,6 +1,7 @@
 const assert = require("assert");
 const Asserts = require("../utils/asserts");
 const Helpers = require("./helpers");
+const { waitForTransformerState } = require("../utils/async-helpers");
 
 Feature("Image transformer");
 
@@ -171,12 +172,17 @@ Data(shapesTable).Scenario(
 
     // Select the first region
     AtImageView.clickAt(...getCenter(bbox1));
-    I.waitTicks(3); // Wait for region selection and transformer initialization
     AtOutliner.seeSelectedRegion();
+
+    // Wait for transformer to initialize and render
+    await waitForTransformerState(I, Shape.hasTransformer, "transformer");
 
     // Match if transformer exist with expectations in single selected mode
     isTransformerExist = await AtImageView.isTransformerExist();
     assert.strictEqual(isTransformerExist, Shape.hasTransformer);
+
+    // Wait for rotator to render
+    await waitForTransformerState(I, Shape.hasRotator, "rotator");
 
     // Match if rotator at transformer exist with expectations in single selected mode
     isTransformerExist = await AtImageView.isRotaterExist();
@@ -184,7 +190,9 @@ Data(shapesTable).Scenario(
 
     // Switch to move tool
     I.pressKey("v");
-    I.waitTicks(3); // Wait for tool switch and transformer update
+
+    // Wait for move tool transformer to initialize
+    await waitForTransformerState(I, Shape.hasMoveToolTransformer, "transformer");
 
     // Match if rotator at transformer exist with expectations in single selected mode with move tool chosen
     isTransformerExist = await AtImageView.isTransformerExist();
@@ -203,9 +211,15 @@ Data(shapesTable).Scenario(
       10,
     );
 
+    // Wait for multi-selection transformer to initialize
+    await waitForTransformerState(I, Shape.hasMultiSelectionTransformer, "transformer");
+
     // Match if transformer exist with expectations in multiple selected mode
     isTransformerExist = await AtImageView.isTransformerExist();
     assert.strictEqual(isTransformerExist, Shape.hasMultiSelectionTransformer);
+
+    // Wait for multi-selection rotator to initialize
+    await waitForTransformerState(I, Shape.hasMultiSelectionRotator, "rotator");
 
     // Match if rotator exist with expectations in multiple selected mode
     isTransformerExist = await AtImageView.isRotaterExist();

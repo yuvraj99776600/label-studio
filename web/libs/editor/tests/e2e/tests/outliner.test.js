@@ -1,5 +1,6 @@
 const assert = require("assert");
 const { centerOfBbox } = require("./helpers");
+const { waitForMetaSaved } = require("../utils/async-helpers");
 
 Feature("Outliner");
 
@@ -202,9 +203,12 @@ Scenario("Basic details", async ({ I, LabelStudio, AtOutliner, AtDetails }) => {
 
   I.say("Add line to meta");
   AtDetails.clickMeta();
-  I.waitTicks(2); // Wait for meta input to be ready
+  I.wait(0.3); // Wait for meta input to focus
   fillByPressKeyDown([["Shift", "Enter"], ["3"], ["Enter"]]);
-  I.waitTicks(3); // Wait for meta to be saved
+  
+  // Wait for meta to be actually saved in the annotation
+  await waitForMetaSaved(I, 2, "3");
+
   AtDetails.seeMeta("3");
   AtDetails.dontSeeMeta("23");
 
