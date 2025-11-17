@@ -172,6 +172,7 @@ Data(shapesTable).Scenario(
 
     // Select the first region
     AtImageView.clickAt(...getCenter(bbox1));
+    I.wait(0.1); // Allow click to register
     AtOutliner.seeSelectedRegion();
 
     // Wait for transformer to initialize and render
@@ -190,6 +191,7 @@ Data(shapesTable).Scenario(
 
     // Switch to move tool
     I.pressKey("v");
+    I.wait(0.1); // Allow tool switch to register
 
     // Wait for move tool transformer to initialize
     await waitForTransformerState(I, Shape.hasMoveToolTransformer, "transformer");
@@ -200,6 +202,7 @@ Data(shapesTable).Scenario(
 
     // Deselect the previous selected region
     I.pressKey(["u"]);
+    I.wait(0.1); // Allow deselection to register
 
     // Select 2 regions
     AtImageView.drawThroughPoints(
@@ -210,6 +213,7 @@ Data(shapesTable).Scenario(
       "steps",
       10,
     );
+    I.wait(0.1); // Allow multi-selection to complete
 
     // Wait for multi-selection transformer to initialize
     await waitForTransformerState(I, Shape.hasMultiSelectionTransformer, "transformer");
