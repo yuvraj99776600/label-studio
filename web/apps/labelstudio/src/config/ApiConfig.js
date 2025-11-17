@@ -94,4 +94,5 @@ export const API_CONFIG = {
     accessTokenUpdateSettings: "POST:/jwt/settings",
   },
   alwaysExpectJSON: false,
+  
 };
