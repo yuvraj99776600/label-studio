@@ -205,7 +205,7 @@ Scenario("Basic details", async ({ I, LabelStudio, AtOutliner, AtDetails }) => {
   AtDetails.clickMeta();
   I.wait(0.3); // Wait for meta input to focus
   fillByPressKeyDown([["Shift", "Enter"], ["3"], ["Enter"]]);
-  
+
   // Wait for meta to be actually saved in the annotation
   await waitForMetaSaved(I, 2, "3");
 

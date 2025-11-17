@@ -1,7 +1,7 @@
 /**
  * General helper to wait for a condition to be met in the browser context.
  * This is the core utility that all other wait helpers should use.
- * 
+ *
  * @example
  * // Wait for an element to have a specific class
  * await waitForCondition(
@@ -10,7 +10,7 @@
  *   ['active'],
  *   { timeout: 3000, timeoutMessage: 'Element did not become active' }
  * );
- * 
+ *
  * @param {Object} I - CodeceptJS I object
  * @param {Function} conditionFn - Function that returns true when condition is met.
  *                                 Will be serialized and executed in browser context.
@@ -23,38 +23,36 @@
  * @returns {Promise<void>}
  */
 const waitForCondition = (I, conditionFn, args = [], options = {}) => {
-  const {
-    timeout = 5000,
-    pollInterval = 50,
-    timeoutMessage = "Timeout waiting for condition",
-  } = options;
+  const { timeout = 5000, pollInterval = 50, timeoutMessage = "Timeout waiting for condition" } = options;
 
-  return I.executeAsyncScript(
-    function(conditionFnStr, args, timeout, pollInterval, timeoutMessage, done) {
-      // Reconstruct the condition function from string
-      const conditionFn = eval(`(${conditionFnStr})`);
-      const startTime = Date.now();
+  return I.executeScript(
+    (conditionFnStr, args, timeout, pollInterval, timeoutMessage) => {
+      return new Promise((resolve, reject) => {
+        // Reconstruct the condition function from string
+        const conditionFn = eval(`(${conditionFnStr})`);
+        const startTime = Date.now();
 
-      const checkCondition = () => {
-        if (Date.now() - startTime > timeout) {
-          done(new Error(timeoutMessage));
-          return;
-        }
+        const checkCondition = () => {
+          if (Date.now() - startTime > timeout) {
+            reject(new Error(timeoutMessage));
+            return;
+          }
 
-        try {
-          const result = conditionFn(...args);
-          if (result) {
-            done();
-          } else {
+          try {
+            const result = conditionFn(...args);
+            if (result) {
+              resolve();
+            } else {
+              setTimeout(checkCondition, pollInterval);
+            }
+          } catch (error) {
+            // If condition throws, keep polling (might be accessing not-yet-available objects)
             setTimeout(checkCondition, pollInterval);
           }
-        } catch (error) {
-          // If condition throws, keep polling (might be accessing not-yet-available objects)
-          setTimeout(checkCondition, pollInterval);
-        }
-      };
+        };
 
-      checkCondition();
+        checkCondition();
+      });
     },
     conditionFn.toString(),
     args,
@@ -72,7 +70,7 @@ const waitForCondition = (I, conditionFn, args = [], options = {}) => {
  * @param {Object} options - Configuration options (passed to waitForCondition)
  */
 const waitForTransformerState = (I, expectedState, checkType = "transformer", options = {}) => {
-  const conditionFn = function(expectedState, checkType) {
+  const conditionFn = (expectedState, checkType) => {
     const stage = window.Konva?.stages?.[0];
     if (!stage) return false;
 
@@ -96,7 +94,7 @@ const waitForTransformerState = (I, expectedState, checkType = "transformer", op
  * @param {Object} options - Configuration options (passed to waitForCondition)
  */
 const waitForMetaSaved = (I, regionIndex, expectedText, options = {}) => {
-  const conditionFn = function(regionIndex, expectedText) {
+  const conditionFn = (regionIndex, expectedText) => {
     const annotations = window.Htx?.annotationStore?.annotations;
     if (!annotations || annotations.length === 0) return false;
 
@@ -119,4 +117,3 @@ module.exports = {
   waitForTransformerState,
   waitForMetaSaved,
 };
-
