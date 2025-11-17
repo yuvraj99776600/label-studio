@@ -261,10 +261,10 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMoveToolTransfor
     // Move the right-bottom anchor right for 200px and down for 50px => {x1:0,y1:0,x2:300,y2:300}
     AtImageView.drawByDrag(100, 250, 200, 50);
     I.waitTicks(5); // Wait for final transformation to complete
-    
+
     // Wait for transformer to finish updating and region state to settle
     I.wait(0.5);
-    
+
     // Check resulting sizes
     const rectangleResult = await LabelStudio.serialize();
     const exceptedResult = Shape.byBBox(0, 0, 300, 300).result;
