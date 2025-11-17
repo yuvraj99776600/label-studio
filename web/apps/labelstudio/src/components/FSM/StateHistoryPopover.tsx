@@ -4,8 +4,7 @@
  */
 
 import type React from "react";
-import { Popover } from "@humansignal/ui";
-import { Badge } from "@humansignal/ui";
+import { Popover, Badge, Button } from "@humansignal/ui";
 import { IconSync, IconError, IconHistoryRewind } from "@humansignal/icons";
 import { useStateHistory, type StateHistoryItem } from "@humansignal/app-common";
 import { formatStateName, formatTimestamp, formatUserName } from "./formatters";
@@ -96,15 +95,18 @@ export function StateHistoryPopover({
               <span className="text-xs text-gray-500 text-center">
                 {error instanceof Error ? error.message : "Unknown error"}
               </span>
-              <button
+              <Button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   refetch();
                 }}
-                className="mt-2 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+                className="mt-tight"
+                size="smaller"
+                variant="primary"
               >
                 Retry
-              </button>
+              </Button>
             </div>
           )}
 
