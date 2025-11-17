@@ -39,7 +39,8 @@ Scenario("Play/pause of multiple synced audio stay in sync", async ({ I, LabelSt
   }
 
   AtAudioView.clickPlayButton();
-  I.wait(1);
+  // Wait for play state to propagate and audio to start playing
+  I.waitTicks(5);
   {
     const [{ paused: audioPaused1 }, { paused: audioPaused2 }] = await AtAudioView.getCurrentAudio();
 
@@ -47,9 +48,11 @@ Scenario("Play/pause of multiple synced audio stay in sync", async ({ I, LabelSt
     assert.equal(audioPaused1, false);
   }
 
-  I.wait(1);
+  // Let audio play for a bit to ensure sync is maintained
+  I.waitTicks(10);
   AtAudioView.clickPauseButton();
-  I.wait(1);
+  // Wait for pause state to propagate fully
+  I.waitTicks(5);
   {
     const [{ currentTime: audioTime1, paused: audioPaused1 }, { currentTime: audioTime2, paused: audioPaused2 }] =
       await AtAudioView.getCurrentAudio();
@@ -64,9 +67,7 @@ Scenario("Play/pause of multiple synced audio stay in sync", async ({ I, LabelSt
     assert.notEqual(audioTime1, 0);
     assert.notEqual(audioTime2, 0);
   }
-})
-  .tag("@flakey")
-  .retry(3);
+});
 
 /**
  * @TODO: Fix `The play() request was interrupted by a call to pause()`

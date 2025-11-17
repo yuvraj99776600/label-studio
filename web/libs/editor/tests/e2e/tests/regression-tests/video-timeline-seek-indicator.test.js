@@ -40,6 +40,7 @@ Scenario("Seek view should be in sync with indicator position", async ({ I, Labe
     I.say("Drag the video position indicator to the right to the middle");
 
     AtVideoView.drag(positionBbox, halfway, 0);
+    I.waitTicks(3); // Wait for drag animation and state update
     positionBbox = await AtVideoView.grabPositionBoundingRect();
     indicatorBbox = await AtVideoView.grabIndicatorBoundingRect();
 
@@ -62,6 +63,7 @@ Scenario("Seek view should be in sync with indicator position", async ({ I, Labe
   {
     I.say("Drag the video position indicator to the end");
     AtVideoView.drag(positionBbox, trackBbox.width + trackBbox.x);
+    I.waitTicks(3); // Wait for drag animation and state update
     positionBbox = await AtVideoView.grabPositionBoundingRect();
     indicatorBbox = await AtVideoView.grabIndicatorBoundingRect();
 
@@ -85,6 +87,7 @@ Scenario("Seek view should be in sync with indicator position", async ({ I, Labe
     I.say("Drag the video position indicator to the left to the middle");
 
     AtVideoView.drag(positionBbox, halfway);
+    I.waitTicks(3); // Wait for drag animation and state update
     positionBbox = await AtVideoView.grabPositionBoundingRect();
     indicatorBbox = await AtVideoView.grabIndicatorBoundingRect();
 
@@ -107,6 +110,7 @@ Scenario("Seek view should be in sync with indicator position", async ({ I, Labe
   {
     I.say("Drag the video position indicator to the start");
     AtVideoView.drag(positionBbox, trackBbox.x, 0);
+    I.waitTicks(3); // Wait for drag animation and state update
     positionBbox = await AtVideoView.grabPositionBoundingRect();
     indicatorBbox = await AtVideoView.grabIndicatorBoundingRect();
 
@@ -138,6 +142,7 @@ Scenario("Seek view should be in sync with indicator position", async ({ I, Labe
     const maxStepsForward = 5;
 
     await AtVideoView.drag(positionBbox, endOfSeeker, 0);
+    I.waitTicks(3); // Wait for drag animation and state update
     indicatorBbox = await AtVideoView.grabIndicatorBoundingRect();
 
     I.say("Seeker should not have moved");
@@ -146,6 +151,7 @@ Scenario("Seek view should be in sync with indicator position", async ({ I, Labe
     for (let i = 0; i < maxStepsForward; i++) {
       I.say("Click on the seek step forward button");
       await AtVideoView.clickSeekStepForward(1);
+      I.waitTicks(2); // Wait for seek step to complete
       indicatorBbox = await AtVideoView.grabIndicatorBoundingRect();
 
       if (indicatorBbox.x > indicatorPosX) break;
@@ -157,11 +163,10 @@ Scenario("Seek view should be in sync with indicator position", async ({ I, Labe
 
     I.say("Click on the seek step backward button");
     await AtVideoView.clickSeekStepBackward(1);
+    I.waitTicks(2); // Wait for seek step to complete
     indicatorBbox = await AtVideoView.grabIndicatorBoundingRect();
 
     I.say("Seeker should now have moved to the left");
     assert.ok(indicatorBbox.x < indicatorPosX, "Seeker should have moved to the left from this one step movement");
   }
-})
-  .tag("@flakey")
-  .retry(3);
+});

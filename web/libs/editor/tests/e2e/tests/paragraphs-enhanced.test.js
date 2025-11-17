@@ -77,7 +77,8 @@ async function tryHotkeys(I, combos) {
   for (const keys of combos) {
     I.say(`Trying hotkey: ${JSON.stringify(keys)}`);
     I.pressKey(keys);
-    I.wait(1.5); // Increased from 0.5s - hotkeys trigger complex DOM/MobX updates
+    // Wait for hotkeys to trigger DOM/MobX updates using animation frames
+    I.waitTicks(10); // ~160ms - enough for complex DOM/MobX updates
   }
 }
 
@@ -85,7 +86,8 @@ async function tryHotkeys(I, combos) {
 async function selectLabelSafely(I, AtLabels, labelText) {
   I.say(`Selecting label: ${labelText}`);
   AtLabels.clickLabel(labelText);
-  I.wait(0.8); // Wait for label selection to fully update UI state
+  // Wait for label selection to fully update UI state using animation frames
+  I.waitTicks(5); // ~80ms - enough for UI state updates
 }
 
 Scenario(
@@ -119,9 +121,7 @@ Scenario(
       assert.deepStrictEqual(result[0].value.paragraphlabels, ["General: Positive1"]);
     });
   },
-)
-  .tag("@flakey")
-  .retry(3);
+);
 
 Scenario("Select All button is disabled when no label is selected", async ({ I, LabelStudio, AtOutliner }) => {
   await retryScenario(async () => {
@@ -151,12 +151,12 @@ Scenario("Hotkey for Select All creates region", async ({ I, LabelStudio, AtOutl
       ["Meta", "Shift", "A"],
       ["Control", "Shift", "A"],
     ]);
-    I.wait(1);
+    I.waitTicks(8); // Wait for region creation to complete
     let result = await LabelStudio.serialize();
     if (result.length === 0) {
       // Try Ctrl+Shift+A (Win/Linux) if Cmd+Shift+A didn't work
       await tryHotkeys(I, [["Control", "Shift", "A"]]);
-      I.wait(1);
+      I.waitTicks(8); // Wait for region creation to complete
       result = await LabelStudio.serialize();
     }
     I.say(`Regions after hotkey: ${JSON.stringify(result)}`);
@@ -233,7 +233,7 @@ Scenario("Hotkey: Select All and Annotate creates region", async ({ I, LabelStud
       ["Meta", "Shift", "A"],
       ["Control", "Shift", "A"],
     ]);
-    I.wait(1);
+    I.waitTicks(8); // Wait for region creation to complete
     AtOutliner.seeRegions(1);
     const result = await LabelStudio.serialize();
     assert.strictEqual(result.length, 1);
@@ -442,7 +442,7 @@ Scenario(
 
       I.say("Test 3: Test phrase clicking and selection without audio");
       I.click('div[data-testid="phrase:1"]');
-      I.wait(0.5);
+      I.waitTicks(3); // Wait for visual selection update
       I.say("Clicked phrase 1 - should update visual selection");
 
       I.say("Test 4: Test Select All functionality without audio");
@@ -452,7 +452,7 @@ Scenario(
         ["Meta", "Shift", "A"],
         ["Control", "Shift", "A"],
       ]);
-      I.wait(1);
+      I.waitTicks(8); // Wait for region creation to complete
       AtOutliner.seeRegions(1);
       I.say("Select All worked without audio - created 1 region");
 
@@ -464,7 +464,7 @@ Scenario(
         ["Meta", "ArrowDown"],
         ["Control", "ArrowDown"],
       ]);
-      I.wait(0.5);
+      I.waitTicks(3); // Wait for phrase navigation
       I.say("Next phrase hotkey executed without audio");
 
       // Test Previous Phrase hotkey
@@ -472,7 +472,7 @@ Scenario(
         ["Meta", "ArrowUp"],
         ["Control", "ArrowUp"],
       ]);
-      I.wait(0.5);
+      I.waitTicks(3); // Wait for phrase navigation
       I.say("Previous phrase hotkey executed without audio");
 
       I.say("Test 6: Test phrase navigation looping at ends without audio");
@@ -482,7 +482,7 @@ Scenario(
           ["Meta", "ArrowDown"],
           ["Control", "ArrowDown"],
         ]);
-        I.wait(0.2);
+        I.waitTicks(2); // Wait for phrase navigation
       }
 
       // Try to go beyond last phrase (should loop to first)
@@ -490,7 +490,7 @@ Scenario(
         ["Meta", "ArrowDown"],
         ["Control", "ArrowDown"],
       ]);
-      I.wait(0.5);
+      I.waitTicks(3); // Wait for phrase navigation
       I.say("Phrase navigation looping works without audio");
 
       I.say("All tests passed: No audio component functionality works correctly!");

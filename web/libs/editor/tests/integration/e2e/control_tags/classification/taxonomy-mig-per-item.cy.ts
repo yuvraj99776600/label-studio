@@ -55,15 +55,13 @@ describe("Control Tags - MIG perItem - Taxonomy", () => {
     ImageView.waitForImage();
 
     Taxonomy.open();
-    ImageView.waitForImage();
-    // TODO: Fix this flakey test
-    // Taxonomy.findItem("Choice 2").as("choice2");
-    // cy.wait(50);
-    // cy.get("@choice2").click();
+    // Wait for taxonomy to be fully rendered and interactive
+    Taxonomy.findItem("Choice 2").should("be.visible").should("not.be.disabled");
+    Taxonomy.findItem("Choice 2").click();
 
-    // LabelStudio.serialize().then((result) => {
-    //   expect(result[0]).to.have.property("item_index", 1);
-    // });
+    LabelStudio.serialize().then((result) => {
+      expect(result[0]).to.have.property("item_index", 1);
+    });
   });
 
   it("should be able to create more that one result", () => {
@@ -82,7 +80,8 @@ describe("Control Tags - MIG perItem - Taxonomy", () => {
     ImageView.paginationNextBtn.click();
     ImageView.waitForImage();
     Taxonomy.open();
-    cy.wait(500);
+    // Wait for taxonomy to be fully rendered and interactive
+    Taxonomy.findItem("Choice 3").should("be.visible").should("not.be.disabled");
     Taxonomy.findItem("Choice 3").click();
 
     LabelStudio.serialize().then((result) => {

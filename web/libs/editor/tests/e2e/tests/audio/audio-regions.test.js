@@ -92,22 +92,26 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
 
     // creating a new region
     I.pressKey("1");
+    I.waitTicks(2); // Wait for label selection to update
     AtAudioView.dragAudioElement(160, 80);
     I.pressKey("u");
+    I.waitTicks(3); // Wait for deselection to complete
 
     AtOutliner.seeRegions(2);
 
     AtAudioView.clickAt(170);
+    I.waitTicks(2); // Wait for region selection
     AtOutliner.seeSelectedRegion();
     AtAudioView.clickAt(170);
+    I.waitTicks(2); // Wait for deselection
     AtOutliner.dontSeeSelectedRegion();
     AtAudioView.dragAudioElement(170, 40);
+    I.waitTicks(2); // Wait for region selection after drag
     AtOutliner.seeSelectedRegion();
     AtAudioView.clickAt(220);
+    I.waitTicks(2); // Wait for deselection
     AtOutliner.dontSeeSelectedRegion();
-  })
-    .tag("@flakey")
-    .retry(3);
+  });
 
   // Don't need to test this for both scenarios of flags, as it is the same code and is verified in the above test
   if (!flags.fflag_feat_front_lsdv_e_278_contextual_scrolling_short) {
@@ -128,14 +132,20 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
         for (let i = 0; i < 10; i++) {
           // creating a new region
           I.pressKey("1");
+          I.waitTicks(2); // Wait for label selection
           AtLabels.seeSelectedLabel("Speech");
           AtAudioView.dragAudioElement(40 * i + 10, 30);
+          I.waitTicks(2); // Wait for region creation
           AtOutliner.dontSeeSelectedRegion();
           AtAudioView.clickAt(40 * i + 20);
+          I.waitTicks(2); // Wait for region selection
           AtOutliner.seeSelectedRegion();
           I.pressKey("2");
+          I.waitTicks(2); // Wait for label change
           I.pressKey("1");
+          I.waitTicks(2); // Wait for label change
           I.pressKey("u");
+          I.waitTicks(2); // Wait for deselection
         }
 
         AtOutliner.seeRegions(10);
@@ -143,19 +153,20 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
         for (let i = 0; i < 10; i++) {
           // creating a new region
           AtAudioView.clickAt(40 * i + 20);
+          I.waitTicks(2); // Wait for region selection
           AtOutliner.seeSelectedRegion();
           I.pressKey("u");
+          I.waitTicks(2); // Wait for deselection
         }
 
         AtOutliner.seeRegions(10);
 
         I.pressKey("u");
+        I.waitTicks(2); // Wait for deselection
 
         AtOutliner.dontSeeSelectedRegion();
       },
-    )
-      .tag("@flakey")
-      .retry(3);
+    );
 
     FFlagScenario("Can select a region below a hidden region", async ({ I, LabelStudio, AtAudioView, AtOutliner }) => {
       LabelStudio.setFeatureFlags({
@@ -171,31 +182,36 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
 
       // create a new region
       I.pressKey("1");
+      I.waitTicks(2); // Wait for label selection
       AtAudioView.dragAudioElement(50, 80);
       I.pressKey("u");
+      I.waitTicks(2); // Wait for deselection
 
       AtOutliner.seeRegions(1);
 
       // create a new region above the first one
       I.pressKey("2");
+      I.waitTicks(2); // Wait for label selection
       AtAudioView.dragAudioElement(49, 81);
       I.pressKey("u");
+      I.waitTicks(2); // Wait for deselection
 
       AtOutliner.seeRegions(2);
 
       // click on the top-most region visible to select it
       AtAudioView.clickAt(51);
+      I.waitTicks(2); // Wait for region selection
       AtOutliner.seeSelectedRegion("Noise");
 
       // hide the region
       AtOutliner.toggleRegionVisibility("Noise");
+      I.waitTicks(2); // Wait for visibility change
 
       // click on the region below the hidden one to select it
       AtAudioView.clickAt(51);
+      I.waitTicks(2); // Wait for region selection
       AtOutliner.seeSelectedRegion("Speech");
-    })
-      .tag("@flakey")
-      .retry(3);
+    });
 
     FFlagScenario(
       "Selecting a region brings it to the front of the stack",
@@ -213,33 +229,41 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
 
         // create a new region
         I.pressKey("1");
+        I.waitTicks(2); // Wait for label selection
         AtAudioView.dragAudioElement(50, 80);
         I.pressKey("u");
+        I.waitTicks(2); // Wait for deselection
 
         AtOutliner.seeRegions(1);
 
         // create a new region above the first one
         I.pressKey("2");
+        I.waitTicks(2); // Wait for label selection
         AtAudioView.dragAudioElement(49, 81);
         I.pressKey("u");
+        I.waitTicks(2); // Wait for deselection
 
         AtOutliner.seeRegions(2);
 
         // click on the top-most region visible to select it
         AtAudioView.clickAt(51);
+        I.waitTicks(2); // Wait for region selection
         AtOutliner.seeSelectedRegion("Noise");
 
         // Select the bottom most region to bring it to the top
         AtOutliner.clickRegion("Speech");
+        I.waitTicks(2); // Wait for region selection and z-index change
         AtOutliner.seeSelectedRegion("Speech");
 
         // click on the overlapping region will deselect it, which shows that it is now the top in the list
         AtAudioView.clickAt(51);
+        I.waitTicks(2); // Wait for deselection
         AtOutliner.dontSeeSelectedRegion("Speech");
         AtOutliner.dontSeeSelectedRegion("Noise");
 
         // click on the overlapping region will select the top item of the list, which will now be the item which was brought to the front by the original interaction.
         AtAudioView.clickAt(51);
+        I.waitTicks(2); // Wait for region selection
         AtOutliner.seeSelectedRegion("Speech");
       },
     );
@@ -282,25 +306,31 @@ FFlagMatrix(["fflag_feat_front_lsdv_e_278_contextual_scrolling_short"], (flags) 
 
       // creating a new region
       I.pressKey("1");
+      I.waitTicks(2); // Wait for label selection
       AtAudioView.dragAudioElement(300, 80);
       I.pressKey("u");
+      I.waitTicks(2); // Wait for deselection
 
       // creating a ghost region
       I.pressKey("1");
+      I.waitTicks(2); // Wait for label selection
       AtAudioView.dragAudioElement(160, 80, false);
       I.pressKey("1");
       I.waitTicks(2);
       I.pressMouseUp();
-      I.waitTicks(2);
+      I.waitTicks(3); // Increased wait for state cleanup
 
       // checking if the created region is selected
       AtAudioView.clickAt(310);
+      I.waitTicks(2); // Wait for region selection
       AtOutliner.seeSelectedRegion();
 
       // trying to select the ghost region, if there is no ghost region, the region will keep selected
       // as ghost region is not selectable and impossible to change the label, the created region will be deselected if there is a ghost region created.
       AtAudioView.clickAt(170);
+      I.waitTicks(2); // Wait for click processing
       I.pressKey("2");
+      I.waitTicks(2); // Wait for label change
       AtOutliner.seeSelectedRegion();
 
       AtOutliner.seeRegions(2);
