@@ -171,6 +171,7 @@ Data(shapesTable).Scenario(
 
     // Select the first region
     AtImageView.clickAt(...getCenter(bbox1));
+    I.waitTicks(3); // Wait for region selection and transformer initialization
     AtOutliner.seeSelectedRegion();
 
     // Match if transformer exist with expectations in single selected mode
@@ -183,6 +184,7 @@ Data(shapesTable).Scenario(
 
     // Switch to move tool
     I.pressKey("v");
+    I.waitTicks(3); // Wait for tool switch and transformer update
 
     // Match if rotator at transformer exist with expectations in single selected mode with move tool chosen
     isTransformerExist = await AtImageView.isTransformerExist();
@@ -246,14 +248,19 @@ Data(shapesTable.filter(({ shapeName }) => shapes[shapeName].hasMoveToolTransfor
     // Transform the shape
     // Move the top anchor up for 50px (limited by image border) => {x1:50,y1:0,x2:150,y2:150}
     AtImageView.drawByDrag(100, 50, 0, -100);
+    I.waitTicks(2); // Wait for transformation to complete
     // Move the left anchor left for 50px (limited by image border) => {x1:0,y1:0,x2:150,y2:150}
     AtImageView.drawByDrag(50, 75, -300, -100);
+    I.waitTicks(2); // Wait for transformation to complete
     // Move the right anchor left for 50px => {x1:0,y1:0,x2:100,y2:150}
     AtImageView.drawByDrag(150, 75, -50, 0);
+    I.waitTicks(2); // Wait for transformation to complete
     // Move the bottom anchor down for 100px => {x1:0,y1:0,x2:100,y2:250}
     AtImageView.drawByDrag(50, 150, 10, 100);
+    I.waitTicks(2); // Wait for transformation to complete
     // Move the right-bottom anchor right for 200px and down for 50px => {x1:0,y1:0,x2:300,y2:300}
     AtImageView.drawByDrag(100, 250, 200, 50);
+    I.waitTicks(3); // Wait for final transformation to complete
     // Check resulting sizes
     const rectangleResult = await LabelStudio.serialize();
     const exceptedResult = Shape.byBBox(0, 0, 300, 300).result;

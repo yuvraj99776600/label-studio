@@ -49,6 +49,7 @@ Scenario("Lines overlap", async ({ I, LabelStudio, AtTaxonomy }) => {
 
   AtTaxonomy.clickTaxonomy();
   AtTaxonomy.toggleGroupWithText("target group");
+  I.waitTicks(3); // Wait for taxonomy to expand and render
 
   await checkOverlapAndGap("long long long", "not so long");
 
@@ -73,6 +74,8 @@ Scenario("Lines overlap", async ({ I, LabelStudio, AtTaxonomy }) => {
 
   AtTaxonomy.clickTaxonomy();
   AtTaxonomy.fillSearch("long");
+  I.waitTicks(3); // Wait for search results to render
+
   await checkOverlapAndGap("long long long", "not so long");
 
   I.amOnPage("/");
@@ -96,6 +99,8 @@ Scenario("Lines overlap", async ({ I, LabelStudio, AtTaxonomy }) => {
 
   AtTaxonomy.clickTaxonomy();
   AtTaxonomy.fillSearch("long");
+  I.waitTicks(3); // Wait for search results to render
+
   await checkOverlapAndGap("super long line", "enough long line");
   await checkOverlapAndGap("enough long line", "not long line");
 });
