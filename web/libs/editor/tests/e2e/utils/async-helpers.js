@@ -4,11 +4,11 @@
  * @param {boolean} expectedState - Expected state (true = should exist, false = should not exist)
  * @param {string} checkType - Type to check: "transformer" or "rotator"
  * @param {Object} options - Configuration options
- * @param {number} options.timeout - Timeout in milliseconds (default: 5000)
+ * @param {number} options.timeout - Timeout in milliseconds (default: 3000)
  * @param {number} options.pollInterval - Polling interval in milliseconds (default: 50)
  */
 const waitForTransformerState = (I, expectedState, checkType = "transformer", options = {}) => {
-  const timeout = options.timeout || 5000;
+  const timeout = options.timeout || 3000; // Reduced from 5000 to 3000ms
   const pollInterval = options.pollInterval || 50;
   const timeoutMessage = `Timeout waiting for ${checkType} state to be ${expectedState}`;
 
@@ -19,8 +19,11 @@ const waitForTransformerState = (I, expectedState, checkType = "transformer", op
         const startTime = Date.now();
 
         const poll = () => {
-          if (Date.now() - startTime > timeout) {
-            reject(new Error(timeoutMessage));
+          const elapsed = Date.now() - startTime;
+
+          // Check timeout
+          if (elapsed > timeout) {
+            reject(new Error(`${timeoutMessage} (elapsed: ${elapsed}ms)`));
             return;
           }
 
@@ -41,6 +44,7 @@ const waitForTransformerState = (I, expectedState, checkType = "transformer", op
               setTimeout(poll, pollInterval);
             }
           } catch (error) {
+            // Continue polling on error
             setTimeout(poll, pollInterval);
           }
         };
@@ -62,11 +66,11 @@ const waitForTransformerState = (I, expectedState, checkType = "transformer", op
  * @param {number} regionIndex - Index of the region to check
  * @param {string} expectedText - Text that should be present in the meta
  * @param {Object} options - Configuration options
- * @param {number} options.timeout - Timeout in milliseconds (default: 5000)
+ * @param {number} options.timeout - Timeout in milliseconds (default: 3000)
  * @param {number} options.pollInterval - Polling interval in milliseconds (default: 50)
  */
 const waitForMetaSaved = (I, regionIndex, expectedText, options = {}) => {
-  const timeout = options.timeout || 5000;
+  const timeout = options.timeout || 3000; // Reduced from 5000 to 3000ms
   const pollInterval = options.pollInterval || 50;
   const timeoutMessage = `Timeout waiting for meta to be saved in region ${regionIndex}`;
 
@@ -77,8 +81,11 @@ const waitForMetaSaved = (I, regionIndex, expectedText, options = {}) => {
         const startTime = Date.now();
 
         const poll = () => {
-          if (Date.now() - startTime > timeout) {
-            reject(new Error(timeoutMessage));
+          const elapsed = Date.now() - startTime;
+
+          // Check timeout
+          if (elapsed > timeout) {
+            reject(new Error(`${timeoutMessage} (elapsed: ${elapsed}ms)`));
             return;
           }
 
@@ -103,6 +110,7 @@ const waitForMetaSaved = (I, regionIndex, expectedText, options = {}) => {
               setTimeout(poll, pollInterval);
             }
           } catch (error) {
+            // Continue polling on error
             setTimeout(poll, pollInterval);
           }
         };

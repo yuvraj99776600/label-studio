@@ -32,7 +32,7 @@ module.exports = {
       { id: this._dateInputId },
     );
 
-    I.fillField(`#${this._dateInputId}`, "01020304");
+    await I.fillField(`#${this._dateInputId}`, "01020304");
 
     const format = await I.executeScript(
       ({ id }) => {
