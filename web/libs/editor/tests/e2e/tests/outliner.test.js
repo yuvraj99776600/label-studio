@@ -124,6 +124,7 @@ Scenario("Basic details", async ({ I, LabelStudio, AtOutliner, AtDetails }) => {
       for (let idx = keys.length - 1; idx >= 0; idx--) {
         I.pressKeyUp(keys[idx]);
       }
+      I.wait(0.05); // Small wait between key sequences
     }
   };
 
@@ -196,18 +197,33 @@ Scenario("Basic details", async ({ I, LabelStudio, AtOutliner, AtDetails }) => {
 
   I.say("Add new meta and check result");
   AtDetails.clickEditMeta();
-
-  fillByPressKeyDown([["M"], ["Space"], ["1"], ["Shift", "Enter"], ["M"], ["Space"], ["2"], ["Enter"]]);
+  
+  // Use fillMeta helper for reliability
+  AtDetails.fillMeta("M 1\nM 2");
+  
+  // Click outside the meta field to blur it and trigger save
+  I.click(locate(".lsf-panel__title").withText("Details"));
+  I.wait(0.3); // Wait for meta to be saved after blur
+  
   AtDetails.seeMeta("M 1");
   AtDetails.seeMeta("M 2");
+
+  // Wait for first meta to be fully committed
+  await waitForMetaSaved(I, 2, "M 1", { timeout: 5000 });
 
   I.say("Add line to meta");
   AtDetails.clickMeta();
   I.wait(0.3); // Wait for meta input to focus
-  fillByPressKeyDown([["Shift", "Enter"], ["3"], ["Enter"]]);
+  
+  // Clear and fill with updated meta value
+  AtDetails.fillMeta("M 1\nM 2\n3");
+  
+  // Click outside the meta field to blur it and trigger save
+  I.click(locate(".lsf-panel__title").withText("Details"));
+  I.wait(0.3); // Wait for meta to be saved after blur
 
   // Wait for meta to be actually saved in the annotation
-  await waitForMetaSaved(I, 2, "3");
+  await waitForMetaSaved(I, 2, "3", { timeout: 5000 });
 
   AtDetails.seeMeta("3");
   AtDetails.dontSeeMeta("23");

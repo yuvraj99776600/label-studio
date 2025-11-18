@@ -1,11 +1,12 @@
 const { I } = inject();
 
 module.exports = {
-  seeWarning(text) {
+  async seeWarning(text) {
     I.seeElement(".ant-modal");
     I.see("Warning");
+    // Wait for modal content to be fully rendered
+    await I.wait(0.5);
     I.see(text);
-    I.waitTicks(3);
     I.see("OK");
   },
   dontSeeWarning(text) {

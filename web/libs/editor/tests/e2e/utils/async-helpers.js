@@ -4,60 +4,40 @@
  * @param {boolean} expectedState - Expected state (true = should exist, false = should not exist)
  * @param {string} checkType - Type to check: "transformer" or "rotator"
  * @param {Object} options - Configuration options
- * @param {number} options.timeout - Timeout in milliseconds (default: 3000)
- * @param {number} options.pollInterval - Polling interval in milliseconds (default: 50)
+ * @param {number} options.timeout - Timeout in milliseconds (default: 2000)
+ * @param {number} options.pollInterval - Polling interval in milliseconds (default: 100)
  */
-const waitForTransformerState = (I, expectedState, checkType = "transformer", options = {}) => {
-  const timeout = options.timeout || 3000; // Reduced from 5000 to 3000ms
-  const pollInterval = options.pollInterval || 50;
-  const timeoutMessage = `Timeout waiting for ${checkType} state to be ${expectedState}`;
+const waitForTransformerState = async (I, expectedState, checkType = "transformer", options = {}) => {
+  const timeout = options.timeout || 2000;
+  const pollInterval = options.pollInterval || 100;
+  const startTime = Date.now();
 
-  // Define everything inline so Playwright can serialize it properly
-  return I.executeScript(
-    (expectedState, checkType, timeout, pollInterval, timeoutMessage) => {
-      return new Promise((resolve, reject) => {
-        const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    const exists = await I.executeScript(
+      (checkType) => {
+        try {
+          const stage = window.Konva?.stages?.[0];
+          if (!stage) return false;
+          
+          const selector = checkType === "transformer" ? "._anchor" : ".rotater";
+          const elements = stage.find(selector).filter((shape) => shape.getAttr("visible") !== false);
+          return !!elements.length;
+        } catch (error) {
+          return false;
+        }
+      },
+      checkType
+    );
 
-        const poll = () => {
-          const elapsed = Date.now() - startTime;
+    if (exists === expectedState) {
+      return; // Success!
+    }
 
-          // Check timeout
-          if (elapsed > timeout) {
-            reject(new Error(`${timeoutMessage} (elapsed: ${elapsed}ms)`));
-            return;
-          }
+    await I.wait(pollInterval / 1000); // Convert ms to seconds for CodeceptJS
+  }
 
-          try {
-            const stage = window.Konva?.stages?.[0];
-            if (!stage) {
-              setTimeout(poll, pollInterval);
-              return;
-            }
-
-            const selector = checkType === "transformer" ? "._anchor" : ".rotater";
-            const elements = stage.find(selector).filter((shape) => shape.getAttr("visible") !== false);
-            const exists = !!elements.length;
-
-            if (exists === expectedState) {
-              resolve();
-            } else {
-              setTimeout(poll, pollInterval);
-            }
-          } catch (error) {
-            // Continue polling on error
-            setTimeout(poll, pollInterval);
-          }
-        };
-
-        poll();
-      });
-    },
-    expectedState,
-    checkType,
-    timeout,
-    pollInterval,
-    timeoutMessage,
-  );
+  // If we get here, we timed out
+  throw new Error(`Timeout waiting for ${checkType} state to be ${expectedState} (elapsed: ${Date.now() - startTime}ms)`);
 };
 
 /**
@@ -66,64 +46,44 @@ const waitForTransformerState = (I, expectedState, checkType = "transformer", op
  * @param {number} regionIndex - Index of the region to check
  * @param {string} expectedText - Text that should be present in the meta
  * @param {Object} options - Configuration options
- * @param {number} options.timeout - Timeout in milliseconds (default: 3000)
- * @param {number} options.pollInterval - Polling interval in milliseconds (default: 50)
+ * @param {number} options.timeout - Timeout in milliseconds (default: 2000)
+ * @param {number} options.pollInterval - Polling interval in milliseconds (default: 100)
  */
-const waitForMetaSaved = (I, regionIndex, expectedText, options = {}) => {
-  const timeout = options.timeout || 3000; // Reduced from 5000 to 3000ms
-  const pollInterval = options.pollInterval || 50;
-  const timeoutMessage = `Timeout waiting for meta to be saved in region ${regionIndex}`;
+const waitForMetaSaved = async (I, regionIndex, expectedText, options = {}) => {
+  const timeout = options.timeout || 2000;
+  const pollInterval = options.pollInterval || 100;
+  const startTime = Date.now();
 
-  // Define everything inline so Playwright can serialize it properly
-  return I.executeScript(
-    (regionIndex, expectedText, timeout, pollInterval, timeoutMessage) => {
-      return new Promise((resolve, reject) => {
-        const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    const saved = await I.executeScript(
+      (regionIndex, expectedText) => {
+        try {
+          const annotations = window.Htx?.annotationStore?.annotations;
+          if (!annotations || annotations.length === 0) return false;
 
-        const poll = () => {
-          const elapsed = Date.now() - startTime;
+          const annotation = annotations[0];
+          const regions = annotation?.regions;
+          if (!regions || regions.length <= regionIndex) return false;
 
-          // Check timeout
-          if (elapsed > timeout) {
-            reject(new Error(`${timeoutMessage} (elapsed: ${elapsed}ms)`));
-            return;
-          }
+          const region = regions[regionIndex];
+          return region?.meta?.text && region.meta.text.some((t) => t.includes(expectedText));
+        } catch (error) {
+          return false;
+        }
+      },
+      regionIndex,
+      expectedText
+    );
 
-          try {
-            const annotations = window.Htx?.annotationStore?.annotations;
-            if (!annotations || annotations.length === 0) {
-              setTimeout(poll, pollInterval);
-              return;
-            }
+    if (saved) {
+      return; // Success!
+    }
 
-            const annotation = annotations[0];
-            const regions = annotation?.regions;
-            if (!regions || regions.length <= regionIndex) {
-              setTimeout(poll, pollInterval);
-              return;
-            }
+    await I.wait(pollInterval / 1000); // Convert ms to seconds for CodeceptJS
+  }
 
-            const region = regions[regionIndex];
-            if (region?.meta?.text && region.meta.text.some((t) => t.includes(expectedText))) {
-              resolve();
-            } else {
-              setTimeout(poll, pollInterval);
-            }
-          } catch (error) {
-            // Continue polling on error
-            setTimeout(poll, pollInterval);
-          }
-        };
-
-        poll();
-      });
-    },
-    regionIndex,
-    expectedText,
-    timeout,
-    pollInterval,
-    timeoutMessage,
-  );
+  // If we get here, we timed out
+  throw new Error(`Timeout waiting for meta to be saved in region ${regionIndex} (elapsed: ${Date.now() - startTime}ms)`);
 };
 
 module.exports = {
