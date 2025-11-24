@@ -6,13 +6,7 @@ import { Label } from "../label/label";
 import { Dropdown } from "./dropdown";
 import { DropdownTrigger } from "./dropdown-trigger";
 import type { Align } from "@humansignal/core/lib/utils/dom";
-import {
-  IconUserEdit,
-  IconSettings,
-  IconCross,
-  IconBell,
-  IconChevronDown,
-} from "@humansignal/icons";
+import { IconUserEdit, IconSettings, IconCross, IconBell, IconChevronDown } from "@humansignal/icons";
 
 const meta = {
   component: DropdownTrigger,
@@ -28,14 +22,7 @@ const meta = {
     },
     alignment: {
       control: "select",
-      options: [
-        "top-left",
-        "top-center",
-        "top-right",
-        "bottom-left",
-        "bottom-center",
-        "bottom-right",
-      ],
+      options: ["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"],
       description: "Dropdown alignment relative to trigger",
     },
     enabled: {
@@ -67,8 +54,7 @@ const meta = {
     },
     toggle: {
       control: "boolean",
-      description:
-        "If false, clicking trigger only opens dropdown (doesn't toggle)",
+      description: "If false, clicking trigger only opens dropdown (doesn't toggle)",
       defaultValue: true,
     },
   },
@@ -85,9 +71,7 @@ const MenuContent = ({
   items?: number;
   fullWidth?: boolean;
 }) => (
-  <div
-    className={`p-tight flex flex-col gap-tightest ${fullWidth ? "w-full" : "w-max"}`}
-  >
+  <div className={`p-tight flex flex-col gap-tightest ${fullWidth ? "w-full" : "w-max"}`}>
     {Array.from({ length: items }, (_, i) => (
       <button
         key={i}
@@ -123,12 +107,9 @@ export const WithCustomContent: Story = {
       content={
         <div className="w-80 p-base flex flex-col gap-base">
           <div>
-            <h3 className="text-heading-small font-medium text-primary-foreground mb-tight">
-              Custom Dropdown
-            </h3>
+            <h3 className="text-heading-small font-medium text-primary-foreground mb-tight">Custom Dropdown</h3>
             <p className="text-body-small text-secondary-foreground">
-              This is a custom dropdown with rich content including text and
-              interactive elements.
+              This is a custom dropdown with rich content including text and interactive elements.
             </p>
           </div>
           <div className="flex flex-col gap-tight">
@@ -161,26 +142,15 @@ export const AllAlignments: Story = {
 
     return (
       <div className="grid grid-cols-3 gap-loose">
-        {(
-          [
-            "top-left",
-            "top-center",
-            "top-right",
-            "bottom-left",
-            "bottom-center",
-            "bottom-right",
-          ] as Align[]
-        ).map((alignment) => (
-          <div key={alignment} className="flex justify-center">
-            <Dropdown.Trigger
-              {...args}
-              alignment={alignment}
-              content={<MenuContent />}
-            >
-              <Button>{alignmentShorthand[alignment]}</Button>
-            </Dropdown.Trigger>
-          </div>
-        ))}
+        {(["top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"] as Align[]).map(
+          (alignment) => (
+            <div key={alignment} className="flex justify-center">
+              <Dropdown.Trigger {...args} alignment={alignment} content={<MenuContent />}>
+                <Button>{alignmentShorthand[alignment]}</Button>
+              </Dropdown.Trigger>
+            </div>
+          ),
+        )}
       </div>
     );
   },
@@ -270,12 +240,7 @@ export const ControlledVisibility: Story = {
           <Button onClick={() => setVisible(false)}>Close Dropdown</Button>
           <Button onClick={() => setVisible(!visible)}>Toggle Dropdown</Button>
         </Space>
-        <Dropdown.Trigger
-          {...args}
-          visible={visible}
-          onToggle={setVisible}
-          content={<MenuContent />}
-        >
+        <Dropdown.Trigger {...args} visible={visible} onToggle={setVisible} content={<MenuContent />}>
           <Button>Controlled Dropdown</Button>
         </Dropdown.Trigger>
       </Space>
@@ -405,9 +370,7 @@ export const WithCallbacks: Story = {
       {...args}
       content={<MenuContent />}
       onToggle={(visible) => console.log("onToggle:", visible)}
-      onVisibilityChanged={(visible) =>
-        console.log("onVisibilityChanged:", visible)
-      }
+      onVisibilityChanged={(visible) => console.log("onVisibilityChanged:", visible)}
     >
       <Button>Dropdown with Callbacks (Check Console)</Button>
     </Dropdown.Trigger>
@@ -422,21 +385,15 @@ export const UserProfileMenu: Story = {
       content={
         <div className="w-96 p-base flex flex-col gap-base">
           <div className="pb-base border-b border-neutral-border">
-            <h3 className="text-heading-small font-medium text-primary-foreground">
-              User Profile
-            </h3>
+            <h3 className="text-heading-small font-medium text-primary-foreground">User Profile</h3>
           </div>
           <div className="flex items-center gap-base pb-base border-b border-neutral-border">
             <div className="w-12 h-12 bg-accent-background rounded-full flex items-center justify-center text-accent-foreground font-medium text-body-large">
               JD
             </div>
             <div className="flex flex-col gap-tightest">
-              <div className="text-body-medium font-medium text-primary-foreground">
-                John Doe
-              </div>
-              <div className="text-body-small text-secondary-foreground">
-                john.doe@example.com
-              </div>
+              <div className="text-body-medium font-medium text-primary-foreground">John Doe</div>
+              <div className="text-body-small text-secondary-foreground">john.doe@example.com</div>
             </div>
           </div>
           <div className="flex flex-col gap-tight">
@@ -483,25 +440,13 @@ export const UserProfileMenu: Story = {
 export const MultipleDropdowns: Story = {
   render: (args) => (
     <Space direction="horizontal" size="base" wrap>
-      <Dropdown.Trigger
-        {...args}
-        alignment="bottom-left"
-        content={<MenuContent />}
-      >
+      <Dropdown.Trigger {...args} alignment="bottom-left" content={<MenuContent />}>
         <Button>Dropdown 1</Button>
       </Dropdown.Trigger>
-      <Dropdown.Trigger
-        {...args}
-        alignment="bottom-center"
-        content={<MenuContent />}
-      >
+      <Dropdown.Trigger {...args} alignment="bottom-center" content={<MenuContent />}>
         <Button>Dropdown 2</Button>
       </Dropdown.Trigger>
-      <Dropdown.Trigger
-        {...args}
-        alignment="bottom-right"
-        content={<MenuContent />}
-      >
+      <Dropdown.Trigger {...args} alignment="bottom-right" content={<MenuContent />}>
         <Button>Dropdown 3</Button>
       </Dropdown.Trigger>
     </Space>
@@ -519,11 +464,7 @@ export const DirectDropdownUsage: Story = {
         <Button ref={triggerRef as any} onClick={() => setVisible(!visible)}>
           Advanced Direct Usage
         </Button>
-        <Dropdown
-          visible={visible}
-          onToggle={setVisible}
-          alignment="bottom-left"
-        >
+        <Dropdown visible={visible} onToggle={setVisible} alignment="bottom-left">
           <MenuContent />
         </Dropdown>
       </div>
@@ -534,11 +475,7 @@ export const DirectDropdownUsage: Story = {
 // With Labels
 export const WithLabels: Story = {
   render: (args) => (
-    <Space
-      direction="vertical"
-      size="small"
-      style={{ gridGap: "var(--spacing-base)" }}
-    >
+    <Space direction="vertical" size="small" style={{ gridGap: "var(--spacing-base)" }}>
       <Label>Select an option</Label>
       <Dropdown.Trigger {...args} content={<MenuContent items={5} />}>
         <Button>Open Menu</Button>
