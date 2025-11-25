@@ -325,6 +325,16 @@ class Project(ProjectMixin, FsmHistoryStateModel):
     show_overlap_first = models.BooleanField(_('show overlap first'), default=False)
     overlap_cohort_percentage = models.IntegerField(_('overlap_cohort_percentage'), default=100)
 
+    # When enabled, ground truth tasks remain available to all annotators.
+    # In Ongoing mode, sampling/order is unchanged; in practice this flag ensures:
+    # - GT tasks are still eligible even if is_labeled=True
+    # - GT tasks ignore overlap-based locking so they don't disappear for others
+    force_all_annotators_see_ground_truth = models.BooleanField(
+        _('force all annotators see ground truth'),
+        default=False,
+        help_text='Keep ground truth tasks available to all annotators regardless of overlap; in Ongoing mode task ordering is unchanged',
+    )
+
     task_data_login = models.CharField(
         _('task_data_login'), max_length=256, blank=True, null=True, help_text='Task data credentials: login'
     )
