@@ -4,7 +4,6 @@ from core.label_config import replace_task_data_undefined_with_config_field
 from core.utils.common import load_func
 from data_export.models import DataExport
 from django.conf import settings
-from fsm.serializer_fields import FSMStateField
 from label_studio_sdk._extensions.label_studio_tools.core.label_config import is_video_object_tracking
 from label_studio_sdk._extensions.label_studio_tools.postprocessing.video import extract_key_frames
 from ml.mixins import InteractiveMixin
@@ -27,29 +26,11 @@ class CompletedBySerializer(serializers.ModelSerializer):
 class AnnotationSerializer(FlexFieldsModelSerializer):
     completed_by = serializers.PrimaryKeyRelatedField(read_only=True)
     result = serializers.SerializerMethodField()
-    state = FSMStateField(read_only=True)  # FSM state for annotations
 
     class Meta:
         model = Annotation
         fields = '__all__'
         expandable_fields = {'completed_by': (CompletedBySerializer,)}
-
-    def to_representation(self, instance):
-        """Override to conditionally exclude FSM state field when feature flags are disabled."""
-        from core.current_request import CurrentContext
-        from core.feature_flags import flag_set
-
-        ret = super().to_representation(instance)
-
-        # Remove state field from output if either feature flag is disabled
-        user = CurrentContext.get_user()
-        if not (
-            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
-            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
-        ):
-            ret.pop('state', None)
-
-        return ret
 
     def get_result(self, obj):
         # run frames extraction on param, result and result type
@@ -67,13 +48,9 @@ class BaseExportDataSerializer(FlexFieldsModelSerializer):
     file_upload = serializers.ReadOnlyField(source='file_upload_name')
     drafts = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     predictions = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    state = FSMStateField(read_only=True)  # FSM state for tasks
 
     # resolve $undefined$ key in task data, if any
     def to_representation(self, task):
-        from core.current_request import CurrentContext
-        from core.feature_flags import flag_set
-
         # avoid long project initializations
         project = getattr(self, '_project', None)
         if project is None:
@@ -88,17 +65,7 @@ class BaseExportDataSerializer(FlexFieldsModelSerializer):
             )
         replace_task_data_undefined_with_config_field(data, project)
 
-        ret = super().to_representation(task)
-
-        # Remove state field from output if either feature flag is disabled
-        user = CurrentContext.get_user()
-        if not (
-            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
-            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
-        ):
-            ret.pop('state', None)
-
-        return ret
+        return super().to_representation(task)
 
     class Meta:
         model = Task
