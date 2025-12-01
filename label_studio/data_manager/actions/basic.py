@@ -37,6 +37,10 @@ def delete_tasks(project, queryset, **kwargs):
     :param project: project instance
     :param queryset: filtered tasks db queryset
     """
+    # Try to get user from request for FSM context
+    request = kwargs.get('request')
+    user = getattr(request, 'user', None) if request else None
+
     tasks_ids = list(queryset.values('id'))
     count = len(tasks_ids)
     tasks_ids_list = [task['id'] for task in tasks_ids]
@@ -58,6 +62,9 @@ def delete_tasks(project, queryset, **kwargs):
     project.update_tasks_states(
         maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True
     )
+    # FSM: Recalculate project state after deletion/unlink using swappable setting
+    update_func = load_func(settings.FSM_UPDATE_PROJECT_STATE_AFTER_TASK_CHANGE)
+    update_func(project, user=user)
     # emit webhooks for project
     emit_webhooks_for_instance(project.organization, project, WebhookAction.TASKS_DELETED, tasks_ids)
 

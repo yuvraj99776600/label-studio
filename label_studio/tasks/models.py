@@ -1316,6 +1316,11 @@ def update_all_task_states_after_deleting_task(sender, instance, **kwargs):
             overlap_cohort_percentage_changed=False,
             tasks_number_changed=True,
         )
+        # FSM: Recalculate project state after a single task deletion (signal-based path) via settings
+        from core.utils.common import load_func
+
+        update_func = load_func(settings.FSM_UPDATE_PROJECT_STATE_AFTER_TASK_CHANGE)
+        update_func(instance.project, user=getattr(instance, 'updated_by', None))
     except Exception as exc:
         logger.error('Error in update_all_task_states_after_deleting_task: ' + str(exc))
 
