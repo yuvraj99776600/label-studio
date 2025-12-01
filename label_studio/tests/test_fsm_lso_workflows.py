@@ -696,7 +696,7 @@ def test_project_completes_after_deleting_unfinished_tasks(django_live_url, busi
     ls = LabelStudio(base_url=django_live_url, api_key=business_client.api_key)
 
     project = ls.projects.create(
-        title='Test Project - Complete after deleting unfinished tasks',
+        title='Complete after deleting unfinished',
         label_config='<View><Text name="text" value="$text"/><Choices name="label" toName="text"><Choice value="positive"/><Choice value="negative"/></Choices></View>',
     )
     # Create 4 tasks
