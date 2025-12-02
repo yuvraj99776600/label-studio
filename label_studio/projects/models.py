@@ -520,6 +520,11 @@ class Project(ProjectMixin, FsmHistoryStateModel):
         elif tasks_number_changed and self.overlap_cohort_percentage < 100 and self.maximum_annotations > 1:
             self._rearrange_overlap_cohort()
 
+        if tasks_number_changed:
+            # FSM: Recalculate project state after task deletion or import
+            update_func = load_func(settings.FSM_UPDATE_PROJECT_STATE_AFTER_TASK_CHANGE)
+            update_func(self, user=None)
+
     def _batch_update_with_retry(self, queryset, batch_size=500, max_retries=3, **update_fields):
         batch_update_with_retry(queryset, batch_size, max_retries, **update_fields)
 
