@@ -14,7 +14,8 @@
   --comment-item-content-font-size: 14px;
   --comment-item-content-line-height: 20px;
   --comment-item-content-letter-spacing: 0.25px;
-  --comment-item-avatar-size: 24px;
+  --comment-item-avatar-size: 20px;
+  --comment-item-meta-font-size: var(--font-size-body-smallest, 12px);
   --comment-item-name-color: var(--color-neutral-content);
   --comment-item-content-color: var(--color-neutral-content-subtle);
   --comment-item-content-color-resolved: var(--color-neutral-content-subtler);
@@ -45,7 +46,7 @@
 
   &__name,
   &__date {
-    font-size: var(--comment-item-content-font-size);
+    font-size: var(--comment-item-meta-font-size);
   }
 
   &__saving {

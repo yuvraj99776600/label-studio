@@ -2,7 +2,7 @@
  * StateHistoryPopoverContent - Popover content for displaying state history
  */
 
-import { Badge, Button, Typography } from "@humansignal/ui";
+import { ActivityItem, Badge, Button, Typography, Userpic } from "@humansignal/ui";
 import { IconSync, IconError, IconHistoryRewind, IconCross } from "@humansignal/icons";
 import { useStateHistory, type StateHistoryItem } from "../../hooks/useStateHistory";
 import { getStateColorClass, formatStateName, formatTimestamp, formatUserName } from "./utils";
@@ -98,19 +98,24 @@ export function StateHistoryPopoverContent({ entityType, entityId, isOpen, onClo
 
         {!isLoading && !isError && history.length > 0 && (
           <div className="space-y-3">
-            {history.map((item: StateHistoryItem, index: number) => (
-              <div key={index} className="pb-3 border-b border-neutral-border last:border-0 last:pb-0">
-                <div className="flex items-center justify-between mb-2">
-                  <Badge className={getStateColorClass(item.state)}>{formatStateName(item.state)}</Badge>
-                  <Typography variant="body" size="smallest" className="text-neutral-content-subtle">
-                    {formatTimestamp(item.created_at)}
-                  </Typography>
-                </div>
-                <Typography variant="body" size="smallest" className="text-muted-foreground">
-                  By: {formatUserName(item.triggered_by)}
-                </Typography>
-              </div>
-            ))}
+            {history.map((item: StateHistoryItem, index: number) => {
+              const isSystemUser = !item.triggered_by;
+              return (
+                <ActivityItem
+                  key={index}
+                  className="pb-3 border-b border-neutral-border last:border-0 last:pb-0"
+                  label={<Badge className={getStateColorClass(item.state)}>{formatStateName(item.state)}</Badge>}
+                  timestamp={formatTimestamp(item.created_at)}
+                  attribution={
+                    <>
+                      <span>By:</span>
+                      {!isSystemUser && <Userpic user={item.triggered_by} size={20} showUsernameTooltip />}
+                      <span>{formatUserName(item.triggered_by)}</span>
+                    </>
+                  }
+                />
+              );
+            })}
           </div>
         )}
       </div>

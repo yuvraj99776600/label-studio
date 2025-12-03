@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import type React from "react";
 import { type FC, useCallback, useContext, useMemo, useState } from "react";
-import { Tooltip, Userpic } from "@humansignal/ui";
+import { ActivityItem, Tooltip, Userpic } from "@humansignal/ui";
 import { IconCheck, IconEllipsis } from "@humansignal/icons";
 import { Button } from "@humansignal/ui";
 import { Dropdown } from "@humansignal/ui";
@@ -168,65 +168,10 @@ export const CommentItem: FC<CommentItemProps> = observer(
         }}
         ref={_commentRef as any}
       >
-        <Space spread size="medium" truncated>
-          <Space size="small" truncated>
-            <Userpic
-              className={cn("comment-item").elem("userpic").toClassName()}
-              user={hiddenUser ?? createdBy}
-              showUsernameTooltip
-              username={createdBy}
-            />
-            <span className={cn("comment-item").elem("name").toClassName()}>
-              {userDisplayName(hiddenUser ?? createdBy)}
-            </span>
-          </Space>
-
-          <Space size="small">
-            <IconCheck className={cn("comment-item").elem("resolved").toClassName()} />
-            <div className={cn("comment-item").elem("saving").mod({ hide: isPersisted }).toClassName()}>
-              <div className={cn("comment-item").elem("dot").toClassName()} />
-            </div>
-            {!infoIsHidden && <TimeTracker />}
-          </Space>
-        </Space>
-
-        <div className={cn("comment-item").elem("content").toClassName()}>
-          <div className={cn("comment-item").elem("text").toClassName()}>
-            {isEditMode ? (
-              <>
-                <CommentFormBase value={text} onSubmit={commentFormBaseOnSubmit} classifications={classifications} />
-                {classificationsItems.length > 0 && (
-                  <div className={cn("comment-item").elem("classifications-row").toClassName()}>
-                    <Taxonomy
-                      selected={taxonomySelectedItems}
-                      items={classificationsItems}
-                      onChange={taxonomyOnChange}
-                      options={COMMENT_TAXONOMY_OPTIONS}
-                      defaultSearch={false}
-                    />
-                  </div>
-                )}
-              </>
-            ) : isConfirmDelete ? (
-              <div className={cn("comment-item").elem("confirmForm").toClassName()}>
-                <div className={cn("comment-item").elem("question").toClassName()}>Are you sure?</div>
-                <div className={cn("comment-item").elem("controls").toClassName()}>
-                  <Button
-                    onClick={() => deleteComment()}
-                    size="small"
-                    look="danger"
-                    autoFocus
-                    aria-label="Delete comment"
-                  >
-                    Yes
-                  </Button>
-                  <Button onClick={() => setConfirmMode(false)} size="small" aria-label="Cancel delete">
-                    No
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <>
+        <ActivityItem
+          label={
+            !isEditMode && !isConfirmDelete ? (
+              <div className={cn("comment-item").elem("text").toClassName()}>
                 {classifications?.default?.values?.length > 0 && (
                   <ul className={cn("comment-item").elem("classifications").toClassName()}>
                     {classifications?.default?.values?.map((valueArray: string[], index: number) => (
@@ -240,56 +185,117 @@ export const CommentItem: FC<CommentItemProps> = observer(
                     <LinkState linking={linking} region={region} result={result} interactive />
                   </div>
                 )}
-              </>
-            )}
-          </div>
-
-          <div
-            className={cn("comment-item").elem("actions").toClassName()}
-            onClick={(e: any) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-          >
-            {isPersisted && (isCreator || canResolveAny) && (
-              <Dropdown.Trigger
-                content={
-                  <Menu size="auto">
-                    <Menu.Item onClick={toggleResolve}>{resolved ? "Unresolve" : "Resolve"}</Menu.Item>
-                    {isCreator && (
-                      <>
-                        <Menu.Item
-                          onClick={() => {
-                            const isGoingIntoEditMode = !isEditMode;
-
-                            setEditMode(isGoingIntoEditMode);
-                            if (!isGoingIntoEditMode) {
-                              setText(initialText);
-                            }
-                          }}
-                        >
-                          {isEditMode ? "Cancel edit" : "Edit"}
-                        </Menu.Item>
-                        <Menu.Item onClick={toggleLink}>{regionRef?.region ? "Unlink" : "Link to..."}</Menu.Item>
-                        {!isConfirmDelete && (
-                          <Menu.Item
-                            onClick={() => {
-                              setConfirmMode(true);
-                            }}
-                          >
-                            Delete
-                          </Menu.Item>
+              </div>
+            ) : undefined
+          }
+          timestamp={
+            <Space size="small">
+              <IconCheck className={cn("comment-item").elem("resolved").toClassName()} />
+              <div className={cn("comment-item").elem("saving").mod({ hide: isPersisted }).toClassName()}>
+                <div className={cn("comment-item").elem("dot").toClassName()} />
+              </div>
+              {!infoIsHidden && <TimeTracker />}
+            </Space>
+          }
+          attribution={
+            <>
+              <span>By:</span>
+              <Userpic
+                className={cn("comment-item").elem("userpic").toClassName()}
+                user={hiddenUser ?? createdBy}
+                showUsernameTooltip
+                username={createdBy}
+                size={20}
+              />
+              <span style={{ flex: 1 }}>{userDisplayName(hiddenUser ?? createdBy)}</span>
+              {isPersisted && (isCreator || canResolveAny) && (
+                <div
+                  className={cn("comment-item").elem("actions").toClassName()}
+                  onClick={(e: any) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                >
+                  <Dropdown.Trigger
+                    content={
+                      <Menu size="auto">
+                        <Menu.Item onClick={toggleResolve}>{resolved ? "Unresolve" : "Resolve"}</Menu.Item>
+                        {isCreator && (
+                          <>
+                            <Menu.Item
+                              onClick={() => {
+                                const isGoingIntoEditMode = !isEditMode;
+                                setEditMode(isGoingIntoEditMode);
+                                if (!isGoingIntoEditMode) {
+                                  setText(initialText);
+                                }
+                              }}
+                            >
+                              {isEditMode ? "Cancel edit" : "Edit"}
+                            </Menu.Item>
+                            <Menu.Item onClick={toggleLink}>{regionRef?.region ? "Unlink" : "Link to..."}</Menu.Item>
+                            {!isConfirmDelete && (
+                              <Menu.Item
+                                onClick={() => {
+                                  setConfirmMode(true);
+                                }}
+                              >
+                                Delete
+                              </Menu.Item>
+                            )}
+                          </>
                         )}
-                      </>
-                    )}
-                  </Menu>
-                }
-              >
-                <Button size="small" look="string" icon={<IconEllipsis />} aria-label="Comment options" />
-              </Dropdown.Trigger>
-            )}
+                      </Menu>
+                    }
+                  >
+                    <Button size="small" look="string" icon={<IconEllipsis />} aria-label="Comment options" />
+                  </Dropdown.Trigger>
+                </div>
+              )}
+            </>
+          }
+        />
+
+        {(isEditMode || isConfirmDelete) && (
+          <div className={cn("comment-item").elem("content").toClassName()}>
+            <div className={cn("comment-item").elem("text").toClassName()}>
+              {isEditMode ? (
+                <>
+                  <CommentFormBase value={text} onSubmit={commentFormBaseOnSubmit} classifications={classifications} />
+                  {classificationsItems.length > 0 && (
+                    <div className={cn("comment-item").elem("classifications-row").toClassName()}>
+                      <Taxonomy
+                        selected={taxonomySelectedItems}
+                        items={classificationsItems}
+                        onChange={taxonomyOnChange}
+                        options={COMMENT_TAXONOMY_OPTIONS}
+                        defaultSearch={false}
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className={cn("comment-item").elem("confirmForm").toClassName()}>
+                  <div className={cn("comment-item").elem("question").toClassName()}>Are you sure?</div>
+                  <div className={cn("comment-item").elem("controls").toClassName()}>
+                    <Button
+                      onClick={() => deleteComment()}
+                      size="small"
+                      look="danger"
+                      autoFocus
+                      aria-label="Delete comment"
+                    >
+                      Yes
+                    </Button>
+                    <Button onClick={() => setConfirmMode(false)} size="small" aria-label="Cancel delete">
+                      No
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   },

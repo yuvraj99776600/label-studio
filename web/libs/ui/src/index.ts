@@ -1,3 +1,4 @@
+export * from "./lib/activity-item";
 export * from "./lib/Card/Card";
 export * from "./lib/InputFile/InputFile";
 export * from "./lib/MultiStateToggle/MultiStateToggle";
