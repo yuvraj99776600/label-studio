@@ -41,6 +41,9 @@ def delete_tasks(project, queryset, **kwargs):
     count = len(tasks_ids)
     tasks_ids_list = [task['id'] for task in tasks_ids]
     project_count = project.tasks.count()
+    
+    user = kwargs.get('request').user if 'request' in kwargs else None
+
     # unlink tasks from project
     queryset = Task.objects.filter(id__in=tasks_ids_list)
     queryset.update(project=None)
@@ -56,7 +59,7 @@ def delete_tasks(project, queryset, **kwargs):
         start_job_async_or_sync(async_project_summary_recalculation, tasks_ids_list, project.id)
 
     project.update_tasks_states(
-        maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True
+        maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True, user=user
     )
     # emit webhooks for project
     emit_webhooks_for_instance(project.organization, project, WebhookAction.TASKS_DELETED, tasks_ids)

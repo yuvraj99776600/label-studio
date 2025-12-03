@@ -27,11 +27,13 @@ def remove_duplicates(project, queryset, **kwargs):
     Duplicated tasks will be deleted and all annotations will be moved to the first of the duplicated tasks.
     Storage links will be restored for the first task.
     """
+    user = kwargs.get('request').user if 'request' in kwargs else None
     start_job_async_or_sync(
         remove_duplicates_job,
         project,
         queryset,
         organization_id=project.organization_id,
+        user=user,
     )
     return {'response_code': 200}
 
@@ -50,6 +52,7 @@ def remove_duplicates_job(project, queryset, **kwargs):
         overlap_cohort_percentage_changed=True,
         tasks_number_changed=False,
         from_scratch=True,
+        user=kwargs.get('user', None),
     )
 
 

@@ -1307,10 +1307,14 @@ def update_all_task_states_after_deleting_task(sender, instance, **kwargs):
     but call only tasks_number_changed section
     """
     try:
-        instance.project.update_tasks_states(
+        request = get_current_request()
+        user = request.user if request else None
+        instance.project.update_tasks_counters_and_task_states(
+            instance.project.tasks.all(),
             maximum_annotations_changed=False,
             overlap_cohort_percentage_changed=False,
             tasks_number_changed=True,
+            user=user,
         )
     except Exception as exc:
         logger.error('Error in update_all_task_states_after_deleting_task: ' + str(exc))

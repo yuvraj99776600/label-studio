@@ -321,6 +321,7 @@ class ImportAPI(generics.CreateAPIView):
                 overlap_cohort_percentage_changed=False,
                 tasks_number_changed=True,
                 recalculate_stats_counts=recalculate_stats_counts,
+                user=self.request.user,
             )
             logger.info('Tasks bulk_update finished (sync import)')
 
@@ -657,6 +658,7 @@ class ReImportAPI(ImportAPI):
                 'annotation_count': annotation_count,
                 'prediction_count': prediction_count,
             },
+            user=self.request.user,
         )
         logger.info('Tasks bulk_update finished (sync reimport)')
 
