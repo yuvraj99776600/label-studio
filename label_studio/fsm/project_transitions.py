@@ -7,8 +7,8 @@ replacing the previous signal-based approach with explicit, testable transitions
 
 from typing import Any, Dict, Optional
 
-from django.conf import settings
 from core.utils.common import load_func
+from django.conf import settings
 from fsm.registry import register_state_transition
 from fsm.state_choices import ProjectStateChoices
 from fsm.state_manager import StateManager
