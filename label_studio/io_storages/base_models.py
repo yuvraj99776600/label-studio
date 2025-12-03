@@ -653,7 +653,10 @@ class ImportStorage(Storage):
         user = request.user if request else None
 
         self.project.update_tasks_states(
-            maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True, user=user
+            maximum_annotations_changed=False,
+            overlap_cohort_percentage_changed=False,
+            tasks_number_changed=True,
+            user=user,
         )
         if validation_errors:
             # sync is finished, set completed with errors status for storage info

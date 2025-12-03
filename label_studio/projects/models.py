@@ -35,8 +35,8 @@ from django.db.models.expressions import RawSQL
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from fsm.models import FsmHistoryStateModel
-from fsm.queryset_mixins import FSMStateQuerySetMixin
 from fsm.project_transitions import update_project_state_after_task_change
+from fsm.queryset_mixins import FSMStateQuerySetMixin
 from label_studio_sdk._extensions.label_studio_tools.core.label_config import parse_config
 from labels_manager.models import Label
 from projects.functions import (
@@ -1197,7 +1197,9 @@ class Project(ProjectMixin, FsmHistoryStateModel):
 
         queryset = make_queryset_from_iterable(queryset)
         objs = update_tasks_counters(queryset, from_scratch)
-        self._update_tasks_states(maximum_annotations_changed, overlap_cohort_percentage_changed, tasks_number_changed, user=user)
+        self._update_tasks_states(
+            maximum_annotations_changed, overlap_cohort_percentage_changed, tasks_number_changed, user=user
+        )
 
         if recalculate_all_stats and recalculate_stats_counts:
             recalculate_all_stats(self.id, **recalculate_stats_counts)
