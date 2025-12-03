@@ -633,6 +633,7 @@ IO_STORAGES_IMPORT_LINK_NAMES = [
 CREATE_ORGANIZATION = 'organizations.functions.create_organization'
 SAVE_USER = 'users.functions.save_user'
 POST_PROCESS_REIMPORT = 'core.utils.common.empty'
+POST_PROCESS_IMPORT = 'core.utils.common.empty'
 USER_SERIALIZER = 'users.serializers.BaseUserSerializer'
 WHOAMI_USER_SERIALIZER = 'users.serializers.BaseWhoAmIUserSerializer'
 USER_SERIALIZER_UPDATE = 'users.serializers.BaseUserSerializerUpdate'

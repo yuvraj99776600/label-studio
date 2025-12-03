@@ -22,6 +22,8 @@ from .uploader import load_tasks_for_async_import
 
 logger = logging.getLogger(__name__)
 
+post_process_import = load_func(settings.POST_PROCESS_IMPORT)
+
 
 def async_import_background(
     import_id, user_id, recalculate_stats_func: Optional[Callable[..., None]] = None, **kwargs
@@ -130,6 +132,7 @@ def async_import_background(
                 logger.info('Tasks bulk_update finished (async import)')
 
                 summary.update_data_columns(tasks)
+
                 # TODO: summary.update_created_annotations_and_labels
             except Exception as e:
                 # Handle any other unexpected errors during task creation
@@ -138,6 +141,8 @@ def async_import_background(
                 project_import.status = ProjectImport.Status.FAILED
                 project_import.save(update_fields=['error', 'status'])
                 return
+
+        post_process_import(project_import)
     else:
         # Do nothing - just output file upload ids for further use
         task_count = len(tasks)
@@ -530,6 +535,8 @@ def _async_import_background_streaming(project_import, user):
                 recalculate_stats_counts=recalculate_stats_counts,
             )
             logger.info('Tasks bulk_update finished (async streaming import)')
+
+            post_process_import(project_import)
 
         duration = time.time() - start
 
