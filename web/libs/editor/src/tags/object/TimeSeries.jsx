@@ -1125,17 +1125,23 @@ const Overview = observer(({ item, data, series }) => {
   const { margin, keyColumn: idX } = item;
   const width = Math.max(fullWidth - margin.left - margin.right, 0);
   // const data = store.task.dataObj;
-  let keys = Object.keys(item.channelsMap);
+  const keys = React.useMemo(() => {
+    let allKeys = Object.keys(item.channelsMap);
 
-  if (item.overviewchannels) {
-    const channels = item.overviewchannels
-      .toLowerCase()
-      .split(",")
-      .map((name) => (/^\d+$/.test(name) ? item.headers[name] : name))
-      .filter((ch) => keys.includes(ch));
+    if (item.overviewchannels) {
+      const channels = item.overviewchannels
+        .toLowerCase()
+        .split(",")
+        .map((name) => {
+          const trimmed = name.trim();
+          return /^\d+$/.test(trimmed) && item.headers ? item.headers[Number(trimmed)]?.toLowerCase() : trimmed;
+        })
+        .filter((ch) => ch && allKeys.includes(ch));
 
-    if (channels.length) keys = channels;
-  }
+      if (channels.length) return channels;
+    }
+    return allKeys;
+  }, [item.overviewchannels, item.channelsMap, item.headers]);
   // const series = data[idX];
   const minRegionWidth = 2;
 
@@ -1353,13 +1359,13 @@ const Overview = observer(({ item, data, series }) => {
         .attr("viewBox", [0, 0, width + margin.left + margin.right, focusHeight + margin.bottom]);
 
       gChannels.current.selectAll("path").remove();
-      for (const key of Object.keys(item.channelsMap)) drawPath(key);
+      for (const key of keys) drawPath(key);
 
       drawAxis();
       // gb.current.selectAll("*").remove();
       gb.current.call(brush).call(brush.move, item.brushRange.map(x));
     }
-  }, [width, node]);
+  }, [width, node, keys]);
 
   // redraw overview on zoom
   React.useEffect(() => {
