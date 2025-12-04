@@ -506,7 +506,7 @@ describe("TimeSeries playback", () => {
 describe("TimeSeries overviewChannels filtering", () => {
   // Helper function to replicate the filtering logic from Overview component
   const filterOverviewChannels = (overviewchannels, channelsMap, headers) => {
-    let allKeys = Object.keys(channelsMap);
+    const allKeys = Object.keys(channelsMap);
 
     if (overviewchannels) {
       const channels = overviewchannels
