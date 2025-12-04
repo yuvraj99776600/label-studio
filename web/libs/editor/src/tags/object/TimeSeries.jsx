@@ -1126,7 +1126,7 @@ const Overview = observer(({ item, data, series }) => {
   const width = Math.max(fullWidth - margin.left - margin.right, 0);
   // const data = store.task.dataObj;
   const keys = React.useMemo(() => {
-    let allKeys = Object.keys(item.channelsMap);
+    const allKeys = Object.keys(item.channelsMap);
 
     if (item.overviewchannels) {
       const channels = item.overviewchannels
