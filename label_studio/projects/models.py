@@ -5,6 +5,7 @@ import logging
 from typing import Any, Mapping, Optional
 
 from annoying.fields import AutoOneToOneField
+from core.current_request import CurrentContext
 from core.label_config import (
     check_control_in_config_by_regex,
     check_toname_in_config_by_regex,
@@ -484,14 +485,13 @@ class Project(ProjectMixin, FsmHistoryStateModel):
         return membership.exists() and membership.first().enabled
 
     def _update_tasks_states(
-        self, maximum_annotations_changed, overlap_cohort_percentage_changed, tasks_number_changed, user=None
+        self, maximum_annotations_changed, overlap_cohort_percentage_changed, tasks_number_changed
     ):
         """
         Update tasks states after settings change
         :param maximum_annotations_changed: If maximum_annotations param changed
         :param overlap_cohort_percentage_changed: If cohort_percentage param changed
         :param tasks_number_changed: If tasks number changed in project
-        :param user: User who is updating the tasks states
         """
         logger.info(
             f'Starting _update_tasks_states with params: Project {str(self)} maximum_annotations '
@@ -533,6 +533,7 @@ class Project(ProjectMixin, FsmHistoryStateModel):
 
         if tasks_number_changed:
             # FSM: Recalculate project state after task deletion or import
+            user = CurrentContext.get_user()
             update_project_state_after_task_change(self, user=user)
 
     def _batch_update_with_retry(self, queryset, batch_size=500, max_retries=3, **update_fields):
@@ -1184,22 +1185,18 @@ class Project(ProjectMixin, FsmHistoryStateModel):
         tasks_number_changed,
         from_scratch=True,
         recalculate_stats_counts: Optional[Mapping[str, int]] = None,
-        user=None,
     ):
         """
         Update tasks counters and update tasks states (rearrange and/or is_labeled)
         :param queryset: Tasks to update queryset
         :param from_scratch: Skip calculated tasks
-        :param user: User who is updating the tasks states
         :return: Count of updated tasks
         """
         from tasks.functions import update_tasks_counters
 
         queryset = make_queryset_from_iterable(queryset)
         objs = update_tasks_counters(queryset, from_scratch)
-        self._update_tasks_states(
-            maximum_annotations_changed, overlap_cohort_percentage_changed, tasks_number_changed, user=user
-        )
+        self._update_tasks_states(maximum_annotations_changed, overlap_cohort_percentage_changed, tasks_number_changed)
 
         if recalculate_all_stats and recalculate_stats_counts:
             recalculate_all_stats(self.id, **recalculate_stats_counts)
