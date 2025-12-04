@@ -17,7 +17,6 @@ from urllib.parse import urljoin
 import django_rq
 import rq
 import rq.exceptions
-from core.current_request import get_current_request
 from core.feature_flags import flag_set
 from core.redis import is_job_in_queue, is_job_on_worker, redis_connected, start_job_async_or_sync
 from core.utils.common import load_func
@@ -652,14 +651,8 @@ class ImportStorage(Storage):
 
         backfill_fsm_states_for_tasks(self.id, tasks_created, link_class)
 
-        request = get_current_request()
-        user = request.user if request else None
-
         self.project.update_tasks_states(
-            maximum_annotations_changed=False,
-            overlap_cohort_percentage_changed=False,
-            tasks_number_changed=True,
-            user=user,
+            maximum_annotations_changed=False, overlap_cohort_percentage_changed=False, tasks_number_changed=True
         )
         if validation_errors:
             # sync is finished, set completed with errors status for storage info

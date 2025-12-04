@@ -126,7 +126,6 @@ def async_import_background(
                     overlap_cohort_percentage_changed=False,
                     tasks_number_changed=True,
                     recalculate_stats_counts=recalculate_stats_counts,
-                    user=user,
                 )
                 logger.info('Tasks bulk_update finished (async import)')
 
@@ -373,7 +372,6 @@ def _async_reimport_background_streaming(reimport, project, organization_id, use
                 overlap_cohort_percentage_changed=False,
                 tasks_number_changed=True,
                 recalculate_stats_counts=recalculate_stats_counts,
-                user=user,
             )
             logger.info('Tasks bulk_update finished (async streaming reimport)')
 
@@ -530,7 +528,6 @@ def _async_import_background_streaming(project_import, user):
                 overlap_cohort_percentage_changed=False,
                 tasks_number_changed=True,
                 recalculate_stats_counts=recalculate_stats_counts,
-                user=user,
             )
             logger.info('Tasks bulk_update finished (async streaming import)')
 
@@ -614,7 +611,6 @@ def async_reimport_background(reimport_id, organization_id, user, **kwargs):
                 overlap_cohort_percentage_changed=False,
                 tasks_number_changed=True,
                 recalculate_stats_counts=recalculate_stats_counts,
-                user=user,
             )
             logger.info('Tasks bulk_update finished (async reimport)')
 
