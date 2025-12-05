@@ -105,15 +105,16 @@ export function StateHistoryPopoverContent({ entityType, entityId, isOpen, onClo
                   className="pb-3 border-b border-neutral-border last:border-0 last:pb-0"
                   label={<Badge className={getStateColorClass(item.state)}>{formatStateName(item.state)}</Badge>}
                   timestamp={formatTimestamp(item.created_at)}
-                  attribution={ item.triggered_by ? (
-                    <>
-                      { <Userpic user={item.triggered_by} size={20} showUsernameTooltip />}
-                      <span>{formatUserName(item.triggered_by)}</span>
-                    </>
-                  ) : (
-                    <span>{item.context_data?.reason}</span>
-                  )
-                }
+                  attribution={
+                    item.triggered_by ? (
+                      <>
+                        {<Userpic user={item.triggered_by} size={20} showUsernameTooltip />}
+                        <span>{formatUserName(item.triggered_by)}</span>
+                      </>
+                    ) : (
+                      <span>{item.context_data?.reason}</span>
+                    )
+                  }
                 />
               );
             })}

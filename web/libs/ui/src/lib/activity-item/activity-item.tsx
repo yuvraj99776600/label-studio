@@ -12,7 +12,7 @@ export interface ActivityItemProps {
   label?: ReactNode;
   /** Timestamp or secondary info on the right of the first row */
   timestamp?: ReactNode;
-  /** Attribution row content (e.g., "By: username" with optional userpic) */
+  /** Attribution row content (e.g., "username" with optional userpic) */
   attribution?: ReactNode;
   /** Additional content below the header and attribution */
   children?: ReactNode;

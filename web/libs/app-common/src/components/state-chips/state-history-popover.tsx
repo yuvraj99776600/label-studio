@@ -106,7 +106,7 @@ export function StateHistoryPopover({
                   </div>
                   <div>
                     <Typography variant="body" size="smallest" className="text-muted-foreground">
-                      By: {formatUserName(item.triggered_by)}
+                      {formatUserName(item.triggered_by)}
                     </Typography>
                     {item.transition_name && (
                       <Typography variant="body" size="smallest" className="mt-1 text-neutral-content-subtle">

@@ -199,7 +199,6 @@ export const CommentItem: FC<CommentItemProps> = observer(
           }
           attribution={
             <>
-              <span>By:</span>
               <Userpic
                 className={cn("comment-item").elem("userpic").toClassName()}
                 user={hiddenUser ?? createdBy}
