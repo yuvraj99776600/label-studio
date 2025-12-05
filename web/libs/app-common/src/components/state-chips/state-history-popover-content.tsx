@@ -99,20 +99,21 @@ export function StateHistoryPopoverContent({ entityType, entityId, isOpen, onClo
         {!isLoading && !isError && history.length > 0 && (
           <div className="space-y-3">
             {history.map((item: StateHistoryItem, index: number) => {
-              const isSystemUser = !item.triggered_by;
               return (
                 <ActivityItem
                   key={index}
                   className="pb-3 border-b border-neutral-border last:border-0 last:pb-0"
                   label={<Badge className={getStateColorClass(item.state)}>{formatStateName(item.state)}</Badge>}
                   timestamp={formatTimestamp(item.created_at)}
-                  attribution={
+                  attribution={ item.triggered_by ? (
                     <>
-                      <span>By:</span>
-                      {!isSystemUser && <Userpic user={item.triggered_by} size={20} showUsernameTooltip />}
+                      { <Userpic user={item.triggered_by} size={20} showUsernameTooltip />}
                       <span>{formatUserName(item.triggered_by)}</span>
                     </>
-                  }
+                  ) : (
+                    <span>{item.context_data?.reason}</span>
+                  )
+                }
                 />
               );
             })}
