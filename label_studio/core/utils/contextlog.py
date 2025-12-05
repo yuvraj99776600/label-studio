@@ -295,7 +295,7 @@ class ContextLog(object):
             'language': request.LANGUAGE_CODE,
             'content_type': content_type,
             'content_length': (
-                int(request.environ.get('CONTENT_LENGTH')) if request.environ.get('CONTENT_LENGTH') else None
+                int(request.META.get('CONTENT_LENGTH')) if request.META.get('CONTENT_LENGTH') else None
             ),
             'status_code': status_code,
             'response': response_content,
@@ -329,7 +329,6 @@ class ContextLog(object):
             pass
         else:
             try:
-                url = 'https://tele.labelstud.io'
-                requests.post(url=url, json=payload, timeout=3.0)
+                requests.post(url=settings.COLLECT_ANALYTICS_URL, json=payload, timeout=3.0)
             except:  # noqa: E722
                 pass

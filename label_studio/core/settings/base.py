@@ -726,6 +726,7 @@ FEATURE_FLAGS_DEFAULT_VALUE = False
 
 # Whether to send analytics telemetry data. Fall back to old lowercase name for legacy compatibility.
 COLLECT_ANALYTICS = get_bool_env('COLLECT_ANALYTICS', get_bool_env('collect_analytics', True))
+COLLECT_ANALYTICS_URL = get_env('COLLECT_ANALYTICS_URL', 'https://tele.labelstud.io')
 
 # Strip harmful content from SVG files by default
 SVG_SECURITY_CLEANUP = get_bool_env('SVG_SECURITY_CLEANUP', False)
