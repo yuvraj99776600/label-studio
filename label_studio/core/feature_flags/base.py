@@ -85,6 +85,13 @@ def flag_set(feature_flag, user=None, override_system_default=None, organization
 
     stale feature flags are considered "deprecated" and should not be changeable in any circumstance.
     They are an intermediary step before code references to the flag being removed completely.
+
+    Priority order:
+    1. STALE_FEATURE_FLAGS (hardcoded deprecations)
+    2. Environment variables (get_bool_env)
+    3. Cypress Redis overrides (only in CYPRESS_ENVIRONMENT)
+    4. LaunchDarkly (via Redis feature store or API)
+    5. FEATURE_FLAGS_DEFAULT_VALUE
     """
 
     if feature_flag in STALE_FEATURE_FLAGS:
@@ -98,14 +105,39 @@ def flag_set(feature_flag, user=None, override_system_default=None, organization
         if request and getattr(request, 'user', None) and request.user.is_authenticated:
             user = request.user
 
+    # Check environment variables (second priority after stale flags)
+    env_value = get_bool_env(feature_flag, default=None)
+    if env_value is not None:
+        return env_value
+
+    # Check Cypress Redis overrides (only in CYPRESS_ENVIRONMENT)
+    # This allows E2E tests to override feature flags at runtime without modifying LaunchDarkly
+    if getattr(settings, 'CYPRESS_ENVIRONMENT', False):
+        try:
+            from htx.cypress.feature_flags import get_cypress_flag_override
+
+            # Try to get session_id from the current request for session-scoped overrides
+            session_id = None
+            request = get_current_request()
+            if request:
+                session_id = request.headers.get('X-Cypress-Session-Id') or request.GET.get('cypress_session_id')
+
+            cypress_override = get_cypress_flag_override(feature_flag, session_id)
+            if cypress_override is not None:
+                logger.debug(f'Using Cypress FF override for {feature_flag}: {cypress_override}')
+                return cypress_override
+        except ImportError:
+            # LSO environment without LSE's htx.cypress module - no Cypress overrides available
+            pass
+        except Exception as e:
+            logger.warning(f'Error checking Cypress FF override for {feature_flag}: {e}')
+
+    # Check LaunchDarkly (via Redis or API)
     if organization is None:
         user_dict = get_user_repr(user)
     else:
         user_dict = get_user_repr_from_organization(organization)
 
-    env_value = get_bool_env(feature_flag, default=None)
-    if env_value is not None:
-        return env_value
     if override_system_default is not None:
         system_default = override_system_default
     else:
