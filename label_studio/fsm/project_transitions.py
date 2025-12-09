@@ -49,7 +49,6 @@ class ProjectCreatedTransition(ModelChangeTransition):
         project = context.entity
 
         return {
-            'reason': 'Project created',
             'organization_id': project.organization_id,
             'title': project.title,
             'created_by_id': project.created_by_id if project.created_by_id else None,
@@ -79,7 +78,6 @@ class ProjectInProgressTransition(ModelChangeTransition):
     def transition(self, context: TransitionContext) -> Dict[str, Any]:
         project = context.entity
         return {
-            'reason': 'Project moved to in progress - first annotation submitted',
             'organization_id': project.organization_id,
             'total_tasks': project.tasks.count(),
         }
@@ -103,7 +101,6 @@ class ProjectCompletedTransition(ModelChangeTransition):
     def transition(self, context: TransitionContext) -> Dict[str, Any]:
         project = context.entity
         return {
-            'reason': 'Project completed - all tasks completed',
             'organization_id': project.organization_id,
             'total_tasks': project.tasks.count(),
         }
@@ -129,7 +126,6 @@ class ProjectInProgressFromCompletedTransition(ModelChangeTransition):
     def transition(self, context: TransitionContext) -> Dict[str, Any]:
         project = context.entity
         return {
-            'reason': 'Project moved back to in progress - task became incomplete',
             'organization_id': project.organization_id,
             'total_tasks': project.tasks.count(),
         }
