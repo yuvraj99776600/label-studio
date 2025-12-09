@@ -60,16 +60,10 @@ def execute_transition_with_state_manager(
     # Extract organization_id from context_kwargs if provided, otherwise use entity's org_id
     organization_id = context_kwargs.pop('organization_id', getattr(entity, 'organization_id', None))
 
-    # Extract entity_user from context_kwargs if explicitly provided
-    # If not provided, TransitionContext will auto-extract from entity
-    entity_user = context_kwargs.pop('user', None)
-
     # Create minimal context with just entity for target_state computation
-    # Note: user will be auto-extracted from entity if not explicitly provided
     minimal_context = TransitionContext(
         entity=entity,
         current_user=user,
-        user=entity_user,  # Will auto-extract from entity if None
         current_state_object=None,
         current_state=None,
         target_state=None,  # Will be computed
@@ -96,11 +90,9 @@ def execute_transition_with_state_manager(
         current_state = current_state_object.state if current_state_object else None
 
     # Build full transition context
-    # Note: user will be auto-extracted from entity if not explicitly provided
     context = TransitionContext(
         entity=entity,
         current_user=user,
-        user=entity_user,  # Will auto-extract from entity if None
         current_state_object=current_state_object,
         current_state=current_state,
         target_state=target_state,

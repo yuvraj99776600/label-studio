@@ -37,12 +37,6 @@ class TransitionContext(BaseModel, Generic[EntityType, StateModelType]):
     # Core context information
     entity: Any = Field(..., description='The entity being transitioned')
     current_user: Optional[Any] = Field(None, description='User triggering the transition (request user)')
-    user: Optional[Any] = Field(
-        None,
-        description='Entity-related user (e.g., annotation completed_by, comment created_by). '
-        'Distinct from current_user which is the request user triggering the transition. '
-        'Automatically extracted from entity if not provided.',
-    )
     current_state_object: Optional[Any] = Field(None, description='Full current state object')
     current_state: Optional[str] = Field(None, description='Current state as string')
     target_state: Optional[str] = Field(
@@ -62,39 +56,6 @@ class TransitionContext(BaseModel, Generic[EntityType, StateModelType]):
 
     # Validation context, for cases where we want to skip validation for the transition
     skip_validation: Optional[bool] = Field(default=False, description='Whether to skip validation for the transition')
-
-    def model_post_init(self, __context) -> None:
-        """Extract user from entity if not explicitly provided."""
-        if self.user is None and self.entity is not None:
-            self.user = self._extract_user_from_entity(self.entity)
-
-    @staticmethod
-    def _extract_user_from_entity(entity) -> Optional[Any]:
-        """
-        Extract the entity-related user from common user fields.
-
-        Checks common patterns for user association on entities:
-        - user: Direct user reference
-        - created_by: User who created the entity
-        - completed_by: User who completed the entity (e.g., annotations)
-        - assignee: User assigned to the entity (e.g., task assignments)
-
-        Args:
-            entity: The entity to extract user from
-
-        Returns:
-            The extracted user or None if no user field found
-        """
-        # Check common user field patterns in order of specificity
-        user_fields = ['user', 'created_by', 'completed_by', 'assignee']
-
-        for field in user_fields:
-            if hasattr(entity, field):
-                user = getattr(entity, field, None)
-                if user is not None:
-                    return user
-
-        return None
 
     @property
     def has_current_state(self) -> bool:

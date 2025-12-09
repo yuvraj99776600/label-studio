@@ -56,7 +56,6 @@ def get_available_transitions(entity: Model, user=None, validate: bool = False) 
             try:
                 temp_instance = transition_class()
                 # Create minimal context for dynamic target_state computation
-                # Note: user will be auto-extracted from entity
                 minimal_context = TransitionContext(
                     entity=entity,
                     current_user=user,
@@ -72,7 +71,6 @@ def get_available_transitions(entity: Model, user=None, validate: bool = False) 
                 valid_transitions[name] = transition_class
                 continue
 
-            # Note: user will be auto-extracted from entity
             context = TransitionContext(
                 entity=entity,
                 current_user=user,
@@ -197,7 +195,6 @@ def get_entity_state_flow(entity: Model) -> List[Dict[str, Any]]:
 
             transition = transition_class()
             # Create minimal context for dynamic target_state computation
-            # Note: user will be auto-extracted from entity
             minimal_context = (
                 TransitionContext(
                     entity=entity,
