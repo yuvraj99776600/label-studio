@@ -405,7 +405,19 @@ def get_next_task(
             if dm_queue:
                 queue_info += (' & ' if queue_info else '') + 'Data manager queue'
                 logger.debug(f'User={user} tries sequence sampling from prepared tasks')
-                next_task = not_solved_tasks.first()
+                # IMPORTANT: When using data manager queue, we need to exclude the currently locked task
+                # to prevent returning the same task repeatedly when navigating forward in label stream.
+                # Without this, clicking "next" would return the same task because:
+                # 1. not_solved_tasks excludes completed tasks but not locked tasks
+                # 2. .first() would keep returning the locked task
+                # 3. The user would be stuck on the same task unable to progress
+                locked_task = Task.get_locked_by(user, tasks=not_solved_tasks)
+                if locked_task:
+                    # Exclude the currently locked task to get the next one in sequence
+                    not_solved_tasks_without_locked = not_solved_tasks.exclude(pk=locked_task.pk)
+                    next_task = not_solved_tasks_without_locked.first()
+                else:
+                    next_task = not_solved_tasks.first()
 
             else:
                 next_task, queue_info = get_task_from_qs_with_sampling(
