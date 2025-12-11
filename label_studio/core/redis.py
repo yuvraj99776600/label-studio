@@ -115,6 +115,9 @@ def _capture_context() -> dict:
         if key not in ['user', 'request'] and _is_serializable(value):
             context_data[key] = value
 
+    # Debug: Log what we're capturing
+    logger.info(f'_capture_context: captured context_data={context_data}')
+
     return context_data
 
 
