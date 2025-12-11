@@ -71,8 +71,12 @@ class BaseExportDataSerializer(FlexFieldsModelSerializer):
 
     # resolve $undefined$ key in task data, if any
     def to_representation(self, task):
+        import logging
+
         from core.current_request import CurrentContext
         from core.feature_flags import flag_set
+
+        logger = logging.getLogger(__name__)
 
         # avoid long project initializations
         project = getattr(self, '_project', None)
@@ -92,10 +96,15 @@ class BaseExportDataSerializer(FlexFieldsModelSerializer):
 
         # Remove state field from output if either feature flag is disabled
         user = CurrentContext.get_user()
-        if not (
-            flag_set('fflag_feat_fit_568_finite_state_management', user=user)
-            and flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
-        ):
+        flag_568 = flag_set('fflag_feat_fit_568_finite_state_management', user=user)
+        flag_710 = flag_set('fflag_feat_fit_710_fsm_state_fields', user=user)
+
+        logger.info(
+            f'BaseExportDataSerializer: task_id={task.id}, state_in_ret={ret.get("state")}, '
+            f'user={user}, user_id={getattr(user, "id", None)}, flag_568={flag_568}, flag_710={flag_710}'
+        )
+
+        if not (flag_568 and flag_710):
             ret.pop('state', None)
 
         return ret
