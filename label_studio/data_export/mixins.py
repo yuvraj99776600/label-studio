@@ -7,9 +7,8 @@ import shutil
 from datetime import datetime
 from functools import reduce
 
-import django_rq
 from core.feature_flags import flag_set
-from core.redis import redis_connected
+from core.redis import redis_connected, start_job_async_or_sync
 from core.utils.common import batch
 from core.utils.io import (
     SerializableGenerator,
@@ -325,8 +324,10 @@ class ExportMixin:
         self.save(update_fields=['status'])
 
         if redis_connected():
-            queue = django_rq.get_queue('default')
-            queue.enqueue(
+            # Use start_job_async_or_sync to automatically capture and restore CurrentContext
+            # This ensures user_id, organization_id, and fsm_enabled_cached are available in the worker
+            # which is required for FSM state field serialization in exports
+            start_job_async_or_sync(
                 export_background,
                 self.id,
                 task_filter_options,
