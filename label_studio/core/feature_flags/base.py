@@ -7,7 +7,7 @@ from ldclient.config import Config, HTTPConfig
 from ldclient.feature_store import CacheConfig
 from ldclient.integrations import Files, Redis
 
-from label_studio.core.current_request import get_current_request
+from label_studio.core.current_request import CurrentContext
 from label_studio.core.utils.common import load_func
 from label_studio.core.utils.io import find_node
 from label_studio.core.utils.params import get_all_env_with_prefix, get_bool_env
@@ -93,10 +93,10 @@ def flag_set(feature_flag, user=None, override_system_default=None, organization
     if user is None:
         user = AnonymousUser
     elif user == 'auto':
-        user = AnonymousUser
-        request = get_current_request()
-        if request and getattr(request, 'user', None) and request.user.is_authenticated:
-            user = request.user
+        # Try to get user from CurrentContext - works for both HTTP requests and background jobs
+        user = CurrentContext.get_user()
+        if not user or not getattr(user, 'is_authenticated', False):
+            user = AnonymousUser
 
     if organization is None:
         user_dict = get_user_repr(user)
