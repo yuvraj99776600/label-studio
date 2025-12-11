@@ -668,40 +668,39 @@ class ImportStorage(Storage):
         self._scan_and_create_links(ImportStorageLink)
 
     def sync(self):
+        queue_name = 'low'
+        meta = {'project': self.project.id, 'storage': self.id}
+
+        # Check for duplicate jobs only when redis is connected (async mode)
         if redis_connected():
-            queue_name = 'low'
             queue = django_rq.get_queue(queue_name)
-            meta = {'project': self.project.id, 'storage': self.id}
-            if not is_job_in_queue(queue, 'import_sync_background', meta=meta) and not is_job_on_worker(
+            if is_job_in_queue(queue, 'import_sync_background', meta=meta) or is_job_on_worker(
                 job_id=self.last_sync_job, queue_name=queue_name
             ):
-                if not self.info_set_queued():
-                    return
-                # Use start_job_async_or_sync to automatically capture and restore CurrentContext
-                # This ensures user_id, organization_id, and request_id are available in the worker
-                sync_job = start_job_async_or_sync(
-                    import_sync_background,
-                    self.__class__,
-                    self.id,
-                    queue_name=queue_name,
-                    meta=meta,
-                    project_id=self.project.id,
-                    organization_id=self.project.organization.id,
-                    on_failure=storage_background_failure,
-                    job_timeout=settings.RQ_LONG_JOB_TIMEOUT,
-                )
-                self.info_set_job(sync_job.id)
-                logger.info(f'Storage sync background job {sync_job.id} for storage {self} has been started')
-        else:
-            try:
-                logger.info(f'Start syncing storage {self}')
-                if not self.info_set_queued():
-                    return
-                import_sync_background(self.__class__, self.id)
-            except Exception:
-                # needed to facilitate debugging storage-related testcases, since otherwise no exception is logged
-                logger.debug(f'Storage {self} failed', exc_info=True)
-                storage_background_failure(self)
+                return  # Job already running or queued
+
+        if not self.info_set_queued():
+            return
+
+        # Use start_job_async_or_sync to automatically capture and restore CurrentContext
+        # This ensures user_id, organization_id, and request_id are available in the worker
+        # Note: start_job_async_or_sync handles redis_connected() check internally
+        result = start_job_async_or_sync(
+            import_sync_background,
+            self.__class__,
+            self.id,
+            queue_name=queue_name,
+            meta=meta,
+            project_id=self.project.id,
+            organization_id=self.project.organization.id,
+            on_failure=storage_background_failure,
+            job_timeout=settings.RQ_LONG_JOB_TIMEOUT,
+        )
+
+        # If result is an RQ job (async), store the job ID for tracking
+        if hasattr(result, 'id'):
+            self.info_set_job(result.id)
+            logger.info(f'Storage sync background job {result.id} for storage {self} has been started')
 
     class Meta:
         abstract = True
@@ -862,29 +861,27 @@ class ExportStorage(Storage, ProjectStorageMixin):
         else:
             export_sync_fn = export_sync_background
 
-        if redis_connected():
-            queue = django_rq.get_queue('low')
-            if not self.info_set_queued():
-                return
-            sync_job = queue.enqueue(
-                export_sync_fn,
-                self.__class__,
-                self.id,
-                job_timeout=settings.RQ_LONG_JOB_TIMEOUT,
-                project_id=self.project.id,
-                organization_id=self.project.organization.id,
-                on_failure=storage_background_failure,
-            )
-            self.info_set_job(sync_job.id)
-            logger.info(f'Storage sync background job {sync_job.id} for storage {self} has been queued')
-        else:
-            try:
-                logger.info(f'Start syncing storage {self}')
-                if not self.info_set_queued():
-                    return
-                export_sync_fn(self.__class__, self.id)
-            except Exception:
-                storage_background_failure(self)
+        if not self.info_set_queued():
+            return
+
+        # Use start_job_async_or_sync to automatically capture and restore CurrentContext
+        # This ensures user_id, organization_id, and request_id are available in the worker
+        # Note: start_job_async_or_sync handles redis_connected() check internally
+        result = start_job_async_or_sync(
+            export_sync_fn,
+            self.__class__,
+            self.id,
+            queue_name='low',
+            job_timeout=settings.RQ_LONG_JOB_TIMEOUT,
+            project_id=self.project.id,
+            organization_id=self.project.organization.id,
+            on_failure=storage_background_failure,
+        )
+
+        # If result is an RQ job (async), store the job ID for tracking
+        if hasattr(result, 'id'):
+            self.info_set_job(result.id)
+            logger.info(f'Storage sync background job {result.id} for storage {self} has been queued')
 
     class Meta:
         abstract = True

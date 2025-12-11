@@ -8,7 +8,7 @@ from datetime import datetime
 from functools import reduce
 
 from core.feature_flags import flag_set
-from core.redis import redis_connected, start_job_async_or_sync
+from core.redis import start_job_async_or_sync
 from core.utils.common import batch
 from core.utils.io import (
     SerializableGenerator,
@@ -323,25 +323,19 @@ class ExportMixin:
         self.status = self.Status.IN_PROGRESS
         self.save(update_fields=['status'])
 
-        if redis_connected():
-            # Use start_job_async_or_sync to automatically capture and restore CurrentContext
-            # This ensures user_id, organization_id, and fsm_enabled_cached are available in the worker
-            # which is required for FSM state field serialization in exports
-            start_job_async_or_sync(
-                export_background,
-                self.id,
-                task_filter_options,
-                annotation_filter_options,
-                serialization_options,
-                on_failure=set_export_background_failure,
-                job_timeout='3h',  # 3 hours
-            )
-        else:
-            self.export_to_file(
-                task_filter_options=task_filter_options,
-                annotation_filter_options=annotation_filter_options,
-                serialization_options=serialization_options,
-            )
+        # Use start_job_async_or_sync to automatically capture and restore CurrentContext
+        # This ensures user_id, organization_id, and fsm_enabled_cached are available in the worker
+        # which is required for FSM state field serialization in exports
+        # Note: start_job_async_or_sync handles redis_connected() check internally
+        start_job_async_or_sync(
+            export_background,
+            self.id,
+            task_filter_options,
+            annotation_filter_options,
+            serialization_options,
+            on_failure=set_export_background_failure,
+            job_timeout='3h',  # 3 hours
+        )
 
     def convert_file(self, to_format, download_resources=False, hostname=None):
         with get_temp_dir() as tmp_dir:
