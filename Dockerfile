@@ -16,20 +16,17 @@ ARG BRANCH_OVERRIDE
 # 5. "prod" - Creates the final production image with the Label Studio, Nginx, and other dependencies.
 
 ################################ Stage: frontend-builder (build frontend assets)
-FROM --platform=${BUILDPLATFORM} node:${NODE_VERSION}-trixie AS frontend-builder
+FROM node:${NODE_VERSION}-trixie AS frontend-builder
 ENV BUILD_NO_SERVER=true \
     BUILD_NO_HASH=true \
     BUILD_NO_CHUNKS=true \
     BUILD_MODULE=true \
     YARN_CACHE_FOLDER=/root/web/.yarn \
     NX_CACHE_DIRECTORY=/root/web/.nx \
-    NODE_ENV=production
+    NODE_ENV=production \
+    JOBS=2
 
 WORKDIR /label-studio/web
-
-# Fix Docker Arm64 Build
-RUN yarn config set registry https://registry.npmjs.org/
-RUN yarn config set network-timeout 1200000 # HTTP timeout used when downloading packages, set to 20 minutes
 
 COPY web/package.json .
 COPY web/yarn.lock .
