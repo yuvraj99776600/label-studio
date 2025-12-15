@@ -149,7 +149,6 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          platforms: ${{ matrix.platform }}
           sbom: true
           provenance: true
           tags: ${{ env.IMAGE_NAME }}
