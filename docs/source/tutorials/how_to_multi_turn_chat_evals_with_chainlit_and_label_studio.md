@@ -11,6 +11,7 @@ report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/is
 thumbnail: /images/tutorials/tutorials-eval-multi-turn-chainlit.png
 meta_title: "How to Evaluate Multi-Turn AI Conversations with Chainlit and Label Studio"
 meta_description: Learn how to create a Label Studio project for evaluating chatbot conversations using the Chatbot Evaluation template.
+duration: 10-15 mins
 ---
 This notebook demonstrates how to create a Label Studio project for evaluating chatbot conversations using the Chatbot Evaluation template.
 

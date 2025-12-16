@@ -11,6 +11,8 @@ report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/is
 thumbnail: /images/tutorials/tutorials-debug-agents-langsmith.png
 meta_title: How to Debug Agents with LangSmith and Label Studio
 meta_description: Learn how LangSmith and Label Studio can work together to debug and evaluate AI Agents.
+is_enterprise: true
+duration: 10-15 mins
 ---
 ## 0. Label Studio Requirements
 
