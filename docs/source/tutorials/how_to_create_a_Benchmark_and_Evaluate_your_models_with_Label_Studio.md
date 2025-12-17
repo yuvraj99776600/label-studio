@@ -11,6 +11,7 @@ report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/is
 thumbnail: /images/tutorials/tutorials-ai-benchmark-and-eval.png
 meta_title: How to Connect Hugging Face with Label Studio SDK
 meta_description: Learn how to use the Label Studio SDK to create a high-quality benchmark dataset to evaluate multiple AI models
+is_enterprise: true
 is_starter_cloud: true
 badges: SDK, Benchmark, Eval, Prompt, Colab
 duration: 10-15 mins
