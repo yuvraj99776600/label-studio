@@ -12,6 +12,8 @@ thumbnail: /images/tutorials/tutorials-debug-agents-langsmith.png
 meta_title: How to Debug Agents with LangSmith and Label Studio
 meta_description: Learn how LangSmith and Label Studio can work together to debug and evaluate AI Agents.
 is_enterprise: true
+is_starter_cloud: true
+badges: SDK, LangSmith, Eval, Agents, Colab
 duration: 10-15 mins
 ---
 ## 0. Label Studio Requirements

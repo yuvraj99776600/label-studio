@@ -11,8 +11,7 @@ report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/is
 thumbnail: /images/tutorials/tutorials-compare-ai-models.png
 meta_title: How to Compare Two AI Models with Label Studio
 meta_description: Learn how to compare and evaluate two AI models with the Label Studio SDK.
-is_enterprise: true
-badges: SDK, Agreement, CodeLab
+badges: SDK, Agreement, Colab
 duration: 10-15 mins
 ---
 
