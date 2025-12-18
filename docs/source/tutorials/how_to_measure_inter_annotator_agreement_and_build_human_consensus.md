@@ -14,7 +14,7 @@ meta_description: Learn how to measure inter-annotator agreement, build human co
 is_enterprise: true
 is_starter_cloud: true
 badges: SDK, Agreement, Colab
-duration: 10-15 mins
+duration: 5-10 mins
 ---
 
 This tutorial walks through a practical workflow to measure inter-annotator agreement, build human consensus, establish ground truth and

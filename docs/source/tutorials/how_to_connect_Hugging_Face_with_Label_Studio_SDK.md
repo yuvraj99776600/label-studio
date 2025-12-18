@@ -12,7 +12,7 @@ thumbnail: /images/tutorials/tutorials-hugging-face-ls-sdk.png
 meta_title: How to Connect Hugging Face with Label Studio SDK
 meta_description: Learn how to create a NLP workflow by integrating Hugging Face datasets and models with Label Studio for annotation and active learning.
 badges: SDK, Hugging Face, Colab
-duration: 10-15 mins
+duration: 5-10 mins
 ---
 **A Complete Guide to Connecting Hugging Face and Label Studio**
 
