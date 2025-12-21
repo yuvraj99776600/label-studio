@@ -24,7 +24,7 @@ With your [Prompt created](prompts_create), you can begin drafting your prompt c
     * You must include the text variables. These appear directly above the prompt field. (In the demo below, this is the `review` variable.) Click the text variable name to insert it into the prompt. 
     * Although not strictly required, you should provide definitions for each class to ensure prediction accuracy and to help [add context](#Add-context). 
 
-    !!! info Tip
+    !!! info "Tip"
         You can generate an initial draft by simply adding the text variables and then [clicking **Enhance Prompt**](#Enhance-prompt). 
 
 3. Select your baseline:
