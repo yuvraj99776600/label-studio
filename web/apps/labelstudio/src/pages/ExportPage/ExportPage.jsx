@@ -328,6 +328,7 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
                     <code>{cliCommand}</code>
                   </pre>
                   <button
+                    type="button"
                     className={cn("export-page").elem("timeout-copy-button").toClassName()}
                     onClick={handleCopy}
                     aria-label="Copy command"
