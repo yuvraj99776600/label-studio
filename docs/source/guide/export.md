@@ -39,7 +39,13 @@ Use the following steps to export data and annotations from the Label Studio UI.
 
 ### Export timeout in Community Edition
 
-If the export times out, see how to [export snapshots using the SDK](https://labelstud.io/sdk/project.html#label_studio_sdk.project.Project.export_snapshot_create) or [API](#Export-snapshots-using-the-Snapshot-API). You can also use a [console command](#Export-using-console-command) to export your project. For more information, see the following section.
+Exports from the Community Edition UI are generated **synchronously** as part of the request. Community Edition keeps deployment simple and does not run background export workers by default. Label Studio Enterprise supports background workers for asynchronous snapshot exports, which is better suited for large-scale projects. For large projects, the community's export can take longer than the timeout configured in your reverse proxy or ingress (often around **90 seconds**), which can result in 502/504 errors or an export timeout.
+
+If you hit this limitation, you can still export your data using one of these options:
+
+- **Export snapshots using the SDK**: See how to [export snapshots using the SDK](https://labelstud.io/sdk/project.html#label_studio_sdk.project.Project.export_snapshot_create) or via the [Snapshot API](#Export-snapshots-using-the-Snapshot-API).
+- **Export using the console command**: Use the [console command](#Export-using-console-command) to export your project directly from the machine running Label Studio.
+- **Export in the UI at scale**: Label Studio Enterprise includes **background snapshot exports** in the UI for large datasets (see [Export snapshots using the UI](#Export-snapshots-using-the-UI)).
 
 ### Export using console command
 
