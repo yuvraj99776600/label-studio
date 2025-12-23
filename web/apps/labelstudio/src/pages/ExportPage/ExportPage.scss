@@ -86,7 +86,7 @@
   &__timeout {
     background: var(--color-neutral-surface);
     border-left: 2px solid var(--color-negative-border);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
   }
 
   &__timeout-header {
@@ -131,7 +131,7 @@
     color: var(--color-neutral-content-subtle);
 
     li {
-      margin: 0 0 14px 0;
+      margin: 0 0 14px;
       padding-left: 0;
 
       &:last-child {
@@ -261,7 +261,6 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      transition: opacity 0.2s;
       border-bottom: 1px solid transparent;
       transition: border-color 0.2s;
 

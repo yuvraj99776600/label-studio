@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useHistory } from "react-router";
 import { Button } from "@humansignal/ui";
-import { IconWarningCircleFilled, IconTerminal, IconCode, IconBook, IconExternal, IconCopyOutline } from "@humansignal/icons";
+import {
+  IconWarningCircleFilled,
+  IconTerminal,
+  IconCode,
+  IconBook,
+  IconExternal,
+  IconCopyOutline,
+} from "@humansignal/icons";
 import { Form, Input } from "../../components/Form";
 import { Modal } from "../../components/Modal/Modal";
 import { Space } from "../../components/Space/Space";
@@ -16,8 +23,7 @@ import "./ExportPage.scss";
 const LARGE_EXPORT_TASK_THRESHOLD = 5000;
 const EXPORT_TIMEOUT_DOCS_URL = "https://labelstud.io/guide/export.html#Export-timeout-in-Community-Edition";
 const EXPORT_CONSOLE_DOCS_URL = "https://labelstud.io/guide/export.html#Export-using-console-command";
-const EXPORT_SNAPSHOT_SDK_URL =
-  "https://api.labelstud.io/api-reference/api-reference/projects/exports/create";
+const EXPORT_SNAPSHOT_SDK_URL = "https://api.labelstud.io/api-reference/api-reference/projects/exports/create";
 const ENTERPRISE_URL = "https://docs.humansignal.com/guide/label_studio_compare";
 
 // const formats = {
@@ -170,9 +176,7 @@ export const ExportPage = () => {
         />
 
         <ExportLargeProjectWarning taskCount={projectTaskNumber} />
-        {exportIssue === "timeout" && (
-          <ExportTimeoutGuidance projectId={pageParams.id} exportType={currentFormat} />
-        )}
+        {exportIssue === "timeout" && <ExportTimeoutGuidance projectId={pageParams.id} exportType={currentFormat} />}
 
         <Form ref={form}>
           <Input type="hidden" name="exportType" value={currentFormat} />
@@ -272,8 +276,8 @@ const ExportLargeProjectWarning = ({ taskCount }) => {
         Large project detected ({taskCount.toLocaleString()} tasks)
       </div>
       <div className={cn("export-page").elem("warning-body").toClassName()}>
-        The export in Community Edition runs in your browser request and might time out (502/504 errors) for large datasets. If you hit a
-        timeout, use the{" "}
+        The export in Community Edition runs in your browser request and might time out (502/504 errors) for large
+        datasets. If you hit a timeout, use the{" "}
         <a className="no-go" href={EXPORT_TIMEOUT_DOCS_URL} target="_blank" rel="noreferrer">
           CLI/SDK export options
         </a>{" "}
@@ -330,7 +334,9 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
                     title={copied ? "Copied!" : "Copy command"}
                   >
                     <IconCopyOutline className={cn("export-page").elem("timeout-copy-icon").toClassName()} />
-                    {copied && <span className={cn("export-page").elem("timeout-copy-text").toClassName()}>Copied</span>}
+                    {copied && (
+                      <span className={cn("export-page").elem("timeout-copy-text").toClassName()}>Copied</span>
+                    )}
                   </button>
                 </div>
               </div>
