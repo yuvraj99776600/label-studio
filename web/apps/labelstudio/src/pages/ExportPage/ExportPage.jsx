@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useHistory } from "react-router";
 import { Button } from "@humansignal/ui";
-import { IconWarningCircleFilled, IconTerminal, IconCode, IconBook, IconExternal } from "@humansignal/icons";
+import { IconWarningCircleFilled, IconTerminal, IconCode, IconBook, IconExternal, IconCopyOutline } from "@humansignal/icons";
 import { Form, Input } from "../../components/Form";
 import { Modal } from "../../components/Modal/Modal";
 import { Space } from "../../components/Space/Space";
 import { useAPI } from "../../providers/ApiProvider";
 import { useFixedLocation, useParams } from "../../providers/RoutesProvider";
 import { cn } from "../../utils/bem";
-import { isDefined } from "../../utils/helpers";
+import { isDefined, copyText } from "../../utils/helpers";
 import "./ExportPage.scss";
 
 // Community Edition exports run synchronously in a single HTTP request.
@@ -17,7 +17,7 @@ const LARGE_EXPORT_TASK_THRESHOLD = 5000;
 const EXPORT_TIMEOUT_DOCS_URL = "https://labelstud.io/guide/export.html#Export-timeout-in-Community-Edition";
 const EXPORT_CONSOLE_DOCS_URL = "https://labelstud.io/guide/export.html#Export-using-console-command";
 const EXPORT_SNAPSHOT_SDK_URL =
-  "https://labelstud.io/sdk/project.html#label_studio_sdk.project.Project.export_snapshot_create";
+  "https://api.labelstud.io/api-reference/api-reference/projects/exports/create";
 const ENTERPRISE_URL = "https://docs.humansignal.com/guide/label_studio_compare";
 
 // const formats = {
@@ -285,6 +285,13 @@ const ExportLargeProjectWarning = ({ taskCount }) => {
 
 const ExportTimeoutGuidance = ({ projectId, exportType }) => {
   const cliCommand = `label-studio export ${projectId} ${exportType} --export-path=<output-path>`;
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    copyText(cliCommand);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [cliCommand]);
 
   return (
     <div className={cn("export-page").elem("timeout").toClassName()}>
@@ -312,9 +319,20 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
                   </a>
                   :
                 </span>
-                <pre className={cn("export-page").elem("timeout-code").toClassName()}>
-                  <code>{cliCommand}</code>
-                </pre>
+                <div className={cn("export-page").elem("timeout-code-wrapper").toClassName()}>
+                  <pre className={cn("export-page").elem("timeout-code").toClassName()}>
+                    <code>{cliCommand}</code>
+                  </pre>
+                  <button
+                    className={cn("export-page").elem("timeout-copy-button").toClassName()}
+                    onClick={handleCopy}
+                    aria-label="Copy command"
+                    title={copied ? "Copied!" : "Copy command"}
+                  >
+                    <IconCopyOutline className={cn("export-page").elem("timeout-copy-icon").toClassName()} />
+                    {copied && <span className={cn("export-page").elem("timeout-copy-text").toClassName()}>Copied</span>}
+                  </button>
+                </div>
               </div>
             </div>
           </li>
