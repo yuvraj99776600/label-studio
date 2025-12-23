@@ -303,8 +303,9 @@ class ImportAPI(generics.CreateAPIView):
                             if validation_errors_list:
                                 for error in validation_errors_list:
                                     validation_errors.append(f'Task {i}, prediction {j}: {error}')
-                        except Exception as e:
-                            error_msg = f'Task {i}, prediction {j}: Error validating prediction - {str(e)}'
+                        except Exception:
+                            logger.exception(f'Error validating prediction {j} for task {i}')
+                            error_msg = f'Task {i}, prediction {j}: Error validating prediction'
                             validation_errors.append(error_msg)
 
             if validation_errors:
@@ -609,8 +610,9 @@ class ImportPredictionsAPI(generics.CreateAPIView):
                         validation_errors.append(f'Prediction {i}: {error}')
                     continue
 
-            except Exception as e:
-                validation_errors.append(f'Prediction {i}: Error validating prediction - {str(e)}')
+            except Exception:
+                logger.exception(f'Error validating prediction {i}')
+                validation_errors.append(f'Prediction {i}: Error validating prediction')
                 continue
 
             # If prediction is valid, add it to predictions list to be created
@@ -624,8 +626,9 @@ class ImportPredictionsAPI(generics.CreateAPIView):
                         model_version=item.get('model_version', 'undefined'),
                     )
                 )
-            except Exception as e:
-                validation_errors.append(f'Prediction {i}: Failed to create prediction - {str(e)}')
+            except Exception:
+                logger.exception(f'Failed to create prediction {i}')
+                validation_errors.append(f'Prediction {i}: Failed to create prediction')
                 continue
 
         # If there are validation errors, raise them before creating any predictions

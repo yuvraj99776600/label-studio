@@ -213,8 +213,9 @@ class FileUpload(models.Model):
                 if batch:
                     yield batch
 
-        except Exception as exc:
-            raise ValidationError(f'Failed to parse JSON file {self.file_name}: {str(exc)}')
+        except Exception:
+            logger.exception(f'Failed to parse JSON file {self.file_name}')
+            raise ValidationError(f'Failed to parse JSON file {self.file_name}. Please ensure it is valid JSON.')
 
     def _format_task_for_json_streaming(self, task):
         """Format task data for JSON streaming consistency with read_tasks_list_from_json"""
@@ -274,8 +275,9 @@ class FileUpload(models.Model):
             else:
                 tasks = self.read_task_from_uploaded_file()
 
-        except Exception as exc:
-            raise ValidationError('Failed to parse input file ' + self.file_name + ': ' + str(exc))
+        except Exception:
+            logger.exception(f'Failed to parse input file {self.file_name}')
+            raise ValidationError(f'Failed to parse input file {self.file_name}. Please check the file format.')
         return tasks
 
     def read_tasks_streaming(self, file_as_tasks_list=True, batch_size=100):
@@ -312,8 +314,9 @@ class FileUpload(models.Model):
                     batch = tasks[i : i + batch_size]
                     yield batch
 
-        except Exception as exc:
-            raise ValidationError('Failed to parse input file ' + self.file_name + ': ' + str(exc))
+        except Exception:
+            logger.exception(f'Failed to parse input file {self.file_name}')
+            raise ValidationError(f'Failed to parse input file {self.file_name}. Please check the file format.')
 
     @classmethod
     def load_tasks_from_uploaded_files(

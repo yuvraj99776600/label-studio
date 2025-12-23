@@ -1,5 +1,6 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import logging
 import os
 
 from django.core.exceptions import ValidationError as DjangoValidationError  # type: ignore[import]
@@ -11,6 +12,8 @@ from io_storages.localfiles.models import (
 from io_storages.serializers import ExportStorageSerializer, ImportStorageSerializer
 from rest_framework import serializers  # type: ignore[import]
 from rest_framework.exceptions import ValidationError as DRFValidationError  # type: ignore[import]
+
+logger = logging.getLogger(__name__)
 
 
 def _stringify_detail(detail):
@@ -40,8 +43,9 @@ class LocalFilesImportStorageSerializer(ImportStorageSerializer):
         except (DjangoValidationError, DRFValidationError) as exc:
             detail = getattr(exc, 'detail', getattr(exc, 'messages', str(exc)))
             raise DRFValidationError(_stringify_detail(detail))
-        except Exception as exc:
-            raise DRFValidationError(str(exc))
+        except Exception:
+            logger.exception('Local files import storage validation failed')
+            raise DRFValidationError('Failed to validate storage connection. Please check your configuration.')
         return data
 
 
@@ -63,6 +67,7 @@ class LocalFilesExportStorageSerializer(ExportStorageSerializer):
         except (DjangoValidationError, DRFValidationError) as exc:
             detail = getattr(exc, 'detail', getattr(exc, 'messages', str(exc)))
             raise DRFValidationError(_stringify_detail(detail))
-        except Exception as exc:
-            raise DRFValidationError(str(exc))
+        except Exception:
+            logger.exception('Local files export storage validation failed')
+            raise DRFValidationError('Failed to validate storage connection. Please check your configuration.')
         return data

@@ -518,8 +518,9 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
                                 validation_errors.append(f'Task {i}, prediction {j}: {error}')
                             continue
 
-                    except Exception as e:
-                        validation_errors.append(f'Task {i}, prediction {j}: Error validating prediction - {str(e)}')
+                    except Exception:
+                        logger.exception(f'Error validating prediction {j} for task {i}')
+                        validation_errors.append(f'Task {i}, prediction {j}: Error validating prediction')
                         continue
 
                 try:
@@ -545,8 +546,9 @@ class BaseTaskSerializerBulk(serializers.ListSerializer):
                             model_version=last_model_version,
                         )
                     )
-                except Exception as e:
-                    validation_errors.append(f'Task {i}, prediction {j}: Failed to create prediction - {str(e)}')
+                except Exception:
+                    logger.exception(f'Failed to create prediction {j} for task {i}')
+                    validation_errors.append(f'Task {i}, prediction {j}: Failed to create prediction')
                     continue
 
         # Return validation errors if they exist

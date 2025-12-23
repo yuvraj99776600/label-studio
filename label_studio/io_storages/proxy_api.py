@@ -272,7 +272,7 @@ class ResolveStorageUriAPIMixin:
         except Exception as e:
             logger.error(f'Error in direct proxy from storage: {e}', exc_info=True)
             return Response(
-                {'error': 'Storage stream failed while proxying data', 'detail': str(e)},
+                {'error': 'Storage stream failed while proxying data'},
                 status=status.HTTP_424_FAILED_DEPENDENCY,
             )
 

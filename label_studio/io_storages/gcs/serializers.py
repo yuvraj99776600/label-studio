@@ -1,11 +1,14 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import logging
 import os
 
 from io_storages.gcs.models import GCSExportStorage, GCSImportStorage
 from io_storages.serializers import ExportStorageSerializer, ImportStorageSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 class GCSImportStorageSerializer(ImportStorageSerializer):
@@ -37,8 +40,9 @@ class GCSImportStorageSerializer(ImportStorageSerializer):
             storage = self.Meta.model(**data)
         try:
             storage.validate_connection()
-        except Exception as exc:
-            raise ValidationError(exc)
+        except Exception:
+            logger.exception('GCS storage connection validation failed')
+            raise ValidationError('Failed to validate storage connection. Please check your configuration.')
         return data
 
 

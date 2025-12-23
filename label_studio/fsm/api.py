@@ -183,13 +183,14 @@ class FSMEntityTransitionAPI(FSMAPIMixin, generics.GenericAPIView):
             )
         except PydanticValidationError as e:
             # Pydantic schema validation errors from transition instantiation
-            raise ValidationError({'detail': str(e)})
+            logger.warning(f'Pydantic validation failed for transition {transition_name}: {e}')
+            raise ValidationError({'detail': 'Invalid transition data provided.'})
         except TransitionValidationError as e:
             # Explicit validation failure
             logger.warning(
                 f'Transition validation failed with context: {e.context} and error: {e} for entity: {entity.id}'
             )
-            raise ValidationError({'detail': str(e)})
+            raise ValidationError({'detail': 'Transition validation failed.'})
         # Handle feature-flag disabled path (no state record created)
         if state_record is None:
             response_payload = {

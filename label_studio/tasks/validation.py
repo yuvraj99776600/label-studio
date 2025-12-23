@@ -145,7 +145,8 @@ class TaskValidator:
                 try:
                     data = json.loads(self.instance.data)
                 except ValueError as e:
-                    raise ValidationError("Can't parse task data: " + str(e))
+                    logger.warning(f"Can't parse task data: {e}")
+                    raise ValidationError("Can't parse task data: invalid JSON format")
             else:
                 raise ValidationError(
                     'Field "data" must be string or dict, but not "' + type(self.instance.data) + '"'

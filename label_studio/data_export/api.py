@@ -457,12 +457,12 @@ class ExportDetailAPI(generics.RetrieveDestroyAPIView):
                 for converted_format in export.converted_formats.all():
                     if converted_format.file:
                         converted_format.file.delete()
-            except Exception as e:
+            except Exception:
+                logger.exception('Could not delete file from storage')
                 return Response(
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     data={
-                        'detail': 'Could not delete file from storage. Check that your user has permissions to delete files: %s'
-                        % str(e)
+                        'detail': 'Could not delete file from storage. Check that your user has permissions to delete files.'
                     },
                 )
 

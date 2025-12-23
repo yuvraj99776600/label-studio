@@ -166,8 +166,9 @@ def tasks_from_url(file_upload_ids, project, user, url, could_be_tasks_list):
 
     except ValidationError as e:
         raise e
-    except Exception as e:
-        raise ValidationError(str(e))
+    except Exception:
+        logger.exception(f'Failed to load tasks from URL: {url}')
+        raise ValidationError('Failed to load tasks from URL. Please check the URL and try again.')
     return data_keys, found_formats, tasks, file_upload_ids, could_be_tasks_list
 
 
