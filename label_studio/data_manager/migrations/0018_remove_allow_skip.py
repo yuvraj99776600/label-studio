@@ -13,7 +13,6 @@ from django.conf import settings
 from django.db import migrations
 
 from core.redis import start_job_async_or_sync
-from core.utils.iterators import iterate_queryset
 
 logger = logging.getLogger(__name__)
 migration_name = __name__
@@ -36,7 +35,7 @@ def forward_migration_job(*, migration_name: str) -> None:
         migration.save()
 
     try:
-        views = iterate_queryset(View.objects.all())
+        views = View.objects.all()
         updated_count = 0
 
         for view in views:
@@ -75,7 +74,7 @@ def reverse_migration_job(*, migration_name: str) -> None:
 
     logger.info(f'Starting reverse migration {migration_name}')
 
-    views = iterate_queryset(View.objects.all())
+    views = View.objects.all()
     updated_count = 0
 
     for view in views:
