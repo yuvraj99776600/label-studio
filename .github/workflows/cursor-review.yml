@@ -48,7 +48,7 @@ jobs:
           Objectives:
           1) Re-check existing review comments and reply resolved when addressed
           2) Review the current PR diff and flag only clear, high-severity issues
-          3) Review only database migrations scripts under label_studio/data_manager/migrations/ directory
+          3) Review only database migrations scripts under label_studio/*/migrations/ directory
           4) Do not comment on style, formatting, or nitpick issues
           5) Leave very short inline comments (1-2 sentences) on changed lines
 

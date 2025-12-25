@@ -69,7 +69,7 @@ jobs:
               - '.github/workflows/cicd_pipeline.yml'
               - '.github/workflows/docker-build.yml'
             migrations:
-              - 'label_studio/data_manager/migrations/**'
+              - 'label_studio/*/migrations/**'
 
       - uses: actions/github-script@v8
         id: commit-details
