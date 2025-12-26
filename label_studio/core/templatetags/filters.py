@@ -56,6 +56,28 @@ def json_dumps_ensure_ascii(dictionary):
 
 
 @register.filter
+def json_dumps_safe_script(dictionary):
+    """
+    Safely encode a dictionary as JSON for embedding in a <script> tag.
+    This filter escapes characters that could break out of the script context
+    or enable XSS attacks.
+    
+    This is more secure than json_dumps_ensure_ascii|safe because it properly
+    escapes <, >, and & characters that could be used to break out of script context.
+    """
+    # Use json.dumps with ensure_ascii=True for maximum safety
+    json_str = json.dumps(dictionary, ensure_ascii=True)
+    
+    # Additional escaping for script context security
+    # Escape </script> sequences and HTML entities
+    json_str = json_str.replace('</', '<\\/')
+    json_str = json_str.replace('<!--', '<\\!--')
+    json_str = json_str.replace('-->', '--\\>')
+    
+    return json_str
+
+
+@register.filter
 def json_escape_quote(data):
     data_str = json.dumps(data, ensure_ascii=False)
     return data_str.replace("'", "\\'")

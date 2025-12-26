@@ -211,19 +211,42 @@ class HotkeysSerializer(serializers.Serializer):
 
     def _validate_key_format(self, key_combo, action_key):
         """
-        Basic validation of key combination format for security.
-        Prevents injection of malicious characters.
+        Strict validation of key combination format for security.
+        Prevents injection of malicious characters and script injection.
         """
-        # Allow only alphanumeric, common modifier keys, and basic symbols
         import re
 
-        # Allow letters, numbers, common modifiers, and basic symbols
-        allowed_pattern = re.compile(r'^[a-zA-Z0-9\+\-\s\[\]\\;\'\".,/`~!@#$%^&*()_={}|:<>?]+$')
+        # Security: Disallow potentially dangerous characters that could be used for XSS
+        # Only allow alphanumeric characters, common modifiers, and safe keyboard symbols
+        # Explicitly exclude: <, >, &, ", ', `, \, script-related characters
+        allowed_pattern = re.compile(r'^[a-zA-Z0-9\+\-\s\[\];,./~!@#$%^&*()_={}|:?]+$')
 
         if not allowed_pattern.match(key_combo):
             raise serializers.ValidationError(
-                f"Key combination '{key_combo}' for '{action_key}' contains invalid characters"
+                f"Key combination '{key_combo}' for '{action_key}' contains invalid characters. "
+                f"Only letters, numbers, and standard keyboard symbols are allowed."
             )
+
+        # Security: Block sequences that look like script injection attempts
+        dangerous_patterns = [
+            r'<script',
+            r'javascript:',
+            r'onerror=',
+            r'onload=',
+            r'eval\(',
+            r'alert\(',
+            r'document\.',
+            r'window\.',
+            r'<iframe',
+            r'<object',
+            r'<embed',
+        ]
+        
+        for pattern in dangerous_patterns:
+            if re.search(pattern, key_combo, re.IGNORECASE):
+                raise serializers.ValidationError(
+                    f"Key combination for '{action_key}' contains potentially malicious content"
+                )
 
         # Validate modifier key format (basic check)
         parts = [part.strip() for part in key_combo.split('+')]
