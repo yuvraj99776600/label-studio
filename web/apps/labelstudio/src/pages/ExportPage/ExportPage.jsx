@@ -8,6 +8,7 @@ import {
   IconBook,
   IconExternal,
   IconCopyOutline,
+  IconChevronDown,
 } from "@humansignal/icons";
 import { Form, Input } from "../../components/Form";
 import { Modal } from "../../components/Modal/Modal";
@@ -175,7 +176,7 @@ export const ExportPage = () => {
           onClick={(format) => setCurrentFormat(format.name)}
         />
 
-        <ExportLargeProjectWarning taskCount={projectTaskNumber} />
+        <ExportLargeProjectWarning taskCount={projectTaskNumber} projectId={pageParams.id} exportType={currentFormat} />
         {exportIssue === "timeout" && <ExportTimeoutGuidance projectId={pageParams.id} exportType={currentFormat} />}
 
         <Form ref={form}>
@@ -267,7 +268,7 @@ const FormatInfo = ({ availableFormats, selected, onClick }) => {
 ExportPage.path = "/export";
 ExportPage.modal = true;
 
-const ExportLargeProjectWarning = ({ taskCount }) => {
+const ExportLargeProjectWarning = ({ taskCount, projectId, exportType }) => {
   if (!Number.isFinite(taskCount) || taskCount < LARGE_EXPORT_TASK_THRESHOLD) return null;
 
   return (
@@ -276,30 +277,16 @@ const ExportLargeProjectWarning = ({ taskCount }) => {
         Large project detected ({taskCount.toLocaleString()} tasks)
       </div>
       <div className={cn("export-page").elem("warning-body").toClassName()}>
-        To avoid potential timeouts during large dataset exports in the Community Edition, use the{" "}
-        <a className="no-go" href={EXPORT_TIMEOUT_DOCS_URL} target="_blank" rel="noreferrer">
-          CLI/SDK export options
-        </a>{" "}
-        or consider{" "}
-        <a className="no-go" href={ENTERPRISE_URL} target="_blank" rel="noreferrer">
-          Enterprise
-        </a>{" "}
-        for background exports at scale.
+        Community Edition exports run in your browser session and can time out on very large datasets. Expand the
+        recommended options below for CLI or SDK instructions, or consider Label Studio Enterprise for background exports
+        at scale.
       </div>
+      <RecommendedOptions projectId={projectId} exportType={exportType} collapsible />
     </div>
   );
 };
 
 const ExportTimeoutGuidance = ({ projectId, exportType }) => {
-  const cliCommand = `label-studio export ${projectId} ${exportType} --export-path=<output-path>`;
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = useCallback(() => {
-    copyText(cliCommand);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [cliCommand]);
-
   return (
     <div className={cn("export-page").elem("timeout").toClassName()}>
       <div className={cn("export-page").elem("timeout-header").toClassName()}>
@@ -311,6 +298,116 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
         (often around 90 seconds) for large datasets.
       </div>
 
+      <RecommendedOptions projectId={projectId} exportType={exportType} />
+      <div className={cn("export-page").elem("timeout-footer").toClassName()}>
+        <IconBook className={cn("export-page").elem("timeout-footer-icon").toClassName()} />
+        <span>
+          More details in the documentation:{" "}
+          <a className="no-go" href={EXPORT_TIMEOUT_DOCS_URL} target="_blank" rel="noreferrer">
+            Export timeout in Community Edition
+            <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
+          </a>
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const CollapsibleSection = ({ title, defaultOpen = false, children }) => {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div className={cn("export-page").elem("collapsible").mod({ open }).toClassName()}>
+      <button
+        type="button"
+        className={cn("export-page").elem("collapsible-toggle").toClassName()}
+        onClick={() => setOpen((prev) => !prev)}
+        aria-expanded={open}
+      >
+        <IconChevronDown className={cn("export-page").elem("collapsible-icon").toClassName()} aria-hidden />
+        <span>{title}</span>
+      </button>
+      {open && <div className={cn("export-page").elem("collapsible-body").toClassName()}>{children}</div>}
+    </div>
+  );
+};
+
+const CopyableCode = ({ code, ariaLabel }) => {
+  const [copied, setCopied] = useState(false);
+  const normalizedCode = code.trim();
+
+  const handleCopy = useCallback(() => {
+    copyText(normalizedCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [normalizedCode]);
+
+  return (
+    <div className={cn("export-page").elem("code-wrapper").toClassName()}>
+      <pre className={cn("export-page").elem("code").toClassName()}>
+        <code>{normalizedCode}</code>
+      </pre>
+      <button
+        type="button"
+        className={cn("export-page").elem("code-copy-button").toClassName()}
+        onClick={handleCopy}
+        aria-label={ariaLabel}
+        title={copied ? "Copied!" : "Copy to clipboard"}
+      >
+        <IconCopyOutline className={cn("export-page").elem("code-copy-icon").toClassName()} />
+        {copied && <span className={cn("export-page").elem("code-copy-text").toClassName()}>Copied</span>}
+      </button>
+    </div>
+  );
+};
+
+const RecommendedOptions = ({ projectId, exportType, collapsible = false, defaultOpen = false }) => {
+  const resolvedExportType = exportType ?? "JSON";
+  const cliProjectId = Number.isFinite(projectId) ? projectId : "<project-id>";
+  const cliCommand = `label-studio export ${cliProjectId} ${resolvedExportType} --export-path=<output-path>`;
+  const pipInstallCommand = "pip install label-studio-sdk";
+  const envSnippet = `export LABEL_STUDIO_HOST="https://your-label-studio.example.com"
+export LABEL_STUDIO_API_KEY="paste-your-token-here"`;
+  const sdkProjectLine = Number.isFinite(projectId)
+    ? `PROJECT_ID = ${projectId}`
+    : "PROJECT_ID = 123  # TODO: replace with your project ID";
+  const sdkCode = `import os
+import time
+from label_studio_sdk import Client
+
+${sdkProjectLine}
+EXPORT_TYPE = "${resolvedExportType}"
+
+ls = Client(
+    url=os.environ["LABEL_STUDIO_HOST"],
+    api_key=os.environ["LABEL_STUDIO_API_KEY"],
+)
+
+project = ls.get_project(PROJECT_ID)
+export_job = project.export_snapshot_create(
+    export_type=EXPORT_TYPE,
+    title="SDK export snapshot",
+)
+export_id = export_job["id"]
+
+while True:
+    status = project.get_export_status(export_id)
+    if status["status"] == "completed":
+        project.export_snapshot_download(
+            export_id,
+            export_type=EXPORT_TYPE,
+            path=".",
+        )
+        break
+    if status["status"] == "failed":
+        raise RuntimeError("Export failed")
+    time.sleep(5)
+
+print("Export snapshot downloaded")
+`;
+
+  const content = (
+    <div className={cn("export-page").elem("recommended").toClassName()}>
       <div className={cn("export-page").elem("timeout-actions").toClassName()}>
         <div className={cn("export-page").elem("timeout-actions-title").toClassName()}>Recommended options:</div>
         <ul className={cn("export-page").elem("timeout-actions-list").toClassName()}>
@@ -323,26 +420,10 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
                   <a className="no-go" href={EXPORT_CONSOLE_DOCS_URL} target="_blank" rel="noreferrer">
                     console command
                     <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
-                  </a>
-                  :
+                  </a>{" "}
+                  to run the export directly on the server until it finishes.
                 </span>
-                <div className={cn("export-page").elem("timeout-code-wrapper").toClassName()}>
-                  <pre className={cn("export-page").elem("timeout-code").toClassName()}>
-                    <code>{cliCommand}</code>
-                  </pre>
-                  <button
-                    type="button"
-                    className={cn("export-page").elem("timeout-copy-button").toClassName()}
-                    onClick={handleCopy}
-                    aria-label="Copy command"
-                    title={copied ? "Copied!" : "Copy command"}
-                  >
-                    <IconCopyOutline className={cn("export-page").elem("timeout-copy-icon").toClassName()} />
-                    {copied && (
-                      <span className={cn("export-page").elem("timeout-copy-text").toClassName()}>Copied</span>
-                    )}
-                  </button>
-                </div>
+                <CopyableCode code={cliCommand} ariaLabel="Copy CLI export command" />
               </div>
             </div>
           </li>
@@ -350,40 +431,65 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
             <div className={cn("export-page").elem("timeout-action-item").toClassName()}>
               <IconCode className={cn("export-page").elem("timeout-action-icon").toClassName()} />
               <div className={cn("export-page").elem("timeout-action-content").toClassName()}>
-                Use{" "}
-                <a className="no-go" href={EXPORT_SNAPSHOT_SDK_URL} target="_blank" rel="noreferrer">
-                  export snapshots via the SDK
-                  <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
-                </a>{" "}
-                to create and download a snapshot without relying on a single UI request.
+                <span>
+                  Use{" "}
+                  <a className="no-go" href={EXPORT_SNAPSHOT_SDK_URL} target="_blank" rel="noreferrer">
+                    export snapshots via the SDK
+                    <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
+                  </a>{" "}
+                  to create a snapshot asynchronously instead of relying on a single browser request.
+                </span>
+                <ol className={cn("export-page").elem("sdk-steps").toClassName()}>
+                  <li>
+                    <strong>Install the SDK.</strong>
+                    <CopyableCode code={pipInstallCommand} ariaLabel="Copy pip install command" />
+                  </li>
+                  <li>
+                    <strong>Grab your API URL & key.</strong> In Label Studio, open your avatar menu →{" "}
+                    <em>Account & Settings &gt; Access Token</em> to copy the token. Use your deployment URL (for example,
+                    https://labelstudio.mycompany.com) as the host.
+                  </li>
+                  <li>
+                    <strong>Set the environment variables.</strong>
+                    <CopyableCode code={envSnippet} ariaLabel="Copy environment variable exports" />
+                  </li>
+                  <li>
+                    <strong>Run the SDK export script.</strong>
+                    <CopyableCode code={sdkCode} ariaLabel="Copy SDK export script" />
+                  </li>
+                </ol>
+                <div className={cn("export-page").elem("sdk-note").toClassName()}>
+                  SDK snapshots run via your deployment and, while more resilient than the UI, cannot guarantee success
+                  for every extremely large dataset.
+                </div>
               </div>
             </div>
           </li>
           <li>
             <div className={cn("export-page").elem("timeout-action-item").toClassName()}>
-              <IconWarningCircleFilled className={cn("export-page").elem("timeout-action-icon").toClassName()} />
+              <IconBook className={cn("export-page").elem("timeout-action-icon").toClassName()} />
               <div className={cn("export-page").elem("timeout-action-content").toClassName()}>
-                For large-scale exports in the UI, consider{" "}
+                For large-scale and streamlined data workflows, consider{" "}
                 <a className="no-go" href={ENTERPRISE_URL} target="_blank" rel="noreferrer">
                   Label Studio Enterprise
                   <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
                 </a>{" "}
-                since it is designed for large-scale projects and asynchronous exports.
+                which provides asynchronous exports, dedicated workers, and background processing at scale.
               </div>
             </div>
           </li>
         </ul>
-        <div className={cn("export-page").elem("timeout-footer").toClassName()}>
-          <IconBook className={cn("export-page").elem("timeout-footer-icon").toClassName()} />
-          <span>
-            More details in the documentation:{" "}
-            <a className="no-go" href={EXPORT_TIMEOUT_DOCS_URL} target="_blank" rel="noreferrer">
-              Export timeout in Community Edition
-              <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
-            </a>
-          </span>
-        </div>
       </div>
     </div>
   );
+
+  if (collapsible) {
+    return (
+      <CollapsibleSection title="Recommended options (CLI or SDK)" defaultOpen={defaultOpen}>
+        {content}
+      </CollapsibleSection>
+    );
+  }
+
+  return content;
 };

@@ -83,6 +83,51 @@
     }
   }
 
+  &__recommended {
+    margin-top: 12px;
+  }
+
+  &__collapsible {
+    margin-top: 12px;
+    border-top: 1px solid var(--color-neutral-border-subtler);
+    padding-top: 12px;
+
+    &_open {
+      .export-page__collapsible-icon {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  &__collapsible-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-neutral-content);
+    font-size: 14px;
+
+    &:hover {
+      color: var(--color-neutral-content-strong);
+    }
+  }
+
+  &__collapsible-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+    color: var(--color-neutral-content-subtler);
+  }
+
+  &__collapsible-body {
+    margin-top: 12px;
+  }
+
   &__timeout {
     background: var(--color-neutral-surface);
     border-left: 2px solid var(--color-negative-border);
@@ -169,14 +214,14 @@
     opacity: 0.6;
   }
 
-  &__timeout-code-wrapper {
+  &__code-wrapper {
     margin: 10px 0 0;
     position: relative;
     display: flex;
     align-items: stretch;
   }
 
-  &__timeout-code {
+  &__code {
     flex: 1;
     padding: 10px 12px;
     padding-right: 50px;
@@ -206,7 +251,7 @@
     }
   }
 
-  &__timeout-copy-button {
+  &__code-copy-button {
     position: absolute;
     right: 8px;
     top: 50%;
@@ -233,15 +278,48 @@
     }
   }
 
-  &__timeout-copy-icon {
+  &__code-copy-icon {
     width: 14px;
     height: 14px;
     flex-shrink: 0;
   }
 
-  &__timeout-copy-text {
+  &__code-copy-text {
     font-weight: 500;
     color: var(--color-primary-content);
+  }
+
+  &__sdk-steps {
+    margin: 8px 0 12px;
+    padding-left: 18px;
+    font-size: 13px;
+    color: var(--color-neutral-content-subtle);
+
+    li {
+      margin-bottom: 10px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--color-neutral-content);
+    }
+
+    em {
+      font-style: normal;
+      font-weight: 500;
+      color: var(--color-neutral-content);
+    }
+  }
+
+  &__sdk-note {
+    font-size: 12px;
+    color: var(--color-neutral-content-subtler);
+    margin-top: 8px;
   }
 
   &__timeout-footer {
