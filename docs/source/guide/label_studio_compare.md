@@ -57,7 +57,7 @@ Label Studio is available to everyone as open source software (Label Studio Comm
     <td style="text-align:center">✅</td>
   </tr>
   <tr>
-    <td><b>Multiple data formats</b><br/><a href="https://labelstud.io/playground/"> Label any data type from text, images, audio, video, time series data to multimodality.</a></td>
+    <td><b>Multiple data formats</b><br/><a href="/tags"> Label data types including text, images, audio, video, and time series.</a></td>
     <td style="text-align:center">✅</td>
     <td style="text-align:center">✅</td>
     <td style="text-align:center">✅</td>
@@ -346,7 +346,7 @@ Label Studio is available to everyone as open source software (Label Studio Comm
     <td style="text-align:center">✅</td>
    </tr>
   <tr>
-    <td><b>SOC2</b><br/><a href ="https://heartex.com/security"> SOC2-compliant hosted cloud service or on-premise availability</a></td>
+    <td><b>SOC2 and HIPAA</b><br/><a href ="https://heartex.com/security"> SOC2 and HIPAA-compliant hosted cloud service or on-premise availability</a></td>
     <td style="text-align:center">❌</td>
     <td style="text-align:center">❌</td>
     <td style="text-align:center">✅</td>
