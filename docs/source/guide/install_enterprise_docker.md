@@ -17,6 +17,9 @@ Install Label Studio Enterprise on-premises if you need to meet strong privacy r
 
 See [Secure Label Studio](security.html) for more details about security and hardening for Label Studio Enterprise.
 
+!!! note
+    Docker deployments are more suitable for proof-of-concept builds and small projects. For production environments and larger deployments, we strongly recommend using Kubernetes. Kubernetes deployments provide better scalability, reliability, and access to advanced features such as Prompts. See [Deploy Label Studio Enterprise on Kubernetes](install_enterprise_k8s.html) for more information.
+
 To install Label Studio Community Edition, see [Install Label Studio](https://labelstud.io/guide/install). This page is specific to the Enterprise version of Label Studio.
 
 !!! note
