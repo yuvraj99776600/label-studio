@@ -42,7 +42,6 @@ class GCS(object):
         google_application_credentials: Optional[Union[str, dict]] = None,
         bucket_name: Optional[str] = None,
     ) -> gcs.Bucket:
-
         client = cls.get_client(
             google_project_id=google_project_id, google_application_credentials=google_application_credentials
         )
@@ -62,7 +61,6 @@ class GCS(object):
         cache_key = google_application_credentials
 
         if cache_key not in GCS._client_cache:
-
             # use credentials from LS Cloud Storage settings
             if google_application_credentials:
                 if isinstance(google_application_credentials, str):
@@ -229,7 +227,7 @@ class GCS(object):
         if not presign:
             blob.reload(client=maybe_client)  # needed to know the content type
             blob_bytes = blob.download_as_bytes(client=maybe_client)
-            return f'data:{blob.content_type};base64,{base64.b64encode(blob_bytes).decode("utf-8")}'
+            return f"data:{blob.content_type};base64,{base64.b64encode(blob_bytes).decode('utf-8')}"
 
         url = blob.generate_signed_url(
             version='v4',

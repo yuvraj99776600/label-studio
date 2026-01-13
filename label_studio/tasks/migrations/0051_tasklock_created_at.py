@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0050_alter_predictionmeta_failed_prediction_and_more'),
+        ("tasks", "0050_alter_predictionmeta_failed_prediction_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tasklock',
-            name='created_at',
-            field=models.DateTimeField(blank=True, default=None, help_text='Creation time', null=True, verbose_name='created_at'),
+            model_name="tasklock",
+            name="created_at",
+            field=models.DateTimeField(
+                blank=True, default=None, help_text="Creation time", null=True, verbose_name="created_at"
+            ),
         ),
     ]

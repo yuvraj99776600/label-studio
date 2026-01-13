@@ -4,20 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('io_storages', '0015_auto_20230804_1732'),
+        ("io_storages", "0015_auto_20230804_1732"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='s3exportstorage',
-            name='aws_sse_kms_key_id',
-            field=models.TextField(blank=True, help_text='AWS SSE KMS Key ID', null=True, verbose_name='aws_sse_kms_key_id'),
+            model_name="s3exportstorage",
+            name="aws_sse_kms_key_id",
+            field=models.TextField(
+                blank=True, help_text="AWS SSE KMS Key ID", null=True, verbose_name="aws_sse_kms_key_id"
+            ),
         ),
         migrations.AddField(
-            model_name='s3importstorage',
-            name='aws_sse_kms_key_id',
-            field=models.TextField(blank=True, help_text='AWS SSE KMS Key ID', null=True, verbose_name='aws_sse_kms_key_id'),
+            model_name="s3importstorage",
+            name="aws_sse_kms_key_id",
+            field=models.TextField(
+                blank=True, help_text="AWS SSE KMS Key ID", null=True, verbose_name="aws_sse_kms_key_id"
+            ),
         ),
     ]

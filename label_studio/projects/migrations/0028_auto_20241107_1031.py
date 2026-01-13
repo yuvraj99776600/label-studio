@@ -9,12 +9,11 @@ from django.db.models import Count, Min
 from projects.models import ProjectMember
 
 logger = logging.getLogger(__name__)
-migration_name = '0028_auto_20241107_1031'
+migration_name = "0028_auto_20241107_1031"
 
 
 def forward_migration(migration_name):
-
-    logger.info(f'Starting async migration {migration_name}')
+    logger.info(f"Starting async migration {migration_name}")
     migration = AsyncMigrationStatus.objects.create(
         name=migration_name,
         status=AsyncMigrationStatus.STATUS_STARTED,
@@ -23,45 +22,41 @@ def forward_migration(migration_name):
     try:
         # Get projects with duplicates
         projects_with_duplicates = (
-            ProjectMember.objects
-            .values('project_id', 'user_id')
-            .annotate(entry_count=Count('id'))
+            ProjectMember.objects.values("project_id", "user_id")
+            .annotate(entry_count=Count("id"))
             .filter(entry_count__gt=1)
-            .values_list('project_id', flat=True)
+            .values_list("project_id", flat=True)
             .distinct()
         )
 
         for project_id in projects_with_duplicates:
             # Remove duplicates for each project
             duplicates = (
-                ProjectMember.objects
-                .filter(project_id=project_id)
-                .values('user_id')
-                .annotate(count=Count('id'), min_id=Min('id'))
+                ProjectMember.objects.filter(project_id=project_id)
+                .values("user_id")
+                .annotate(count=Count("id"), min_id=Min("id"))
                 .filter(count__gt=1)
             )
             total_deleted = 0
             for dup in duplicates:
-                user_id = dup['user_id']
-                min_id = dup['min_id']
-                entries_to_delete = (
-                    ProjectMember.objects
-                    .filter(user_id=user_id, project_id=project_id)
-                    .exclude(id=min_id)
+                user_id = dup["user_id"]
+                min_id = dup["min_id"]
+                entries_to_delete = ProjectMember.objects.filter(user_id=user_id, project_id=project_id).exclude(
+                    id=min_id
                 )
                 deleted_count, _ = entries_to_delete.delete()
                 total_deleted += deleted_count
-            logger.info(f'Deleted {total_deleted} duplicate ProjectMember entries for project ID {project_id}.')
+            logger.info(f"Deleted {total_deleted} duplicate ProjectMember entries for project ID {project_id}.")
 
     except Exception as e:
         migration.status = AsyncMigrationStatus.STATUS_ERROR
         migration.save()
-        logger.error(f'Async migration {migration_name} failed: {e}')
+        logger.error(f"Async migration {migration_name} failed: {e}")
         raise
 
     migration.status = AsyncMigrationStatus.STATUS_FINISHED
     migration.save()
-    logger.info(f'Async migration {migration_name} complete')
+    logger.info(f"Async migration {migration_name} complete")
 
 
 def forwards(apps, schema_editor):

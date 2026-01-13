@@ -235,7 +235,9 @@ class DjangoModelIntegrationTests(TestCase):
         mock_get_state_obj.return_value = mock_current_state
 
         assign_transition = AssignAndStartTaskTransition(
-            assignee_id=200, estimated_hours=4.5, priority='urgent'  # Different from creator
+            assignee_id=200,
+            estimated_hours=4.5,
+            priority='urgent',  # Different from creator
         )
 
         context = TransitionContext(
@@ -381,7 +383,9 @@ class DjangoModelIntegrationTests(TestCase):
 
         # Step 1: Submit annotation
         submit_transition = SubmitAnnotationForReview(
-            annotator_confidence=0.9, annotation_time_seconds=300, review_requested=True  # 5 minutes
+            annotator_confidence=0.9,
+            annotation_time_seconds=300,
+            review_requested=True,  # 5 minutes
         )
 
         context = TransitionContext(

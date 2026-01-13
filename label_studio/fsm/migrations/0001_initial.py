@@ -133,12 +133,8 @@ class Migration(migrations.Migration):
             options={
                 "ordering": ["-id"],
                 "indexes": [
-                    models.Index(
-                        fields=["annotation_id", "-id"], name="anno_current_state_idx"
-                    ),
-                    models.Index(
-                        fields=["task_id", "state", "-id"], name="anno_task_state_idx"
-                    ),
+                    models.Index(fields=["annotation_id", "-id"], name="anno_current_state_idx"),
+                    models.Index(fields=["task_id", "state", "-id"], name="anno_task_state_idx"),
                     models.Index(
                         fields=["completed_by_id", "state", "-id"],
                         name="anno_user_report_idx",
@@ -252,9 +248,7 @@ class Migration(migrations.Migration):
             options={
                 "ordering": ["-id"],
                 "indexes": [
-                    models.Index(
-                        fields=["project_id", "-id"], name="project_current_state_idx"
-                    ),
+                    models.Index(fields=["project_id", "-id"], name="project_current_state_idx"),
                     models.Index(
                         fields=["organization_id", "state", "-id"],
                         name="project_org_state_idx",
@@ -367,9 +361,7 @@ class Migration(migrations.Migration):
             options={
                 "ordering": ["-id"],
                 "indexes": [
-                    models.Index(
-                        fields=["task_id", "-id"], name="task_current_state_idx"
-                    ),
+                    models.Index(fields=["task_id", "-id"], name="task_current_state_idx"),
                     models.Index(
                         fields=["project_id", "state", "-id"],
                         name="task_project_state_idx",

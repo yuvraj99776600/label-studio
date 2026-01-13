@@ -5,20 +5,19 @@ import users.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0008_alter_user_managers'),
+        ("users", "0008_alter_user_managers"),
     ]
 
     operations = [
         migrations.AlterModelManagers(
-            name='user',
+            name="user",
             managers=[
-                ('objects', users.models.UserManager()),
+                ("objects", users.models.UserManager()),
             ],
         ),
         migrations.RemoveField(
-            model_name='user',
-            name='is_deleted',
+            model_name="user",
+            name="is_deleted",
         ),
     ]

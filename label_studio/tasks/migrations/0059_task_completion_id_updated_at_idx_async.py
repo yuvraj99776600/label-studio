@@ -2,12 +2,10 @@ from django.db import migrations
 from core.migration_helpers import make_sql_migration
 
 sql_forwards = (
-    'CREATE INDEX CONCURRENTLY IF NOT EXISTS task_completion_id_updated_at_idx '
-    'ON task_completion (id, updated_at);'
+    "CREATE INDEX CONCURRENTLY IF NOT EXISTS task_completion_id_updated_at_idx ON task_completion (id, updated_at);"
 )
-sql_backwards = (
-    'DROP INDEX CONCURRENTLY IF EXISTS task_completion_id_updated_at_idx;'
-)
+sql_backwards = "DROP INDEX CONCURRENTLY IF EXISTS task_completion_id_updated_at_idx;"
+
 
 class Migration(migrations.Migration):
     atomic = False

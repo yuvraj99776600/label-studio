@@ -1,5 +1,5 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 import json
 import logging
 from typing import Any, Mapping, Optional
@@ -710,7 +710,7 @@ class Project(ProjectMixin, FsmHistoryStateModel):
             """
             if not count:
                 return None
-            return f'{count} {type}{"s" if count > 1 else ""}'
+            return f"{count} {type}{'s' if count > 1 else ''}"
 
         for control_tag_from_data, labels_from_data in created_labels.items():
             # Check if labels created in annotations, and their control tag has been removed
@@ -751,7 +751,7 @@ class Project(ProjectMixin, FsmHistoryStateModel):
 
                     display = [disp for disp in [annotation_display_count, draft_display_count] if disp]
                     if display:
-                        diff_str += f'{label} ({", ".join(display)})\n'
+                        diff_str += f"{label} ({', '.join(display)})\n"
 
                 if (strict is True) and (
                     (control_tag_from_data not in dynamic_label_from_config)
@@ -1371,7 +1371,6 @@ class ProjectOnboarding(models.Model):
 
 
 class LabelStreamHistory(models.Model):
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='histories', help_text='User ID'
     )
@@ -1383,7 +1382,6 @@ class LabelStreamHistory(models.Model):
 
 
 class ProjectMember(models.Model):
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='project_memberships', help_text='User ID'
     )
@@ -1394,7 +1392,6 @@ class ProjectMember(models.Model):
 
 
 class ProjectSummary(models.Model):
-
     project = AutoOneToOneField(Project, primary_key=True, on_delete=models.CASCADE, related_name='summary')
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Creation time')
 

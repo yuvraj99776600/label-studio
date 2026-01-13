@@ -1,5 +1,5 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 import json
 import logging
 import mimetypes
@@ -370,7 +370,6 @@ class ImportAPI(generics.CreateAPIView):
 
     @timeit
     def async_import(self, request, project, preannotated_from_fields, commit_to_project, return_task_ids):
-
         project_import = ProjectImport.objects.create(
             project=project,
             preannotated_from_fields=preannotated_from_fields,
@@ -385,7 +384,7 @@ class ImportAPI(generics.CreateAPIView):
             project_import.could_be_tasks_list = could_be_tasks_list
             project_import.save(update_fields=['file_upload_ids', 'could_be_tasks_list'])
         elif 'application/x-www-form-urlencoded' in request.content_type:
-            logger.debug(f'Import from url: {request.data.get("url")}')
+            logger.debug(f"Import from url: {request.data.get('url')}")
             # empty url
             url = request.data.get('url')
             if not url:
@@ -539,7 +538,7 @@ class ImportPredictionsAPI(generics.CreateAPIView):
 
                 if task_id not in existing_task_ids:
                     raise ValidationError(
-                        f'{item} contains invalid "task" field: task ID {task_id} ' f'not found in project {project}'
+                        f'{item} contains invalid "task" field: task ID {task_id} not found in project {project}'
                     )
 
                 batch_predictions.append(
@@ -558,7 +557,7 @@ class ImportPredictionsAPI(generics.CreateAPIView):
             total_created += len(batch_created)
 
             logger.debug(
-                f'Processed batch {batch_start}-{batch_end-1}: created {len(batch_created)} predictions '
+                f'Processed batch {batch_start}-{batch_end - 1}: created {len(batch_created)} predictions '
                 f'(total so far: {total_created})'
             )
 
@@ -588,7 +587,7 @@ class ImportPredictionsAPI(generics.CreateAPIView):
             if item.get('task') not in tasks_ids:
                 if flag_set('fflag_feat_utc_210_prediction_validation_15082025', user='auto'):
                     validation_errors.append(
-                        f'Prediction {i}: Invalid task ID {item.get("task")} - task not found in project'
+                        f"Prediction {i}: Invalid task ID {item.get('task')} - task not found in project"
                     )
                     continue
                 else:
@@ -696,7 +695,6 @@ class ReImportAPI(ImportAPI):
         )
 
     def async_reimport(self, project, file_upload_ids, files_as_tasks_list, organization_id):
-
         project_reimport = ProjectReimport.objects.create(
             project=project, file_upload_ids=file_upload_ids, files_as_tasks_list=files_as_tasks_list
         )

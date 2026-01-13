@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0046_auto_20240314_1957'),
-        ('tasks', '0046_prediction_model_run'),
+        ("tasks", "0046_auto_20240314_1957"),
+        ("tasks", "0046_prediction_model_run"),
     ]
 
-    operations = [
-    ]
+    operations = []

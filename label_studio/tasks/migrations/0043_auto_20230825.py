@@ -3,8 +3,9 @@
 from django.db import migrations
 from tasks.functions import fill_predictions_project
 
+
 def forward(apps, schema_editor):
-    fill_predictions_project('0043_auto_20230825')
+    fill_predictions_project("0043_auto_20230825")
 
 
 def backwards(apps, schema_editor):
@@ -14,7 +15,7 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ('tasks', '0042_auto_20230810_2304'),
+        ("tasks", "0042_auto_20230810_2304"),
     ]
 
     operations = [

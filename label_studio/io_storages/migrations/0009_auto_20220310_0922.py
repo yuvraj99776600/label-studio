@@ -4,35 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('io_storages', '0008_auto_20211129_1132'),
+        ("io_storages", "0008_auto_20211129_1132"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='azureblobexportstoragelink',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, help_text='Update time', verbose_name='updated at'),
+            model_name="azureblobexportstoragelink",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, help_text="Update time", verbose_name="updated at"),
         ),
         migrations.AddField(
-            model_name='gcsexportstoragelink',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, help_text='Update time', verbose_name='updated at'),
+            model_name="gcsexportstoragelink",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, help_text="Update time", verbose_name="updated at"),
         ),
         migrations.AddField(
-            model_name='localfilesexportstoragelink',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, help_text='Update time', verbose_name='updated at'),
+            model_name="localfilesexportstoragelink",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, help_text="Update time", verbose_name="updated at"),
         ),
         migrations.AddField(
-            model_name='redisexportstoragelink',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, help_text='Update time', verbose_name='updated at'),
+            model_name="redisexportstoragelink",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, help_text="Update time", verbose_name="updated at"),
         ),
         migrations.AddField(
-            model_name='s3exportstoragelink',
-            name='updated_at',
-            field=models.DateTimeField(auto_now=True, help_text='Update time', verbose_name='updated at'),
+            model_name="s3exportstoragelink",
+            name="updated_at",
+            field=models.DateTimeField(auto_now=True, help_text="Update time", verbose_name="updated at"),
         ),
     ]

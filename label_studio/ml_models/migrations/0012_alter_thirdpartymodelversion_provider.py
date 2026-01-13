@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ml_models', '0011_thirdpartymodelversion_model_provider_connection'),
+        ("ml_models", "0011_thirdpartymodelversion_model_provider_connection"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='thirdpartymodelversion',
-            name='provider',
-            field=models.CharField(choices=[('OpenAI', 'OpenAI'), ('AzureOpenAI', 'AzureOpenAI'), ('Custom', 'Custom')], default='OpenAI', help_text='The model provider to use e.g. OpenAI', max_length=255),
+            model_name="thirdpartymodelversion",
+            name="provider",
+            field=models.CharField(
+                choices=[("OpenAI", "OpenAI"), ("AzureOpenAI", "AzureOpenAI"), ("Custom", "Custom")],
+                default="OpenAI",
+                help_text="The model provider to use e.g. OpenAI",
+                max_length=255,
+            ),
         ),
     ]

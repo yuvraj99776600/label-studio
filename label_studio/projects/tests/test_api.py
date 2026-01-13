@@ -18,7 +18,7 @@ class TestProjectCountsListAPI(TestCase):
         Task.objects.create(project=cls.project_2, data={'text': 'Task 3'})
 
     def get_url(self, **params):
-        return f'{reverse("projects:api:project-counts-list")}?{urlencode(params)}'
+        return f"{reverse('projects:api:project-counts-list')}?{urlencode(params)}"
 
     def test_get_counts(self):
         client = APIClient()

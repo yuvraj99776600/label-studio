@@ -84,7 +84,7 @@ class TestStoragePredictionValidation:
             assert len(tasks) == 1
 
             # Verify prediction was created
-            predictions_response = api_client.get(f'/api/predictions?task={tasks[0]["id"]}')
+            predictions_response = api_client.get(f"/api/predictions?task={tasks[0]['id']}")
             assert predictions_response.status_code == 200
             predictions = predictions_response.json()
             assert len(predictions) == 1

@@ -1,5 +1,5 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 import json
 
 import pytest
@@ -227,7 +227,7 @@ def test_views_api_nested_filters(business_client, project_id):
     # Create tasks with different data
     task1_data = {'text': 'task1', 'category': 'A'}
     task1_response = business_client.post(
-        f'/api/projects/{project["id"]}/tasks',
+        f"/api/projects/{project['id']}/tasks",
         data=json.dumps({'data': task1_data}),
         content_type='application/json',
     )
@@ -236,7 +236,7 @@ def test_views_api_nested_filters(business_client, project_id):
 
     task2_data = {'text': 'task2', 'category': 'B'}
     task2_response = business_client.post(
-        f'/api/projects/{project["id"]}/tasks',
+        f"/api/projects/{project['id']}/tasks",
         data=json.dumps({'data': task2_data}),
         content_type='application/json',
     )
@@ -245,7 +245,7 @@ def test_views_api_nested_filters(business_client, project_id):
 
     task3_data = {'text': 'task3', 'category': 'A'}
     task3_response = business_client.post(
-        f'/api/projects/{project["id"]}/tasks',
+        f"/api/projects/{project['id']}/tasks",
         data=json.dumps({'data': task3_data}),
         content_type='application/json',
     )
@@ -414,7 +414,7 @@ def test_views_api_patch_add_child_filter(business_client, project_id):
     # Create tasks with different data
     task1_data = {'text': 'task1', 'category': 'A'}
     task1_response = business_client.post(
-        f'/api/projects/{project["id"]}/tasks',
+        f"/api/projects/{project['id']}/tasks",
         data=json.dumps({'data': task1_data}),
         content_type='application/json',
     )
@@ -423,7 +423,7 @@ def test_views_api_patch_add_child_filter(business_client, project_id):
 
     task2_data = {'text': 'task2', 'category': 'A'}
     task2_response = business_client.post(
-        f'/api/projects/{project["id"]}/tasks',
+        f"/api/projects/{project['id']}/tasks",
         data=json.dumps({'data': task2_data}),
         content_type='application/json',
     )
@@ -432,7 +432,7 @@ def test_views_api_patch_add_child_filter(business_client, project_id):
 
     task3_data = {'text': 'task3', 'category': 'B'}
     task3_response = business_client.post(
-        f'/api/projects/{project["id"]}/tasks',
+        f"/api/projects/{project['id']}/tasks",
         data=json.dumps({'data': task3_data}),
         content_type='application/json',
     )

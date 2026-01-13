@@ -4,14 +4,13 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('labels_manager', '0001_initial'),
+        ("labels_manager", "0001_initial"),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='labellink',
-            constraint=models.UniqueConstraint(fields=('project', 'label'), name='unique_label_project'),
+            model_name="labellink",
+            constraint=models.UniqueConstraint(fields=("project", "label"), name="unique_label_project"),
         ),
     ]

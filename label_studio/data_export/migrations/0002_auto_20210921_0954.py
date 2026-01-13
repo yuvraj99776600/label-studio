@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('data_export', '0001_initial'),
+        ("data_export", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='export',
-            name='only_finished',
+            model_name="export",
+            name="only_finished",
         ),
         migrations.RemoveField(
-            model_name='export',
-            name='task_ids',
+            model_name="export",
+            name="task_ids",
         ),
     ]

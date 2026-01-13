@@ -1,5 +1,5 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 """ Actions for tasks and annotations provided by data manager.
     All actions are stored in settings.DATA_MANAGER_ACTIONS dict.
     Data manager uses settings.DATA_MANAGER_ACTIONS to know the list of available actions,
@@ -135,7 +135,7 @@ def perform_action(action_id, project, queryset, user, **kwargs):
 
     # check user permissions for this action
     if not check_permission(user, action, project):
-        raise PermissionDenied(f'Action is not allowed for the current user: {action["id"]}')
+        raise PermissionDenied(f"Action is not allowed for the current user: {action['id']}")
 
     try:
         result = action['entry_point'](project, queryset, **kwargs)
@@ -155,7 +155,7 @@ def get_action_form(action_id, project, user):
     check_permission = load_func(settings.DATA_MANAGER_CHECK_ACTION_PERMISSION)
 
     if not check_permission(user, action, project):
-        raise PermissionDenied(f'Action is not allowed for the current user: {action["id"]}')
+        raise PermissionDenied(f"Action is not allowed for the current user: {action['id']}")
 
     form = action.get('dialog', {}).get('form')
     if callable(form):

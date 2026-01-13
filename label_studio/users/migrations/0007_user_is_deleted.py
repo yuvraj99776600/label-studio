@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0006_user_allow_newsletters'),
+        ("users", "0006_user_allow_newsletters"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='is_deleted',
-            field=models.BooleanField(db_index=True, default=False, help_text='Designates whether to treat this user as deleted. Select this instead of deleting accounts.', verbose_name='deleted'),
+            model_name="user",
+            name="is_deleted",
+            field=models.BooleanField(
+                db_index=True,
+                default=False,
+                help_text="Designates whether to treat this user as deleted. Select this instead of deleting accounts.",
+                verbose_name="deleted",
+            ),
         ),
     ]

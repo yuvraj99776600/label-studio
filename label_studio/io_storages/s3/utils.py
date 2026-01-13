@@ -1,5 +1,5 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 import base64
 import fnmatch
 import logging
@@ -24,7 +24,7 @@ def get_client_and_resource(
     logger.debug(
         f'Create boto3 session with '
         f'access key id={aws_access_key_id}, '
-        f'secret key={aws_secret_access_key[:4] + "..." if aws_secret_access_key else None}, '
+        f"secret key={aws_secret_access_key[:4] + '...' if aws_secret_access_key else None}, "
         f'session token={aws_session_token}'
     )
     session = boto3.Session(

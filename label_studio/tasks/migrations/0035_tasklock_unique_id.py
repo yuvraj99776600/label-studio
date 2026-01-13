@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0034_annotation_unique_id'),
+        ("tasks", "0034_annotation_unique_id"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tasklock',
-            name='unique_id',
+            model_name="tasklock",
+            name="unique_id",
             field=models.UUIDField(blank=True, editable=False, null=True, unique=True),
         ),
     ]

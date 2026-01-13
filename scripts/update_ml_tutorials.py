@@ -95,7 +95,7 @@ def update_ml_tutorials_index(files_and_headers: List):
             logging.error(f'No dict header found in {f} file. Skipping ...')
             continue
         print('Processing', f['model_name'])
-        card = {'title': h.get('title') or f['model_name'], 'url': f'/guide/ml_tutorials/{f["model_name"]}.html'}
+        card = {'title': h.get('title') or f['model_name'], 'url': f"/guide/ml_tutorials/{f['model_name']}.html"}
         card.update(h)
         data['cards'].append(card)
 

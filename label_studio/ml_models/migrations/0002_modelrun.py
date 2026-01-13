@@ -6,28 +6,71 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('projects', '0026_auto_20231103_0020'),
-        ('organizations', '0006_alter_organizationmember_deleted_at'),
-        ('ml_models', '0001_initial'),
+        ("projects", "0026_auto_20231103_0020"),
+        ("organizations", "0006_alter_organizationmember_deleted_at"),
+        ("ml_models", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ModelRun',
+            name="ModelRun",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('project_subset', models.CharField(choices=[('All', 'All'), ('HasGT', 'HasGT')], default='HasGT', max_length=255)),
-                ('status', models.CharField(choices=[('Pending', 'Pending'), ('InProgress', 'InProgress'), ('Completed', 'Completed'), ('Failed', 'Failed'), ('Canceled', 'Canceled')], default='Pending', max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='created at')),
-                ('triggered_at', models.DateTimeField(verbose_name='triggered at')),
-                ('completed_at', models.DateTimeField(default=None, null=True, verbose_name='completed at')),
-                ('created_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='model_runs', to=settings.AUTH_USER_MODEL)),
-                ('model_version', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='model_runs', to='ml_models.thirdpartymodelversion')),
-                ('organization', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='model_runs', to='organizations.organization')),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='model_runs', to='projects.project')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "project_subset",
+                    models.CharField(choices=[("All", "All"), ("HasGT", "HasGT")], default="HasGT", max_length=255),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Pending", "Pending"),
+                            ("InProgress", "InProgress"),
+                            ("Completed", "Completed"),
+                            ("Failed", "Failed"),
+                            ("Canceled", "Canceled"),
+                        ],
+                        default="Pending",
+                        max_length=255,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, verbose_name="created at")),
+                ("triggered_at", models.DateTimeField(verbose_name="triggered at")),
+                ("completed_at", models.DateTimeField(default=None, null=True, verbose_name="completed at")),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="model_runs",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "model_version",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="model_runs",
+                        to="ml_models.thirdpartymodelversion",
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="model_runs",
+                        to="organizations.organization",
+                    ),
+                ),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, related_name="model_runs", to="projects.project"
+                    ),
+                ),
             ],
         ),
     ]

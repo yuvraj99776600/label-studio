@@ -4,20 +4,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0039_annotation_draft_created_at'),
+        ("tasks", "0039_annotation_draft_created_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='annotation',
-            name='import_id',
-            field=models.BigIntegerField(blank=True, db_index=True, default=None, help_text="Original annotation ID that was at the import step or NULL if this annotation wasn't imported", null=True),
+            model_name="annotation",
+            name="import_id",
+            field=models.BigIntegerField(
+                blank=True,
+                db_index=True,
+                default=None,
+                help_text="Original annotation ID that was at the import step or NULL if this annotation wasn't imported",
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='annotationdraft',
-            name='import_id',
-            field=models.BigIntegerField(blank=True, db_index=True, default=None, help_text="Original draft ID that was at the import step or NULL if this draft wasn't imported", null=True),
+            model_name="annotationdraft",
+            name="import_id",
+            field=models.BigIntegerField(
+                blank=True,
+                db_index=True,
+                default=None,
+                help_text="Original draft ID that was at the import step or NULL if this draft wasn't imported",
+                null=True,
+            ),
         ),
     ]

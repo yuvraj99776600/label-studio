@@ -10,19 +10,22 @@ logger = logging.getLogger(__name__)
 
 def async_index_creation(db_alias):
     from django.db import connections
+
     with connections[db_alias].schema_editor(atomic=False) as schema_editor:
-        schema_editor.execute('create index concurrently if not exists tasks_annotations_result_proj_gin '
-            'on task_completion using gin (project_id, cast(result as text) gin_trgm_ops);'
+        schema_editor.execute(
+            "create index concurrently if not exists tasks_annotations_result_proj_gin "
+            "on task_completion using gin (project_id, cast(result as text) gin_trgm_ops);"
         )
 
+
 def forwards(apps, schema_editor):
-    if not schema_editor.connection.vendor.startswith('postgres'):
-        logger.info('Database vendor: {}'.format(schema_editor.connection.vendor))
-        logger.info('Skipping dropping tasks_annotations_result_idx index')
+    if not schema_editor.connection.vendor.startswith("postgres"):
+        logger.info("Database vendor: {}".format(schema_editor.connection.vendor))
+        logger.info("Skipping dropping tasks_annotations_result_idx index")
         return
 
-    schema_editor.execute('drop index if exists tasks_annotations_result_idx;')
-    schema_editor.execute('drop index if exists tasks_annotations_result_idx2;')
+    schema_editor.execute("drop index if exists tasks_annotations_result_idx;")
+    schema_editor.execute("drop index if exists tasks_annotations_result_idx2;")
     db_alias = schema_editor.connection.alias
     start_job_async_or_sync(async_index_creation, db_alias=db_alias)
 
@@ -34,6 +37,6 @@ def backwards(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = False
 
-    dependencies = [('tasks', '0034_auto_20221221_1101')]
+    dependencies = [("tasks", "0034_auto_20221221_1101")]
 
     operations = btree_gin_migration_operations(migrations.RunPython(forwards, backwards))

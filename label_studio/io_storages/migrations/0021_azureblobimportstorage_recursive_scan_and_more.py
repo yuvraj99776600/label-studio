@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("io_storages", "0020_alter_azureblobexportstorage_status_and_more"),
     ]

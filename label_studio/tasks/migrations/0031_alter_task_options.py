@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0030_auto_20221102_1118'),
+        ("tasks", "0030_auto_20221102_1118"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='task',
+            name="task",
             options={},
         ),
     ]

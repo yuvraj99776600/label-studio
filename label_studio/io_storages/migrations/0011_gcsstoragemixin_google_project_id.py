@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('io_storages', '0010_auto_20221014_1708'),
+        ("io_storages", "0010_auto_20221014_1708"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='gcsstoragemixin',
-            name='google_project_id',
-            field=models.TextField(blank=True, help_text='Google project ID', null=True, verbose_name='Google Project ID'),
+            model_name="gcsstoragemixin",
+            name="google_project_id",
+            field=models.TextField(
+                blank=True, help_text="Google project ID", null=True, verbose_name="Google Project ID"
+            ),
         ),
     ]

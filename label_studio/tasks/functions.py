@@ -80,8 +80,8 @@ def redis_job_for_calculation(org_id, from_scratch, migration_name='0018_manual_
         )
         project_tasks = Task.objects.filter(project_id=project_dict['id'])
         logger.debug(
-            f'Start processing stats project <{project_dict["title"]}> ({project_dict["id"]}) '
-            f'with task count {project_tasks.count()} and updated_at {project_dict["updated_at"]}'
+            f"Start processing stats project <{project_dict['title']}> ({project_dict['id']}) "
+            f"with task count {project_tasks.count()} and updated_at {project_dict['updated_at']}"
         )
 
         task_count = update_tasks_counters(project_tasks, from_scratch=from_scratch)
@@ -90,7 +90,7 @@ def redis_job_for_calculation(org_id, from_scratch, migration_name='0018_manual_
         migration.meta = {'tasks_processed': task_count, 'total_project_tasks': project_tasks.count()}
         migration.save()
         logger.debug(
-            f'End processing counters for project <{project_dict["title"]}> ({project_dict["id"]}), '
+            f"End processing counters for project <{project_dict['title']}> ({project_dict['id']}), "
             f'processed {str(task_count)} tasks'
         )
 

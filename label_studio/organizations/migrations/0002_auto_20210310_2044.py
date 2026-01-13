@@ -4,18 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('organizations', '0001_squashed_0008_auto_20201005_1552'),
+        ("organizations", "0001_squashed_0008_auto_20201005_1552"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='organization',
-            name='default_role',
+            model_name="organization",
+            name="default_role",
         ),
         migrations.RemoveField(
-            model_name='organizationmember',
-            name='role',
+            model_name="organizationmember",
+            name="role",
         ),
     ]

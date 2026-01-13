@@ -7,23 +7,57 @@ import django_migration_linter as linter
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0009_auto_20231201_0001'),
+        ("users", "0009_auto_20231201_0001"),
     ]
 
     operations = [
         linter.IgnoreMigration(),
         migrations.CreateModel(
-            name='UserProductTour',
+            name="UserProductTour",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(help_text='Unique identifier for the product tour. Name must match the config name.', max_length=256, verbose_name='Name')),
-                ('state', models.CharField(choices=[('ready', 'Ready'), ('completed', 'Completed'), ('skipped', 'Skipped')], default='ready', help_text='Current state of the tour for this user. Available options: ready (Ready), completed (Completed), skipped (Skipped)', max_length=32, verbose_name='State')),
-                ('interaction_data', models.JSONField(blank=True, default=dict, help_text='Additional data about user interaction with the tour', verbose_name='Interaction Data')),
-                ('created_at', models.DateTimeField(auto_now_add=True, help_text='When this tour record was created')),
-                ('updated_at', models.DateTimeField(auto_now=True, help_text='When this tour record was last updated')),
-                ('user', models.ForeignKey(help_text='User who interacted with the tour', on_delete=django.db.models.deletion.CASCADE, related_name='tours', to=settings.AUTH_USER_MODEL)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "name",
+                    models.CharField(
+                        help_text="Unique identifier for the product tour. Name must match the config name.",
+                        max_length=256,
+                        verbose_name="Name",
+                    ),
+                ),
+                (
+                    "state",
+                    models.CharField(
+                        choices=[("ready", "Ready"), ("completed", "Completed"), ("skipped", "Skipped")],
+                        default="ready",
+                        help_text="Current state of the tour for this user. Available options: ready (Ready), completed (Completed), skipped (Skipped)",
+                        max_length=32,
+                        verbose_name="State",
+                    ),
+                ),
+                (
+                    "interaction_data",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text="Additional data about user interaction with the tour",
+                        verbose_name="Interaction Data",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True, help_text="When this tour record was created")),
+                (
+                    "updated_at",
+                    models.DateTimeField(auto_now=True, help_text="When this tour record was last updated"),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        help_text="User who interacted with the tour",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="tours",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

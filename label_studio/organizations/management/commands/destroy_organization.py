@@ -16,7 +16,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         org = Organization.objects.filter(pk=options['organization_id']).first()
         if org is None:
-            print(f'Organization with id: {options["organization_id"]} not found')
+            print(f"Organization with id: {options['organization_id']} not found")
             return
         yes = input(
             f'You are trying to remove organization with id: {org.id} and title: "{org.title}". This is not reversible!! Are you sure? yes/no: '

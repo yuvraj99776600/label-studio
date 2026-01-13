@@ -4,20 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ml_model_providers', '0003_modelproviderconnection_cached_available_models'),
+        ("ml_model_providers", "0003_modelproviderconnection_cached_available_models"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='modelproviderconnection',
-            name='auth_token',
-            field=models.TextField(blank=True, help_text='Model provider Auth token', null=True, verbose_name='auth_token'),
+            model_name="modelproviderconnection",
+            name="auth_token",
+            field=models.TextField(
+                blank=True, help_text="Model provider Auth token", null=True, verbose_name="auth_token"
+            ),
         ),
         migrations.AlterField(
-            model_name='modelproviderconnection',
-            name='provider',
-            field=models.CharField(choices=[('OpenAI', 'OpenAI'), ('AzureOpenAI', 'AzureOpenAI'), ('Custom', 'Custom')], default='OpenAI', max_length=255),
+            model_name="modelproviderconnection",
+            name="provider",
+            field=models.CharField(
+                choices=[("OpenAI", "OpenAI"), ("AzureOpenAI", "AzureOpenAI"), ("Custom", "Custom")],
+                default="OpenAI",
+                max_length=255,
+            ),
         ),
     ]

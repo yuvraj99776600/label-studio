@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0033_annotation_updated_by_fill'),
+        ("tasks", "0033_annotation_updated_by_fill"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='annotation',
-            name='unique_id',
+            model_name="annotation",
+            name="unique_id",
             field=models.UUIDField(blank=True, editable=False, null=True, unique=True),
         ),
     ]

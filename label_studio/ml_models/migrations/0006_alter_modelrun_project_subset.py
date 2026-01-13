@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ml_models', '0005_auto_20240319_1738'),
+        ("ml_models", "0005_auto_20240319_1738"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='modelrun',
-            name='project_subset',
-            field=models.CharField(choices=[('All', 'All'), ('HasGT', 'HasGT'), ('Sample', 'Sample')], default='HasGT', max_length=255),
+            model_name="modelrun",
+            name="project_subset",
+            field=models.CharField(
+                choices=[("All", "All"), ("HasGT", "HasGT"), ("Sample", "Sample")], default="HasGT", max_length=255
+            ),
         ),
     ]

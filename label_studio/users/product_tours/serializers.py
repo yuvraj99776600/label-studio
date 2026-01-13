@@ -28,7 +28,6 @@ class UserProductTourSerializer(serializers.ModelSerializer):
         return {pathlib.Path(f).stem for f in PRODUCT_TOURS_CONFIGS_DIR.iterdir()}
 
     def validate_name(self, value):
-
         if value not in self.available_tours:
             raise serializers.ValidationError(
                 f'Product tour {value} not found. Available tours: {self.available_tours}'
@@ -39,7 +38,7 @@ class UserProductTourSerializer(serializers.ModelSerializer):
     @cached_property
     def load_tour_config(self):
         # TODO: get product tour from yaml file. Later we move it to remote storage, e.g. S3
-        filepath = PRODUCT_TOURS_CONFIGS_DIR / f'{self.context["name"]}.yml'
+        filepath = PRODUCT_TOURS_CONFIGS_DIR / f"{self.context['name']}.yml"
         with open(filepath, 'r') as f:
             return yaml.safe_load(f)
 
@@ -49,7 +48,7 @@ class UserProductTourSerializer(serializers.ModelSerializer):
         for dependency in dependencies:
             tour = fast_first(UserProductTour.objects.filter(user=self.context['request'].user, name=dependency))
             if not tour or tour.state != ProductTourState.COMPLETED:
-                logger.info(f'Tour {dependency} is not completed: skipping tour {self.context["name"]}')
+                logger.info(f"Tour {dependency} is not completed: skipping tour {self.context['name']}")
                 return True
         return False
 

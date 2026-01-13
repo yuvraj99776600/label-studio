@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0005_auto_20211010_1339'),
+        ("users", "0005_auto_20211010_1339"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='allow_newsletters',
-            field=models.BooleanField(default=None, help_text='Allow sending newsletters to user', null=True, verbose_name='allow newsletters'),
+            model_name="user",
+            name="allow_newsletters",
+            field=models.BooleanField(
+                default=None,
+                help_text="Allow sending newsletters to user",
+                null=True,
+                verbose_name="allow newsletters",
+            ),
         ),
     ]

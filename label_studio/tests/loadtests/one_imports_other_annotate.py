@@ -96,7 +96,7 @@ class Annotator(HttpUser):
         ) as r:
             task = r.json()
             self.client.post(
-                f'/api/tasks/{task["id"]}/annotations',
+                f"/api/tasks/{task['id']}/annotations",
                 name='/api/tasks/<pk>/annotations',
                 json={
                     'result': [

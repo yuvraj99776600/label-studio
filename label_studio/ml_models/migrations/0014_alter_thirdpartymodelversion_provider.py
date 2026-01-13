@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("ml_models", "0013_alter_thirdpartymodelversion_provider"),
     ]

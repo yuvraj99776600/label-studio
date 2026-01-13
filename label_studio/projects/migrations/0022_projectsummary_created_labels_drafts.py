@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0021_merge_20230215_1943'),
+        ("projects", "0021_merge_20230215_1943"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='projectsummary',
-            name='created_labels_drafts',
-            field=models.JSONField(default=dict, help_text='Unique drafts labels', null=True, verbose_name='created labels in drafts'),
+            model_name="projectsummary",
+            name="created_labels_drafts",
+            field=models.JSONField(
+                default=dict, help_text="Unique drafts labels", null=True, verbose_name="created labels in drafts"
+            ),
         ),
     ]

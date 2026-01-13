@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("session_policy", "0002_alter_sessiontimeoutpolicy_max_session_age_and_more"),
     ]

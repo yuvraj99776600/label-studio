@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ml_models', '0006_alter_modelrun_project_subset'),
+        ("ml_models", "0006_alter_modelrun_project_subset"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='modelrun',
-            name='total_correct_predictions',
-            field=models.IntegerField(default=0, verbose_name='total correct predictions'),
+            model_name="modelrun",
+            name="total_correct_predictions",
+            field=models.IntegerField(default=0, verbose_name="total correct predictions"),
         ),
         migrations.AddField(
-            model_name='modelrun',
-            name='total_predictions',
-            field=models.IntegerField(default=0, verbose_name='total predictions'),
+            model_name="modelrun",
+            name="total_predictions",
+            field=models.IntegerField(default=0, verbose_name="total predictions"),
         ),
     ]

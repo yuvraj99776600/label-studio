@@ -4,18 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0015_task_fill_inner_id'),
+        ("tasks", "0015_task_fill_inner_id"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='annotation',
-            index=models.Index(fields=['task', 'completed_by'], name='task_comple_task_id_d49cd7_idx'),
+            model_name="annotation",
+            index=models.Index(fields=["task", "completed_by"], name="task_comple_task_id_d49cd7_idx"),
         ),
         migrations.AddIndex(
-            model_name='task',
-            index=models.Index(fields=['id', 'project'], name='task_id_aef988_idx'),
+            model_name="task",
+            index=models.Index(fields=["id", "project"], name="task_id_aef988_idx"),
         ),
     ]

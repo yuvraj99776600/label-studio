@@ -5,20 +5,33 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0049_auto_20240905_1602'),
+        ("tasks", "0049_auto_20240905_1602"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='predictionmeta',
-            name='failed_prediction',
-            field=models.OneToOneField(blank=True, help_text='Reference to the associated failed prediction', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='meta', to='tasks.failedprediction'),
+            model_name="predictionmeta",
+            name="failed_prediction",
+            field=models.OneToOneField(
+                blank=True,
+                help_text="Reference to the associated failed prediction",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="meta",
+                to="tasks.failedprediction",
+            ),
         ),
         migrations.AlterField(
-            model_name='predictionmeta',
-            name='prediction',
-            field=models.OneToOneField(blank=True, help_text='Reference to the associated prediction', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='meta', to='tasks.prediction'),
+            model_name="predictionmeta",
+            name="prediction",
+            field=models.OneToOneField(
+                blank=True,
+                help_text="Reference to the associated prediction",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="meta",
+                to="tasks.prediction",
+            ),
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('data_export', '0007_auto_20230327_1910'),
+        ("data_export", "0007_auto_20230327_1910"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='convertedformat',
-            name='traceback',
+            model_name="convertedformat",
+            name="traceback",
             field=models.TextField(blank=True, null=True),
         ),
     ]

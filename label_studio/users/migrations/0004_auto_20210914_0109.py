@@ -4,30 +4,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0003_user_active_organization'),
+        ("users", "0003_user_active_organization"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='user',
-            index=models.Index(fields=['username'], name='htx_user_usernam_a41619_idx'),
+            model_name="user",
+            index=models.Index(fields=["username"], name="htx_user_usernam_a41619_idx"),
         ),
         migrations.AddIndex(
-            model_name='user',
-            index=models.Index(fields=['email'], name='htx_user_email_051c68_idx'),
+            model_name="user",
+            index=models.Index(fields=["email"], name="htx_user_email_051c68_idx"),
         ),
         migrations.AddIndex(
-            model_name='user',
-            index=models.Index(fields=['first_name'], name='htx_user_first_n_93c5de_idx'),
+            model_name="user",
+            index=models.Index(fields=["first_name"], name="htx_user_first_n_93c5de_idx"),
         ),
         migrations.AddIndex(
-            model_name='user',
-            index=models.Index(fields=['last_name'], name='htx_user_last_na_2ace53_idx'),
+            model_name="user",
+            index=models.Index(fields=["last_name"], name="htx_user_last_na_2ace53_idx"),
         ),
         migrations.AddIndex(
-            model_name='user',
-            index=models.Index(fields=['date_joined'], name='htx_user_date_jo_3bd95e_idx'),
+            model_name="user",
+            index=models.Index(fields=["date_joined"], name="htx_user_date_jo_3bd95e_idx"),
         ),
     ]

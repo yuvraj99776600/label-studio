@@ -4,60 +4,159 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('io_storages', '0012_auto_20230418_1510'),
+        ("io_storages", "0012_auto_20230418_1510"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='azureblobexportstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="azureblobexportstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='azureblobimportstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="azureblobimportstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='gcsexportstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="gcsexportstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='gcsimportstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="gcsimportstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='localfilesexportstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="localfilesexportstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='localfilesimportstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="localfilesimportstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='redisexportstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="redisexportstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='redisimportstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="redisimportstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='s3exportstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="s3exportstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
         migrations.AlterField(
-            model_name='s3importstorage',
-            name='status',
-            field=models.CharField(choices=[('initialized', 'Initialized'), ('queued', 'Queued'), ('in_progress', 'In progress'), ('failed', 'Failed'), ('completed', 'Completed')], default='initialized', max_length=64),
+            model_name="s3importstorage",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("initialized", "Initialized"),
+                    ("queued", "Queued"),
+                    ("in_progress", "In progress"),
+                    ("failed", "Failed"),
+                    ("completed", "Completed"),
+                ],
+                default="initialized",
+                max_length=64,
+            ),
         ),
     ]

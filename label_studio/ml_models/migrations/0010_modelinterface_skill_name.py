@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("ml_models", "0009_alter_thirdpartymodelversion_provider"),
     ]
@@ -28,6 +27,6 @@ class Migration(migrations.Migration):
                 "UPDATE ml_models_modelinterface SET skill_name = 'TextClassification' WHERE skill_name IS NULL;",
             ],
             # statement above is not reversible, but doesn't matter because the column will be dropped, so do nothing
-            reverse_sql=[]
+            reverse_sql=[],
         ),
     ]

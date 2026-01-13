@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0005_auto_20210309_1239'),
+        ("tasks", "0005_auto_20210309_1239"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='annotation',
-            name='state',
+            model_name="annotation",
+            name="state",
         ),
     ]

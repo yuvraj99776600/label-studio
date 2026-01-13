@@ -8,11 +8,10 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-IS_SQLITE = connection.vendor == 'sqlite'
+IS_SQLITE = connection.vendor == "sqlite"
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("tasks", "0047_merge_20240318_2210"),
         ("projects", "0026_auto_20231103_0020"),
@@ -216,9 +215,9 @@ class Migration(migrations.Migration):
         if IS_SQLITE and not settings.LSE_PROJECT:
             # Migration should be a no op after 0017 but we're forcing the no-op here because
             # The migration thinks there's a difference
-            logger.info('Trying to apply default migrations')
+            logger.info("Trying to apply default migrations")
             return super().apply(project_state, schema_editor, collect_sql)
-        logger.info('Skipping migrations for LSE project or Postgres database')
+        logger.info("Skipping migrations for LSE project or Postgres database")
         return project_state
 
     def unapply(self, project_state, schema_editor, collect_sql=False):

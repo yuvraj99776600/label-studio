@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("organizations", "0006_alter_organizationmember_deleted_at"),
         ("projects", "0031_alter_project_show_ground_truth_first"),

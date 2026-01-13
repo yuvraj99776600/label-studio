@@ -13,16 +13,27 @@ def _fill_model_version_model_provider_connection(db_alias: str):
         this_provider_model_versions = (
             ThirdPartyModelVersion.objects.using(db_alias)
             .filter(provider=provider)
-            .values('id', 'organization_id', 'provider_model_id')
+            .values("id", "organization_id", "provider_model_id")
         )
         for provider_model_version in this_provider_model_versions:
-            connection_ids = ModelProviderConnection.objects.using(db_alias).filter(
-                organization_id=provider_model_version['organization_id'],
-                provider=provider,
-                **({'deployment_name': provider_model_version['provider_model_id']} if provider == ModelProviders.AZURE_OPENAI else {}),
-            ).values_list('id', flat=True)[:1]
+            connection_ids = (
+                ModelProviderConnection.objects.using(db_alias)
+                .filter(
+                    organization_id=provider_model_version["organization_id"],
+                    provider=provider,
+                    **(
+                        {"deployment_name": provider_model_version["provider_model_id"]}
+                        if provider == ModelProviders.AZURE_OPENAI
+                        else {}
+                    ),
+                )
+                .values_list("id", flat=True)[:1]
+            )
             connection_id = connection_ids[0] if connection_ids else None
-            ThirdPartyModelVersion.objects.using(db_alias).filter(id=provider_model_version['id']).update(model_provider_connection_id=connection_id)
+            ThirdPartyModelVersion.objects.using(db_alias).filter(id=provider_model_version["id"]).update(
+                model_provider_connection_id=connection_id
+            )
+
 
 def forwards(apps, schema_editor):
     db_alias = schema_editor.connection.alias
@@ -37,16 +48,21 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ('ml_model_providers', '0003_modelproviderconnection_cached_available_models'),
-        ('ml_models', '0010_modelinterface_skill_name'),
+        ("ml_model_providers", "0003_modelproviderconnection_cached_available_models"),
+        ("ml_models", "0010_modelinterface_skill_name"),
     ]
 
     operations = [
         linter.IgnoreMigration(),
         migrations.AddField(
-            model_name='thirdpartymodelversion',
-            name='model_provider_connection',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='model_versions', to='ml_model_providers.modelproviderconnection'),
+            model_name="thirdpartymodelversion",
+            name="model_provider_connection",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="model_versions",
+                to="ml_model_providers.modelproviderconnection",
+            ),
         ),
-        migrations.RunPython(forwards, backwards)
+        migrations.RunPython(forwards, backwards),
     ]

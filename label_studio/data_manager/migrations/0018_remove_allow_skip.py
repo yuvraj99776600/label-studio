@@ -7,6 +7,7 @@ meaning it should be hidden by default. However, existing views don't have this 
 hiddenColumns list, so it appears visible. This migration adds the column to hiddenColumns
 for all existing views to match the expected default behavior.
 """
+
 import logging
 
 from django.conf import settings
@@ -26,10 +27,10 @@ def forward_migration_job(*, migration_name: str) -> None:
 
     migration, created = AsyncMigrationStatus.objects.get_or_create(
         name=migration_name,
-        defaults={'status': AsyncMigrationStatus.STATUS_STARTED},
+        defaults={"status": AsyncMigrationStatus.STATUS_STARTED},
     )
     if not created and migration.status == AsyncMigrationStatus.STATUS_FINISHED:
-        logger.info(f'Migration {migration_name} already executed with status FINISHED')
+        logger.info(f"Migration {migration_name} already executed with status FINISHED")
         return
     if migration.status == AsyncMigrationStatus.STATUS_SCHEDULED:
         migration.status = AsyncMigrationStatus.STATUS_STARTED
@@ -40,31 +41,31 @@ def forward_migration_job(*, migration_name: str) -> None:
         updated_count = 0
 
         for view in views:
-            if view.data and 'hiddenColumns' in view.data:
+            if view.data and "hiddenColumns" in view.data:
                 modified = False
-                if 'explore' in view.data['hiddenColumns']:
-                    if 'tasks:allow_skip' not in view.data['hiddenColumns']['explore']:
-                        view.data['hiddenColumns']['explore'].append('tasks:allow_skip')
+                if "explore" in view.data["hiddenColumns"]:
+                    if "tasks:allow_skip" not in view.data["hiddenColumns"]["explore"]:
+                        view.data["hiddenColumns"]["explore"].append("tasks:allow_skip")
                         modified = True
-                if 'labeling' in view.data['hiddenColumns']:
-                    if 'tasks:allow_skip' not in view.data['hiddenColumns']['labeling']:
-                        view.data['hiddenColumns']['labeling'].append('tasks:allow_skip')
+                if "labeling" in view.data["hiddenColumns"]:
+                    if "tasks:allow_skip" not in view.data["hiddenColumns"]["labeling"]:
+                        view.data["hiddenColumns"]["labeling"].append("tasks:allow_skip")
                         modified = True
 
                 if modified:
-                    view.save(update_fields=['data'])
+                    view.save(update_fields=["data"])
                     updated_count += 1
 
-        logger.info(f'Migration {migration_name} complete: updated {updated_count} views')
+        logger.info(f"Migration {migration_name} complete: updated {updated_count} views")
         migration.status = AsyncMigrationStatus.STATUS_FINISHED
-        migration.meta = {'updated_views': updated_count}
+        migration.meta = {"updated_views": updated_count}
         migration.save()
     except Exception as e:
-        logger.exception(f'Migration {migration_name} failed: {e}')
+        logger.exception(f"Migration {migration_name} failed: {e}")
         migration.status = AsyncMigrationStatus.STATUS_ERROR
         if not migration.meta:
             migration.meta = {}
-        migration.meta['error'] = str(e)
+        migration.meta["error"] = str(e)
         migration.save()
         raise
 
@@ -73,26 +74,29 @@ def reverse_migration_job(*, migration_name: str) -> None:
     """Async job: Show the allow_skip column by removing it from hiddenColumns."""
     from data_manager.models import View
 
-    logger.info(f'Starting reverse migration {migration_name}')
+    logger.info(f"Starting reverse migration {migration_name}")
 
     views = iterate_queryset(View.objects.all())
     updated_count = 0
 
     for view in views:
-        if view.data and 'hiddenColumns' in view.data:
+        if view.data and "hiddenColumns" in view.data:
             modified = False
-            if 'explore' in view.data['hiddenColumns'] and 'tasks:allow_skip' in view.data['hiddenColumns']['explore']:
-                view.data['hiddenColumns']['explore'].remove('tasks:allow_skip')
+            if "explore" in view.data["hiddenColumns"] and "tasks:allow_skip" in view.data["hiddenColumns"]["explore"]:
+                view.data["hiddenColumns"]["explore"].remove("tasks:allow_skip")
                 modified = True
-            if 'labeling' in view.data['hiddenColumns'] and 'tasks:allow_skip' in view.data['hiddenColumns']['labeling']:
-                view.data['hiddenColumns']['labeling'].remove('tasks:allow_skip')
+            if (
+                "labeling" in view.data["hiddenColumns"]
+                and "tasks:allow_skip" in view.data["hiddenColumns"]["labeling"]
+            ):
+                view.data["hiddenColumns"]["labeling"].remove("tasks:allow_skip")
                 modified = True
 
             if modified:
-                view.save(update_fields=['data'])
+                view.save(update_fields=["data"])
                 updated_count += 1
 
-    logger.info(f'Reverse migration {migration_name} complete: updated {updated_count} views')
+    logger.info(f"Reverse migration {migration_name} complete: updated {updated_count} views")
 
 
 def forwards(apps, schema_editor):
@@ -117,9 +121,9 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ('data_manager', '0017_update_agreement_selected_to_nested_structure'),
-        ('tasks', '0060_add_allow_skip_to_task'),
-        ('core', '0001_initial'),  # For AsyncMigrationStatus model
+        ("data_manager", "0017_update_agreement_selected_to_nested_structure"),
+        ("tasks", "0060_add_allow_skip_to_task"),
+        ("core", "0001_initial"),  # For AsyncMigrationStatus model
     ]
 
     operations = [

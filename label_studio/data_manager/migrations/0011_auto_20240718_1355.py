@@ -4,23 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('data_manager', '0010_auto_20230718_1423'),
+        ("data_manager", "0010_auto_20230718_1423"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='view',
-            options={'ordering': ['order']},
+            name="view",
+            options={"ordering": ["order"]},
         ),
         migrations.AddField(
-            model_name='view',
-            name='order',
-            field=models.IntegerField(default=0, help_text='Position of the tab, starting at the left in data manager and increasing as the tabs go left to right', null=True, verbose_name='order'),
+            model_name="view",
+            name="order",
+            field=models.IntegerField(
+                default=0,
+                help_text="Position of the tab, starting at the left in data manager and increasing as the tabs go left to right",
+                null=True,
+                verbose_name="order",
+            ),
         ),
         migrations.AddIndex(
-            model_name='view',
-            index=models.Index(fields=['project', 'order'], name='data_manage_project_69b96e_idx'),
+            model_name="view",
+            index=models.Index(fields=["project", "order"], name="data_manage_project_69b96e_idx"),
         ),
     ]

@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0011_auto_20210517_2101'),
+        ("projects", "0011_auto_20210517_2101"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='project',
-            name='show_ground_truth_first',
-            field=models.BooleanField(default=False, verbose_name='show ground truth first'),
+            model_name="project",
+            name="show_ground_truth_first",
+            field=models.BooleanField(default=False, verbose_name="show ground truth first"),
         ),
         migrations.AlterField(
-            model_name='project',
-            name='show_overlap_first',
-            field=models.BooleanField(default=False, verbose_name='show overlap first'),
+            model_name="project",
+            name="show_overlap_first",
+            field=models.BooleanField(default=False, verbose_name="show overlap first"),
         ),
     ]

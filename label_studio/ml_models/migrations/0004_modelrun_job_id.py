@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ml_models', '0003_auto_20240228_2228'),
+        ("ml_models", "0003_auto_20240228_2228"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='modelrun',
-            name='job_id',
-            field=models.CharField(blank=True, default=None, help_text='Job ID for inference job for a ModelRun e.g. Adala job ID', max_length=255, null=True),
+            model_name="modelrun",
+            name="job_id",
+            field=models.CharField(
+                blank=True,
+                default=None,
+                help_text="Job ID for inference job for a ModelRun e.g. Adala job ID",
+                max_length=255,
+                null=True,
+            ),
         ),
     ]

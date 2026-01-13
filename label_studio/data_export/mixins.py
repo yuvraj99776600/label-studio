@@ -236,7 +236,7 @@ class ExportMixin:
             for ids in batch(task_ids, BATCH_SIZE):
                 i += 1
                 tasks = list(self.get_task_queryset(ids, annotation_filter_options))
-                logger.debug(f'Batch: {i*BATCH_SIZE}')
+                logger.debug(f'Batch: {i * BATCH_SIZE}')
                 if isinstance(task_filter_options, dict) and task_filter_options.get('only_with_annotations'):
                     tasks = [task for task in tasks if task.annotations.exists()]
 
@@ -253,7 +253,7 @@ class ExportMixin:
                     yield task
         duration = datetime.now() - start
         logger.info(
-            f'{self.counters["task_number"]} tasks from project {self.project_id} exported in {duration.total_seconds():.2f} seconds'
+            f"{self.counters['task_number']} tasks from project {self.project_id} exported in {duration.total_seconds():.2f} seconds"
         )
 
     def update_export_serializer_option(self, base_export_serializer_option, annotation_ids):
@@ -261,7 +261,7 @@ class ExportMixin:
 
     @staticmethod
     def eval_md5(file):
-        md5_object = hashlib.md5()   # nosec
+        md5_object = hashlib.md5()  # nosec
         block_size = 128 * md5_object.block_size
         chunk = file.read(block_size)
         while chunk:
@@ -272,7 +272,7 @@ class ExportMixin:
 
     def save_file(self, file, md5):
         now = datetime.now()
-        file_name = f'project-{self.project.id}-at-{now.strftime("%Y-%m-%d-%H-%M")}-{md5[0:8]}.json'
+        file_name = f"project-{self.project.id}-at-{now.strftime('%Y-%m-%d-%H-%M')}-{md5[0:8]}.json"
         file_path = f'{self.project.id}/{file_name}'  # finally file will be in settings.DELAYED_EXPORT_DIR/self.project.id/file_name
         file_ = File(file, name=file_path)
         self.file.save(file_path, file_)

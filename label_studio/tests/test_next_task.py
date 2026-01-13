@@ -1,5 +1,5 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 import json
 import time
 from unittest import mock
@@ -455,7 +455,6 @@ def test_next_task_with_active_learning(
     status_code,
     prelabeling_result,
 ):
-
     project = make_project(project_config, business_client.user, use_ml_backend=False)
     if _client_is_annotator(any_client):
         invite_client_to_project(any_client, project)
@@ -518,7 +517,7 @@ def test_active_learning_with_uploaded_predictions(business_client):
 
         # and completes it
         r = business_client.post(
-            f'/api/tasks/{task["id"]}/annotations/', data={'task': task['id'], 'result': json.dumps(result)}
+            f"/api/tasks/{task['id']}/annotations/", data={'task': task['id'], 'result': json.dumps(result)}
         )
         assert r.status_code == 201
         return task['data']['text']

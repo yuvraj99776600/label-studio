@@ -22,6 +22,7 @@ SQL_CREATE_INDEX = (
 
 SQL_DROP_INDEX = "DROP INDEX CONCURRENTLY IF EXISTS tasks_predictions_result_proj_gin;"
 
+
 def _forward(migration_name: str, db_alias: str):
     """Create the GIN index inside a dedicated job."""
     # If the migration has already been executed, do nothing
@@ -84,7 +85,6 @@ def backwards(apps, schema_editor):
 
     db_alias = schema_editor.connection.alias
     start_job_async_or_sync(_backward, migration_name=migration_name, db_alias=db_alias)
-
 
 
 class Migration(migrations.Migration):

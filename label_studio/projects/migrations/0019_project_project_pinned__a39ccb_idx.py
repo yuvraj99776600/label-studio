@@ -4,14 +4,13 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0018_alter_project_control_weights'),
+        ("projects", "0018_alter_project_control_weights"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='project',
-            index=models.Index(fields=['pinned_at', 'created_at'], name='project_pinned__a39ccb_idx'),
+            model_name="project",
+            index=models.Index(fields=["pinned_at", "created_at"], name="project_pinned__a39ccb_idx"),
         ),
     ]

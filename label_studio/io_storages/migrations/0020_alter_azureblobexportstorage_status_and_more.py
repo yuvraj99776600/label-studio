@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("io_storages", "0019_azureblobimportstoragelink_row_group_and_more"),
     ]

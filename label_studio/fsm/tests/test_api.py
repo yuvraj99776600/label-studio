@@ -16,13 +16,13 @@ class FSMEntityHistoryAPITests(APITestCase):
     def setUpTestData(cls):
         cls.project = ProjectFactory()
         cls.user = cls.project.created_by
-        ProjectState.objects.all().delete()   # Clean everything just in case
+        ProjectState.objects.all().delete()  # Clean everything just in case
 
         cls.task = TaskFactory(project=cls.project)
-        TaskState.objects.all().delete()   # Clean everything just in case
+        TaskState.objects.all().delete()  # Clean everything just in case
 
         cls.annotation = AnnotationFactory(task=cls.task, completed_by=cls.user)
-        AnnotationState.objects.all().delete()   # Clean everything just in case
+        AnnotationState.objects.all().delete()  # Clean everything just in case
 
     def test_invalid_entity_name(self):
         self.client.force_authenticate(user=self.user)

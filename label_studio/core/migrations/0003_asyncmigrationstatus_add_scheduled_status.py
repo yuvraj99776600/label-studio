@@ -4,22 +4,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0002_deletedrow'),
+        ("core", "0002_deletedrow"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='asyncmigrationstatus',
-            name='status',
+            model_name="asyncmigrationstatus",
+            name="status",
             field=models.CharField(
                 choices=[
-                    ('SCHEDULED', 'Migration is scheduled but not yet started.'),
-                    ('STARTED', 'Migration is started or queued.'),
-                    ('IN PROGRESS', 'Migration is in progress. Check meta for job_id or status.'),
-                    ('FINISHED', 'Migration completed successfully.'),
-                    ('ERROR', 'Migration completed with errors. Check meta for more info.'),
+                    ("SCHEDULED", "Migration is scheduled but not yet started."),
+                    ("STARTED", "Migration is started or queued."),
+                    ("IN PROGRESS", "Migration is in progress. Check meta for job_id or status."),
+                    ("FINISHED", "Migration completed successfully."),
+                    ("ERROR", "Migration completed with errors. Check meta for more info."),
                 ],
                 default=None,
                 max_length=100,

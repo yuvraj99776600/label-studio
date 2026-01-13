@@ -130,9 +130,10 @@ class TestResolveStorageUriAPIMixin(unittest.TestCase):
         mock_storage.get_bytes_stream.return_value = (io.BytesIO(b'test data'), 'image/jpeg', {})
         mock_project = MagicMock()
 
-        with patch('io_storages.proxy_api.StreamingHttpResponse') as mock_response_class, patch(
-            'io_storages.proxy_api.settings'
-        ) as mock_settings:
+        with (
+            patch('io_storages.proxy_api.StreamingHttpResponse') as mock_response_class,
+            patch('io_storages.proxy_api.settings') as mock_settings,
+        ):
             # Configure mock settings
             mock_settings.RESOLVER_PROXY_MAX_RANGE_SIZE = 1024 * 1024  # 1MB
             mock_settings.RESOLVER_PROXY_BUFFER_SIZE = 8192
@@ -277,9 +278,10 @@ class TestResolveStorageUriAPIMixin(unittest.TestCase):
         """Test override_range_header with header probe formats"""
         # Test bytes=0-
         self.request.headers = {'Range': 'bytes=0-'}
-        with patch('io_storages.proxy_api.settings') as mock_settings, patch(
-            'io_storages.proxy_api.parse_range'
-        ) as mock_parse_range:
+        with (
+            patch('io_storages.proxy_api.settings') as mock_settings,
+            patch('io_storages.proxy_api.parse_range') as mock_parse_range,
+        ):
             mock_settings.RESOLVER_PROXY_MAX_RANGE_SIZE = 1024 * 1024
             # Mock the parse_range function to return a known value
             mock_parse_range.return_value = (0, '')
@@ -289,9 +291,10 @@ class TestResolveStorageUriAPIMixin(unittest.TestCase):
 
         # Test bytes=0-0
         self.request.headers = {'Range': 'bytes=0-0'}
-        with patch('io_storages.proxy_api.settings') as mock_settings, patch(
-            'io_storages.proxy_api.parse_range'
-        ) as mock_parse_range:
+        with (
+            patch('io_storages.proxy_api.settings') as mock_settings,
+            patch('io_storages.proxy_api.parse_range') as mock_parse_range,
+        ):
             mock_settings.RESOLVER_PROXY_MAX_RANGE_SIZE = 1024 * 1024
             # Mock the parse_range function to return a known value
             mock_parse_range.return_value = (0, 0)
@@ -303,37 +306,40 @@ class TestResolveStorageUriAPIMixin(unittest.TestCase):
         """Test override_range_header with a start position but no end"""
         # Case: bytes=100-
         self.request.headers = {'Range': 'bytes=100-'}
-        with patch('io_storages.proxy_api.settings') as mock_settings, patch(
-            'io_storages.proxy_api.parse_range'
-        ) as mock_parse_range:
+        with (
+            patch('io_storages.proxy_api.settings') as mock_settings,
+            patch('io_storages.proxy_api.parse_range') as mock_parse_range,
+        ):
             mock_settings.RESOLVER_PROXY_MAX_RANGE_SIZE = 1024 * 1024  # 1MB
             # Mock the parse_range function to return a known value
             mock_parse_range.return_value = (100, '')
 
             result = self.mixin.override_range_header(self.request)
             # Should add MAX_RANGE_SIZE to start
-            assert result == f'bytes=100-{100 + 1024*1024}'
+            assert result == f'bytes=100-{100 + 1024 * 1024}'
 
         # Case: bytes=100-0 (treated like bytes=100-)
         self.request.headers = {'Range': 'bytes=100-0'}
-        with patch('io_storages.proxy_api.settings') as mock_settings, patch(
-            'io_storages.proxy_api.parse_range'
-        ) as mock_parse_range:
+        with (
+            patch('io_storages.proxy_api.settings') as mock_settings,
+            patch('io_storages.proxy_api.parse_range') as mock_parse_range,
+        ):
             mock_settings.RESOLVER_PROXY_MAX_RANGE_SIZE = 1024 * 1024  # 1MB
             # Mock the parse_range function to return a known value
             mock_parse_range.return_value = (100, 0)
 
             result = self.mixin.override_range_header(self.request)
             # Should add MAX_RANGE_SIZE to start
-            assert result == f'bytes=100-{100 + 1024*1024}'
+            assert result == f'bytes=100-{100 + 1024 * 1024}'
 
     def test_override_range_header_start_and_end(self):
         """Test override_range_header with start and end positions"""
         # Case: Range within limit
         self.request.headers = {'Range': 'bytes=100-5000'}
-        with patch('io_storages.proxy_api.settings') as mock_settings, patch(
-            'io_storages.proxy_api.parse_range'
-        ) as mock_parse_range:
+        with (
+            patch('io_storages.proxy_api.settings') as mock_settings,
+            patch('io_storages.proxy_api.parse_range') as mock_parse_range,
+        ):
             mock_settings.RESOLVER_PROXY_MAX_RANGE_SIZE = 10000  # 10KB
             # Mock the parse_range function to return a known value
             mock_parse_range.return_value = (100, 5000)
@@ -344,9 +350,10 @@ class TestResolveStorageUriAPIMixin(unittest.TestCase):
 
         # Case: Range exceeding limit
         self.request.headers = {'Range': 'bytes=100-20000'}
-        with patch('io_storages.proxy_api.settings') as mock_settings, patch(
-            'io_storages.proxy_api.parse_range'
-        ) as mock_parse_range:
+        with (
+            patch('io_storages.proxy_api.settings') as mock_settings,
+            patch('io_storages.proxy_api.parse_range') as mock_parse_range,
+        ):
             mock_settings.RESOLVER_PROXY_MAX_RANGE_SIZE = 10000  # 10KB
             # Mock the parse_range function to return a known value
             mock_parse_range.return_value = (100, 20000)
@@ -358,9 +365,10 @@ class TestResolveStorageUriAPIMixin(unittest.TestCase):
     def test_override_range_header_negative_start(self):
         """Test override_range_header with negative start position"""
         self.request.headers = {'Range': 'bytes=-1024'}
-        with patch('io_storages.proxy_api.settings') as mock_settings, patch(
-            'io_storages.proxy_api.parse_range'
-        ) as mock_parse_range:
+        with (
+            patch('io_storages.proxy_api.settings') as mock_settings,
+            patch('io_storages.proxy_api.parse_range') as mock_parse_range,
+        ):
             mock_settings.RESOLVER_PROXY_MAX_RANGE_SIZE = 10000  # 10KB
             # Mock the parse_range function to return a negative start
             mock_parse_range.return_value = (-1024, None)
@@ -372,9 +380,10 @@ class TestResolveStorageUriAPIMixin(unittest.TestCase):
     def test_override_range_header_unsupported_format(self):
         """Test override_range_header with unsupported range format"""
         self.request.headers = {'Range': 'invalid-range-format'}
-        with patch('io_storages.proxy_api.settings') as mock_settings, patch(
-            'io_storages.proxy_api.parse_range'
-        ) as mock_parse_range:
+        with (
+            patch('io_storages.proxy_api.settings') as mock_settings,
+            patch('io_storages.proxy_api.parse_range') as mock_parse_range,
+        ):
             mock_settings.RESOLVER_PROXY_MAX_RANGE_SIZE = 10000  # 10KB
             # Mock parse_range to simulate failure with invalid format
             mock_parse_range.return_value = (0, None)

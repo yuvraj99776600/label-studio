@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("io_storages", "0018_alter_azureblobexportstorage_project_and_more"),
     ]
@@ -13,9 +12,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="azureblobimportstoragelink",
             name="row_group",
-            field=models.IntegerField(
-                blank=True, help_text="Parquet row group", null=True
-            ),
+            field=models.IntegerField(blank=True, help_text="Parquet row group", null=True),
         ),
         migrations.AddField(
             model_name="azureblobimportstoragelink",
@@ -29,9 +26,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="gcsimportstoragelink",
             name="row_group",
-            field=models.IntegerField(
-                blank=True, help_text="Parquet row group", null=True
-            ),
+            field=models.IntegerField(blank=True, help_text="Parquet row group", null=True),
         ),
         migrations.AddField(
             model_name="gcsimportstoragelink",
@@ -45,9 +40,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="localfilesimportstoragelink",
             name="row_group",
-            field=models.IntegerField(
-                blank=True, help_text="Parquet row group", null=True
-            ),
+            field=models.IntegerField(blank=True, help_text="Parquet row group", null=True),
         ),
         migrations.AddField(
             model_name="localfilesimportstoragelink",
@@ -61,9 +54,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="redisimportstoragelink",
             name="row_group",
-            field=models.IntegerField(
-                blank=True, help_text="Parquet row group", null=True
-            ),
+            field=models.IntegerField(blank=True, help_text="Parquet row group", null=True),
         ),
         migrations.AddField(
             model_name="redisimportstoragelink",
@@ -77,9 +68,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="s3importstoragelink",
             name="row_group",
-            field=models.IntegerField(
-                blank=True, help_text="Parquet row group", null=True
-            ),
+            field=models.IntegerField(blank=True, help_text="Parquet row group", null=True),
         ),
         migrations.AddField(
             model_name="s3importstoragelink",

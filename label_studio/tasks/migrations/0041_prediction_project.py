@@ -4,17 +4,20 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0024_merge_0023_merge_20230512_1333_0023_projectreimport'),
-        ('tasks', '0040_auto_20230628_1101'),
+        ("projects", "0024_merge_0023_merge_20230512_1333_0023_projectreimport"),
+        ("tasks", "0040_auto_20230628_1101"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='prediction',
-            name='project',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='predictions', to='projects.project'),
+            model_name="prediction",
+            name="project",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="predictions",
+                to="projects.project",
+            ),
         ),
-
     ]

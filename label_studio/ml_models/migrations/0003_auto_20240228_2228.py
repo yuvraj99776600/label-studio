@@ -5,26 +5,25 @@ import ml_models.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0026_auto_20231103_0020'),
-        ('ml_models', '0002_modelrun'),
+        ("projects", "0026_auto_20231103_0020"),
+        ("ml_models", "0002_modelrun"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='modelinterface',
-            name='associated_projects',
-            field=models.ManyToManyField(blank=True, to='projects.Project'),
+            model_name="modelinterface",
+            name="associated_projects",
+            field=models.ManyToManyField(blank=True, to="projects.Project"),
         ),
         migrations.AddField(
-            model_name='modelinterface',
-            name='input_fields',
+            model_name="modelinterface",
+            name="input_fields",
             field=models.JSONField(default=list, validators=[ml_models.models.validate_string_list]),
         ),
         migrations.AddField(
-            model_name='modelinterface',
-            name='output_classes',
+            model_name="modelinterface",
+            name="output_classes",
             field=models.JSONField(default=list, validators=[ml_models.models.validate_string_list]),
         ),
     ]

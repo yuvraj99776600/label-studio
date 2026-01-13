@@ -143,6 +143,6 @@ def test_batch_predictions_multiple_predictions_per_task(
             assert len(task.predictions) == 2
 
             for i, prediction in enumerate(task.predictions):
-                assert prediction.result[0]['value']['choices'][0] == f'label_{["A", "B"][i]}'
-                assert prediction.model_version == f'Model{"AB"[i]}'
+                assert prediction.result[0]['value']['choices'][0] == f"label_{['A', 'B'][i]}"
+                assert prediction.model_version == f"Model{'AB'[i]}"
                 assert prediction.score == 0.2 if i == 0 else 0.3

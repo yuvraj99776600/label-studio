@@ -6,15 +6,15 @@ from django.conf import settings
 from django.db import migrations, models
 from django.db import connection
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ("organizations", "0006_alter_organizationmember_deleted_at"),
         ("projects", "0028_auto_20241107_1031"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
-    if connection.vendor == 'postgresql':
+    if connection.vendor == "postgresql":
         operations = [
             migrations.AddField(
                 model_name="project",
@@ -33,8 +33,8 @@ class Migration(migrations.Migration):
     else:
         operations = [
             migrations.AddField(
-                model_name='project',
-                name='search_vector',
+                model_name="project",
+                name="search_vector",
                 field=models.TextField(blank=True, null=True),
             ),
         ]

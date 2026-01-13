@@ -1,5 +1,5 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 import logging
 import time
 from datetime import timedelta
@@ -177,7 +177,7 @@ class XApiKeySupportMiddleware:
 
     def __call__(self, request):
         if 'HTTP_X_API_KEY' in request.META:
-            request.META['HTTP_AUTHORIZATION'] = f'Token {request.META["HTTP_X_API_KEY"]}'
+            request.META['HTTP_AUTHORIZATION'] = f"Token {request.META['HTTP_X_API_KEY']}"
             del request.META['HTTP_X_API_KEY']
 
         return self.get_response(request)

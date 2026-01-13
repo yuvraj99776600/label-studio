@@ -1,5 +1,5 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 import logging
 import os
 import traceback as tb
@@ -626,7 +626,7 @@ def async_convert(converted_format_id, export_type, project, hostname, download_
     ext = converted_file.name.split('.')[-1]
 
     now = datetime.now()
-    file_name = f'project-{project.id}-at-{now.strftime("%Y-%m-%d-%H-%M")}-{md5[0:8]}.{ext}'
+    file_name = f"project-{project.id}-at-{now.strftime('%Y-%m-%d-%H-%M')}-{md5[0:8]}.{ext}"
     file_path = f'{project.id}/{file_name}'  # finally file will be in settings.DELAYED_EXPORT_DIR/project.id/file_name
     file_ = File(converted_file, name=file_path)
     converted_format.file.save(file_path, file_)

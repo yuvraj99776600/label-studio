@@ -4,19 +4,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0022_merge_20220517_1128'),
+        ("tasks", "0022_merge_20220517_1128"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='inner_id',
-            field=models.BigIntegerField(default=0, help_text='Internal task ID in the project, starts with 1', null=True, verbose_name='inner id'),
+            model_name="task",
+            name="inner_id",
+            field=models.BigIntegerField(
+                default=0,
+                help_text="Internal task ID in the project, starts with 1",
+                null=True,
+                verbose_name="inner id",
+            ),
         ),
         migrations.AddIndex(
-            model_name='task',
-            index=models.Index(fields=['project', 'inner_id'], name='task_project_499b59_idx'),
+            model_name="task",
+            index=models.Index(fields=["project", "inner_id"], name="task_project_499b59_idx"),
         ),
     ]

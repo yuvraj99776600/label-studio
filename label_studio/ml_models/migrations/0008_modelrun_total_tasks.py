@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('ml_models', '0007_auto_20240617_2200'),
+        ("ml_models", "0007_auto_20240617_2200"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='modelrun',
-            name='total_tasks',
-            field=models.IntegerField(default=0, verbose_name='total tasks'),
+            model_name="modelrun",
+            name="total_tasks",
+            field=models.IntegerField(default=0, verbose_name="total tasks"),
         ),
     ]

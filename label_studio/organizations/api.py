@@ -1,5 +1,5 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 import logging
 
 from core.feature_flags import flag_set
@@ -320,7 +320,6 @@ class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroy
     ),
 )
 class OrganizationAPI(generics.RetrieveUpdateAPIView):
-
     parser_classes = (JSONParser, FormParser, MultiPartParser)
     queryset = Organization.objects.all()
     permission_required = all_permissions.organizations_change

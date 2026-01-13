@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('data_export', '0008_convertedformat_traceback'),
+        ("data_export", "0008_convertedformat_traceback"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='convertedformat',
-            name='traceback',
-            field=models.TextField(blank=True, help_text='Traceback report in case of errors', null=True),
+            model_name="convertedformat",
+            name="traceback",
+            field=models.TextField(blank=True, help_text="Traceback report in case of errors", null=True),
         ),
     ]
