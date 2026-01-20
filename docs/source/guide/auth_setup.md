@@ -27,7 +27,8 @@ The organization Owner or Administrator for Label Studio Enterprise can set up S
 - [Google SAML](google_saml.html)
 - [Ping Federate and Ping Identity SAML SSO Setup Example](pingone.html)
 - OneLogin
-- Microsoft Active Directory
+- Microsoft Entra ID (formerly Azure Active Directory, Azure AD)
+- Auth0
 - Others that use SAML assertions
 
 After setting up the SSO, you can use native authentication to access the Label Studio UI, however it's not a recommended option especially for the user with the Owner role.
@@ -63,12 +64,29 @@ The details will vary depending on your IdP, but in general you will complete th
 2. Generate a metadata XML file, or a URL that specifies the metadata for the IdP.
 3. Set up or confirm setup of the following SAML attributes. Label Studio Enterprise expects specific attribute mappings for user identities.
 
-    | Data | Required Attribute |
+    The default attribute names are:
+
+    | Data | Default Attribute |
     | --- | --- |
     | Email address | Email |
     | First or given name | FirstName |
     | Last or family name | LastName |
     | Group name | Groups | 
+
+    !!! note Note
+        Different Identity Providers use different attribute names. Label Studio provides **presets** in the SSO & SAML settings page to quickly configure the correct attribute mappings for popular IdPs:
+
+        | IdP | Email | FirstName | LastName | Groups |
+        | --- | --- | --- | --- | --- |
+        | Default | `Email` | `FirstName` | `LastName` | `Groups` |
+        | Okta | `email` | `firstName` | `lastName` | `groups` |
+        | Google | `Email` | `FirstName` | `LastName` | `Groups` |
+        | Entra ID (URI) | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname` | `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname` | `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups` |
+        | Entra ID (short) | `emailAddress` | `givenName` | `surname` | `groups` |
+        | PingOne | `emailAddress` | `givenName` | `surname` | `Groups` |
+        | Auth0 | `email` | `given_name` | `family_name` | `groups` |
+
+        You can also manually configure custom attribute names if your IdP uses different values.
 
 
 
