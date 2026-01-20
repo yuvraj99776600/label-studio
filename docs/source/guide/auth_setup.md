@@ -64,7 +64,7 @@ The details will vary depending on your IdP, but in general you will complete th
 2. Generate a metadata XML file, or a URL that specifies the metadata for the IdP.
 3. Set up or confirm setup of the following SAML attributes. Label Studio Enterprise expects specific attribute mappings for user identities.
 
-    The default attribute names are:
+**The default attribute names are:**
 
     | Data | Default Attribute |
     | --- | --- |
