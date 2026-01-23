@@ -912,14 +912,22 @@ class Project(ProjectMixin, FsmHistoryStateModel):
                 elif self.num_annotations == 0 and self.num_drafts == 0:
                     summary.reset(tasks_data_based=False)
 
-        # Call dimensions postprocess if configured (LSE feature)
-        dimensions_postprocess = load_func(settings.PROJECT_SAVE_DIMENSIONS_POSTPROCESS)
-        if dimensions_postprocess is not None:
-            dimensions_postprocess(
-                project=self,
-                created=not exists,
-                label_config_has_changed=label_config_has_changed,
-            )
+        # Call integration hooks (LSE feature)
+        from projects.functions.hooks import project_save_hook
+
+        project_save_hook(
+            project=self,
+            created=not exists,
+            update_fields=update_fields,
+            label_config_has_changed=label_config_has_changed,
+        )
+
+    def delete(self, *args, **kwargs):
+        """Delete the project, calling integration hooks before deletion."""
+        from projects.functions.hooks import project_delete_hook
+
+        project_delete_hook(project=self)
+        return super().delete(*args, **kwargs)
 
     # ============================================================================
     # FSM Integration
@@ -1391,6 +1399,30 @@ class ProjectMember(models.Model):
     enabled = models.BooleanField(default=True, help_text='Project member is enabled')
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+
+    def save(self, *args, **kwargs):
+        exists = self.pk is not None
+        super().save(*args, **kwargs)
+
+        from projects.functions.hooks import project_member_save_hook
+
+        project_member_save_hook(member=self, created=not exists)
+
+    def delete(self, *args, **kwargs):
+        # Capture data before delete for hook
+        project_id = self.project_id
+        user_id = self.user_id
+        organization = self.project.organization
+
+        from projects.functions.hooks import project_member_delete_hook
+
+        project_member_delete_hook(
+            project_id=project_id,
+            user_id=user_id,
+            organization=organization,
+        )
+
+        return super().delete(*args, **kwargs)
 
 
 class ProjectSummary(models.Model):

@@ -665,6 +665,14 @@ INTERACTIVE_DATA_SERIALIZER = 'data_export.serializers.BaseExportDataSerializerF
 PROJECT_IMPORT_PERMISSION = 'projects.permissions.ProjectImportPermission'
 DELETE_TASKS_ANNOTATIONS_POSTPROCESS = None
 PROJECT_SAVE_DIMENSIONS_POSTPROCESS = None
+
+# Slack integration hooks (LSE feature)
+SLACK_PROJECT_SAVE_HOOK = None           # Called after project save
+SLACK_PROJECT_DELETE_HOOK = None         # Called before project delete
+SLACK_PROJECT_MEMBER_SAVE_HOOK = None    # Called after project member save
+SLACK_PROJECT_MEMBER_DELETE_HOOK = None  # Called before project member delete
+SLACK_COMMENT_SAVE_HOOK = None           # Called after comment save
+
 FEATURE_FLAGS_GET_USER_REPR = 'core.feature_flags.utils.get_user_repr'
 FEATURE_FLAGS_GET_USER_REPR_FROM_ORGANIZATION = 'core.feature_flags.utils.get_user_repr_from_organization'
 
