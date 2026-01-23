@@ -591,16 +591,20 @@ class ExportDownloadAPI(generics.RetrieveAPIView):
                 # below header tells NGINX to catch it and serve, see docker-config/nginx-app.conf
                 redirect = '/file_download/' + protocol + '/' + url.replace(protocol + '://', '')
                 response['X-Accel-Redirect'] = redirect
-                response['Content-Disposition'] = 'attachment; filename="{}"'.format(file.name)
-                response['filename'] = os.path.basename(file.name)
+                # Use basename to get just the filename, not the full path
+                filename = os.path.basename(file.name)
+                response['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+                response['filename'] = filename
                 return response
 
             # No NGINX: standard way for export downloads in the community edition
             else:
                 ext = file.name.split('.')[-1]
                 response = RangedFileResponse(request, file, content_type=f'application/{ext}')
-                response['Content-Disposition'] = f'attachment; filename="{file.name}"'
-                response['filename'] = os.path.basename(file.name)
+                # Use basename to get just the filename, not the full path
+                filename = os.path.basename(file.name)
+                response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                response['filename'] = filename
                 return response
         else:
             if export_type is None:
@@ -614,8 +618,10 @@ class ExportDownloadAPI(generics.RetrieveAPIView):
             ext = file_.name.split('.')[-1]
 
             response = RangedFileResponse(request, file_, content_type=f'application/{ext}')
-            response['Content-Disposition'] = f'attachment; filename="{file_.name}"'
-            response['filename'] = file_.name
+            # Use basename to get just the filename, not the full path
+            filename = os.path.basename(file_.name)
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            response['filename'] = filename
             return response
 
 
@@ -640,7 +646,15 @@ def async_convert(converted_format_id, export_type, project, hostname, download_
     ext = converted_file.name.split('.')[-1]
 
     now = datetime.now()
-    file_name = f'project-{project.id}-at-{now.strftime("%Y-%m-%d-%H-%M")}-{md5[0:8]}.{ext}'
+    
+    # Use custom title if available, otherwise fall back to default pattern
+    from data_export.mixins import sanitize_filename
+    sanitized_title = sanitize_filename(snapshot.title)
+    if sanitized_title:
+        file_name = f'{sanitized_title}-{md5[0:8]}.{ext}'
+    else:
+        file_name = f'project-{project.id}-at-{now.strftime("%Y-%m-%d-%H-%M")}-{md5[0:8]}.{ext}'
+    
     file_path = f'{project.id}/{file_name}'  # finally file will be in settings.DELAYED_EXPORT_DIR/project.id/file_name
     file_ = File(converted_file, name=file_path)
     converted_format.file.save(file_path, file_)

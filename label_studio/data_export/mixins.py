@@ -3,6 +3,7 @@ import io
 import json
 import logging
 import pathlib
+import re
 import shutil
 from datetime import datetime
 from functools import reduce
@@ -32,6 +33,40 @@ EXCLUDE = 'exclude'
 
 
 logger = logging.getLogger(__name__)
+
+
+def sanitize_filename(title):
+    """
+    Sanitize a title string for use in filenames.
+    Replaces spaces and special characters with hyphens, removes invalid characters.
+    
+    Args:
+        title: The title string to sanitize
+        
+    Returns:
+        A sanitized string safe for use in filenames, or None if title is empty/invalid
+    """
+    if not title or not isinstance(title, str):
+        return None
+    
+    # Remove leading/trailing whitespace
+    title = title.strip()
+    
+    if not title:
+        return None
+    
+    # Replace spaces and common special characters with hyphens
+    title = re.sub(r'[^\w\s-]', '', title)  # Remove invalid filename characters
+    title = re.sub(r'[-\s]+', '-', title)   # Replace spaces and multiple hyphens with single hyphen
+    
+    # Remove leading/trailing hyphens
+    title = title.strip('-')
+    
+    # Limit length to avoid filesystem issues (keep reasonable length)
+    if len(title) > 200:
+        title = title[:200]
+    
+    return title if title else None
 
 
 class ExportMixin:
@@ -271,7 +306,14 @@ class ExportMixin:
 
     def save_file(self, file, md5):
         now = datetime.now()
-        file_name = f'project-{self.project.id}-at-{now.strftime("%Y-%m-%d-%H-%M")}-{md5[0:8]}.json'
+        
+        # Use custom title if available, otherwise fall back to default pattern
+        sanitized_title = sanitize_filename(self.title)
+        if sanitized_title:
+            file_name = f'{sanitized_title}-{md5[0:8]}.json'
+        else:
+            file_name = f'project-{self.project.id}-at-{now.strftime("%Y-%m-%d-%H-%M")}-{md5[0:8]}.json'
+        
         file_path = f'{self.project.id}/{file_name}'  # finally file will be in settings.DELAYED_EXPORT_DIR/self.project.id/file_name
         file_ = File(file, name=file_path)
         self.file.save(file_path, file_)
