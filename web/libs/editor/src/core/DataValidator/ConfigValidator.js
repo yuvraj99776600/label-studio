@@ -180,9 +180,9 @@ const validateNameTag = (child, model) => {
  * and can be controlled by current Object Tag
  * @param {Object} element
  * @param {Object} model
- * @param {Object[]} flatTree
+ * @param {Map<string, Object>} nameMap - Pre-built map of name -> element for O(1) lookup
  */
-const validateToNameTag = (element, model, flatTree) => {
+const validateToNameTag = (element, model, nameMap) => {
   const { controlledTags } = model.properties;
 
   if (!element.toname) return null;
@@ -190,8 +190,8 @@ const validateToNameTag = (element, model, flatTree) => {
   const names = element.toname.split(","); // for pairwise
 
   for (const name of names) {
-    // Find referenced tag in the tree
-    const controlledTag = flatTree.find((item) => item.name === name);
+    // Use Map for O(1) lookup instead of O(n) flatTree.find()
+    const controlledTag = nameMap.get(name);
 
     if (controlledTag === undefined) {
       return errorBuilder.tagNotFound(model.name, "toname", name);
@@ -210,31 +210,38 @@ const validateToNameTag = (element, model, flatTree) => {
  * Checks that parent tag has the right type
  * @param {Object} element
  * @param {Object} model
- * @param {Object[]} flatTree
  */
 const validateParentTag = (element, model) => {
   const parentTypes = model.properties.parentTypes?.value;
 
-  if (
-    !parentTypes ||
-    element.parentTypes.find((elementParentType) =>
-      parentTypes.find((type) => elementParentType === type.toLowerCase()),
-    )
-  ) {
+  if (!parentTypes) {
     return null;
   }
+
+  // Convert to lowercase Set for O(1) lookup instead of nested O(n²) find()
+  const parentTypesSet = new Set(parentTypes.map((type) => type.toLowerCase()));
+
+  // Check if any element parent type matches allowed parent types
+  const hasValidParent = element.parentTypes.some((elementParentType) => parentTypesSet.has(elementParentType));
+
+  if (hasValidParent) {
+    return null;
+  }
+
   return errorBuilder.parentTagUnexpected(model.name, "parent", element.tagName, model.properties.parentTypes);
 };
+
+// Pre-computed Set for O(1) lookup instead of O(n) includes()
+const visualTagsSet = new Set(["Collapse", "Filter", "Header", "Style", "View"]);
 
 /**
  * Validates if visual tags have name attribute
  * @param {Object} element
  */
 const validateVisualTags = (element) => {
-  const visualTags = ["Collapse", "Filter", "Header", "Style", "View"];
   const { tagName } = element;
 
-  if (visualTags.includes(tagName) && element.name) {
+  if (visualTagsSet.has(tagName) && element.name) {
     return errorBuilder.generalError(`Attribute <b>name</b> is not allowed for tag <b>${tagName}</b>.`);
   }
 
@@ -303,6 +310,16 @@ export class ConfigValidator {
     const flatTree = [];
 
     flattenTree(root, null, [], flatTree);
+
+    // Build name -> element Map for O(1) lookup in validateToNameTag
+    // This eliminates O(n²) nested find() operations
+    const nameMap = new Map();
+    for (const item of flatTree) {
+      if (item.name) {
+        nameMap.set(item.name, item);
+      }
+    }
+
     const propertiesToSkip = ["id", "children", "name", "toname", "controlledTags", "parentTypes"];
     const validationResult = [];
 
@@ -314,8 +331,8 @@ export class ConfigValidator {
 
         if (nameValidation !== null) validationResult.push(nameValidation);
 
-        // Validate toName attribute
-        const toNameValidation = validateToNameTag(child, model, flatTree);
+        // Validate toName attribute - now uses nameMap for O(1) lookup
+        const toNameValidation = validateToNameTag(child, model, nameMap);
 
         if (toNameValidation !== null) validationResult.push(toNameValidation);
 
