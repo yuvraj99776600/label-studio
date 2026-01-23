@@ -2148,7 +2148,7 @@ optional = false
 python-versions = ">=3.10,<4"
 groups = ["main"]
 files = [
-    {file = "f8fa10c7b92562900daeb29058ca213f0b2786f7.zip", hash = "sha256:f28710b30bfcd451484960ae0e1d35b3dd10763a4caceb9a7ebbd0250e99d08c"},
+    {file = "f9b9898ea4323597e624466d0f568a611f5f3a22.zip", hash = "sha256:fec800fd7c72893051138ebe832f1784e5d9bc0cba825539ff9acb729d56cee4"},
 ]
 
 [package.dependencies]
@@ -2176,7 +2176,7 @@ xmljson = "0.2.1"
 
 [package.source]
 type = "url"
-url = "https://github.com/HumanSignal/label-studio-sdk/archive/f8fa10c7b92562900daeb29058ca213f0b2786f7.zip"
+url = "https://github.com/HumanSignal/label-studio-sdk/archive/f9b9898ea4323597e624466d0f568a611f5f3a22.zip"
 
 [[package]]
 name = "launchdarkly-server-sdk"
@@ -5146,4 +5146,4 @@ uwsgi = ["pyuwsgi", "uwsgitop"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4"
-content-hash = "2a669a7073ace4f7d648eca3550e30344a8a3e4d7d7e239a09f8450ed605a440"
+content-hash = "aae1df40d3375ad8bb7aa2ccc90ea9627b4a12e975bebb4b7747c1aa848426db"
