@@ -41,8 +41,9 @@ const Model = types
     id: types.optional(types.identifier, guidGenerator),
     pid: types.optional(types.string, guidGenerator),
     type: "vectorregion",
+    // Use safeReference to avoid errors during tree destruction
     object: types.late(() => {
-      return types.reference(ImageModel);
+      return types.safeReference(ImageModel);
     }),
 
     vertices: types.array(types.frozen()), // Store whatever format KonvaVector gives us

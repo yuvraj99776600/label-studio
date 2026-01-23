@@ -26,7 +26,8 @@ const ClassificationArea = types.compose(
   AreaMixin,
   types
     .model({
-      object: types.late(() => types.reference(types.union(...Registry.objectTypes()))),
+      // Use safeReference to avoid errors during tree destruction
+      object: types.late(() => types.safeReference(types.union(...Registry.objectTypes()))),
       // true only for global classifications
       classification: true,
     })

@@ -22,7 +22,8 @@ const SharedStoreID = types.optional(types.maybeNull(types.string), null);
 /**
  * Defines the Store model referenced from the Annotation Store
  */
-const Store = types.optional(types.maybeNull(types.late(() => types.reference(SharedStoreModel))), null);
+// Use safeReference to avoid errors during tree destruction
+const Store = types.optional(types.maybeNull(types.late(() => types.safeReference(SharedStoreModel))), null);
 
 /**
  * SharedStoreMixin, when injected into the model, provides an AnnotationStore level shared storages to

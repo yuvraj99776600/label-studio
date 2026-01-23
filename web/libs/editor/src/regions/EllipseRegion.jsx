@@ -28,7 +28,8 @@ const Model = types
     id: types.optional(types.identifier, guidGenerator),
     pid: types.optional(types.string, guidGenerator),
     type: "ellipseregion",
-    object: types.late(() => types.reference(ImageModel)),
+    // Use safeReference to avoid errors during tree destruction
+    object: types.late(() => types.safeReference(ImageModel)),
 
     x: types.number,
     y: types.number,

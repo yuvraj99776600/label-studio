@@ -89,9 +89,11 @@ const Result = types
     // KonvaRegion, TextRegion, HyperTextRegion, AudioRegion)),
     // optional for classifications
     // labeling/control tag
-    from_name: types.late(() => types.reference(types.union(...Registry.modelsArr()))),
+    // Use safeReference to avoid errors during tree destruction
+    from_name: types.late(() => types.safeReference(types.union(...Registry.modelsArr()))),
     // object tag
-    to_name: types.late(() => types.reference(types.union(...Registry.objectTypes()))),
+    // Use safeReference to avoid errors during tree destruction
+    to_name: types.late(() => types.safeReference(types.union(...Registry.objectTypes()))),
     // @todo some general type, maybe just a `string`
     type: ff.isActive(ff.FF_CUSTOM_TAGS)
       ? types.late(() =>

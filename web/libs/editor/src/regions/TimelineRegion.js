@@ -47,7 +47,8 @@ function rangeToSequence(range) {
 const Model = types
   .model("TimelineRegionModel", {
     type: "timelineregion",
-    object: types.late(() => types.reference(VideoModel)),
+    // Use safeReference to avoid errors during tree destruction
+    object: types.late(() => types.safeReference(VideoModel)),
 
     ranges: types.array(TimelineRange),
   })

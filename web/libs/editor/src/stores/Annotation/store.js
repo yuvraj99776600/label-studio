@@ -22,12 +22,16 @@ const localStorageKeys = {
 
 const AnnotationStoreModel = types
   .model("AnnotationStore", {
-    selected: types.maybeNull(types.reference(SelectedItem)),
+    // Use safeReference to avoid errors during tree destruction
+    // safeReference returns undefined instead of throwing when target is destroyed
+    selected: types.maybeNull(types.safeReference(SelectedItem)),
     selectedHistory: types.maybeNull(types.safeReference(SelectedItem)),
 
     root: Types.allModelsTypes(),
-    names: types.map(types.reference(Types.allModelsTypes())),
-    toNames: types.map(types.array(types.reference(Types.allModelsTypes()))),
+    // Use safeReference in maps to prevent destruction warnings
+    // These maps hold references to config tree nodes that may be destroyed
+    names: types.map(types.safeReference(Types.allModelsTypes())),
+    toNames: types.map(types.array(types.safeReference(Types.allModelsTypes()))),
 
     annotations: types.array(Annotation),
     predictions: types.array(Annotation),

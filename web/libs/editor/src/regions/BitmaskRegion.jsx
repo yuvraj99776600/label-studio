@@ -27,7 +27,8 @@ const Model = types
     id: types.optional(types.identifier, guidGenerator),
     pid: types.optional(types.string, guidGenerator),
     type: "bitmaskregion",
-    object: types.late(() => types.reference(ImageModel)),
+    // Use safeReference to avoid errors during tree destruction
+    object: types.late(() => types.safeReference(ImageModel)),
 
     /**
      * Used to restore an image from the result or from a drawing region

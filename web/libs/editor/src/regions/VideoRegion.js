@@ -15,7 +15,8 @@ const Model = types
   .model("VideoRegionModel", {
     id: types.optional(types.identifier, guidGenerator),
     pid: types.optional(types.string, guidGenerator),
-    object: types.late(() => types.reference(VideoModel)),
+    // Use safeReference to avoid errors during tree destruction
+    object: types.late(() => types.safeReference(VideoModel)),
 
     sequence: types.frozen([]),
   })

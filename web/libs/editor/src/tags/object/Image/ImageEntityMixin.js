@@ -3,7 +3,8 @@ import { ImageEntity } from "./ImageEntity";
 
 export const ImageEntityMixin = types
   .model({
-    currentImageEntity: types.maybeNull(types.reference(ImageEntity)),
+    // Use safeReference to avoid errors during tree destruction
+    currentImageEntity: types.maybeNull(types.safeReference(ImageEntity)),
 
     imageEntities: types.optional(types.array(ImageEntity), []),
   })

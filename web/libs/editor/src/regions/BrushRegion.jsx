@@ -119,7 +119,8 @@ const Model = types
     pid: types.optional(types.string, guidGenerator),
 
     type: "brushregion",
-    object: types.late(() => types.reference(ImageModel)),
+    // Use safeReference to avoid errors during tree destruction
+    object: types.late(() => types.safeReference(ImageModel)),
 
     coordstype: types.optional(types.enumeration(["px", "perc"]), "perc"),
 
@@ -128,7 +129,8 @@ const Model = types
     maskDataURL: types.frozen(),
 
     touches: types.array(Points),
-    currentTouch: types.maybeNull(types.reference(Points)),
+    // Use safeReference for internal point references
+    currentTouch: types.maybeNull(types.safeReference(Points)),
   })
   .volatile(() => ({
     /**

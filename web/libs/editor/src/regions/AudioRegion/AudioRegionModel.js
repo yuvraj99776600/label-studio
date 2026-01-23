@@ -7,7 +7,8 @@ import { clamp } from "../../utils/utilities";
 export const AudioRegionModel = types
   .model("AudioRegionModel", {
     type: "audioregion",
-    object: types.late(() => types.reference(AudioModel)),
+    // Use safeReference to avoid errors during tree destruction
+    object: types.late(() => types.safeReference(AudioModel)),
 
     start: types.number,
     end: types.number,

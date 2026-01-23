@@ -17,7 +17,8 @@ const Model = types
     id: types.optional(types.identifier, guidGenerator),
     pid: types.optional(types.string, guidGenerator),
     type: "timeseriesregion",
-    object: types.late(() => types.reference(TimeSeriesModel)),
+    // Use safeReference to avoid errors during tree destruction
+    object: types.late(() => types.safeReference(TimeSeriesModel)),
 
     start: types.union(types.number, types.string),
     end: types.union(types.number, types.string),

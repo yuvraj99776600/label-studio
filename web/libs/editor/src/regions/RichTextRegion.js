@@ -26,7 +26,8 @@ const GlobalOffsets = types
 const Model = types
   .model("RichTextRegionModel", {
     type: "richtextregion",
-    object: types.late(() => types.reference(RichTextModel)),
+    // Use safeReference to avoid errors during tree destruction
+    object: types.late(() => types.safeReference(RichTextModel)),
 
     startOffset: types.integer,
     endOffset: types.integer,

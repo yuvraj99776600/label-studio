@@ -16,8 +16,10 @@ const Relation = types
   .model("Relation", {
     id: types.optional(types.identifier, guidGenerator),
 
-    node1: types.reference(Area),
-    node2: types.reference(Area),
+    // Use safeReference to avoid errors during tree destruction
+    // safeReference returns undefined instead of throwing when target is destroyed
+    node1: types.safeReference(Area),
+    node2: types.safeReference(Area),
 
     direction: types.optional(types.enumeration(["left", "right", "bi"]), "right"),
 
@@ -50,6 +52,10 @@ const Relation = types
     get shouldRender() {
       if (!isAlive(self)) return false;
       const { node1: start, node2: end } = self;
+
+      // safeReference may return undefined if nodes were destroyed
+      if (!start || !end) return false;
+
       const [sIdx, eIdx] = [start.item_index, end.item_index];
 
       // as we don't currently have a unified solution for multi-object segmentation
@@ -74,6 +80,9 @@ const Relation = types
     },
 
     toggleHighlight() {
+      // Guard against undefined nodes (safeReference may return undefined)
+      if (!self.node1 || !self.node2) return;
+
       if (self.node1 === self.node2) {
         self.node1.toggleHighlight();
       } else {
@@ -161,12 +170,14 @@ const RelationStore = types
 
       if (!id2) {
         return self.relations.filter((rl) => {
-          return rl.node1.id === id1 || rl.node2.id === id1;
+          // Guard against undefined nodes (safeReference may return undefined)
+          return rl.node1?.id === id1 || rl.node2?.id === id1;
         });
       }
 
       return self.relations.filter((rl) => {
-        return rl.node1.id === id1 && rl.node2.id === id2;
+        // Guard against undefined nodes (safeReference may return undefined)
+        return rl.node1?.id === id1 && rl.node2?.id === id2;
       });
     },
 
@@ -203,18 +214,20 @@ const RelationStore = types
     },
 
     serialize() {
-      return self.relations.map((r) => {
-        const s = {
-          from_id: r.node1.cleanId,
-          to_id: r.node2.cleanId,
-          type: "relation",
-          direction: r.direction,
-        };
+      return self.relations
+        .filter((r) => r.node1 && r.node2) // Filter out relations with destroyed nodes
+        .map((r) => {
+          const s = {
+            from_id: r.node1.cleanId,
+            to_id: r.node2.cleanId,
+            type: "relation",
+            direction: r.direction,
+          };
 
-        if (r.selectedValues) s.labels = r.selectedValues;
+          if (r.selectedValues) s.labels = r.selectedValues;
 
-        return s;
-      });
+          return s;
+        });
     },
 
     deserializeRelation(node1, node2, direction, labels) {

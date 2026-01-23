@@ -15,7 +15,8 @@ import Registry from "../core/Registry";
 const Model = types
   .model("ParagraphsRegionModel", {
     type: "textrange",
-    object: types.late(() => types.reference(ParagraphsModel)),
+    // Use safeReference to avoid errors during tree destruction
+    object: types.late(() => types.safeReference(ParagraphsModel)),
 
     startOffset: types.integer,
     start: types.string,
