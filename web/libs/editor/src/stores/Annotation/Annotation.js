@@ -372,6 +372,8 @@ const _Annotation = types
     submissionStarted: 0,
     versions: {},
     resultSnapshot: "",
+    // Disposer function for onSnapshot subscription - must be called in beforeDestroy
+    _snapshotDisposer: null,
   }))
   .volatile(() =>
     isFF(FF_DEV_3391)
@@ -791,7 +793,9 @@ const _Annotation = types
         { leading: false },
       );
 
-      onSnapshot(self.areas, self.autosave);
+      // Store the disposer so we can clean up in beforeDestroy
+      // This prevents memory leaks from dangling MobX subscriptions
+      self._snapshotDisposer = onSnapshot(self.areas, self.autosave);
     }),
 
     async saveDraft(params) {
@@ -836,7 +840,15 @@ const _Annotation = types
     },
 
     beforeDestroy() {
+      // Cancel the throttled autosave function
       self.autosave?.cancel?.();
+
+      // Dispose the onSnapshot subscription to prevent memory leaks
+      // and avoid warnings when areas are destroyed
+      if (self._snapshotDisposer) {
+        self._snapshotDisposer();
+        self._snapshotDisposer = null;
+      }
     },
 
     setDraftId(id) {

@@ -74,6 +74,10 @@ const SettingsModel = types
 
     invertedZoom: types.optional(types.boolean, false),
   })
+  .volatile(() => ({
+    // Disposer function for onSnapshot subscription - must be called in beforeDestroy
+    _snapshotDisposer: null,
+  }))
   .views((self) => ({
     get annotation() {
       return getRoot(self).annotationStore.selected;
@@ -88,6 +92,12 @@ const SettingsModel = types
   .actions((self) => ({
     beforeDestroy() {
       self.isDestroying = true;
+
+      // Dispose the onSnapshot subscription to prevent memory leaks
+      if (self._snapshotDisposer) {
+        self._snapshotDisposer();
+        self._snapshotDisposer = null;
+      }
     },
     afterCreate() {
       // sandboxed environment may break even on check of this property
@@ -125,7 +135,8 @@ const SettingsModel = types
       }
 
       // capture changes and save it
-      onSnapshot(self, (ss) => {
+      // Store the disposer so we can clean up in beforeDestroy
+      self._snapshotDisposer = onSnapshot(self, (ss) => {
         // it's necessary to wait 1 tick before check if self.isDestroying is true
         setTimeout(() => {
           if (!self.isDestroying) localStorage.setItem(lsKey, JSON.stringify(ss));
