@@ -1,4 +1,4 @@
-import throttle from "lodash/throttle";
+import debounce from "lodash/debounce";
 import { destroy, detach, flow, getEnv, getParent, getRoot, isAlive, onSnapshot, types } from "mobx-state-tree";
 import { ff } from "@humansignal/core";
 import { errorBuilder } from "../../core/DataValidator/ConfigValidator";
@@ -779,8 +779,12 @@ const _Annotation = types
         return;
       }
 
-      // mobx will modify methods, so add it directly to have cancel() method
-      self.autosave = throttle(
+      // Use debounce instead of throttle to avoid saving during active drawing.
+      // Debounce waits until activity stops before saving, which:
+      // 1. Reduces unnecessary serialization during continuous operations
+      // 2. Saves once the user pauses, preserving work without interruption
+      // 3. Uses maxWait to ensure saves happen at least every 30 seconds during long operations
+      self.autosave = debounce(
         () => {
           // if autosave is paused, do nothing
           if (self.autosave.paused) return;
@@ -788,7 +792,7 @@ const _Annotation = types
           self.saveDraft();
         },
         self.autosaveDelay,
-        { leading: false },
+        { leading: false, maxWait: 30000 },
       );
 
       onSnapshot(self.areas, self.autosave);
