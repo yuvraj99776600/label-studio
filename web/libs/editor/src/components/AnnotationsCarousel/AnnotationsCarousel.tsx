@@ -1,6 +1,6 @@
 import { Button, IconChevronLeft, IconChevronRight } from "@humansignal/ui";
 import { observer } from "mobx-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "../../utils/bem";
 import { clamp, sortAnnotations } from "../../utils/utilities";
 import { AnnotationButton } from "./AnnotationButton";
@@ -61,6 +61,21 @@ export const AnnotationsCarousel = observer(({ store, annotationStore }: Annotat
     setEntities(newEntities);
   }, [annotationStore, JSON.stringify(annotationStore.predictions), JSON.stringify(annotationStore.annotations)]);
 
+  // Memoize sorted entities to avoid re-sorting on every render
+  const sortedEntities = useMemo(() => sortAnnotations(entities), [entities]);
+
+  // Memoize capabilities object to avoid creating new object on every render
+  const capabilities = useMemo(
+    () => ({
+      enablePredictions,
+      enableCreateAnnotation,
+      groundTruthEnabled,
+      enableAnnotations,
+      enableAnnotationDelete,
+    }),
+    [enablePredictions, enableCreateAnnotation, groundTruthEnabled, enableAnnotations, enableAnnotationDelete],
+  );
+
   return enableAnnotations || enablePredictions || enableCreateAnnotation ? (
     <div
       className={cn("annotations-carousel")
@@ -70,17 +85,11 @@ export const AnnotationsCarousel = observer(({ store, annotationStore }: Annotat
     >
       <div ref={containerRef as any} className={cn("annotations-carousel").elem("container").toClassName()}>
         <div ref={carouselRef as any} className={cn("annotations-carousel").elem("carosel").toClassName()}>
-          {sortAnnotations(entities).map((entity) => (
+          {sortedEntities.map((entity) => (
             <AnnotationButton
               key={entity?.id}
               entity={entity}
-              capabilities={{
-                enablePredictions,
-                enableCreateAnnotation,
-                groundTruthEnabled,
-                enableAnnotations,
-                enableAnnotationDelete,
-              }}
+              capabilities={capabilities}
               annotationStore={annotationStore}
             />
           ))}
