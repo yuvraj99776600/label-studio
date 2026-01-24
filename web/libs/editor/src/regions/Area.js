@@ -18,6 +18,9 @@ import { ParagraphsRegionModel } from "./ParagraphsRegion";
 import { VideoRectangleRegionModel } from "./VideoRectangleRegion";
 import { BitmaskRegionModel } from "./BitmaskRegion";
 
+// Cache for area union types to avoid recreating identical unions
+const areaUnionCache = new Map();
+
 // general Area type for classification Results which doesn't belong to any real Area
 const ClassificationArea = types.compose(
   "ClassificationArea",
@@ -71,9 +74,6 @@ const Area = types.union(
       const objectName = Tree.cleanUpId(sn.object.name || sn.object);
       // we have to use current config to detect Object tag by name
       const tag = window.Htx.annotationStore.names.get(objectName);
-      // provide value to detect Area by data
-      const available = Registry.getAvailableAreas(tag.type, sn);
-      // union of all available Areas for this Object type
 
       // @todo dirty hack to distinguish two video types
       if (tag.type === "video") {
@@ -81,8 +81,24 @@ const Area = types.union(
         return TimelineRegionModel;
       }
 
+      // provide value to detect Area by data
+      const available = Registry.getAvailableAreas(tag.type, sn);
+      // union of all available Areas for this Object type
+
       if (!available.length) return ClassificationArea;
-      return types.union(...available, ClassificationArea);
+
+      // Cache the union type by tag type to avoid recreating identical unions
+      // The available areas for a given tag type are deterministic based on the tag type
+      const cacheKey = tag.type;
+
+      if (areaUnionCache.has(cacheKey)) {
+        return areaUnionCache.get(cacheKey);
+      }
+
+      const unionType = types.union(...available, ClassificationArea);
+
+      areaUnionCache.set(cacheKey, unionType);
+      return unionType;
     },
   },
   AudioRegionModel,
