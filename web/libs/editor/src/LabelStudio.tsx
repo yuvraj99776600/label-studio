@@ -179,6 +179,11 @@ export class LabelStudio {
       }
       destroy(this.store);
       Hotkey.unbindAll();
+
+      // Always clear window.Htx to allow garbage collection of the store
+      // This was previously only done in V18 path, causing memory leaks in V17
+      window.Htx = null;
+
       if (isFF(FF_LSDV_4620_3_ML)) {
         /*
             ...
