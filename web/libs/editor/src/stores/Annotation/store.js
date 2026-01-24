@@ -1,4 +1,4 @@
-import { destroy, getEnv, getParent, getRoot, types } from "mobx-state-tree";
+import { destroy, getEnv, getParent, getRoot, isAlive, types } from "mobx-state-tree";
 
 import { errorBuilder } from "../../core/DataValidator/ConfigValidator";
 import { DataValidator, ValidationError, VALIDATORS } from "../../core/DataValidator";
@@ -482,8 +482,13 @@ const AnnotationStoreModel = types
     function selectHistory(item) {
       self.selectedHistory = item;
       setTimeout(() => {
+        // Guard against accessing destroyed store after navigation
+        if (!isAlive(self)) return;
+
         // update classifications after render
         const updatedItem = item ?? self.selected;
+
+        if (!updatedItem) return;
 
         Array.from(updatedItem.names.values())
           .filter((t) => t.isClassificationTag)
