@@ -323,39 +323,64 @@ function traverseTree(root: IAnyStateTreeNode, cb: (node: IAnyStateTreeNode) => 
 const cleanUpId = (id: string) => id.replace(/@.*/, "");
 
 function extractNames(root: IAnyStateTreeNode) {
-  const objects: IAnyStateTreeNode[] = [];
+  const objects: string[] = [];
   const names = new Map<string, IAnyStateTreeNode>();
   const toNames = new Map<string, IAnyStateTreeNode[]>();
 
   // hacky way to get all the available object tag names
-  const objectTypes = Registry.objectTypes().map((type) => type.name.replace("Model", "").toLowerCase());
+  // Use Set for O(1) lookup instead of O(n) includes
+  const objectTypes = new Set(Registry.objectTypes().map((type) => type.name.replace("Model", "").toLowerCase()));
 
+  // Nodes that need toName processing in second phase
+  const controlTagsWithToName: IAnyStateTreeNode[] = [];
+  const controlTagsWithoutToName: IAnyStateTreeNode[] = [];
+
+  // Single traversal to collect all data
   traverseTree(root, (node) => {
     if (node.name) {
-      names.set(cleanUpId(node.name), node);
-      if (objectTypes.includes(node.type)) objects.push(cleanUpId(node.name));
-    }
-  });
+      const cleanName = cleanUpId(node.name);
 
-  // initialize toName bindings [DOCS] name & toName are used to
-  // connect different components to each other
-  traverseTree(root, (node) => {
-    const isControlTag = node.name && !objectTypes.includes(node.type);
-    // auto-infer missed toName if there is only one object tag in the config
-    if (isControlTag && !node.toname && objects.length === 1) {
-      node.toname = objects[0];
-    }
-
-    if (node && node.toname) {
-      const val = toNames.get(node.toname);
-
-      if (val) {
-        val.push(names.get(cleanUpId(node.name)));
-      } else {
-        toNames.set(node.toname, [names.get(cleanUpId(node.name))]);
+      names.set(cleanName, node);
+      if (objectTypes.has(node.type)) {
+        objects.push(cleanName);
       }
     }
+
+    // Collect control tags for toName processing
+    const isControlTag = node.name && !objectTypes.has(node.type);
+
+    if (isControlTag) {
+      if (node.toname) {
+        controlTagsWithToName.push(node);
+      } else {
+        controlTagsWithoutToName.push(node);
+      }
+    } else if (node.toname) {
+      // Non-control tags with toname (edge case)
+      controlTagsWithToName.push(node);
+    }
   });
+
+  // Process toName bindings - no tree traversal needed
+  // Auto-infer missed toName if there is only one object tag
+  if (objects.length === 1) {
+    for (const node of controlTagsWithoutToName) {
+      node.toname = objects[0];
+      controlTagsWithToName.push(node);
+    }
+  }
+
+  // Build toNames map
+  for (const node of controlTagsWithToName) {
+    const val = toNames.get(node.toname);
+    const nodeRef = names.get(cleanUpId(node.name));
+
+    if (val) {
+      val.push(nodeRef);
+    } else {
+      toNames.set(node.toname, [nodeRef]);
+    }
+  }
 
   return { names, toNames };
 }
