@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { memo, useContext, useEffect, useMemo } from "react";
+import { memo, useCallback, useContext, useEffect, useMemo } from "react";
 import { Group, Line } from "react-konva";
 import { destroy, detach, getRoot, isAlive, types } from "mobx-state-tree";
 
@@ -420,32 +420,43 @@ const Poly = memo(
  */
 const Edge = observer(({ name, item, idx, p1, p2, closed, regionStyles }) => {
   const insertIdx = idx + 1; // idx1 + 1 or idx2
-  const flattenedPoints = [p1.canvasX, p1.canvasY, p2.canvasX, p2.canvasY];
+  const flattenedPoints = useMemo(() => [p1.canvasX, p1.canvasY, p2.canvasX, p2.canvasY], [p1.canvasX, p1.canvasY, p2.canvasX, p2.canvasY]);
 
-  const lineProps = closed
-    ? {
-        stroke: "transparent",
-        strokeWidth: regionStyles.strokeWidth,
-        strokeScaleEnabled: false,
-      }
-    : {
-        stroke: regionStyles.strokeColor,
-        strokeWidth: regionStyles.strokeWidth,
-        strokeScaleEnabled: false,
-      };
+  const lineProps = useMemo(
+    () =>
+      closed
+        ? {
+            stroke: "transparent",
+            strokeWidth: regionStyles.strokeWidth,
+            strokeScaleEnabled: false,
+          }
+        : {
+            stroke: regionStyles.strokeColor,
+            strokeWidth: regionStyles.strokeWidth,
+            strokeScaleEnabled: false,
+          },
+    [closed, regionStyles.strokeWidth, regionStyles.strokeColor],
+  );
+
+  // Extract handlers with useCallback to prevent recreation on each render
+  const handleClick = useCallback(
+    (e) => item.handleLineClick({ e, flattenedPoints, insertIdx }),
+    [item, flattenedPoints, insertIdx],
+  );
+
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (!item.closed || !item.selected || item.isReadOnly()) return;
+
+      item.handleMouseMove({ e, flattenedPoints });
+    },
+    [item, flattenedPoints],
+  );
+
+  const handleMouseLeave = useCallback((e) => item.handleMouseLeave({ e }), [item]);
 
   return (
-    <Group
-      key={name}
-      name={name}
-      onClick={(e) => item.handleLineClick({ e, flattenedPoints, insertIdx })}
-      onMouseMove={(e) => {
-        if (!item.closed || !item.selected || item.isReadOnly()) return;
-
-        item.handleMouseMove({ e, flattenedPoints });
-      }}
-      onMouseLeave={(e) => item.handleMouseLeave({ e })}
-    >
+    <Group key={name} name={name} onClick={handleClick} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
       <Line
         lineJoin="round"
         opacity={1}

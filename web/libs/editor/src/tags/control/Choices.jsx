@@ -23,7 +23,7 @@ import SelectedChoiceMixin from "../../mixins/SelectedChoiceMixin";
 import ClassificationBase from "./ClassificationBase";
 import PerItemMixin from "../../mixins/PerItem";
 import Infomodal from "../../components/Infomodal/Infomodal";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Select, Tooltip } from "@humansignal/ui";
 
 /**
@@ -266,25 +266,32 @@ const ChoicesSelectLayout = observer(({ item }) => {
       })),
     [item.tiedChildren],
   );
+
+  // Extract onChange handler with useCallback to prevent recreation on each render
+  const handleChange = useCallback(
+    (val) => {
+      if (Array.isArray(val)) {
+        item.resetSelected();
+        val.forEach((v) => item.findLabel(v).setSelected(true));
+        item.updateResult();
+      } else {
+        const c = item.findLabel(val);
+
+        if (c) {
+          c.toggleSelected();
+        }
+      }
+    },
+    [item],
+  );
+
   return (
     <Select
       style={{ width: "100%" }}
       value={item.selectedLabels.map((l) => l._value)}
       multiple={item.choice === "multiple"}
       disabled={item.isReadOnly()}
-      onChange={(val) => {
-        if (Array.isArray(val)) {
-          item.resetSelected();
-          val.forEach((v) => item.findLabel(v).setSelected(true));
-          item.updateResult();
-        } else {
-          const c = item.findLabel(val);
-
-          if (c) {
-            c.toggleSelected();
-          }
-        }
-      }}
+      onChange={handleChange}
       options={options}
     />
   );

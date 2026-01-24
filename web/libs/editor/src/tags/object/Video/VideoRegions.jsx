@@ -37,9 +37,14 @@ const VideoRegionsPure = ({
   const [newRegion, setNewRegion] = useState();
   const [isDrawing, setDrawingMode] = useState(false);
 
-  const selected = regions.filter((reg) => {
-    return (reg.selected || reg.inSelection) && !reg.hidden && !reg.isReadOnly() && reg.isInLifespan(item.frame);
-  });
+  // Memoize selected regions to prevent recalculation on every render
+  const selected = useMemo(
+    () =>
+      regions.filter((reg) => {
+        return (reg.selected || reg.inSelection) && !reg.hidden && !reg.isReadOnly() && reg.isInLifespan(item.frame);
+      }),
+    [regions, item.frame],
+  );
   const listenToEvents = !locked;
 
   // if region is not in lifespan, it's not rendered,
@@ -273,27 +278,24 @@ const Shape = observer(({ id, reg, item, stageRef, currentFrame, ...props }) => 
   const frame = currentFrame ?? item.frame;
   const box = reg.getShape(frame);
 
+  // Extract onClick handler with useCallback to prevent recreation on each render
+  const handleClick = useCallback(
+    (e) => {
+      const annotation = getParentOfType(reg, Annotation);
+
+      if (annotation && annotation.isLinkingMode) {
+        stageRef.current.container().style.cursor = Constants.DEFAULT_CURSOR;
+      }
+
+      reg.setHighlight(false);
+      reg.onClickRegion(e);
+    },
+    [reg, stageRef],
+  );
+
   return (
     reg.isInLifespan(frame) &&
-    box && (
-      <Rectangle
-        id={id}
-        reg={reg}
-        box={box}
-        frame={frame}
-        onClick={(e) => {
-          const annotation = getParentOfType(reg, Annotation);
-
-          if (annotation && annotation.isLinkingMode) {
-            stageRef.current.container().style.cursor = Constants.DEFAULT_CURSOR;
-          }
-
-          reg.setHighlight(false);
-          reg.onClickRegion(e);
-        }}
-        {...props}
-      />
-    )
+    box && <Rectangle id={id} reg={reg} box={box} frame={frame} onClick={handleClick} {...props} />
   );
 });
 
