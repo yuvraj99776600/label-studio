@@ -635,7 +635,7 @@ const RegionItemDesc: FC<RegionItemOCSProps> = observer(({ item, collapsed, setC
 
           return View ? (
             <View
-              key={idx}
+              key={tag.name || `${tag.type}-${idx}`}
               item={tag}
               area={item}
               collapsed={collapsed}

@@ -185,7 +185,7 @@ class App extends Component {
 
     return (
       <RelationsOverlay
-        key={guidGenerator()}
+        key="relations-overlay"
         store={store}
         ref={this.relationsRef}
         tags={selectedStore.names}

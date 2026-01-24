@@ -119,7 +119,7 @@ const HtxTextAreaResult = observer(({ item, control, firstResultInputRef, onFocu
   return value.map((line, idx) => {
     return (
       <HtxTextAreaResultLine
-        key={idx}
+        key={`${item.id}-line-${idx}`}
         idx={idx}
         value={line}
         readOnly={!editable}

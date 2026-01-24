@@ -579,7 +579,7 @@ const HtxPolygonView = ({ item, setShapeRef }) => {
 
   return (
     <Group
-      key={item.id ? item.id : guidGenerator(5)}
+      key={item.id}
       name={item.id}
       ref={(el) => setShapeRef(el)}
       onMouseOver={() => {

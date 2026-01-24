@@ -510,7 +510,9 @@ const SidePanelsComponent: FC<SidePanelsProps> = ({ currentEntity, panelsHidden,
             {panelsHidden !== true && (
               <>
                 {Object.entries(panels).map(([key, panel]) => {
-                  const content = panel.map(({ props, Component }, i) => <Component key={i} {...props} />);
+                  const content = panel.map(({ props, Component }) => (
+                    <Component key={Component.displayName || Component.name || "panel"} {...props} />
+                  ));
 
                   if (key === "detached") {
                     return <Fragment key={key}>{content}</Fragment>;

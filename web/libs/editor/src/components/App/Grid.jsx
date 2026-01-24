@@ -213,7 +213,7 @@ export default class Grid extends Component {
                 bordered={false}
                 style={{ height: 44 }}
               />
-              <Item root={this.props.root} onFinish={this.onFinish} key={i} annotation={selected} />
+              <Item root={this.props.root} onFinish={this.onFinish} key={selected.id} annotation={selected} />
             </div>
           )}
         </div>
