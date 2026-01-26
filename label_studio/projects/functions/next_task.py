@@ -225,6 +225,27 @@ def get_not_solved_tasks_qs(
             _, not_solved_tasks = _try_tasks_with_overlap(not_solved_tasks)
             queue_info += (' & ' if queue_info else '') + 'Show overlap first'
 
+    # Strict task overlap enforcement: filter out tasks where overlap is already reached
+    # This prevents NEW users from getting tasks that are already at their annotation limit
+    # Note: Postponed tasks are NOT filtered here - they are served with overlap_reached flag
+    # so users can see their work and understand why they can't submit
+    lse_project = getattr(project, 'lse_project', None)
+    if lse_project and getattr(lse_project, 'strict_task_overlap', False):
+        # Exclude tasks where distinct annotator count >= overlap
+        tasks_at_overlap = Task.objects.filter(
+            project=project
+        ).annotate(
+            distinct_annotators=Count(
+                'annotations__completed_by',
+                filter=Q(annotations__was_cancelled=False),
+                distinct=True,
+            )
+        ).filter(
+            distinct_annotators__gte=F('overlap')
+        ).values_list('pk', flat=True)
+
+        not_solved_tasks = not_solved_tasks.exclude(pk__in=tasks_at_overlap)
+
     return not_solved_tasks, user_solved_tasks_array, queue_info, prioritized_on_agreement
 
 

@@ -383,10 +383,44 @@ export class LSFWrapper {
     // undefined or true for backward compatibility
     this.lsf.toggleInterface("postpone", this.task.allow_postpone !== false);
     this.lsf.toggleInterface("topbar:task-counter", true);
+
+    // Handle strict task overlap - disable submission controls when overlap is reached
+    const overlapReached = this.task.overlap_reached === true;
+    this.overlapReached = overlapReached;
+    this.overlapReachedMessage = this.task.overlap_reached_message || 
+      "Annotation overlap has been reached for this task. Your draft is preserved but cannot be submitted.";
+    
+    if (overlapReached) {
+      // Disable submission-related interfaces
+      this.lsf.toggleInterface("submit", false);
+      this.lsf.toggleInterface("update", false);
+      this.lsf.toggleInterface("skip", false);
+      // Keep navigation enabled - users must be able to move to next task
+      // The Next/Prev buttons should remain functional
+    }
+
     this.lsf.assignTask(task);
     this.lsf.initializeStore(lsfTask);
     this.setAnnotation(annotationID, fromHistory || isRejectedQueue, selectPrediction);
     this.setLoading(false);
+
+    // Show informational message if overlap is reached
+    if (overlapReached) {
+      this.showOverlapReachedMessage();
+    }
+  }
+
+  /**
+   * Show informational message when overlap is reached
+   * @private
+   */
+  showOverlapReachedMessage() {
+    // Use info toast to communicate the overlap status
+    // This is informational, not an error, so we use a neutral tone
+    this.datamanager.invoke("toast", {
+      message: `${this.overlapReachedMessage} Click the Next arrow (→) to continue.`,
+      type: "info",
+    });
   }
 
   /** @private */
@@ -623,6 +657,12 @@ export class LSFWrapper {
 
   /** @private */
   onSubmitAnnotation = async () => {
+    // Prevent submission if overlap is reached
+    if (this.overlapReached) {
+      this.showOverlapReachedMessage();
+      return;
+    }
+
     const exitStream = this.shouldExitStream();
     const loadNext = exitStream ? false : this.shouldLoadNext();
     const result = await this.submitCurrentAnnotation(
@@ -804,6 +844,12 @@ export class LSFWrapper {
   };
 
   onSkipTask = async (_, { comment } = {}) => {
+    // Prevent skipping if overlap is reached
+    if (this.overlapReached) {
+      this.showOverlapReachedMessage();
+      return;
+    }
+
     // Manager roles that can force-skip unskippable tasks (OW=Owner, AD=Admin, MA=Manager)
     const MANAGER_ROLES = ["OW", "AD", "MA"];
     const task = this.task;
