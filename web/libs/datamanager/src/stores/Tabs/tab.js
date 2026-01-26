@@ -91,7 +91,7 @@ export const Tab = types
     },
 
     get hiddenColumnsList() {
-      return self.columns.filter((c) => c.hidden).map((c) => c.key);
+      return self.columns.filter((c) => c.is_hidden).map((c) => c.key);
     },
 
     get availableFilters() {
@@ -274,6 +274,10 @@ export const Tab = types
       self.title = title;
     },
 
+    setVirtual(value) {
+      self.virtual = value;
+    },
+
     setRenameMode(mode) {
       self.renameMode = mode;
       if (self.renameMode) self.oldTitle = self.title;
@@ -357,6 +361,15 @@ export const Tab = types
 
     toggleSelected(id) {
       self.selected.toggleItem(id);
+    },
+
+    /**
+     * Select or unselect a range of items by their IDs (used for shift-click range selection)
+     * @param {Array} ids - Array of item IDs
+     * @param {boolean} select - true to select, false to unselect
+     */
+    selectRange(ids, select = true) {
+      self.selected.selectRange(ids, select);
     },
 
     setColumnWidth(columnID, width) {
@@ -499,9 +512,19 @@ export const Tab = types
     }),
 
     saveVirtual: flow(function* (options) {
-      self.virtual = false;
-      yield self.save(options);
-      History.navigate({ tab: self.id }, true);
+      const originalId = self.id;
+      self.setVirtual(false);
+      const newView = yield self.save(options);
+
+      // If a new view was created (different ID), the old view is destroyed
+      // Use the new view for navigation
+      if (newView && newView.id !== originalId) {
+        History.navigate({ tab: newView.id }, true);
+      } else {
+        // Same view, ensure virtual is false
+        self.setVirtual(false);
+        History.navigate({ tab: self.id }, true);
+      }
     }),
 
     delete: flow(function* () {

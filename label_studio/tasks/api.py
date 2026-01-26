@@ -1,8 +1,7 @@
-"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
-"""
+"""This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license."""
+
 import logging
 
-from core.feature_flags import flag_set
 from core.mixins import GetParentObjectMixin
 from core.permissions import ViewClassPermission, all_permissions
 from core.utils.common import is_community
@@ -343,13 +342,10 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
         if review:
             kwargs = {'fields_for_evaluation': ['annotators', 'reviewed']}
         else:
-            if flag_set('fflag_fix_back_bros_182_api_task_optimizations', user=self.request.user):
-                kwargs = {
-                    'all_fields': True,
-                    'excluded_fields_for_evaluation': self.get_excluded_fields_for_evaluation(),
-                }
-            else:
-                kwargs = {'all_fields': True}
+            kwargs = {
+                'all_fields': True,
+                'excluded_fields_for_evaluation': self.get_excluded_fields_for_evaluation(),
+            }
         project = self.request.query_params.get('project') or self.request.data.get('project')
         if not project:
             project = task.project.id
@@ -603,7 +599,7 @@ class AnnotationsListAPI(GetParentObjectMixin, generics.ListCreateAPIView):
         was_cancelled_data = self.request.data.get('was_cancelled', False)
         is_skipping = was_cancelled_get or was_cancelled_data
 
-        if is_skipping and not task.allow_skip:
+        if is_skipping and not task.can_be_skipped():
             raise ValidationError({'detail': 'This task cannot be skipped.'})
 
         # updates history

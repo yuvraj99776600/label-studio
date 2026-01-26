@@ -7,7 +7,6 @@ import { guidGenerator } from "../core/Helpers";
 import { AreaMixin } from "../mixins/AreaMixin";
 import { useRegionStyles } from "../hooks/useRegionColor";
 import { KonvaRegionMixin } from "../mixins/KonvaRegion";
-import { FF_DEV_3793, isFF } from "../utils/feature-flags";
 import { RELATIVE_STAGE_HEIGHT, RELATIVE_STAGE_WIDTH } from "../components/ImageView/Image";
 import { KonvaVector } from "../components/KonvaVector/KonvaVector";
 import { observer } from "mobx-react";
@@ -72,6 +71,7 @@ const Model = types
     isDrawing: false,
     vectorRef: null,
     groupRef: null,
+    _justSelected: false,
   }))
   .views((self) => ({
     get store() {
@@ -102,7 +102,6 @@ const Model = types
       const bbox = self.bbox;
 
       if (!bbox) return null;
-      if (!isFF(FF_DEV_3793)) return bbox;
 
       return {
         left: self.parent.imageToInternalX(bbox.left),
@@ -234,9 +233,11 @@ const Model = types
         vector?.selectPointsByIds(selectedPoints);
       },
 
-      _selectArea(additiveMode = false) {
+      _selectArea(additiveMode = false, preserveTransformMode = false) {
         const annotation = self.annotation;
-        self.setTransformMode(false);
+        if (!preserveTransformMode) {
+          self.setTransformMode(false);
+        }
         if (!annotation) return;
 
         if (additiveMode) {
@@ -245,9 +246,16 @@ const Model = types
           const wasNotSelected = !self.selected;
 
           if (wasNotSelected) {
+            // Set the flag before selecting to prevent double-click issues
+            // This will be cleared by selectRegion() when called from RegionStore
+            self._justSelected = true;
             annotation.selectArea(self);
           } else {
-            annotation.unselectAll();
+            // If _justSelected is true, it means this click is part of a double-click
+            // Don't unselect - let the double-click handler manage selection
+            if (!self._justSelected) {
+              annotation.unselectAll();
+            }
           }
         }
       },
@@ -433,13 +441,32 @@ const Model = types
       },
 
       /**
+       * Clear the just-selected flag (action for use in setTimeout)
+       */
+      clearJustSelectedFlag() {
+        self._justSelected = false;
+      },
+
+      setJustSelectedFlag(value) {
+        self._justSelected = value;
+      },
+
+      /**
        * Override selectRegion to reset transform mode when selecting from sidebar
        * This ensures transform mode is reset whether selecting by clicking on the shape
        * or selecting from the sidebar/outliner
        */
-      selectRegion() {
+      selectRegion(preserveTransformMode = false) {
         // Reset transform mode when region is selected (from sidebar or elsewhere)
-        self.setTransformMode(false);
+        // unless preserveTransformMode is true
+        if (!preserveTransformMode) {
+          self.setTransformMode(false);
+        }
+        // Mark that we just selected this region (to prevent double-click from enabling transform mode)
+        self._justSelected = true;
+        setTimeout(() => {
+          self.clearJustSelectedFlag();
+        }, 300); // Clear after double-click detection window
         // Call parent selectRegion to handle scrolling
         self.scrollToRegion();
       },
@@ -628,86 +655,6 @@ const HtxVectorView = observer(({ item, suggestion }) => {
           }}
           onTransformEnd={(e) => {
             item.parent.annotation.history.unfreeze();
-
-            // Handle case where event might be undefined (e.g., from onTransformationEnd)
-            if (!e || !e.target || !e.currentTarget) return;
-
-            if (e.target !== e.currentTarget) return;
-
-            const t = e.target;
-            const dx = t.getAttr("x", 0);
-            const dy = t.getAttr("y", 0);
-            const scaleX = t.getAttr("scaleX", 1);
-            const scaleY = t.getAttr("scaleY", 1);
-            const rotation = t.getAttr("rotation", 0);
-
-            // Reset transform attributes
-            t.setAttr("x", 0);
-            t.setAttr("y", 0);
-            t.setAttr("scaleX", 1);
-            t.setAttr("scaleY", 1);
-            t.setAttr("rotation", 0);
-
-            // Apply transformation to all points using KonvaVector methods
-            if (item.vectorRef) {
-              // Apply the transformation exactly as Konva did:
-              // 1. Scale around origin (0,0)
-              // 2. Rotate around origin (0,0)
-              // 3. Translate by (dx, dy)
-              // Don't pass centerX/centerY - transform around origin
-              const radians = rotation * (Math.PI / 180);
-              const cos = Math.cos(radians);
-              const sin = Math.sin(radians);
-
-              const imageWidth = image?.naturalWidth ?? 0;
-              const imageHeight = image?.naturalHeight ?? 0;
-
-              const transformedVertices = item.vertices.map((point) => {
-                // Step 1: Scale
-                const x = point.x * scaleX;
-                const y = point.y * scaleY;
-
-                // Step 2: Rotate
-                const rx = x * cos - y * sin;
-                const ry = x * sin + y * cos;
-
-                // Step 3: Translate and clamp to image bounds
-                const result = {
-                  ...point,
-                  x: Math.max(0, Math.min(imageWidth, rx + dx)),
-                  y: Math.max(0, Math.min(imageHeight, ry + dy)),
-                };
-
-                // Transform control points if bezier
-                if (point.isBezier) {
-                  if (point.controlPoint1) {
-                    const cp1x = point.controlPoint1.x * scaleX;
-                    const cp1y = point.controlPoint1.y * scaleY;
-                    const cp1rx = cp1x * cos - cp1y * sin;
-                    const cp1ry = cp1x * sin + cp1y * cos;
-                    result.controlPoint1 = {
-                      x: Math.max(0, Math.min(imageWidth, cp1rx + dx)),
-                      y: Math.max(0, Math.min(imageHeight, cp1ry + dy)),
-                    };
-                  }
-                  if (point.controlPoint2) {
-                    const cp2x = point.controlPoint2.x * scaleX;
-                    const cp2y = point.controlPoint2.y * scaleY;
-                    const cp2rx = cp2x * cos - cp2y * sin;
-                    const cp2ry = cp2x * sin + cp2y * cos;
-                    result.controlPoint2 = {
-                      x: Math.max(0, Math.min(imageWidth, cp2rx + dx)),
-                      y: Math.max(0, Math.min(imageHeight, cp2ry + dy)),
-                    };
-                  }
-                }
-
-                return result;
-              });
-
-              // Update the points
-              item.updatePointsFromKonvaVector(transformedVertices);
-            }
           }}
           onPointsChange={(points) => {
             item.updatePointsFromKonvaVector(points);
@@ -740,7 +687,27 @@ const HtxVectorView = observer(({ item, suggestion }) => {
             if (item.isDrawing) return;
             if (e.evt.altKey || e.evt.ctrlKey || e.evt.shiftKey || e.evt.metaKey) return;
 
+            // If region was just selected (part of a double-click on unselected region),
+            // ignore this click to prevent it from unselecting
+            if (item._justSelected) {
+              e.cancelBubble = true;
+              return;
+            }
+
             e.cancelBubble = true;
+
+            // When clicking a selected region, set _justSelected flag temporarily
+            // to prevent unselection if this is part of a double-click
+            // The flag will be cleared by the double-click handler or after timeout
+            if (item.selected) {
+              item.setJustSelectedFlag(true);
+              setTimeout(() => {
+                // Only clear if still set (double-click handler might have cleared it)
+                if (item._justSelected) {
+                  item.clearJustSelectedFlag();
+                }
+              }, 200); // Slightly longer than debounce timeout to ensure double-click is detected
+            }
 
             // Allow selection regardless of whether the path is closed
             // The Selection tool will handle multi-selection logic
@@ -767,7 +734,33 @@ const HtxVectorView = observer(({ item, suggestion }) => {
             e.evt.stopImmediatePropagation();
             e.evt.stopPropagation();
             e.evt.preventDefault();
+            e.cancelBubble = true;
+
+            // Clear the _justSelected flag if it was set (from first click of double-click)
+            // This prevents unselection logic from running
+            if (item._justSelected) {
+              item.clearJustSelectedFlag();
+            }
+
+            // Always ensure the region is selected first
+            // This handles the case where double-click starts from unselected state
+            const annotation = item.annotation;
+            if (!item.selected && annotation) {
+              // Select the region directly without going through _selectArea
+              // to avoid any potential unselection logic
+              annotation.selectArea(item);
+            }
+
+            // Always toggle transform mode for double-click (regardless of initial state)
+            // This ensures double-click always enters transform mode, whether starting from
+            // selected or unselected state
             item.toggleTransformMode();
+
+            // Ensure the region stays selected after entering transform mode
+            // Transform mode requires the region to be selected (see line 868: transformMode={item.selected && ...})
+            if (!item.selected && annotation) {
+              annotation.selectArea(item);
+            }
           }}
           closed={item.closed}
           width={stageWidth}
