@@ -504,25 +504,6 @@ describe("TimeSeries playback", () => {
 });
 
 describe("TimeSeries overviewChannels filtering", () => {
-  // Helper function to replicate the filtering logic from Overview component
-  const filterOverviewChannels = (overviewchannels, channelsMap, headers) => {
-    const allKeys = Object.keys(channelsMap);
-
-    if (overviewchannels) {
-      const channels = overviewchannels
-        .toLowerCase()
-        .split(",")
-        .map((name) => {
-          const trimmed = name.trim();
-          return /^\d+$/.test(trimmed) && headers ? headers[Number(trimmed)]?.toLowerCase() : trimmed;
-        })
-        .filter((ch) => ch && allKeys.includes(ch));
-
-      if (channels.length) return channels;
-    }
-    return allKeys;
-  };
-
   it("should return all channels when overviewChannels is not set", () => {
     const model = TimeSeriesModel.create(
       {
@@ -543,8 +524,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     const store = MockStore.create({ timeseries: model }, mockEnv);
     model.setColumnNames(["time", "channel1", "channel2", "channel3"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     expect(filtered).toEqual(["channel1", "channel2", "channel3"]);
     expect(filtered.length).toBe(3);
@@ -570,8 +550,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     const store = MockStore.create({ timeseries: model }, mockEnv);
     model.setColumnNames(["time", "channel1", "channel2", "channel3"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     expect(filtered).toEqual(["channel1", "channel3"]);
     expect(filtered.length).toBe(2);
@@ -599,8 +578,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     // Headers array: [0: "time", 1: "velocity", 2: "acceleration", 3: "temperature"]
     model.setColumnNames(["time", "velocity", "acceleration", "temperature"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     // Should map index 1 -> "velocity", index 3 -> "temperature"
     expect(filtered).toEqual(["velocity", "temperature"]);
@@ -628,8 +606,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     const store = MockStore.create({ timeseries: model }, mockEnv);
     model.setColumnNames(["time", "velocity", "acceleration", "temperature"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     expect(filtered).toEqual(["velocity", "acceleration"]);
     expect(filtered.length).toBe(2);
@@ -655,8 +632,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     const store = MockStore.create({ timeseries: model }, mockEnv);
     model.setColumnNames(["time", "channel1", "channel2", "channel3"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     expect(filtered).toEqual(["channel1", "channel2"]);
     expect(filtered.length).toBe(2);
@@ -682,8 +658,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     const store = MockStore.create({ timeseries: model }, mockEnv);
     model.setColumnNames(["time", "channel1", "channel2", "channel3"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     // Should only include valid channels
     expect(filtered).toEqual(["channel1", "channel2"]);
@@ -711,8 +686,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     const store = MockStore.create({ timeseries: model }, mockEnv);
     model.setColumnNames(["time", "channel1", "channel2"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     // When all channels are invalid, should return all channels (fallback behavior)
     expect(filtered).toEqual(["channel1", "channel2"]);
@@ -738,8 +712,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     const store = MockStore.create({ timeseries: model }, mockEnv);
     model.setColumnNames(["time", "channel1", "channel2", "channel3"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     expect(filtered).toEqual(["channel2"]);
     expect(filtered.length).toBe(1);
@@ -766,8 +739,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     // Headers: [0: "time", 1: "velocity", 2: "acceleration", 3: "channel3"]
     model.setColumnNames(["time", "velocity", "acceleration", "channel3"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     // Index 1 maps to "velocity", "channel3" is used directly
     expect(filtered).toEqual(["velocity", "channel3"]);
@@ -795,8 +767,7 @@ describe("TimeSeries overviewChannels filtering", () => {
     // Headless CSV: headers are numeric strings ["0", "1", "2", "3"]
     model.setColumnNames(["0", "1", "2", "3"]);
 
-    const channelsMap = model.channelsMap;
-    const filtered = filterOverviewChannels(model.overviewchannels, channelsMap, model.headers);
+    const filtered = model.filteredOverviewChannels;
 
     // For headless CSV, numeric indices map to header names
     expect(filtered).toEqual(["1", "2"]);

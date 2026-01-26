@@ -196,6 +196,24 @@ const Model = types
       return Object.values(self.channelsMap);
     },
 
+    get filteredOverviewChannels() {
+      const allKeys = Object.keys(self.channelsMap);
+
+      if (self.overviewchannels) {
+        const channels = self.overviewchannels
+          .toLowerCase()
+          .split(",")
+          .map((name) => {
+            const trimmed = name.trim();
+            return /^\d+$/.test(trimmed) && self.headers ? self.headers[Number(trimmed)]?.toLowerCase() : trimmed;
+          })
+          .filter((ch) => ch && allKeys.includes(ch));
+
+        if (channels.length) return channels;
+      }
+      return allKeys;
+    },
+
     parseTime(time) {
       const parse = self.parseTimeFn;
 
@@ -1126,22 +1144,8 @@ const Overview = observer(({ item, data, series }) => {
   const width = Math.max(fullWidth - margin.left - margin.right, 0);
   // const data = store.task.dataObj;
   const keys = React.useMemo(() => {
-    const allKeys = Object.keys(item.channelsMap);
-
-    if (item.overviewchannels) {
-      const channels = item.overviewchannels
-        .toLowerCase()
-        .split(",")
-        .map((name) => {
-          const trimmed = name.trim();
-          return /^\d+$/.test(trimmed) && item.headers ? item.headers[Number(trimmed)]?.toLowerCase() : trimmed;
-        })
-        .filter((ch) => ch && allKeys.includes(ch));
-
-      if (channels.length) return channels;
-    }
-    return allKeys;
-  }, [item.overviewchannels, item.channelsMap, item.headers]);
+    return item.filteredOverviewChannels;
+  }, [item.filteredOverviewChannels]);
   // const series = data[idX];
   const minRegionWidth = 2;
 
