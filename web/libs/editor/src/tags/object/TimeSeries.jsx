@@ -1149,9 +1149,7 @@ const Overview = observer(({ item, data, series }) => {
   const { margin, keyColumn: idX } = item;
   const width = Math.max(fullWidth - margin.left - margin.right, 0);
   // const data = store.task.dataObj;
-  const keys = React.useMemo(() => {
-    return item.filteredOverviewChannels;
-  }, [item.filteredOverviewChannels]);
+  const keys = item.filteredOverviewChannels;
   // const series = data[idX];
   const minRegionWidth = 2;
 
