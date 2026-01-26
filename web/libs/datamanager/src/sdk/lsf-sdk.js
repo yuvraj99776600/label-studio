@@ -387,9 +387,10 @@ export class LSFWrapper {
     // Handle strict task overlap - disable submission controls when overlap is reached
     const overlapReached = this.task.overlap_reached === true;
     this.overlapReached = overlapReached;
-    this.overlapReachedMessage = this.task.overlap_reached_message || 
+    this.overlapReachedMessage =
+      this.task.overlap_reached_message ||
       "Annotation overlap has been reached for this task. Your draft is preserved but cannot be submitted.";
-    
+
     if (overlapReached) {
       // Disable submission-related interfaces
       this.lsf.toggleInterface("submit", false);

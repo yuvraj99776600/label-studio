@@ -232,17 +232,18 @@ def get_not_solved_tasks_qs(
     lse_project = getattr(project, 'lse_project', None)
     if lse_project and getattr(lse_project, 'strict_task_overlap', False):
         # Exclude tasks where distinct annotator count >= overlap
-        tasks_at_overlap = Task.objects.filter(
-            project=project
-        ).annotate(
-            distinct_annotators=Count(
-                'annotations__completed_by',
-                filter=Q(annotations__was_cancelled=False),
-                distinct=True,
+        tasks_at_overlap = (
+            Task.objects.filter(project=project)
+            .annotate(
+                distinct_annotators=Count(
+                    'annotations__completed_by',
+                    filter=Q(annotations__was_cancelled=False),
+                    distinct=True,
+                )
             )
-        ).filter(
-            distinct_annotators__gte=F('overlap')
-        ).values_list('pk', flat=True)
+            .filter(distinct_annotators__gte=F('overlap'))
+            .values_list('pk', flat=True)
+        )
 
         not_solved_tasks = not_solved_tasks.exclude(pk__in=tasks_at_overlap)
 
