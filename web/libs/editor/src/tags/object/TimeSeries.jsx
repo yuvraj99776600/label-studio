@@ -200,12 +200,18 @@ const Model = types
       const allKeys = Object.keys(self.channelsMap);
 
       if (self.overviewchannels) {
+        // Infer headers from dataObj if headers array is not set
+        let headers = self.headers;
+        if (!headers && self.dataObj) {
+          headers = Object.keys(self.dataObj);
+        }
+
         const channels = self.overviewchannels
           .toLowerCase()
           .split(",")
           .map((name) => {
             const trimmed = name.trim();
-            return /^\d+$/.test(trimmed) && self.headers ? self.headers[Number(trimmed)]?.toLowerCase() : trimmed;
+            return /^\d+$/.test(trimmed) && headers ? headers[Number(trimmed)]?.toLowerCase() : trimmed;
           })
           .filter((ch) => ch && allKeys.includes(ch));
 
