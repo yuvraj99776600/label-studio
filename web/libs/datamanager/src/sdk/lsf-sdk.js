@@ -1,4 +1,12 @@
-import { FF_DEV_1752, FF_DEV_2186, FF_DEV_2887, FF_DEV_3034, FF_LSDV_4620_3_ML, isFF } from "../utils/feature-flags";
+import {
+  FF_DEV_1752,
+  FF_DEV_2186,
+  FF_DEV_2887,
+  FF_DEV_3034,
+  FF_FIT_720_LAZY_LOAD_ANNOTATIONS,
+  FF_LSDV_4620_3_ML,
+  isFF,
+} from "../utils/feature-flags";
 import { isDefined } from "../utils/utils";
 import { Modal } from "../components/Common/Modal/Modal";
 import { CommentsSdk } from "./comments-sdk";
@@ -340,7 +348,7 @@ export class LSFWrapper {
     this.setLSFTask(task, annotationID, fromHistory);
   }
 
-  setLSFTask(task, annotationID, fromHistory, selectPrediction = false) {
+  async setLSFTask(task, annotationID, fromHistory, selectPrediction = false) {
     if (!this.lsf) return;
 
     const hasChangedTasks = this.lsf?.task?.id !== task?.id && task?.id;
@@ -385,12 +393,65 @@ export class LSFWrapper {
     this.lsf.toggleInterface("topbar:task-counter", true);
     this.lsf.assignTask(task);
     this.lsf.initializeStore(lsfTask);
-    this.setAnnotation(annotationID, fromHistory || isRejectedQueue, selectPrediction);
+    await this.setAnnotation(annotationID, fromHistory || isRejectedQueue, selectPrediction);
     this.setLoading(false);
   }
 
+  /**
+   * Ensure annotation is fully loaded (for lazy loading - FIT-720)
+   * If the annotation is a stub, fetch the full annotation data from the server.
+   * @param {string} annotationPk - The annotation pk to load
+   * @returns {Promise<Object|null>} The full annotation data or null if not a stub
+   * @private
+   */
+  async ensureAnnotationLoaded(annotationPk) {
+    if (!isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS) || !this.labelStream) {
+      return null;
+    }
+
+    // Check if this annotation is a stub in the original task data
+    const taskAnnotation = this.task?.annotations?.find((a) => String(a.id) === String(annotationPk));
+    if (!taskAnnotation?.is_stub) {
+      return null;
+    }
+
+    // Fetch full annotation from backend
+    try {
+      const taskStore = this.datamanager.store.taskStore;
+      const fullAnnotation = await taskStore.loadAnnotation(annotationPk);
+
+      if (fullAnnotation && !fullAnnotation.error) {
+        // Update the original task annotation data
+        const annotationIndex = this.task.annotations.findIndex((a) => String(a.id) === String(annotationPk));
+        if (annotationIndex !== -1) {
+          // Merge full annotation data, removing stub flag
+          this.task.annotations[annotationIndex] = {
+            ...this.task.annotations[annotationIndex],
+            ...fullAnnotation,
+            is_stub: false,
+          };
+        }
+
+        // Hydrate the LSF annotation with the full result
+        const lsfAnnotation = this.annotations.find((a) => String(a.pk) === String(annotationPk));
+        if (lsfAnnotation && fullAnnotation.result) {
+          lsfAnnotation.history.freeze();
+          lsfAnnotation.deserializeResults(fullAnnotation.result);
+          lsfAnnotation.history.safeUnfreeze();
+          lsfAnnotation.history.reinit();
+        }
+
+        return fullAnnotation;
+      }
+    } catch (error) {
+      console.error(`[Lazy Load] Failed to load annotation ${annotationPk}:`, error);
+    }
+
+    return null;
+  }
+
   /** @private */
-  setAnnotation(annotationID, selectAnnotation = false, selectPrediction = false) {
+  async setAnnotation(annotationID, selectAnnotation = false, selectPrediction = false) {
     const id = annotationID ? annotationID.toString() : null;
     const { annotationStore: cs } = this.lsf;
     let annotation;
@@ -447,6 +508,8 @@ export class LSFWrapper {
         // not submitted draft, most likely from previous labeling session
         annotation = first;
       } else if (isDefined(annotationID) && selectAnnotation) {
+        // Lazy load annotation if it's a stub (FIT-720)
+        await this.ensureAnnotationLoaded(annotationID);
         annotation = this.annotations.find(({ pk }) => pk === annotationID);
       } else if (showPredictions && this.predictions.length > 0 && !this.isInteractivePreannotations) {
         annotation = cs.addAnnotationFromPrediction(this.predictions[0]);
@@ -588,7 +651,7 @@ export class LSFWrapper {
       const annotationID =
         this.initialAnnotation?.pk ?? this.task.lastAnnotation?.pk ?? this.task.lastAnnotation?.id ?? "auto";
 
-      this.setAnnotation(annotationID);
+      await this.setAnnotation(annotationID);
     }
   };
 
@@ -730,7 +793,7 @@ export class LSFWrapper {
       const lastAnnotation = this.annotations[this.annotations.length - 1] ?? {};
       const annotationID = lastAnnotation.pk ?? undefined;
 
-      this.setAnnotation(annotationID);
+      await this.setAnnotation(annotationID);
     }
   };
 

@@ -197,6 +197,43 @@ class AnnotationSerializer(FlexFieldsModelSerializer):
         expandable_fields = {'completed_by': (CompletedByDMSerializer,)}
 
 
+class AnnotationStubSerializer(FlexFieldsModelSerializer):
+    """
+    Lightweight Annotation Serializer for lazy loading.
+
+    Returns only metadata needed for annotation list display, excluding the
+    heavy 'result' field. Used when fflag_fix_all_fit_720_lazy_load_annotations
+    is enabled to improve performance for tasks with many annotations.
+    """
+
+    created_username = serializers.SerializerMethodField(default='', read_only=True, help_text='Username string')
+    created_ago = serializers.CharField(default='', read_only=True, help_text='Time delta from creation time')
+    completed_by = serializers.PrimaryKeyRelatedField(required=False, queryset=User.objects.all())
+    # Mark this as a stub so frontend knows to fetch full data on selection
+    is_stub = serializers.SerializerMethodField(read_only=True)
+
+    def get_created_username(self, annotation) -> str:
+        user = annotation.completed_by
+        if not user:
+            return ''
+
+        name = user.first_name
+        if len(user.last_name):
+            name = name + ' ' + user.last_name
+
+        name += f' {user.email}, {user.id}'
+        return name
+
+    def get_is_stub(self, annotation) -> bool:
+        return True
+
+    class Meta:
+        model = Annotation
+        # Exclude heavy fields: result, prediction, result_count
+        exclude = ['result', 'prediction', 'result_count']
+        expandable_fields = {'completed_by': (CompletedByDMSerializer,)}
+
+
 class TaskSimpleSerializer(ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
