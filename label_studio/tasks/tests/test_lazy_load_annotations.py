@@ -3,12 +3,11 @@
 This module tests the AnnotationStubSerializer and the annotations_stub
 query parameter for the TaskAPI endpoint.
 """
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
 from organizations.tests.factories import OrganizationFactory
 from projects.tests.factories import ProjectFactory
 from rest_framework.test import APITestCase
-from tasks.models import Annotation
 from tasks.serializers import AnnotationSerializer, AnnotationStubSerializer
 from tasks.tests.factories import AnnotationFactory, TaskFactory
 
