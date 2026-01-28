@@ -51,18 +51,14 @@ class TestAnnotationStubSerializer(APITestCase):
         assert data['is_stub'] is True
 
     def test_stub_serializer_includes_metadata(self):
-        """Test that AnnotationStubSerializer includes all required metadata fields."""
+        """Test that AnnotationStubSerializer includes only minimal required metadata fields."""
         serializer = AnnotationStubSerializer(self.annotation)
         data = serializer.data
 
-        # Required metadata fields for displaying annotation list
+        # Minimal metadata fields for displaying annotation list
+        # (reduced to avoid N+1 queries and minimize payload size)
         required_fields = [
             'id',
-            'created_at',
-            'updated_at',
-            'was_cancelled',
-            'ground_truth',
-            'lead_time',
             'created_ago',
             'created_username',
             'completed_by',
@@ -71,6 +67,11 @@ class TestAnnotationStubSerializer(APITestCase):
 
         for field in required_fields:
             assert field in data, f"Field '{field}' should be in stub serializer"
+
+        # Verify we're NOT including heavyweight fields that were removed
+        removed_fields = ['created_at', 'updated_at', 'was_cancelled', 'ground_truth', 'lead_time', 'result']
+        for field in removed_fields:
+            assert field not in data, f"Field '{field}' should NOT be in minimal stub serializer"
 
     def test_full_serializer_includes_result(self):
         """Test that the full AnnotationSerializer includes the result field."""
