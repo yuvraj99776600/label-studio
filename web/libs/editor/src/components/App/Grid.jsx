@@ -3,7 +3,7 @@
  * FIT-720: Added virtualization support for large annotation counts
  */
 
-import React, { Component, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { Component, useCallback, useMemo, useRef, useState } from "react";
 import { Spin } from "antd";
 import { Button } from "@humansignal/ui";
 import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
@@ -110,10 +110,7 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
   const [containerWidth, setContainerWidth] = useState(0);
 
   // Filter visible annotations
-  const visibleAnnotations = useMemo(
-    () => annotations.filter((c) => !c.hidden),
-    [annotations],
-  );
+  const visibleAnnotations = useMemo(() => annotations.filter((c) => !c.hidden), [annotations]);
 
   // Calculate panel width based on container (aim for ~50% width, min PANEL_WIDTH)
   const panelWidth = useMemo(() => {
@@ -151,75 +148,89 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
     }
   }, [scrollOffset, panelWidth, totalWidth, containerWidth]);
 
-  const select = useCallback((c) => {
-    c.type === "annotation" ? store.selectAnnotation(c.id) : store.selectPrediction(c.id);
-  }, [store]);
+  const select = useCallback(
+    (c) => {
+      c.type === "annotation" ? store.selectAnnotation(c.id) : store.selectPrediction(c.id);
+    },
+    [store],
+  );
 
   // FIT-720: Hydrate annotations that come into view
-  const hydrateAnnotation = useCallback(async (annotation) => {
-    // Check if annotation is a stub - it may be stored on the MST model or via is_stub flag
-    const isStub = annotation.is_stub === true || (annotation.result?.length === 0 && annotation.pk);
-    
-    if (!isStub || hydratingIds.has(annotation.id)) {
-      return;
-    }
+  const hydrateAnnotation = useCallback(
+    async (annotation) => {
+      // Check if annotation is a stub - it may be stored on the MST model or via is_stub flag
+      const isStub = annotation.is_stub === true || (annotation.result?.length === 0 && annotation.pk);
 
-    const annotationPk = annotation.pk || annotation.id;
-    console.log(`[FIT-720] Compare view: Hydrating annotation ${annotationPk}...`);
-    
-    setHydratingIds((prev) => new Set([...prev, annotation.id]));
-
-    try {
-      // Access the root store to get the SDK
-      const rootStore = store.store;
-      const sdk = rootStore?.SDK;
-      
-      if (sdk?.ensureAnnotationLoaded) {
-        // Try the SDK method (works for labelStream)
-        await sdk.ensureAnnotationLoaded(annotationPk);
-      } else if (sdk?.datamanager?.store?.taskStore?.loadAnnotation) {
-        // Fallback: directly load annotation via taskStore
-        const fullAnnotation = await sdk.datamanager.store.taskStore.loadAnnotation(annotationPk);
-        if (fullAnnotation && !fullAnnotation.error && fullAnnotation.result) {
-          // Hydrate the annotation with the loaded result
-          annotation.history?.freeze?.();
-          annotation.deserializeResults?.(fullAnnotation.result);
-          annotation.history?.safeUnfreeze?.();
-          annotation.history?.reinit?.();
-          console.log(`[FIT-720] Compare view: Hydrated annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`);
-        }
-      } else {
-        console.warn(`[FIT-720] Compare view: No SDK available to hydrate annotation ${annotationPk}`);
+      if (!isStub || hydratingIds.has(annotation.id)) {
+        return;
       }
-    } catch (error) {
-      console.error(`[FIT-720] Compare view: Failed to hydrate annotation ${annotationPk}:`, error);
-    } finally {
-      setHydratingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(annotation.id);
-        return next;
-      });
-    }
-  }, [store, hydratingIds]);
+
+      const annotationPk = annotation.pk || annotation.id;
+      console.log(`[FIT-720] Compare view: Hydrating annotation ${annotationPk}...`);
+
+      setHydratingIds((prev) => new Set([...prev, annotation.id]));
+
+      try {
+        // Access the root store to get the SDK
+        const rootStore = store.store;
+        const sdk = rootStore?.SDK;
+
+        if (sdk?.ensureAnnotationLoaded) {
+          // Try the SDK method (works for labelStream)
+          await sdk.ensureAnnotationLoaded(annotationPk);
+        } else if (sdk?.datamanager?.store?.taskStore?.loadAnnotation) {
+          // Fallback: directly load annotation via taskStore
+          const fullAnnotation = await sdk.datamanager.store.taskStore.loadAnnotation(annotationPk);
+          if (fullAnnotation && !fullAnnotation.error && fullAnnotation.result) {
+            // Hydrate the annotation with the loaded result
+            annotation.history?.freeze?.();
+            annotation.deserializeResults?.(fullAnnotation.result);
+            annotation.history?.safeUnfreeze?.();
+            annotation.history?.reinit?.();
+            console.log(
+              `[FIT-720] Compare view: Hydrated annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`,
+            );
+          }
+        } else {
+          console.warn(`[FIT-720] Compare view: No SDK available to hydrate annotation ${annotationPk}`);
+        }
+      } catch (error) {
+        console.error(`[FIT-720] Compare view: Failed to hydrate annotation ${annotationPk}:`, error);
+      } finally {
+        setHydratingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(annotation.id);
+          return next;
+        });
+      }
+    },
+    [store, hydratingIds],
+  );
 
   // FIT-720: Handle items rendered - hydrate visible stubs
-  const onItemsRendered = useCallback(({ visibleStartIndex, visibleStopIndex }) => {
-    for (let i = visibleStartIndex; i <= visibleStopIndex; i++) {
-      const annotation = visibleAnnotations[i];
-      if (annotation?.is_stub && !hydratingIds.has(annotation.id)) {
-        hydrateAnnotation(annotation);
+  const onItemsRendered = useCallback(
+    ({ visibleStartIndex, visibleStopIndex }) => {
+      for (let i = visibleStartIndex; i <= visibleStopIndex; i++) {
+        const annotation = visibleAnnotations[i];
+        if (annotation?.is_stub && !hydratingIds.has(annotation.id)) {
+          hydrateAnnotation(annotation);
+        }
       }
-    }
-  }, [visibleAnnotations, hydratingIds, hydrateAnnotation]);
+    },
+    [visibleAnnotations, hydratingIds, hydrateAnnotation],
+  );
 
   // Item data for virtualized list
-  const itemData = useMemo(() => ({
-    annotations: visibleAnnotations,
-    store,
-    root,
-    onSelect: select,
-    hydratingIds,
-  }), [visibleAnnotations, store, root, select, hydratingIds]);
+  const itemData = useMemo(
+    () => ({
+      annotations: visibleAnnotations,
+      store,
+      root,
+      onSelect: select,
+      hydratingIds,
+    }),
+    [visibleAnnotations, store, root, select, hydratingIds],
+  );
 
   // Row renderer
   const renderPanel = useCallback(({ index, style, data }) => {
@@ -266,10 +277,24 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
       </div>
       {showControls && (
         <>
-          <Button size="small" look="string" onClick={scrollLeft} className={styles.left} aria-label="Move left" disabled={isLeftDisabled}>
+          <Button
+            size="small"
+            look="string"
+            onClick={scrollLeft}
+            className={styles.left}
+            aria-label="Move left"
+            disabled={isLeftDisabled}
+          >
             <LeftCircleOutlined />
           </Button>
-          <Button size="small" look="string" onClick={scrollRight} className={styles.right} aria-label="Move right" disabled={isRightDisabled}>
+          <Button
+            size="small"
+            look="string"
+            onClick={scrollRight}
+            className={styles.right}
+            aria-label="Move right"
+            disabled={isRightDisabled}
+          >
             <RightCircleOutlined />
           </Button>
         </>
