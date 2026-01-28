@@ -443,6 +443,8 @@ export class LSFWrapper {
           );
           lsfAnnotation.history.freeze();
           lsfAnnotation.deserializeResults(fullAnnotation.result);
+          // Critical: updateObjects() is required to render visual regions after deserializing
+          lsfAnnotation.updateObjects();
           lsfAnnotation.history.safeUnfreeze();
           lsfAnnotation.history.reinit();
         }

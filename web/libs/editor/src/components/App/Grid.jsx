@@ -63,7 +63,8 @@ class Item extends Component {
 
 // FIT-720: Virtualized annotation panel with lazy hydration
 const VirtualizedAnnotationPanel = observer(({ annotation, store, root, style, onSelect, isHydrating }) => {
-  const isStub = annotation.is_stub === true;
+  // Use consistent stub detection: is_stub flag OR empty result with pk
+  const isStub = annotation.is_stub === true || (annotation.result?.length === 0 && annotation.pk);
 
   return (
     <div style={{ ...style, paddingRight: PANEL_GAP }}>
@@ -108,6 +109,7 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
   const listRef = useRef(null);
   const [hydratingIds, setHydratingIds] = useState(new Set());
   const [containerWidth, setContainerWidth] = useState(0);
+  const initialHydrationDone = useRef(false);
 
   // Filter visible annotations
   const visibleAnnotations = useMemo(
@@ -174,22 +176,42 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
       const rootStore = store.store;
       const sdk = rootStore?.SDK;
       
+      let fullAnnotation = null;
+      
       if (sdk?.ensureAnnotationLoaded) {
         // Try the SDK method (works for labelStream)
         await sdk.ensureAnnotationLoaded(annotationPk);
+        console.log(`[FIT-720] Compare view: Hydrated via SDK.ensureAnnotationLoaded`);
+        return; // SDK method handles everything
       } else if (sdk?.datamanager?.store?.taskStore?.loadAnnotation) {
         // Fallback: directly load annotation via taskStore
-        const fullAnnotation = await sdk.datamanager.store.taskStore.loadAnnotation(annotationPk);
-        if (fullAnnotation && !fullAnnotation.error && fullAnnotation.result) {
-          // Hydrate the annotation with the loaded result
-          annotation.history?.freeze?.();
-          annotation.deserializeResults?.(fullAnnotation.result);
-          annotation.history?.safeUnfreeze?.();
-          annotation.history?.reinit?.();
-          console.log(`[FIT-720] Compare view: Hydrated annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`);
-        }
+        fullAnnotation = await sdk.datamanager.store.taskStore.loadAnnotation(annotationPk);
+        console.log(`[FIT-720] Compare view: Loaded via taskStore.loadAnnotation`);
       } else {
-        console.warn(`[FIT-720] Compare view: No SDK available to hydrate annotation ${annotationPk}`);
+        // Ultimate fallback: direct API fetch
+        console.log(`[FIT-720] Compare view: Using direct API fetch for annotation ${annotationPk}`);
+        const response = await fetch(`/api/annotations/${annotationPk}/`);
+        if (response.ok) {
+          fullAnnotation = await response.json();
+          console.log(`[FIT-720] Compare view: Fetched annotation ${annotationPk} via API`);
+        } else {
+          console.error(`[FIT-720] Compare view: API fetch failed for annotation ${annotationPk}:`, response.status);
+        }
+      }
+      
+      if (fullAnnotation && !fullAnnotation.error && fullAnnotation.result) {
+        // Hydrate the annotation with the loaded result
+        annotation.history?.freeze?.();
+        annotation.deserializeResults?.(fullAnnotation.result);
+        // Critical: updateObjects() is required to render visual regions after deserializing
+        annotation.updateObjects?.();
+        annotation.history?.safeUnfreeze?.();
+        annotation.history?.reinit?.();
+        // Mark as no longer a stub
+        if (annotation.is_stub !== undefined) {
+          annotation.is_stub = false;
+        }
+        console.log(`[FIT-720] Compare view: Hydrated annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`);
       }
     } catch (error) {
       console.error(`[FIT-720] Compare view: Failed to hydrate annotation ${annotationPk}:`, error);
@@ -206,11 +228,41 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
   const onItemsRendered = useCallback(({ visibleStartIndex, visibleStopIndex }) => {
     for (let i = visibleStartIndex; i <= visibleStopIndex; i++) {
       const annotation = visibleAnnotations[i];
-      if (annotation?.is_stub && !hydratingIds.has(annotation.id)) {
+      if (!annotation) continue;
+      
+      // Use same stub detection as hydrateAnnotation: is_stub flag OR empty result with pk
+      const isStub = annotation.is_stub === true || (annotation.result?.length === 0 && annotation.pk);
+      
+      if (isStub && !hydratingIds.has(annotation.id)) {
+        console.log(`[FIT-720] Compare view: onItemsRendered triggering hydration for annotation ${annotation.pk || annotation.id}`);
         hydrateAnnotation(annotation);
       }
     }
   }, [visibleAnnotations, hydratingIds, hydrateAnnotation]);
+
+  // FIT-720: Initial hydration on mount - hydrate first visible annotations
+  useEffect(() => {
+    // Only run once when containerWidth becomes non-zero
+    if (initialHydrationDone.current || visibleAnnotations.length === 0 || containerWidth === 0) return;
+    
+    initialHydrationDone.current = true;
+    
+    // Calculate how many panels fit in the viewport
+    const visibleCount = Math.ceil(containerWidth / (panelWidth + PANEL_GAP)) + 1;
+    const initialVisibleCount = Math.min(visibleCount, visibleAnnotations.length);
+    
+    console.log(`[FIT-720] Compare view: Initial mount - checking first ${initialVisibleCount} annotations for hydration`);
+    
+    for (let i = 0; i < initialVisibleCount; i++) {
+      const annotation = visibleAnnotations[i];
+      if (!annotation) continue;
+      
+      const isStub = annotation.is_stub === true || (annotation.result?.length === 0 && annotation.pk);
+      if (isStub) {
+        hydrateAnnotation(annotation);
+      }
+    }
+  }, [containerWidth, visibleAnnotations, panelWidth, hydrateAnnotation]);
 
   // Item data for virtualized list
   const itemData = useMemo(() => ({
