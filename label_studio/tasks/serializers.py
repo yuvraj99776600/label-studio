@@ -210,6 +210,7 @@ class AnnotationStubSerializer(FlexFieldsModelSerializer):
     - created_username: for display in annotation list
     - created_ago: for display in annotation list
     - completed_by: user id for avatar lookup
+    - ground_truth: for showing star indicator
     - is_stub: signals frontend to fetch full data on selection
     """
 
@@ -237,7 +238,8 @@ class AnnotationStubSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = Annotation
         # Minimal fields for annotation list display only
-        fields = ['id', 'created_username', 'created_ago', 'completed_by', 'is_stub']
+        # ground_truth is a simple model field (no extra query)
+        fields = ['id', 'created_username', 'created_ago', 'completed_by', 'ground_truth', 'is_stub']
 
 
 class TaskSimpleSerializer(ModelSerializer):

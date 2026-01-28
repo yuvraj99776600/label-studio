@@ -56,12 +56,13 @@ class TestAnnotationStubSerializer(APITestCase):
         data = serializer.data
 
         # Minimal metadata fields for displaying annotation list
-        # (reduced to avoid N+1 queries and minimize payload size)
+        # (reduced to minimize payload size while keeping UI indicators)
         required_fields = [
             'id',
             'created_ago',
             'created_username',
             'completed_by',
+            'ground_truth',  # needed for star indicator in UI
             'is_stub',
         ]
 
@@ -69,7 +70,7 @@ class TestAnnotationStubSerializer(APITestCase):
             assert field in data, f"Field '{field}' should be in stub serializer"
 
         # Verify we're NOT including heavyweight fields that were removed
-        removed_fields = ['created_at', 'updated_at', 'was_cancelled', 'ground_truth', 'lead_time', 'result']
+        removed_fields = ['created_at', 'updated_at', 'was_cancelled', 'lead_time', 'result']
         for field in removed_fields:
             assert field not in data, f"Field '{field}' should NOT be in minimal stub serializer"
 
