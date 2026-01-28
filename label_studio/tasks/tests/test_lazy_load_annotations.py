@@ -60,6 +60,7 @@ class TestAnnotationStubSerializer(APITestCase):
         required_fields = [
             'id',
             'created_ago',
+            'created_at',  # needed for TimeAgo component to display correct timestamp
             'created_username',
             'completed_by',
             'ground_truth',  # needed for star indicator in UI
@@ -70,7 +71,7 @@ class TestAnnotationStubSerializer(APITestCase):
             assert field in data, f"Field '{field}' should be in stub serializer"
 
         # Verify we're NOT including heavyweight fields that were removed
-        removed_fields = ['created_at', 'updated_at', 'was_cancelled', 'lead_time', 'result']
+        removed_fields = ['updated_at', 'was_cancelled', 'lead_time', 'result']
         for field in removed_fields:
             assert field not in data, f"Field '{field}' should NOT be in minimal stub serializer"
 

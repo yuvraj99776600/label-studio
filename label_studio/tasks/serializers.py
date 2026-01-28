@@ -208,7 +208,8 @@ class AnnotationStubSerializer(FlexFieldsModelSerializer):
     Fields included:
     - id: for selection and hydration
     - created_username: for display in annotation list
-    - created_ago: for display in annotation list
+    - created_ago: for display in annotation list (relative time string)
+    - created_at: for TimeAgo component (actual timestamp)
     - completed_by: user id for avatar lookup
     - ground_truth: for showing star indicator
     - is_stub: signals frontend to fetch full data on selection
@@ -238,8 +239,8 @@ class AnnotationStubSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = Annotation
         # Minimal fields for annotation list display only
-        # ground_truth is a simple model field (no extra query)
-        fields = ['id', 'created_username', 'created_ago', 'completed_by', 'ground_truth', 'is_stub']
+        # ground_truth and created_at are simple model fields (no extra query)
+        fields = ['id', 'created_username', 'created_ago', 'created_at', 'completed_by', 'ground_truth', 'is_stub']
 
 
 class TaskSimpleSerializer(ModelSerializer):

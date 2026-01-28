@@ -17,9 +17,14 @@ $gap: 30px;
   margin: 0 30px;
   overflow: auto;
   position: relative;
+
+  // FIT-720: Virtualized grid uses react-window, not CSS grid
+  &:has([data-virtualized="true"]) {
+    display: block;
+  }
 }
 
-.grid > div > h4 {
+.grid>div>h4 {
   cursor: pointer;
 }
 
@@ -29,26 +34,39 @@ $gap: 30px;
   min-width: 0; // famous flex hack to prevent block from growing enormously
 }
 
-.container > button {
+// FIT-720: Virtualized container needs explicit height for AutoSizer
+.containerVirtualized {
+  position: relative;
+  flex-grow: 1;
+  min-width: 0;
+  height: calc(100vh - 200px); // Account for header/tabs
+  min-height: 400px;
+}
+
+.container>button,
+.containerVirtualized>button {
   position: absolute;
   top: 0;
   width: $gap;
   height: 100%;
+  z-index: 10;
 
   &:hover {
     background: var(--sand_200);
   }
 }
 
-.container > button.left {
+.container>button.left,
+.containerVirtualized>button.left {
   left: 0;
 }
 
-.container > button.right {
+.container>button.right,
+.containerVirtualized>button.right {
   right: 0;
 }
 
-.grid > div:global(.hover) {
+.grid>div:global(.hover) {
   background: #eee;
 
   h4 {
@@ -57,7 +75,7 @@ $gap: 30px;
 }
 
 /* don't let the empty blocks to break the nice grid */
-.grid > div:empty {
+.grid>div:empty {
   display: none;
 }
 
