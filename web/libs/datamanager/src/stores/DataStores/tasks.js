@@ -167,6 +167,7 @@ export const create = (columns) => {
           // Lazy load annotations behind feature flag (FIT-720)
           if (isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
             taskParams.annotations_stub = true;
+            console.log(`[FIT-720] LabelStream: Loading task ${taskID} with annotations_stub=true`);
           }
         }
 
@@ -227,7 +228,12 @@ export const create = (columns) => {
        * @returns {Promise<Object>} The full annotation data
        */
       loadAnnotation: flow(function* (annotationID) {
+        console.log(`[FIT-720] LabelStream: Fetching full annotation ${annotationID}`);
         const annotationData = yield self.root.apiCall("fetchAnnotation", { annotationID });
+        console.log(
+          `[FIT-720] LabelStream: Received annotation ${annotationID}`,
+          annotationData ? "success" : "failed",
+        );
         return annotationData;
       }),
 

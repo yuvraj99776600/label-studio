@@ -201,9 +201,16 @@ class AnnotationStubSerializer(FlexFieldsModelSerializer):
     """
     Lightweight Annotation Serializer for lazy loading.
 
-    Returns only metadata needed for annotation list display, excluding the
-    heavy 'result' field. Used when fflag_fix_all_fit_720_lazy_load_annotations
-    is enabled to improve performance for tasks with many annotations.
+    Returns only minimal metadata needed for annotation list display.
+    Used when fflag_fix_all_fit_720_lazy_load_annotations is enabled
+    to improve performance for tasks with many annotations.
+
+    Fields included:
+    - id: for selection and hydration
+    - created_username: for display in annotation list
+    - created_ago: for display in annotation list
+    - completed_by: user id for avatar lookup
+    - is_stub: signals frontend to fetch full data on selection
     """
 
     created_username = serializers.SerializerMethodField(default='', read_only=True, help_text='Username string')
@@ -229,9 +236,8 @@ class AnnotationStubSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = Annotation
-        # Exclude heavy fields: result, prediction, result_count
-        exclude = ['result', 'prediction', 'result_count']
-        expandable_fields = {'completed_by': (CompletedByDMSerializer,)}
+        # Minimal fields for annotation list display only
+        fields = ['id', 'created_username', 'created_ago', 'completed_by', 'is_stub']
 
 
 class TaskSimpleSerializer(ModelSerializer):
@@ -908,11 +914,24 @@ class NextTaskSerializer(TaskWithAnnotationsAndPredictionsAndDraftsSerializer):
     def get_annotations(self, task):
         result = []
         if self.context.get('annotations', False):
-            annotations = super().get_annotations(task)
+            # Support lazy loading of annotations (FIT-720)
+            # When annotations_stub is True, return lightweight stubs without result field
+            use_stub = self.context.get('annotations_stub', False)
             user = self.context['request'].user
-            for annotation in annotations:
-                if annotation.get('completed_by') == user.id:
-                    result.append(annotation)
+
+            if use_stub:
+                # Get annotations queryset and filter by user
+                annotations = task.annotations
+                if user.is_annotator:
+                    annotations = annotations.filter(completed_by=user)
+                else:
+                    annotations = annotations.filter(completed_by=user)
+                return AnnotationStubSerializer(annotations, many=True, read_only=True, context=self.context).data
+            else:
+                annotations = super().get_annotations(task)
+                for annotation in annotations:
+                    if annotation.get('completed_by') == user.id:
+                        result.append(annotation)
         return result
 
 

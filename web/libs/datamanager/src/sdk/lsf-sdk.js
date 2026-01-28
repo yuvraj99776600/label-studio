@@ -412,8 +412,11 @@ export class LSFWrapper {
     // Check if this annotation is a stub in the original task data
     const taskAnnotation = this.task?.annotations?.find((a) => String(a.id) === String(annotationPk));
     if (!taskAnnotation?.is_stub) {
+      console.log(`[FIT-720] LabelStream: Annotation ${annotationPk} is not a stub, skipping lazy load`);
       return null;
     }
+
+    console.log(`[FIT-720] LabelStream: Annotation ${annotationPk} is a stub, loading full data...`);
 
     // Fetch full annotation from backend
     try {
@@ -435,6 +438,9 @@ export class LSFWrapper {
         // Hydrate the LSF annotation with the full result
         const lsfAnnotation = this.annotations.find((a) => String(a.pk) === String(annotationPk));
         if (lsfAnnotation && fullAnnotation.result) {
+          console.log(
+            `[FIT-720] LabelStream: Hydrating annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`,
+          );
           lsfAnnotation.history.freeze();
           lsfAnnotation.deserializeResults(fullAnnotation.result);
           lsfAnnotation.history.safeUnfreeze();
@@ -444,7 +450,7 @@ export class LSFWrapper {
         return fullAnnotation;
       }
     } catch (error) {
-      console.error(`[Lazy Load] Failed to load annotation ${annotationPk}:`, error);
+      console.error(`[FIT-720] LabelStream: Failed to load annotation ${annotationPk}:`, error);
     }
 
     return null;
