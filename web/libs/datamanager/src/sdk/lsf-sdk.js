@@ -26,7 +26,6 @@ try {
   invalidateDistributionCache = editorHooks.invalidateDistributionCache;
 } catch {
   // Editor hooks not available, invalidation will be skipped
-  console.debug("[FIT-720] Editor hooks not available for cache invalidation");
 }
 
 const DEFAULT_INTERFACES = [
@@ -427,11 +426,8 @@ export class LSFWrapper {
     // Check if this annotation is a stub in the original task data
     const taskAnnotation = this.task?.annotations?.find((a) => String(a.id) === String(annotationPk));
     if (!taskAnnotation?.is_stub) {
-      console.log(`[FIT-720] LabelStream: Annotation ${annotationPk} is not a stub, skipping lazy load`);
       return null;
     }
-
-    console.log(`[FIT-720] LabelStream: Annotation ${annotationPk} is a stub, loading full data...`);
 
     // Fetch full annotation from backend
     try {
@@ -453,9 +449,6 @@ export class LSFWrapper {
         // Hydrate the LSF annotation with the full result
         const lsfAnnotation = this.annotations.find((a) => String(a.pk) === String(annotationPk));
         if (lsfAnnotation && fullAnnotation.result) {
-          console.log(
-            `[FIT-720] LabelStream: Hydrating annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`,
-          );
           lsfAnnotation.history.freeze();
           lsfAnnotation.deserializeResults(fullAnnotation.result);
           // Critical: updateObjects() is required to render visual regions after deserializing
@@ -466,8 +459,8 @@ export class LSFWrapper {
 
         return fullAnnotation;
       }
-    } catch (error) {
-      console.error(`[FIT-720] LabelStream: Failed to load annotation ${annotationPk}:`, error);
+    } catch {
+      // Failed to load annotation - will retry on next attempt
     }
 
     return null;
@@ -1077,63 +1070,28 @@ export class LSFWrapper {
     const versionsResult = annotation.versions?.result;
     const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
 
-    console.log("[FIT-720] _hydrateStubAnnotation called:", {
-      pk: annotation.pk,
-      hasRegions,
-      isUserGenerated,
-      areasSize: annotation.areas?.size,
-      hasVersionsResult,
-      versionsResultLength: versionsResult?.length,
-    });
-
     // Skip if already hydrated or is a new user-generated annotation
     // Use versionsResult as the source of truth - if it has data, the annotation is already hydrated
     if (hasVersionsResult || isUserGenerated) {
-      console.log("[FIT-720] Skipping hydration - already has versionsResult or is user-generated");
       return;
     }
 
-    // If areas exist but no versionsResult, the areas might be stale/incorrect - proceed with hydration
-    if (hasRegions && !hasVersionsResult) {
-      console.log("[FIT-720] Areas exist but no versionsResult - will hydrate anyway");
-    }
-
     const annotationId = annotation.pk;
-    console.log(`[FIT-720] Fetching full annotation ${annotationId} from API...`);
 
     try {
       const fullAnnotation = await this.datamanager.apiCall("fetchAnnotation", {
         annotationID: annotationId,
       });
 
-      console.log(`[FIT-720] API response for annotation ${annotationId}:`, {
-        hasResult: !!fullAnnotation?.result,
-        resultLength: fullAnnotation?.result?.length,
-        error: fullAnnotation?.error,
-        fullResponse: fullAnnotation,
-      });
-
-      // Check if this annotation is still the selected one
-      const currentSelected = this.lsf?.annotationStore?.selected;
-      console.log("[FIT-720] Current selected annotation:", currentSelected?.pk, "hydrating:", annotationId);
-
       if (fullAnnotation?.result && !fullAnnotation.error) {
-        console.log(
-          `[FIT-720] Hydrating annotation ${annotationId} with ${fullAnnotation.result?.length || 0} regions`,
-        );
-
         // Freeze history to prevent undo/redo issues during hydration
         annotation.history?.freeze?.();
 
         // Deserialize the results into the annotation
         annotation.deserializeResults(fullAnnotation.result);
 
-        console.log("[FIT-720] After deserializeResults, areas.size:", annotation.areas?.size);
-
         // Critical: updateObjects() MUST be called to render visual regions after deserializing
         annotation.updateObjects?.();
-
-        console.log("[FIT-720] After updateObjects, areas.size:", annotation.areas?.size);
 
         // Unfreeze history
         annotation.history?.safeUnfreeze?.();
@@ -1142,19 +1100,14 @@ export class LSFWrapper {
         // This prevents the hydration from being treated as a user modification
         annotation.reinitHistory?.();
 
-        console.log(`[FIT-720] Hydration complete for annotation ${annotationId}`);
-
         // Force React/MobX to re-render by triggering updateObjects again after a microtask
         // This ensures the canvas picks up the new regions
         setTimeout(() => {
-          console.log(`[FIT-720] Delayed updateObjects for annotation ${annotationId}`);
           annotation.updateObjects?.();
         }, 0);
-      } else {
-        console.log(`[FIT-720] No result data in API response for annotation ${annotationId}`);
       }
-    } catch (error) {
-      console.error(`[FIT-720] Failed to hydrate annotation ${annotationId}:`, error);
+    } catch {
+      // Failed to hydrate annotation - will show stub state
     }
   };
 

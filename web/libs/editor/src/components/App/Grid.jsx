@@ -70,8 +70,10 @@ const VirtualizedAnnotationPanel = observer(({ annotation, root, style, onSelect
   // Force MobX to track areas by accessing the regions getter (which iterates areas)
   const regions = annotation.regions;
   const hasRegions = regions && regions.length > 0;
-  // Annotation is ready to display if it has versionsResult OR has regions (hydrated)
-  const isStub = !hasVersionsResult && !hasRegions && annotation.pk && !annotation.userGenerate;
+  // FIT-720: Check if annotation was previously hydrated (is_stub explicitly set to false)
+  const wasHydrated = annotation.is_stub === false;
+  // Annotation is ready to display if it has versionsResult OR has regions OR was previously hydrated
+  const isStub = !wasHydrated && !hasVersionsResult && !hasRegions && annotation.pk && !annotation.userGenerate;
 
   return (
     <div style={{ ...style, paddingRight: PANEL_GAP }}>
@@ -123,7 +125,49 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
   const scrollHydrationTimer = useRef(null);
 
   // FIT-720: Use TanStack Query for annotation fetching
-  const { fetchAnnotationCached } = useAnnotationFetcher();
+  const { fetchAnnotationCached, getCachedAnnotation } = useAnnotationFetcher();
+
+  // FIT-720: On mount, initialize hydratedIds with annotations that already have data
+  // This handles the case where user navigated away and came back
+  useEffect(() => {
+    if (!isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) return;
+
+    annotations.forEach((annotation) => {
+      if (!annotation.pk || annotation.type === "prediction" || annotation.userGenerate) return;
+
+      const id = annotation.pk;
+
+      // Check if annotation already has data in MST
+      const versionsResult = annotation.versions?.result;
+      const hasDataInMST = Array.isArray(versionsResult) && versionsResult.length > 0;
+      const regions = annotation.regions;
+      const hasRegions = regions && regions.length > 0;
+
+      if (hasDataInMST || hasRegions || annotation.is_stub === false) {
+        // This annotation was previously hydrated
+        hydratedIds.current.add(annotation.id);
+        if (annotation.is_stub !== undefined) {
+          annotation.is_stub = false;
+        }
+        return;
+      }
+
+      // Check if we have cached data in TanStack Query
+      const cachedData = getCachedAnnotation(id);
+      if (cachedData?.result !== undefined) {
+        // Restore data from cache to MST annotation
+        annotation.history?.freeze?.();
+        annotation.deserializeResults?.(cachedData.result);
+        annotation.updateObjects?.();
+        annotation.history?.safeUnfreeze?.();
+        annotation.reinitHistory?.();
+        if (annotation.is_stub !== undefined) {
+          annotation.is_stub = false;
+        }
+        hydratedIds.current.add(annotation.id);
+      }
+    });
+  }, []); // Only run once on mount
 
   // Filter visible annotations
   const visibleAnnotations = useMemo(() => annotations.filter((c) => !c.hidden), [annotations]);
@@ -175,7 +219,6 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
   const hydrateAnnotation = useCallback(
     async (annotation) => {
       const annotationPk = annotation.pk || annotation.id;
-      console.log(`[FIT-720] Compare view: Hydrating annotation ${annotationPk}...`);
 
       setHydratingIds((prev) => new Set([...prev, annotation.id]));
 
@@ -195,21 +238,12 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
         if (sdk?.datamanager?.store?.taskStore?.loadAnnotation) {
           // Fallback: directly load annotation via taskStore
           fullAnnotation = await sdk.datamanager.store.taskStore.loadAnnotation(annotationPk);
-          console.log("[FIT-720] Compare view: Loaded via taskStore.loadAnnotation");
         } else {
           // Use TanStack Query for caching and deduplication
-          console.log(`[FIT-720] Compare view: Using TanStack Query for annotation ${annotationPk}`);
           fullAnnotation = await fetchAnnotationCached(annotationPk);
-          if (fullAnnotation) {
-            console.log(`[FIT-720] Compare view: Fetched annotation ${annotationPk} via TanStack Query`);
-          }
         }
 
         if (fullAnnotation && !fullAnnotation.error && fullAnnotation.result) {
-          console.log(
-            `[FIT-720] Compare view: Hydrating annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`,
-          );
-
           // Hydrate the annotation with the loaded result
           annotation.history?.freeze?.();
           annotation.deserializeResults?.(fullAnnotation.result);
@@ -224,15 +258,18 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
           // isn't treated as a user modification (prevents unwanted draft creation)
           annotation.reinitHistory?.();
 
+          // FIT-720: Clear is_stub flag so we don't show skeleton on remount
+          if (annotation.is_stub !== undefined) {
+            annotation.is_stub = false;
+          }
+
           // Mark as successfully hydrated to avoid re-hydrating
           hydratedIds.current.add(annotation.id);
-
-          console.log(
-            `[FIT-720] Compare view: Hydration complete for annotation ${annotationPk}, areas.size:`,
-            annotation.areas?.size,
-          );
         } else {
-          console.log(`[FIT-720] Compare view: No result data for annotation ${annotationPk}`, fullAnnotation);
+          // FIT-720: Clear is_stub flag even for empty results (they're still valid)
+          if (annotation.is_stub !== undefined) {
+            annotation.is_stub = false;
+          }
           // Even if no results, mark as hydrated to avoid repeated attempts
           hydratedIds.current.add(annotation.id);
         }
@@ -241,7 +278,6 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
         if (error?.name === "CancelledError" || error?.revert === true) {
           return;
         }
-        console.error(`[FIT-720] Compare view: Failed to hydrate annotation ${annotationPk}:`, error);
       } finally {
         setHydratingIds((prev) => {
           const next = new Set(prev);

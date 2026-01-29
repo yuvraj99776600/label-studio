@@ -28,12 +28,10 @@ const ObservableCell = observer(
     annotation,
     control,
     render,
-    isHydrated,
   }: {
     annotation: AnnotationSummary;
     control: ControlTag;
     render: RendererType;
-    isHydrated: boolean;
   }) => {
     // Read directly from MST annotation if available (for MobX reactivity)
     const mstAnnotation = annotation._mstAnnotation;
@@ -62,11 +60,16 @@ const ObservableCell = observer(
     const results = allResults.filter((result: RawResult) => result.from_name === control.name);
 
     // FIT-720: Check if this is a stub that needs hydration
-    // A stub is identified by:
-    // 1. is_stub flag from backend, OR
-    // 2. Not yet hydrated AND not a prediction AND not user-generated
-    const hasIsStubFlag = (mstAnnotation as any)?.is_stub === true;
-    const isStub = !isPrediction && !mstAnnotation?.userGenerate && annotation.id && (hasIsStubFlag || !isHydrated);
+    // A stub is identified by having no data loaded yet - check:
+    // 1. is_stub flag from backend (true when backend returns stub, false after hydration)
+    // 2. No actual results data in the annotation
+    // If is_stub is explicitly false, it was hydrated (even if result is empty)
+    const isStubFlag = (mstAnnotation as any)?.is_stub;
+    const wasHydrated = isStubFlag === false; // Explicitly false means hydrated
+    const isStubFromBackend = isStubFlag === true; // True means still a stub
+    const hasNoData = allResults.length === 0;
+    const isStub =
+      !isPrediction && !mstAnnotation?.userGenerate && annotation.id && isStubFromBackend && hasNoData && !wasHydrated;
 
     // Show skeleton for stubs that haven't been hydrated yet
     if (isStub && isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
@@ -101,6 +104,8 @@ const convertPredictionResult = (result: MSTResult) => {
 const isAnnotationStub = (annotation: MSTAnnotation): boolean => {
   if (!annotation.pk || annotation.userGenerate) return false;
   if (annotation.type === "prediction") return false;
+  // If is_stub was explicitly set to false, it was already hydrated (even if empty)
+  if ((annotation as any).is_stub === false) return false;
   const versionsResult = annotation.versions?.result;
   const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
   return !hasVersionsResult;
@@ -121,7 +126,7 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
   const tableRef = useRef<HTMLTableElement>(null);
 
   // FIT-720: Use TanStack Query for annotation fetching
-  const { fetchAnnotationCached } = useAnnotationFetcher();
+  const { fetchAnnotationCached, getCachedAnnotation } = useAnnotationFetcher();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(400);
 
@@ -168,6 +173,11 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
             anno.versions.result = fullAnnotation.result;
           }
 
+          // FIT-720: Clear the is_stub flag so we don't show skeleton
+          if (anno.is_stub !== undefined) {
+            anno.is_stub = false;
+          }
+
           anno.history?.freeze?.();
           anno.deserializeResults?.(fullAnnotation.result);
           anno.updateObjects?.();
@@ -183,7 +193,6 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
         if (error?.name === "CancelledError" || error?.revert === true) {
           return;
         }
-        console.error(`[FIT-720] Summary: Failed to hydrate annotation ${id}:`, error);
         // Don't mark as hydrated on error so it can be retried
       }
     },
@@ -222,6 +231,61 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
       pendingHydrationTimers.current.clear();
     };
   }, []);
+
+  // FIT-720: On mount, initialize hydratedIds with annotations that already have data
+  // This handles the case where user navigated away and came back - restore from MST or cache
+  useEffect(() => {
+    if (!isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) return;
+
+    all.forEach((annotation) => {
+      if (!annotation.pk) return;
+      // Skip predictions and user-generated annotations
+      if (annotation.type === "prediction" || annotation.userGenerate) return;
+
+      const id = annotation.pk;
+
+      // Check if annotation already has data in MST (from previous hydration)
+      const versionsResult = annotation.versions?.result;
+      const hasDataInMST = Array.isArray(versionsResult) && versionsResult.length > 0;
+
+      if (hasDataInMST) {
+        // This annotation was previously hydrated and retained its data
+        hydratedIds.current.add(id);
+        fetchAttemptedIds.current.add(id);
+        // Clear stub flag if it was set
+        if ((annotation as any).is_stub !== undefined) {
+          (annotation as any).is_stub = false;
+        }
+        return;
+      }
+
+      // Check if we have cached data in TanStack Query that can be used
+      const cachedData = getCachedAnnotation(id);
+      if (cachedData?.result !== undefined) {
+        // Restore data from cache to MST annotation
+        const anno = annotation as any;
+        if (anno.versions) {
+          anno.versions.result = cachedData.result;
+        }
+        if (anno.is_stub !== undefined) {
+          anno.is_stub = false;
+        }
+        // Only deserialize if there's actual result data
+        if (cachedData.result && cachedData.result.length > 0) {
+          anno.history?.freeze?.();
+          anno.deserializeResults?.(cachedData.result);
+          anno.updateObjects?.();
+          anno.history?.safeUnfreeze?.();
+          anno.reinitHistory?.();
+        }
+        hydratedIds.current.add(id);
+        fetchAttemptedIds.current.add(id);
+      }
+    });
+
+    // Trigger re-render to reflect any restored data
+    forceUpdate((n) => n + 1);
+  }, []); // Only run once on mount - 'all' dependency would cause re-runs
 
   // Update container height on mount
   useEffect(() => {
@@ -279,18 +343,11 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
     }
   }, [controls, columnWidths]);
 
-  // FIT-720: Create cell renderer - uses _isHydrated from annotation data
+  // FIT-720: Create cell renderer - ObservableCell checks actual data presence
   const createCellFn = useCallback((control: ControlTag, render: RendererType) => {
     return (props: { row: Row<AnnotationSummary> }) => {
       const annotation = props.row.original;
-      return (
-        <ObservableCell
-          annotation={annotation}
-          control={control}
-          render={render}
-          isHydrated={annotation._isHydrated ?? false}
-        />
-      );
+      return <ObservableCell annotation={annotation} control={control} render={render} />;
     };
   }, []);
 

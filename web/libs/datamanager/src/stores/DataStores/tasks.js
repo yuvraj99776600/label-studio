@@ -228,12 +228,7 @@ export const create = (columns) => {
        * @returns {Promise<Object>} The full annotation data
        */
       loadAnnotation: flow(function* (annotationID) {
-        console.log(`[FIT-720] LabelStream: Fetching full annotation ${annotationID}`);
         const annotationData = yield self.root.apiCall("fetchAnnotation", { annotationID });
-        console.log(
-          `[FIT-720] LabelStream: Received annotation ${annotationID}`,
-          annotationData ? "success" : "failed",
-        );
         return annotationData;
       }),
 

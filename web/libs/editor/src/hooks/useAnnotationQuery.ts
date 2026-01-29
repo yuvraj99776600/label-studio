@@ -86,7 +86,6 @@ export const useAnnotationFetcher = () => {
         if (error?.name === "CancelledError" || error?.revert === true) {
           return null;
         }
-        console.error(`[FIT-720] Failed to fetch annotation ${id}:`, error);
         return null;
       }
     },
@@ -192,7 +191,6 @@ export const setEditorQueryClient = (client: ReturnType<typeof useQueryClient>) 
  */
 export const invalidateAnnotationCache = (annotationId?: number | string) => {
   if (!editorQueryClientRef) {
-    console.warn("[FIT-720] QueryClient not initialized, skipping invalidation");
     return;
   }
 
@@ -210,7 +208,6 @@ export const invalidateAnnotationCache = (annotationId?: number | string) => {
  */
 export const invalidateDistributionCache = (taskId?: number | string) => {
   if (!editorQueryClientRef) {
-    console.warn("[FIT-720] QueryClient not initialized, skipping invalidation");
     return;
   }
 
