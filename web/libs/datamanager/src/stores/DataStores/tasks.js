@@ -164,11 +164,11 @@ export const create = (columns) => {
         const taskParams = { taskID };
         if (isLabelStream) {
           taskParams.interaction = "labelstream";
-          // Lazy load annotations behind feature flag (FIT-720)
-          if (isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
-            taskParams.annotations_stub = true;
-            console.log(`[FIT-720] LabelStream: Loading task ${taskID} with annotations_stub=true`);
-          }
+        }
+        // FIT-720: Lazy load annotations - use stubs for both label stream and quick view modes
+        // Hydration happens in lsf-sdk.js when the annotation is selected
+        if (isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
+          taskParams.annotations_stub = true;
         }
 
         const taskData = yield self.root.apiCall("task", taskParams);

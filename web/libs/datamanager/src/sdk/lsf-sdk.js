@@ -992,16 +992,138 @@ export class LSFWrapper {
   // Proxy events that are unused by DM integration
   onEntityCreate = (...args) => this.datamanager.invoke("onEntityCreate", ...args);
   onEntityDelete = (...args) => this.datamanager.invoke("onEntityDelete", ...args);
+  _selectAnnotationTimeout = null;
   onSelectAnnotation = (prevAnnotation, nextAnnotation, options) => {
     if (window.APP_SETTINGS.read_only_quick_view_enabled && !this.labelStream) {
       prevAnnotation?.setEditable(false);
     }
+
+    // FIT-720: Debounce selectAnnotation callbacks during batch selection (init)
+    // During init, selectAnnotation fires for ALL annotations in rapid succession
+    // This debounce ensures only the final selection triggers the callback
+    if (isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
+      if (this._selectAnnotationTimeout) {
+        clearTimeout(this._selectAnnotationTimeout);
+      }
+      this._selectAnnotationTimeout = setTimeout(() => {
+        this._selectAnnotationTimeout = null;
+        this._invokeSelectAnnotation(prevAnnotation, nextAnnotation, options);
+      }, 0);
+      return;
+    }
+
+    this._invokeSelectAnnotation(prevAnnotation, nextAnnotation, options);
+  };
+
+  _invokeSelectAnnotation = async (prevAnnotation, nextAnnotation, options) => {
+    // FIT-720: Hydrate stub annotations when selected
+    // IMPORTANT: Use the CURRENTLY SELECTED annotation, not the one from the callback
+    // The debounce may have caused the callback annotation to be stale
+    if (isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
+      const currentSelected = this.lsf?.annotationStore?.selected;
+      if (currentSelected?.pk) {
+        await this._hydrateStubAnnotation(currentSelected);
+      }
+    }
+
     if (nextAnnotation?.history?.undoIdx) {
       this.saveDraft(nextAnnotation).then(() => {
         this.datamanager.invoke("onSelectAnnotation", prevAnnotation, nextAnnotation, options, this);
       });
     } else {
       this.datamanager.invoke("onSelectAnnotation", prevAnnotation, nextAnnotation, options, this);
+    }
+  };
+
+  // FIT-720: Hydrate a stub annotation by fetching full data from API
+  _hydrateStubAnnotation = async (annotation) => {
+    // Check if annotation is a stub (no regions/results)
+    // Stubs have empty results - check via the areas map which holds deserialized regions
+    const hasRegions = annotation.areas?.size > 0;
+    const isUserGenerated = annotation.userGenerate && !annotation.sentUserGenerate;
+
+    // Also check versions.result to see if the annotation was loaded with actual results
+    const versionsResult = annotation.versions?.result;
+    const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
+
+    console.log(`[FIT-720] _hydrateStubAnnotation called:`, {
+      pk: annotation.pk,
+      hasRegions,
+      isUserGenerated,
+      areasSize: annotation.areas?.size,
+      hasVersionsResult,
+      versionsResultLength: versionsResult?.length,
+    });
+
+    // Skip if already hydrated or is a new user-generated annotation
+    // Use versionsResult as the source of truth - if it has data, the annotation is already hydrated
+    if (hasVersionsResult || isUserGenerated) {
+      console.log(`[FIT-720] Skipping hydration - already has versionsResult or is user-generated`);
+      return;
+    }
+
+    // If areas exist but no versionsResult, the areas might be stale/incorrect - proceed with hydration
+    if (hasRegions && !hasVersionsResult) {
+      console.log(`[FIT-720] Areas exist but no versionsResult - will hydrate anyway`);
+    }
+
+    const annotationId = annotation.pk;
+    console.log(`[FIT-720] Fetching full annotation ${annotationId} from API...`);
+
+    try {
+      const fullAnnotation = await this.datamanager.apiCall("fetchAnnotation", {
+        annotationID: annotationId,
+      });
+
+      console.log(`[FIT-720] API response for annotation ${annotationId}:`, {
+        hasResult: !!fullAnnotation?.result,
+        resultLength: fullAnnotation?.result?.length,
+        error: fullAnnotation?.error,
+        fullResponse: fullAnnotation,
+      });
+
+      // Check if this annotation is still the selected one
+      const currentSelected = this.lsf?.annotationStore?.selected;
+      console.log(`[FIT-720] Current selected annotation:`, currentSelected?.pk, `hydrating:`, annotationId);
+
+      if (fullAnnotation?.result && !fullAnnotation.error) {
+        console.log(
+          `[FIT-720] Hydrating annotation ${annotationId} with ${fullAnnotation.result?.length || 0} regions`,
+        );
+
+        // Freeze history to prevent undo/redo issues during hydration
+        annotation.history?.freeze?.();
+
+        // Deserialize the results into the annotation
+        annotation.deserializeResults(fullAnnotation.result);
+
+        console.log(`[FIT-720] After deserializeResults, areas.size:`, annotation.areas?.size);
+
+        // Critical: updateObjects() MUST be called to render visual regions after deserializing
+        annotation.updateObjects?.();
+
+        console.log(`[FIT-720] After updateObjects, areas.size:`, annotation.areas?.size);
+
+        // Unfreeze history
+        annotation.history?.safeUnfreeze?.();
+
+        // reinitHistory cancels autosave and sets initial values so LSF knows this is the base state
+        // This prevents the hydration from being treated as a user modification
+        annotation.reinitHistory?.();
+
+        console.log(`[FIT-720] Hydration complete for annotation ${annotationId}`);
+
+        // Force React/MobX to re-render by triggering updateObjects again after a microtask
+        // This ensures the canvas picks up the new regions
+        setTimeout(() => {
+          console.log(`[FIT-720] Delayed updateObjects for annotation ${annotationId}`);
+          annotation.updateObjects?.();
+        }, 0);
+      } else {
+        console.log(`[FIT-720] No result data in API response for annotation ${annotationId}`);
+      }
+    } catch (error) {
+      console.error(`[FIT-720] Failed to hydrate annotation ${annotationId}:`, error);
     }
   };
 
