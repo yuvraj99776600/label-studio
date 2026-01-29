@@ -5,7 +5,7 @@
 
 import React, { Component, useCallback, useMemo, useRef, useState } from "react";
 import { Spin } from "antd";
-import { Button } from "@humansignal/ui";
+import { Button, Tooltip } from "@humansignal/ui";
 import { LeftCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -486,7 +486,9 @@ class GridClassComponent extends Component {
   select = (c) => {
     const { store } = this.props;
 
-    c.type === "annotation" ? store.selectAnnotation(c.id) : store.selectPrediction(c.id);
+    c.type === "annotation"
+      ? store.selectAnnotation(c.id, { exitViewAll: true })
+      : store.selectPrediction(c.id, { exitViewAll: true });
   };
 
   render() {
@@ -502,13 +504,17 @@ class GridClassComponent extends Component {
             .filter((c) => !c.hidden)
             .map((c) => (
               <div id={`c-${c.id}`} key={`anno-${c.id}`} style={{ position: "relative" }}>
-                <EntityTab
-                  entity={c}
-                  onClick={() => this.select(c)}
-                  prediction={c.type === "prediction"}
-                  bordered={false}
-                  style={{ height: 44 }}
-                />
+                <Tooltip title="Open Annotation Tab">
+                  <div>
+                    <EntityTab
+                      entity={c}
+                      onClick={() => this.select(c)}
+                      prediction={c.type === "prediction"}
+                      bordered={false}
+                      style={{ height: 44 }}
+                    />
+                  </div>
+                </Tooltip>
                 {isFF(FF_DEV_3391) ? (
                   <Annotation root={this.props.root} annotation={c} />
                 ) : (
