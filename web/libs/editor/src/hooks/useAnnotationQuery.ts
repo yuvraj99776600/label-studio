@@ -56,18 +56,36 @@ export const useAnnotationFetcher = () => {
   const queryClient = useQueryClient();
 
   /**
+   * Check if annotation is currently being fetched
+   */
+  const isAnnotationFetching = useCallback(
+    (id: number | string): boolean => {
+      const state = queryClient.getQueryState(annotationKeys.detail(id));
+      return state?.fetchStatus === "fetching";
+    },
+    [queryClient],
+  );
+
+  /**
    * Fetch annotation with caching - won't duplicate in-flight requests
+   * Uses ensureQueryData which returns cached data immediately if available
    */
   const fetchAnnotationCached = useCallback(
     async (id: number | string): Promise<AnnotationData | null> => {
       try {
-        return await queryClient.fetchQuery({
+        // ensureQueryData returns cached data if fresh, otherwise fetches
+        // It also deduplicates concurrent requests automatically
+        return await queryClient.ensureQueryData({
           queryKey: annotationKeys.detail(id),
           queryFn: () => fetchAnnotation(id),
           staleTime: 30000,
           gcTime: 5 * 60 * 1000,
         });
-      } catch (error) {
+      } catch (error: any) {
+        // Silently ignore cancellation errors - they're expected when scrolling
+        if (error?.name === "CancelledError" || error?.revert === true) {
+          return null;
+        }
         console.error(`[FIT-720] Failed to fetch annotation ${id}:`, error);
         return null;
       }
@@ -144,6 +162,7 @@ export const useAnnotationFetcher = () => {
     invalidateAnnotation,
     invalidateAllAnnotations,
     isAnnotationCached,
+    isAnnotationFetching,
     getCachedAnnotation,
   };
 };

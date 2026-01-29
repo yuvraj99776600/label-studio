@@ -121,36 +121,30 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
   const tableRef = useRef<HTMLTableElement>(null);
 
   // FIT-720: Use TanStack Query for annotation fetching
-  const { fetchAnnotationCached, cancelAnnotationFetch } = useAnnotationFetcher();
+  const { fetchAnnotationCached } = useAnnotationFetcher();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(400);
 
   // FIT-720: Hydration state - use refs to avoid stale closures
   const [, forceUpdate] = useState(0);
-  const hydratingIdsRef = useRef<Set<number | string>>(new Set());
+  // Single Set to track ALL annotation IDs we've ever attempted to fetch - prevents ALL duplicates
+  const fetchAttemptedIds = useRef<Set<number | string>>(new Set());
   const hydratedIds = useRef<Set<number | string>>(new Set());
   // FIT-720: Track debounce timers for pending hydrations (before fetch starts)
   const pendingHydrationTimers = useRef<Map<number | string, ReturnType<typeof setTimeout>>>(new Map());
 
-  // FIT-720: Cancel pending or in-flight hydration for an annotation
-  const cancelHydration = useCallback(
-    (id: number | string) => {
-      // First, cancel any pending timer (before fetch started)
-      const timer = pendingHydrationTimers.current.get(id);
-      if (timer) {
-        clearTimeout(timer);
-        pendingHydrationTimers.current.delete(id);
-      }
-
-      // Then, cancel any in-flight TanStack Query request
-      if (hydratingIdsRef.current.has(id)) {
-        cancelAnnotationFetch(id);
-        hydratingIdsRef.current.delete(id);
-        forceUpdate((n) => n + 1);
-      }
-    },
-    [cancelAnnotationFetch],
-  );
+  // FIT-720: Cancel pending hydration for an annotation (only cancels timer, not in-flight request)
+  const cancelHydration = useCallback((id: number | string) => {
+    // Cancel any pending timer (before fetch started)
+    const timer = pendingHydrationTimers.current.get(id);
+    if (timer) {
+      clearTimeout(timer);
+      pendingHydrationTimers.current.delete(id);
+      // Remove from attempted so it can be re-scheduled when back in view
+      fetchAttemptedIds.current.delete(id);
+    }
+    // Note: We don't cancel in-flight requests - let them complete and cache
+  }, []);
 
   // FIT-720: Hydrate a single annotation using TanStack Query (called after debounce)
   const hydrateAnnotation = useCallback(
@@ -158,14 +152,11 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
       if (!annotation.pk) return;
       const id = annotation.pk;
 
-      // Skip if already hydrated or hydrating
-      if (hydratedIds.current.has(id) || hydratingIdsRef.current.has(id)) return;
-
-      hydratingIdsRef.current.add(id);
-      forceUpdate((n) => n + 1);
+      // Skip if already hydrated
+      if (hydratedIds.current.has(id)) return;
 
       try {
-        // Use TanStack Query's fetchQuery - handles caching and deduplication
+        // Use TanStack Query's ensureQueryData - returns cached data or fetches
         const fullAnnotation = await fetchAnnotationCached(id);
 
         if (fullAnnotation?.result !== undefined) {
@@ -173,7 +164,6 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
           const anno = annotation as any;
 
           // FIT-720: Update versions.result directly so the summary table can read it
-          // This is the raw result array that the table reads from
           if (anno.versions) {
             anno.versions.result = fullAnnotation.result;
           }
@@ -183,14 +173,18 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
           anno.updateObjects?.();
           anno.history?.safeUnfreeze?.();
           anno.reinitHistory?.();
-          hydratedIds.current.add(id);
         }
-      } catch (error) {
-        // TanStack Query handles abort errors internally
-        console.error(`[FIT-720] Summary: Failed to hydrate annotation ${id}:`, error);
-      } finally {
-        hydratingIdsRef.current.delete(id);
+
+        // Mark as hydrated regardless of result (even empty results are valid)
+        hydratedIds.current.add(id);
         forceUpdate((n) => n + 1);
+      } catch (error: any) {
+        // Silently ignore cancellation errors
+        if (error?.name === "CancelledError" || error?.revert === true) {
+          return;
+        }
+        console.error(`[FIT-720] Summary: Failed to hydrate annotation ${id}:`, error);
+        // Don't mark as hydrated on error so it can be retried
       }
     },
     [fetchAnnotationCached],
@@ -202,10 +196,12 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
       if (!annotation.pk) return;
       const id = annotation.pk;
 
-      // Skip if already hydrated, hydrating, or scheduled
-      if (hydratedIds.current.has(id)) return;
-      if (hydratingIdsRef.current.has(id)) return;
-      if (pendingHydrationTimers.current.has(id)) return;
+      // Single check: skip if we've already attempted to fetch this annotation
+      // This prevents ALL duplicates - no race conditions possible
+      if (fetchAttemptedIds.current.has(id)) return;
+
+      // Mark as attempted IMMEDIATELY - before any async operations
+      fetchAttemptedIds.current.add(id);
 
       // Schedule hydration after 200ms debounce
       const timer = setTimeout(() => {
@@ -236,37 +232,8 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
     }
   }, []);
 
-  // FIT-720: Hydrate initially visible rows after mount
-  useEffect(() => {
-    if (!isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) return;
-    if (!containerRef.current) return;
-
-    // Wait for layout to complete, then hydrate visible rows
-    const timer = setTimeout(() => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      const scrollContainer = container.querySelector('[style*="overflow"]') as HTMLElement;
-      if (!scrollContainer) return;
-
-      const containerRect = scrollContainer.getBoundingClientRect();
-      const rows = scrollContainer.querySelectorAll("tbody tr");
-
-      rows.forEach((row, index) => {
-        const rect = row.getBoundingClientRect();
-        const isVisible = rect.top < containerRect.bottom && rect.bottom > containerRect.top;
-
-        if (isVisible) {
-          const annotation = all[index];
-          if (annotation && isAnnotationStub(annotation) && !hydratedIds.current.has(annotation.pk)) {
-            scheduleHydration(annotation);
-          }
-        }
-      });
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [all, scheduleHydration]);
+  // FIT-720: Initial hydration is handled by IntersectionObserver in TableRow
+  // No need for a separate useEffect that scans visible rows - this was causing duplicate requests
 
   // Create annotation summaries - re-computed when annotations change
   const annotations: AnnotationSummary[] = all.map((annotation) => ({
@@ -287,7 +254,7 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
         : (annotation.versions.result ?? []),
     // FIT-720: Track hydration state for skeleton rendering
     _isStub: isAnnotationStub(annotation),
-    _isHydrating: hydratingIdsRef.current.has(annotation.pk),
+    _isHydrating: fetchAttemptedIds.current.has(annotation.pk) && !hydratedIds.current.has(annotation.pk),
     _isHydrated: hydratedIds.current.has(annotation.pk),
     // FIT-720: Keep reference to MST annotation for MobX reactivity in cells
     _mstAnnotation: annotation,
@@ -405,39 +372,31 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
         const annotationId = annotation.pk;
         const element = rowRef.current;
 
-        // Check initial visibility - IntersectionObserver might not fire for already-visible elements
-        const checkInitialVisibility = () => {
-          const rect = element.getBoundingClientRect();
-          const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
-          if (isVisible && isStub && !hydratedIds.current.has(annotationId)) {
-            scheduleHydration(annotation);
-          }
-        };
-
-        // Small delay to ensure layout is complete
-        const initialTimer = setTimeout(checkInitialVisibility, 50);
-
+        // IntersectionObserver with rootMargin to trigger slightly before entering viewport
         const observer = new IntersectionObserver(
           (entries) => {
             const entry = entries[0];
             if (!entry) return;
 
             if (entry.isIntersecting) {
-              // Row came into view - schedule hydration after debounce
-              if (isStub && !hydratedIds.current.has(annotationId)) {
+              // Row came into view - schedule hydration (deduplication handled in scheduleHydration)
+              if (isStub) {
                 scheduleHydration(annotation);
               }
             } else {
-              // Row left view - cancel pending timer or in-flight request
+              // Row left view - cancel pending timer (but let in-flight requests complete)
               cancelHydration(annotationId);
             }
           },
-          { threshold: 0.1 },
+          {
+            threshold: 0.1,
+            // Expand observation area to pre-fetch slightly before rows enter viewport
+            rootMargin: "100px 0px",
+          },
         );
 
         observer.observe(element);
         return () => {
-          clearTimeout(initialTimer);
           observer.disconnect();
           // Cancel any pending/in-flight request when unmounting
           cancelHydration(annotationId);
@@ -519,11 +478,12 @@ export const LabelingSummary = observer(({ hideInfo, annotations: all, controls,
                       width: header.getSize(),
                       minWidth: header.column.columnDef.minSize || 120,
                       maxWidth: header.column.columnDef.maxSize || 600,
-                      zIndex: index === 0 ? 30 : 1, // First column even higher for sticky column + header
+                      zIndex: index === 0 ? 30 : 20, // All header cells need z-index for proper stacking
+                      background: "var(--neutral-surface, #fff)", // Solid background to prevent content bleed-through
                     }}
                     className={cnm(
-                      "px-4 py-2.5 text-left whitespace-nowrap font-semibold text-sm bg-neutral-surface-subtle",
-                      index === 0 && "border-r border-neutral-border bg-neutral-surface",
+                      "px-4 py-2.5 text-left whitespace-nowrap font-semibold text-sm",
+                      index === 0 && "border-r border-neutral-border",
                     )}
                   >
                     <div className="overflow-hidden text-ellipsis flex items-start gap-2">

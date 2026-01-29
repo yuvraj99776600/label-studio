@@ -237,6 +237,10 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
           hydratedIds.current.add(annotation.id);
         }
       } catch (error) {
+        // Silently ignore cancellation errors - they're expected when scrolling
+        if (error?.name === "CancelledError" || error?.revert === true) {
+          return;
+        }
         console.error(`[FIT-720] Compare view: Failed to hydrate annotation ${annotationPk}:`, error);
       } finally {
         setHydratingIds((prev) => {
