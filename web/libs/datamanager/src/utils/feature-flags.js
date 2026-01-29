@@ -62,6 +62,12 @@ export const FF_DISABLE_GLOBAL_USER_FETCHING =
  */
 export const FF_FIT_720_LAZY_LOAD_ANNOTATIONS = "fflag_fix_all_fit_720_lazy_load_annotations";
 
+/**
+ * Enable interactive JSON viewer for task source in Data Manager
+ * @link TBD - LaunchDarkly flag to be created
+ */
+export const FF_INTERACTIVE_JSON_VIEWER = "fflag_feat_front_interactive_json_viewer_short";
+
 // Customize flags
 const flags = {};
 
