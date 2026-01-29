@@ -18,6 +18,7 @@ import { Annotation } from "./Annotation";
 import { isDefined } from "../../utils/utilities";
 import { FF_DEV_3391, FF_FIT_720_LAZY_LOAD_ANNOTATIONS, isFF } from "../../utils/feature-flags";
 import { moveStylesBetweenHeadTags } from "../../utils/html";
+import { useAnnotationFetcher } from "../../hooks/useAnnotationQuery";
 
 // FIT-720: Virtualization constants for Compare view
 const PANEL_WIDTH = 500; // Width of each annotation panel (approximately 50% of typical viewport)
@@ -121,6 +122,9 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
   // Debounce timer for scroll-based hydration
   const scrollHydrationTimer = useRef(null);
 
+  // FIT-720: Use TanStack Query for annotation fetching
+  const { fetchAnnotationCached } = useAnnotationFetcher();
+
   // Filter visible annotations
   const visibleAnnotations = useMemo(() => annotations.filter((c) => !c.hidden), [annotations]);
 
@@ -167,7 +171,7 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
     [store],
   );
 
-  // FIT-720: Hydrate annotations that come into view
+  // FIT-720: Hydrate annotations that come into view using TanStack Query
   const hydrateAnnotation = useCallback(
     async (annotation) => {
       const annotationPk = annotation.pk || annotation.id;
@@ -193,19 +197,18 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
           fullAnnotation = await sdk.datamanager.store.taskStore.loadAnnotation(annotationPk);
           console.log("[FIT-720] Compare view: Loaded via taskStore.loadAnnotation");
         } else {
-          // Ultimate fallback: direct API fetch
-          console.log(`[FIT-720] Compare view: Using direct API fetch for annotation ${annotationPk}`);
-          const response = await fetch(`/api/annotations/${annotationPk}/`);
-          if (response.ok) {
-            fullAnnotation = await response.json();
-            console.log(`[FIT-720] Compare view: Fetched annotation ${annotationPk} via API`);
-          } else {
-            console.error(`[FIT-720] Compare view: API fetch failed for annotation ${annotationPk}:`, response.status);
+          // Use TanStack Query for caching and deduplication
+          console.log(`[FIT-720] Compare view: Using TanStack Query for annotation ${annotationPk}`);
+          fullAnnotation = await fetchAnnotationCached(annotationPk);
+          if (fullAnnotation) {
+            console.log(`[FIT-720] Compare view: Fetched annotation ${annotationPk} via TanStack Query`);
           }
         }
 
         if (fullAnnotation && !fullAnnotation.error && fullAnnotation.result) {
-          console.log(`[FIT-720] Compare view: Hydrating annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`);
+          console.log(
+            `[FIT-720] Compare view: Hydrating annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`,
+          );
 
           // Hydrate the annotation with the loaded result
           annotation.history?.freeze?.();
@@ -224,7 +227,10 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
           // Mark as successfully hydrated to avoid re-hydrating
           hydratedIds.current.add(annotation.id);
 
-          console.log(`[FIT-720] Compare view: Hydration complete for annotation ${annotationPk}, areas.size:`, annotation.areas?.size);
+          console.log(
+            `[FIT-720] Compare view: Hydration complete for annotation ${annotationPk}, areas.size:`,
+            annotation.areas?.size,
+          );
         } else {
           console.log(`[FIT-720] Compare view: No result data for annotation ${annotationPk}`, fullAnnotation);
           // Even if no results, mark as hydrated to avoid repeated attempts
@@ -240,7 +246,7 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
         });
       }
     },
-    [store],
+    [store, fetchAnnotationCached],
   );
 
   // FIT-720: Handle items rendered - hydrate visible stubs (debounced to avoid hammering on scroll)

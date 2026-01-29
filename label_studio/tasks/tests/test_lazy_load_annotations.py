@@ -210,3 +210,345 @@ class TestSingleAnnotationEndpoint(APITestCase):
         assert len(data['result']) == 1
         assert data['result'][0]['type'] == 'labels'
         assert data['id'] == self.annotation.id
+
+
+class TestTaskDistributionAPI(APITestCase):
+    """Test the task distribution endpoint for efficient label aggregation (FIT-720)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.organization = OrganizationFactory()
+        cls.project = ProjectFactory(organization=cls.organization)
+        cls.user = cls.organization.created_by
+        cls.task = TaskFactory(project=cls.project, data={'text': 'test'})
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_endpoint_requires_feature_flag(self, mock_flag_set):
+        """Test that distribution endpoint returns 404 when feature flag is disabled."""
+        mock_flag_set.return_value = False
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+
+        assert response.status_code == 404
+        assert response.json()['error'] == 'Feature not enabled'
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_endpoint_empty_task(self, mock_flag_set):
+        """Test distribution endpoint returns empty distribution for task with no annotations."""
+        mock_flag_set.return_value = True
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data['total_annotations'] == 0
+        assert data['distributions'] == {}
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_endpoint_with_labels(self, mock_flag_set):
+        """Test distribution endpoint correctly aggregates label annotations."""
+        mock_flag_set.return_value = True
+
+        # Create multiple annotations with different labels
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'label',
+                    'to_name': 'text',
+                    'type': 'labels',
+                    'value': {'labels': ['Car'], 'start': 0, 'end': 10},
+                }
+            ],
+        )
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'label',
+                    'to_name': 'text',
+                    'type': 'labels',
+                    'value': {'labels': ['Car'], 'start': 0, 'end': 10},
+                },
+                {
+                    'from_name': 'label',
+                    'to_name': 'text',
+                    'type': 'labels',
+                    'value': {'labels': ['Person'], 'start': 11, 'end': 20},
+                },
+            ],
+        )
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'label',
+                    'to_name': 'text',
+                    'type': 'labels',
+                    'value': {'labels': ['Dog'], 'start': 0, 'end': 10},
+                }
+            ],
+        )
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data['total_annotations'] == 3
+        assert 'label' in data['distributions']
+        assert data['distributions']['label']['type'] == 'labels'
+        # Car appears twice, Person once, Dog once
+        assert data['distributions']['label']['labels'] == {'Car': 2, 'Person': 1, 'Dog': 1}
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_endpoint_with_choices(self, mock_flag_set):
+        """Test distribution endpoint correctly aggregates choices."""
+        mock_flag_set.return_value = True
+
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'sentiment',
+                    'to_name': 'text',
+                    'type': 'choices',
+                    'value': {'choices': ['Positive']},
+                }
+            ],
+        )
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'sentiment',
+                    'to_name': 'text',
+                    'type': 'choices',
+                    'value': {'choices': ['Positive']},
+                }
+            ],
+        )
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'sentiment',
+                    'to_name': 'text',
+                    'type': 'choices',
+                    'value': {'choices': ['Negative']},
+                }
+            ],
+        )
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data['total_annotations'] == 3
+        assert data['distributions']['sentiment']['type'] == 'choices'
+        assert data['distributions']['sentiment']['labels'] == {'Positive': 2, 'Negative': 1}
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_endpoint_with_ratings(self, mock_flag_set):
+        """Test distribution endpoint correctly calculates rating average."""
+        mock_flag_set.return_value = True
+
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'rating',
+                    'to_name': 'text',
+                    'type': 'rating',
+                    'value': {'rating': 5},
+                }
+            ],
+        )
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'rating',
+                    'to_name': 'text',
+                    'type': 'rating',
+                    'value': {'rating': 3},
+                }
+            ],
+        )
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'rating',
+                    'to_name': 'text',
+                    'type': 'rating',
+                    'value': {'rating': 4},
+                }
+            ],
+        )
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data['total_annotations'] == 3
+        assert data['distributions']['rating']['type'] == 'rating'
+        assert data['distributions']['rating']['average'] == 4.0  # (5 + 3 + 4) / 3
+        assert data['distributions']['rating']['count'] == 3
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_endpoint_excludes_cancelled_annotations(self, mock_flag_set):
+        """Test that cancelled annotations are not included in distribution."""
+        mock_flag_set.return_value = True
+
+        # Create a normal annotation
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'label',
+                    'to_name': 'text',
+                    'type': 'labels',
+                    'value': {'labels': ['Valid']},
+                }
+            ],
+        )
+        # Create a cancelled annotation
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            was_cancelled=True,
+            result=[
+                {
+                    'from_name': 'label',
+                    'to_name': 'text',
+                    'type': 'labels',
+                    'value': {'labels': ['Skipped']},
+                }
+            ],
+        )
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # Only 1 annotation should be counted (the non-cancelled one)
+        assert data['total_annotations'] == 1
+        assert data['distributions']['label']['labels'] == {'Valid': 1}
+        # Skipped should not appear as it was from cancelled annotation
+        assert 'Skipped' not in data['distributions']['label']['labels']
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_endpoint_with_multiple_controls(self, mock_flag_set):
+        """Test distribution endpoint handles multiple control types in one annotation."""
+        mock_flag_set.return_value = True
+
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'label',
+                    'to_name': 'image',
+                    'type': 'rectanglelabels',
+                    'value': {'rectanglelabels': ['Car'], 'x': 10, 'y': 10, 'width': 50, 'height': 50},
+                },
+                {
+                    'from_name': 'sentiment',
+                    'to_name': 'text',
+                    'type': 'choices',
+                    'value': {'choices': ['Positive']},
+                },
+                {
+                    'from_name': 'quality',
+                    'to_name': 'text',
+                    'type': 'rating',
+                    'value': {'rating': 5},
+                },
+            ],
+        )
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data['total_annotations'] == 1
+        # All three controls should be present
+        assert 'label' in data['distributions']
+        assert 'sentiment' in data['distributions']
+        assert 'quality' in data['distributions']
+        assert data['distributions']['label']['labels'] == {'Car': 1}
+        assert data['distributions']['sentiment']['labels'] == {'Positive': 1}
+        assert data['distributions']['quality']['average'] == 5.0
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_endpoint_task_not_found(self, mock_flag_set):
+        """Test that distribution endpoint returns 404 for non-existent task."""
+        mock_flag_set.return_value = True
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get('/api/tasks/99999999/distribution/')
+
+        assert response.status_code == 404
+        assert response.json()['error'] == 'Task not found'
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_endpoint_with_taxonomy(self, mock_flag_set):
+        """Test distribution endpoint correctly handles taxonomy labels."""
+        mock_flag_set.return_value = True
+
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'taxonomy',
+                    'to_name': 'text',
+                    'type': 'taxonomy',
+                    'value': {'taxonomy': [['Animals', 'Mammals', 'Dog'], ['Animals', 'Mammals', 'Cat']]},
+                }
+            ],
+        )
+        AnnotationFactory(
+            task=self.task,
+            completed_by=self.user,
+            result=[
+                {
+                    'from_name': 'taxonomy',
+                    'to_name': 'text',
+                    'type': 'taxonomy',
+                    'value': {'taxonomy': [['Animals', 'Mammals', 'Dog']]},
+                }
+            ],
+        )
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+
+        assert response.status_code == 200
+        data = response.json()
+
+        # Taxonomy aggregates leaf nodes
+        assert data['distributions']['taxonomy']['labels'] == {'Dog': 2, 'Cat': 1}

@@ -1,6 +1,7 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { flexRender, getCoreRowModel, useReactTable, createColumnHelper } from "@tanstack/react-table";
 import type { ColumnDef, Row } from "@tanstack/react-table";
+import { observer } from "mobx-react";
 
 import { userDisplayName } from "@humansignal/core";
 import { cnm, IconSparks, Userpic } from "@humansignal/ui";
@@ -10,28 +11,82 @@ import { Chip } from "./Chip";
 import { renderers } from "./labelings";
 import { ResizeHandler } from "./ResizeHandler";
 import type { AnnotationSummary, ControlTag, RendererType } from "./types";
+import { FF_FIT_720_LAZY_LOAD_ANNOTATIONS, isFF } from "../../utils/feature-flags";
+import { useAnnotationFetcher } from "../../hooks/useAnnotationQuery";
 
 type Props = {
   annotations: MSTAnnotation[];
   controls: ControlTag[];
   onSelect: (entity: AnnotationSummary) => void;
   hideInfo: boolean;
+  taskId?: number | string; // FIT-720: Task ID for distribution API
 };
 
-const cellFn = (control: ControlTag, render: RendererType) => (props: { row: Row<AnnotationSummary> }) => {
-  const annotation = props.row.original;
-  const results = annotation.results.filter((result) => result.from_name === control.name);
-  const content = !results.length ? (
-    <span className="text-neutral-content-subtler text-sm">—</span>
-  ) : (
-    (render?.(results, control) ?? (
-      <span className="inline-flex items-center px-2 py-0.5 rounded-4 bg-neutral-surface-subtle text-xs font-medium">
-        {results.length} result{results.length > 1 ? "s" : ""}
-      </span>
-    ))
-  );
-  return <div className="min-h-[2rem] flex items-center">{content}</div>;
-};
+// FIT-720: Observable cell component that reads directly from MST annotation
+const ObservableCell = observer(
+  ({
+    annotation,
+    control,
+    render,
+    isHydrated,
+  }: {
+    annotation: AnnotationSummary;
+    control: ControlTag;
+    render: RendererType;
+    isHydrated: boolean;
+  }) => {
+    // Read directly from MST annotation if available (for MobX reactivity)
+    const mstAnnotation = annotation._mstAnnotation;
+    const isPrediction = mstAnnotation?.type === "prediction" || annotation.type === "prediction";
+
+    // Get the results - read from MST annotation for MobX tracking
+    let allResults: RawResult[] = [];
+
+    if (mstAnnotation) {
+      if (isPrediction) {
+        // Predictions have results in a different format
+        allResults =
+          mstAnnotation.results?.map((r: MSTResult) => {
+            const json = r.toJSON() as RawResult;
+            return { ...json, from_name: json.from_name.replace(/@.*$/, "") };
+          }) ?? [];
+      } else {
+        // Regular annotations - read from versions.result (this is MobX tracked)
+        allResults = mstAnnotation.versions?.result ?? [];
+      }
+    } else {
+      allResults = annotation.results ?? [];
+    }
+
+    // Filter results for this specific control
+    const results = allResults.filter((result: RawResult) => result.from_name === control.name);
+
+    // FIT-720: Check if this is a stub that needs hydration
+    // A stub is identified by:
+    // 1. is_stub flag from backend, OR
+    // 2. Not yet hydrated AND not a prediction AND not user-generated
+    const hasIsStubFlag = (mstAnnotation as any)?.is_stub === true;
+    const isStub = !isPrediction && !mstAnnotation?.userGenerate && annotation.id && (hasIsStubFlag || !isHydrated);
+
+    // Show skeleton for stubs that haven't been hydrated yet
+    if (isStub && isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
+      return <SkeletonCell width="60%" />;
+    }
+
+    const content = !results.length ? (
+      <span className="text-neutral-content-subtler text-sm">—</span>
+    ) : (
+      (render?.(results, control) ?? (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-4 bg-neutral-surface-subtle text-xs font-medium">
+          {results.length} result{results.length > 1 ? "s" : ""}
+        </span>
+      ))
+    );
+    return <div className="min-h-[2rem] flex items-center">{content}</div>;
+  },
+);
+
+// cellFn is now created inside the component to access hydratedIds
 
 const convertPredictionResult = (result: MSTResult) => {
   const json = result.toJSON() as RawResult;
@@ -42,13 +97,178 @@ const convertPredictionResult = (result: MSTResult) => {
   };
 };
 
+// FIT-720: Check if an annotation is a stub that needs hydration
+const isAnnotationStub = (annotation: MSTAnnotation): boolean => {
+  if (!annotation.pk || annotation.userGenerate) return false;
+  if (annotation.type === "prediction") return false;
+  const versionsResult = annotation.versions?.result;
+  const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
+  return !hasVersionsResult;
+};
+
+// FIT-720: Skeleton loader for table cells
+const SkeletonCell = ({ width = "60%" }: { width?: string }) => (
+  <div className="min-h-[2rem] flex items-center">
+    <div className="h-4 bg-neutral-surface-subtle rounded animate-pulse" style={{ width }} />
+  </div>
+);
+
 const columnHelper = createColumnHelper<AnnotationSummary>();
 
-export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect }: Props) => {
-  const currentUser = window.APP_SETTINGS?.user;
+export const LabelingSummary = observer(({ hideInfo, annotations: all, controls, onSelect, taskId }: Props) => {
+  const currentUser = (window as any).APP_SETTINGS?.user;
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const tableRef = useRef<HTMLTableElement>(null);
 
+  // FIT-720: Use TanStack Query for annotation fetching
+  const { fetchAnnotationCached, cancelAnnotationFetch } = useAnnotationFetcher();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerHeight, setContainerHeight] = useState(400);
+
+  // FIT-720: Hydration state - use refs to avoid stale closures
+  const [, forceUpdate] = useState(0);
+  const hydratingIdsRef = useRef<Set<number | string>>(new Set());
+  const hydratedIds = useRef<Set<number | string>>(new Set());
+  // FIT-720: Track debounce timers for pending hydrations (before fetch starts)
+  const pendingHydrationTimers = useRef<Map<number | string, ReturnType<typeof setTimeout>>>(new Map());
+
+  // FIT-720: Cancel pending or in-flight hydration for an annotation
+  const cancelHydration = useCallback(
+    (id: number | string) => {
+      // First, cancel any pending timer (before fetch started)
+      const timer = pendingHydrationTimers.current.get(id);
+      if (timer) {
+        clearTimeout(timer);
+        pendingHydrationTimers.current.delete(id);
+      }
+
+      // Then, cancel any in-flight TanStack Query request
+      if (hydratingIdsRef.current.has(id)) {
+        cancelAnnotationFetch(id);
+        hydratingIdsRef.current.delete(id);
+        forceUpdate((n) => n + 1);
+      }
+    },
+    [cancelAnnotationFetch],
+  );
+
+  // FIT-720: Hydrate a single annotation using TanStack Query (called after debounce)
+  const hydrateAnnotation = useCallback(
+    async (annotation: MSTAnnotation) => {
+      if (!annotation.pk) return;
+      const id = annotation.pk;
+
+      // Skip if already hydrated or hydrating
+      if (hydratedIds.current.has(id) || hydratingIdsRef.current.has(id)) return;
+
+      hydratingIdsRef.current.add(id);
+      forceUpdate((n) => n + 1);
+
+      try {
+        // Use TanStack Query's fetchQuery - handles caching and deduplication
+        const fullAnnotation = await fetchAnnotationCached(id);
+
+        if (fullAnnotation?.result !== undefined) {
+          // Cast to any for MST methods not in type definitions
+          const anno = annotation as any;
+
+          // FIT-720: Update versions.result directly so the summary table can read it
+          // This is the raw result array that the table reads from
+          if (anno.versions) {
+            anno.versions.result = fullAnnotation.result;
+          }
+
+          anno.history?.freeze?.();
+          anno.deserializeResults?.(fullAnnotation.result);
+          anno.updateObjects?.();
+          anno.history?.safeUnfreeze?.();
+          anno.reinitHistory?.();
+          hydratedIds.current.add(id);
+        }
+      } catch (error) {
+        // TanStack Query handles abort errors internally
+        console.error(`[FIT-720] Summary: Failed to hydrate annotation ${id}:`, error);
+      } finally {
+        hydratingIdsRef.current.delete(id);
+        forceUpdate((n) => n + 1);
+      }
+    },
+    [fetchAnnotationCached],
+  );
+
+  // FIT-720: Schedule hydration after debounce delay (row must stay in view)
+  const scheduleHydration = useCallback(
+    (annotation: MSTAnnotation) => {
+      if (!annotation.pk) return;
+      const id = annotation.pk;
+
+      // Skip if already hydrated, hydrating, or scheduled
+      if (hydratedIds.current.has(id)) return;
+      if (hydratingIdsRef.current.has(id)) return;
+      if (pendingHydrationTimers.current.has(id)) return;
+
+      // Schedule hydration after 200ms debounce
+      const timer = setTimeout(() => {
+        pendingHydrationTimers.current.delete(id);
+        hydrateAnnotation(annotation);
+      }, 200);
+
+      pendingHydrationTimers.current.set(id, timer);
+    },
+    [hydrateAnnotation],
+  );
+
+  // FIT-720: Cleanup - cancel all pending timers on unmount
+  useEffect(() => {
+    return () => {
+      // Cancel all pending hydration timers
+      pendingHydrationTimers.current.forEach((timer) => clearTimeout(timer));
+      pendingHydrationTimers.current.clear();
+    };
+  }, []);
+
+  // Update container height on mount
+  useEffect(() => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const availableHeight = window.innerHeight - rect.top - 100;
+      setContainerHeight(Math.max(300, Math.min(availableHeight, 500)));
+    }
+  }, []);
+
+  // FIT-720: Hydrate initially visible rows after mount
+  useEffect(() => {
+    if (!isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) return;
+    if (!containerRef.current) return;
+
+    // Wait for layout to complete, then hydrate visible rows
+    const timer = setTimeout(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const scrollContainer = container.querySelector('[style*="overflow"]') as HTMLElement;
+      if (!scrollContainer) return;
+
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const rows = scrollContainer.querySelectorAll("tbody tr");
+
+      rows.forEach((row, index) => {
+        const rect = row.getBoundingClientRect();
+        const isVisible = rect.top < containerRect.bottom && rect.bottom > containerRect.top;
+
+        if (isVisible) {
+          const annotation = all[index];
+          if (annotation && isAnnotationStub(annotation) && !hydratedIds.current.has(annotation.pk)) {
+            scheduleHydration(annotation);
+          }
+        }
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [all, scheduleHydration]);
+
+  // Create annotation summaries - re-computed when annotations change
   const annotations: AnnotationSummary[] = all.map((annotation) => ({
     id: annotation.pk,
     type: annotation.type,
@@ -65,6 +285,12 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
       annotation.type === "prediction"
         ? (annotation.results?.map(convertPredictionResult) ?? [])
         : (annotation.versions.result ?? []),
+    // FIT-720: Track hydration state for skeleton rendering
+    _isStub: isAnnotationStub(annotation),
+    _isHydrating: hydratingIdsRef.current.has(annotation.pk),
+    _isHydrated: hydratedIds.current.has(annotation.pk),
+    // FIT-720: Keep reference to MST annotation for MobX reactivity in cells
+    _mstAnnotation: annotation,
   }));
 
   // Measure initial column widths after first render
@@ -86,6 +312,21 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
     }
   }, [controls, columnWidths]);
 
+  // FIT-720: Create cell renderer - uses _isHydrated from annotation data
+  const createCellFn = useCallback((control: ControlTag, render: RendererType) => {
+    return (props: { row: Row<AnnotationSummary> }) => {
+      const annotation = props.row.original;
+      return (
+        <ObservableCell
+          annotation={annotation}
+          control={control}
+          render={render}
+          isHydrated={annotation._isHydrated ?? false}
+        />
+      );
+    };
+  }, []);
+
   const columns = useMemo(() => {
     const columns: ColumnDef<AnnotationSummary, unknown>[] = controls.map((control) =>
       columnHelper.display({
@@ -98,7 +339,7 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
             </Chip>
           </div>
         ),
-        cell: cellFn(control, renderers[control.type]),
+        cell: createCellFn(control, renderers[control.type]),
         size: columnWidths[control.name] || 150,
         minSize: 120,
         maxSize: 600,
@@ -134,7 +375,7 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
       },
     });
     return columns;
-  }, [controls, onSelect, hideInfo, columnWidths]);
+  }, [controls, onSelect, hideInfo, columnWidths, createCellFn]);
 
   const table = useReactTable<AnnotationSummary>({
     data: annotations,
@@ -149,21 +390,124 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
     },
   });
 
+  // FIT-720: Row component with IntersectionObserver for lazy loading
+  const TableRow = useCallback(
+    ({ row, rowIndex, totalRows }: { row: Row<AnnotationSummary>; rowIndex: number; totalRows: number }) => {
+      const rowRef = useRef<HTMLTableRowElement>(null);
+      const annotation = all[rowIndex];
+      const isStub = annotation && isAnnotationStub(annotation);
+
+      // Use IntersectionObserver to detect when row enters/leaves viewport
+      useEffect(() => {
+        if (!isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) return;
+        if (!annotation || !rowRef.current) return;
+
+        const annotationId = annotation.pk;
+        const element = rowRef.current;
+
+        // Check initial visibility - IntersectionObserver might not fire for already-visible elements
+        const checkInitialVisibility = () => {
+          const rect = element.getBoundingClientRect();
+          const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+          if (isVisible && isStub && !hydratedIds.current.has(annotationId)) {
+            scheduleHydration(annotation);
+          }
+        };
+
+        // Small delay to ensure layout is complete
+        const initialTimer = setTimeout(checkInitialVisibility, 50);
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            const entry = entries[0];
+            if (!entry) return;
+
+            if (entry.isIntersecting) {
+              // Row came into view - schedule hydration after debounce
+              if (isStub && !hydratedIds.current.has(annotationId)) {
+                scheduleHydration(annotation);
+              }
+            } else {
+              // Row left view - cancel pending timer or in-flight request
+              cancelHydration(annotationId);
+            }
+          },
+          { threshold: 0.1 },
+        );
+
+        observer.observe(element);
+        return () => {
+          clearTimeout(initialTimer);
+          observer.disconnect();
+          // Cancel any pending/in-flight request when unmounting
+          cancelHydration(annotationId);
+        };
+      }, [annotation, isStub]);
+
+      const isEvenRow = rowIndex % 2 === 0;
+      const isLastRow = rowIndex === totalRows - 1;
+
+      return (
+        <tr ref={rowRef} key={row.id} className="group">
+          {row.getVisibleCells().map((cell, cellIndex) => {
+            const isSticky = cellIndex === 0;
+
+            return (
+              <td
+                key={cell.id}
+                style={{
+                  position: isSticky ? "sticky" : "relative",
+                  left: isSticky ? 0 : "auto",
+                  width: cell.column.getSize(),
+                  zIndex: isSticky ? 10 : "auto",
+                }}
+                className={cnm(
+                  "px-4 py-2.5 align-top overflow-hidden transition-colors",
+                  isEvenRow ? "bg-neutral-surface" : "bg-neutral-background",
+                  "group-hover:bg-neutral-surface-subtle",
+                  !isLastRow && "border-b border-neutral-border-subtle",
+                  isSticky && "border-r border-neutral-border",
+                )}
+              >
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            );
+          })}
+        </tr>
+      );
+    },
+    [all, scheduleHydration, cancelHydration],
+  );
+
   return (
-    <div className="mb-base">
-      <div className="overflow-x-auto pb-tight">
+    <div className="mb-base" ref={containerRef}>
+      <div
+        className="border border-neutral-border rounded-small"
+        style={{
+          maxHeight: containerHeight,
+          overflowY: "auto",
+          overflowX: "auto",
+          position: "relative",
+        }}
+      >
         <table
           ref={tableRef}
-          className="border border-neutral-border rounded-small w-full"
+          className="w-full"
           style={{
             tableLayout: Object.keys(columnWidths).length > 0 ? "fixed" : "auto",
             borderCollapse: "separate",
             borderSpacing: 0,
-            width: "calc(100% - 2px)", // account for border
           }}
         >
-          {/* Sticky Header */}
-          <thead className="sticky top-0 z-10">
+          {/* Sticky Header - z-20 to be above all row content */}
+          <thead
+            className="bg-neutral-surface-subtle"
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 20,
+            }}
+          >
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="border-b border-neutral-border">
                 {headerGroup.headers.map((header, index) => (
@@ -175,7 +519,7 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
                       width: header.getSize(),
                       minWidth: header.column.columnDef.minSize || 120,
                       maxWidth: header.column.columnDef.maxSize || 600,
-                      zIndex: index === 0 ? 20 : 1,
+                      zIndex: index === 0 ? 30 : 1, // First column even higher for sticky column + header
                     }}
                     className={cnm(
                       "px-4 py-2.5 text-left whitespace-nowrap font-semibold text-sm bg-neutral-surface-subtle",
@@ -197,41 +541,15 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
               headers={table.getHeaderGroups()[0]?.headers ?? []}
               controls={controls}
               annotations={annotations}
+              taskId={taskId}
             />
-            {/* Annotation Rows */}
+            {/* Annotation Rows - with lazy loading */}
             {table.getRowModel().rows.map((row, rowIndex) => (
-              <tr key={row.id} className="group">
-                {row.getVisibleCells().map((cell, cellIndex) => {
-                  const isSticky = cellIndex === 0;
-                  const isEvenRow = rowIndex % 2 === 0;
-                  const isLastRow = rowIndex === table.getRowModel().rows.length - 1;
-
-                  return (
-                    <td
-                      key={cell.id}
-                      style={{
-                        position: isSticky ? "sticky" : "relative",
-                        left: isSticky ? 0 : "auto",
-                        width: cell.column.getSize(),
-                        zIndex: isSticky ? 10 : "auto",
-                      }}
-                      className={cnm(
-                        "px-4 py-2.5 align-top overflow-hidden transition-colors",
-                        isEvenRow ? "bg-neutral-surface" : "bg-neutral-background",
-                        "group-hover:bg-neutral-surface-subtle",
-                        !isLastRow && "border-b border-neutral-border-subtle",
-                        isSticky && "border-r border-neutral-border",
-                      )}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  );
-                })}
-              </tr>
+              <TableRow key={row.id} row={row} rowIndex={rowIndex} totalRows={table.getRowModel().rows.length} />
             ))}
           </tbody>
         </table>
       </div>
     </div>
   );
-};
+});
