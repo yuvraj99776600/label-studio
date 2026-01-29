@@ -63,8 +63,14 @@ class Item extends Component {
 
 // FIT-720: Virtualized annotation panel with lazy hydration
 const VirtualizedAnnotationPanel = observer(({ annotation, root, style, onSelect, isHydrating }) => {
-  // Use consistent stub detection: is_stub flag OR empty result with pk
-  const isStub = annotation.is_stub === true || (annotation.result?.length === 0 && annotation.pk);
+  // Check if annotation has regions - either from original load (versions.result) or from hydration (areas)
+  const versionsResult = annotation.versions?.result;
+  const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
+  // Force MobX to track areas by accessing the regions getter (which iterates areas)
+  const regions = annotation.regions;
+  const hasRegions = regions && regions.length > 0;
+  // Annotation is ready to display if it has versionsResult OR has regions (hydrated)
+  const isStub = !hasVersionsResult && !hasRegions && annotation.pk && !annotation.userGenerate;
 
   return (
     <div style={{ ...style, paddingRight: PANEL_GAP }}>
@@ -110,6 +116,10 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
   const [hydratingIds, setHydratingIds] = useState(new Set());
   const [containerWidth, setContainerWidth] = useState(0);
   const initialHydrationDone = useRef(false);
+  // Track annotations that have been successfully hydrated to avoid re-hydrating
+  const hydratedIds = useRef(new Set());
+  // Debounce timer for scroll-based hydration
+  const scrollHydrationTimer = useRef(null);
 
   // Filter visible annotations
   const visibleAnnotations = useMemo(() => annotations.filter((c) => !c.hidden), [annotations]);
@@ -195,20 +205,30 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
         }
 
         if (fullAnnotation && !fullAnnotation.error && fullAnnotation.result) {
+          console.log(`[FIT-720] Compare view: Hydrating annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`);
+
           // Hydrate the annotation with the loaded result
           annotation.history?.freeze?.();
           annotation.deserializeResults?.(fullAnnotation.result);
+
           // Critical: updateObjects() is required to render visual regions after deserializing
           annotation.updateObjects?.();
+
+          // Unfreeze history
           annotation.history?.safeUnfreeze?.();
-          annotation.history?.reinit?.();
-          // Mark as no longer a stub
-          if (annotation.is_stub !== undefined) {
-            annotation.is_stub = false;
-          }
-          console.log(
-            `[FIT-720] Compare view: Hydrated annotation ${annotationPk} with ${fullAnnotation.result?.length || 0} regions`,
-          );
+
+          // reinitHistory cancels autosave and sets initial values so the hydration
+          // isn't treated as a user modification (prevents unwanted draft creation)
+          annotation.reinitHistory?.();
+
+          // Mark as successfully hydrated to avoid re-hydrating
+          hydratedIds.current.add(annotation.id);
+
+          console.log(`[FIT-720] Compare view: Hydration complete for annotation ${annotationPk}, areas.size:`, annotation.areas?.size);
+        } else {
+          console.log(`[FIT-720] Compare view: No result data for annotation ${annotationPk}`, fullAnnotation);
+          // Even if no results, mark as hydrated to avoid repeated attempts
+          hydratedIds.current.add(annotation.id);
         }
       } catch (error) {
         console.error(`[FIT-720] Compare view: Failed to hydrate annotation ${annotationPk}:`, error);
@@ -223,23 +243,40 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
     [store],
   );
 
-  // FIT-720: Handle items rendered - hydrate visible stubs
+  // FIT-720: Handle items rendered - hydrate visible stubs (debounced to avoid hammering on scroll)
   const onItemsRendered = useCallback(
     ({ visibleStartIndex, visibleStopIndex }) => {
-      for (let i = visibleStartIndex; i <= visibleStopIndex; i++) {
-        const annotation = visibleAnnotations[i];
-        if (!annotation) continue;
-
-        // Use same stub detection as hydrateAnnotation: is_stub flag OR empty result with pk
-        const isStub = annotation.is_stub === true || (annotation.result?.length === 0 && annotation.pk);
-
-        if (isStub && !hydratingIds.has(annotation.id)) {
-          console.log(
-            `[FIT-720] Compare view: onItemsRendered triggering hydration for annotation ${annotation.pk || annotation.id}`,
-          );
-          hydrateAnnotation(annotation);
-        }
+      // Clear any pending hydration check
+      if (scrollHydrationTimer.current) {
+        clearTimeout(scrollHydrationTimer.current);
       }
+
+      // Debounce hydration checks to avoid triggering on every scroll frame
+      scrollHydrationTimer.current = setTimeout(() => {
+        for (let i = visibleStartIndex; i <= visibleStopIndex; i++) {
+          const annotation = visibleAnnotations[i];
+          if (!annotation) continue;
+
+          // Skip if already hydrated or currently hydrating
+          if (hydratedIds.current.has(annotation.id) || hydratingIds.has(annotation.id)) {
+            continue;
+          }
+
+          // Use consistent stub detection: check versions.result (source of truth)
+          const versionsResult = annotation.versions?.result;
+          const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
+          const regions = annotation.regions;
+          const hasRegions = regions && regions.length > 0;
+          const isStub = !hasVersionsResult && !hasRegions && annotation.pk && !annotation.userGenerate;
+
+          if (isStub) {
+            console.log(
+              `[FIT-720] Compare view: onItemsRendered triggering hydration for annotation ${annotation.pk || annotation.id}`,
+            );
+            hydrateAnnotation(annotation);
+          }
+        }
+      }, 150); // Debounce for 150ms to avoid rapid-fire hydration
     },
     [visibleAnnotations, hydratingIds, hydrateAnnotation],
   );
@@ -263,7 +300,16 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
       const annotation = visibleAnnotations[i];
       if (!annotation) continue;
 
-      const isStub = annotation.is_stub === true || (annotation.result?.length === 0 && annotation.pk);
+      // Skip if already hydrated
+      if (hydratedIds.current.has(annotation.id)) continue;
+
+      // Use consistent stub detection: check versions.result (source of truth)
+      const versionsResult = annotation.versions?.result;
+      const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
+      const regions = annotation.regions;
+      const hasRegions = regions && regions.length > 0;
+      const isStub = !hasVersionsResult && !hasRegions && annotation.pk && !annotation.userGenerate;
+
       if (isStub) {
         hydrateAnnotation(annotation);
       }
