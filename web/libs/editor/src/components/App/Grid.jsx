@@ -62,7 +62,7 @@ class Item extends Component {
 }
 
 // FIT-720: Virtualized annotation panel with lazy hydration
-const VirtualizedAnnotationPanel = observer(({ annotation, store, root, style, onSelect, isHydrating }) => {
+const VirtualizedAnnotationPanel = observer(({ annotation, root, style, onSelect, isHydrating }) => {
   // Use consistent stub detection: is_stub flag OR empty result with pk
   const isStub = annotation.is_stub === true || (annotation.result?.length === 0 && annotation.pk);
 
@@ -176,7 +176,9 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
           // Try the SDK method (works for labelStream)
           await sdk.ensureAnnotationLoaded(annotationPk);
           return; // SDK method handles everything
-        } else if (sdk?.datamanager?.store?.taskStore?.loadAnnotation) {
+        }
+
+        if (sdk?.datamanager?.store?.taskStore?.loadAnnotation) {
           // Fallback: directly load annotation via taskStore
           fullAnnotation = await sdk.datamanager.store.taskStore.loadAnnotation(annotationPk);
           console.log("[FIT-720] Compare view: Loaded via taskStore.loadAnnotation");
@@ -272,12 +274,11 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
   const itemData = useMemo(
     () => ({
       annotations: visibleAnnotations,
-      store,
       root,
       onSelect: select,
       hydratingIds,
     }),
-    [visibleAnnotations, store, root, select, hydratingIds],
+    [visibleAnnotations, root, select, hydratingIds],
   );
 
   // Row renderer
@@ -287,7 +288,6 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
       <VirtualizedAnnotationPanel
         key={annotation.id}
         annotation={annotation}
-        store={data.store}
         root={data.root}
         style={style}
         onSelect={data.onSelect}
