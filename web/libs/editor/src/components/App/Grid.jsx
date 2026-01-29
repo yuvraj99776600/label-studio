@@ -316,9 +316,6 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
           const isStub = !hasVersionsResult && !hasRegions && annotation.pk && !annotation.userGenerate;
 
           if (isStub) {
-            console.log(
-              `[FIT-720] Compare view: onItemsRendered triggering hydration for annotation ${annotation.pk || annotation.id}`,
-            );
             hydrateAnnotation(annotation);
           }
         }
@@ -337,10 +334,6 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
     // Calculate how many panels fit in the viewport
     const visibleCount = Math.ceil(containerWidth / (panelWidth + PANEL_GAP)) + 1;
     const initialVisibleCount = Math.min(visibleCount, visibleAnnotations.length);
-
-    console.log(
-      `[FIT-720] Compare view: Initial mount - checking first ${initialVisibleCount} annotations for hydration`,
-    );
 
     for (let i = 0; i < initialVisibleCount; i++) {
       const annotation = visibleAnnotations[i];

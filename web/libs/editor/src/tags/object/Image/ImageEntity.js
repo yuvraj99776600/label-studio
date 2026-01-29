@@ -1,5 +1,6 @@
 import { types, getParent } from "mobx-state-tree";
 import { FileLoader } from "../../../utils/FileLoader";
+import { imageCache } from "../../../utils/ImageCache";
 import { clamp } from "../../../utils/utilities";
 import { FF_IMAGE_MEMORY_USAGE, isFF } from "../../../utils/feature-flags";
 
@@ -79,48 +80,100 @@ export const ImageEntity = types
     preload() {
       if (self.ensurePreloaded() || !self.src) return;
 
-      if (isFF(FF_IMAGE_MEMORY_USAGE)) {
+      // FIT-720: Use global image cache to prevent re-downloading on annotation switch
+      const crossOrigin = self.imageCrossOrigin;
+
+      // Check if already cached in global cache
+      const cached = imageCache.get(self.src);
+      if (cached) {
+        self.setCurrentSrc(cached.blobUrl);
+        self.setDownloaded(true);
+        self.setProgress(1);
+        self.setDownloading(false);
+        self.setImageLoaded(true);
+        return;
+      }
+
+      // Check if currently loading (deduplication)
+      if (imageCache.isLoading(self.src)) {
         self.setDownloading(true);
-        new Promise((resolve) => {
-          const img = new Image();
-          // Get from the image tag
-          const crossOrigin = self.imageCrossOrigin;
-          if (crossOrigin) img.crossOrigin = crossOrigin;
-          img.onload = () => {
-            self.setCurrentSrc(self.src);
+        imageCache
+          .getPendingLoad(self.src)
+          ?.then((result) => {
+            self.setCurrentSrc(result.blobUrl);
             self.setDownloaded(true);
             self.setProgress(1);
             self.setDownloading(false);
             self.setImageLoaded(true);
-            resolve();
-          };
-          img.onerror = () => {
+          })
+          .catch(() => {
             self.setError(true);
             self.setDownloading(false);
-            resolve();
-          };
-          img.src = self.src;
-        });
+          });
         return;
       }
 
       self.setDownloading(true);
-      fileLoader
-        .download(self.src, (_t, _l, progress) => {
+
+      // Use the global cache for loading
+      imageCache
+        .load(self.src, crossOrigin, (progress) => {
           self.setProgress(progress);
         })
-        .then((url) => {
+        .then((result) => {
+          self.setCurrentSrc(result.blobUrl);
           self.setDownloaded(true);
+          self.setProgress(1);
           self.setDownloading(false);
-          self.setCurrentSrc(url);
+          self.setImageLoaded(true);
         })
         .catch(() => {
-          self.setDownloading(false);
-          self.setError(true);
+          // Fallback to old behavior if global cache fails
+          if (isFF(FF_IMAGE_MEMORY_USAGE)) {
+            const img = new Image();
+            if (crossOrigin) img.crossOrigin = crossOrigin;
+            img.onload = () => {
+              self.setCurrentSrc(self.src);
+              self.setDownloaded(true);
+              self.setProgress(1);
+              self.setDownloading(false);
+              self.setImageLoaded(true);
+            };
+            img.onerror = () => {
+              self.setError(true);
+              self.setDownloading(false);
+            };
+            img.src = self.src;
+          } else {
+            fileLoader
+              .download(self.src, (_t, _l, progress) => {
+                self.setProgress(progress);
+              })
+              .then((url) => {
+                self.setDownloaded(true);
+                self.setDownloading(false);
+                self.setCurrentSrc(url);
+              })
+              .catch(() => {
+                self.setDownloading(false);
+                self.setError(true);
+              });
+          }
         });
     },
 
     ensurePreloaded() {
+      // FIT-720: First check global image cache
+      const cached = imageCache.get(self.src);
+      if (cached) {
+        self.setDownloading(false);
+        self.setDownloaded(true);
+        self.setProgress(1);
+        self.setCurrentSrc(cached.blobUrl);
+        self.setImageLoaded(true);
+        return true;
+      }
+
       if (isFF(FF_IMAGE_MEMORY_USAGE)) return self.currentSrc !== undefined;
 
       if (fileLoader.isError(self.src)) {
