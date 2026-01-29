@@ -173,7 +173,7 @@ const CommentsOverlayInner = observer(({ annotation, commentStore }: CommentsOve
   const resizeObserver: ResizeObserver = useMemo(() => {
     let requestId: number;
 
-    return new ResizeObserver((entities) => {
+    return new ResizeObserver((_entries) => {
       cancelAnimationFrame(requestId);
       requestId = requestAnimationFrame(() => {
         forceUpdate(guidGenerator());

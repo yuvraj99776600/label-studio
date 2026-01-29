@@ -24,7 +24,7 @@ try {
   const editorHooks = require("@humansignal/editor/src/hooks/useAnnotationQuery");
   invalidateAnnotationCache = editorHooks.invalidateAnnotationCache;
   invalidateDistributionCache = editorHooks.invalidateDistributionCache;
-} catch (e) {
+} catch {
   // Editor hooks not available, invalidation will be skipped
   console.debug("[FIT-720] Editor hooks not available for cache invalidation");
 }
@@ -864,7 +864,7 @@ export class LSFWrapper {
     }
   };
 
-  onSubmitDraft = async (studio, annotation, params = {}) => {
+  onSubmitDraft = async (_studio, annotation, params = {}) => {
     // It should be preserved as soon as possible because each `await` will allow it to be changed
     const taskId = this.task.id;
     const annotationDoesntExist = !annotation.pk;
@@ -1077,7 +1077,7 @@ export class LSFWrapper {
     const versionsResult = annotation.versions?.result;
     const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
 
-    console.log(`[FIT-720] _hydrateStubAnnotation called:`, {
+    console.log("[FIT-720] _hydrateStubAnnotation called:", {
       pk: annotation.pk,
       hasRegions,
       isUserGenerated,
@@ -1089,13 +1089,13 @@ export class LSFWrapper {
     // Skip if already hydrated or is a new user-generated annotation
     // Use versionsResult as the source of truth - if it has data, the annotation is already hydrated
     if (hasVersionsResult || isUserGenerated) {
-      console.log(`[FIT-720] Skipping hydration - already has versionsResult or is user-generated`);
+      console.log("[FIT-720] Skipping hydration - already has versionsResult or is user-generated");
       return;
     }
 
     // If areas exist but no versionsResult, the areas might be stale/incorrect - proceed with hydration
     if (hasRegions && !hasVersionsResult) {
-      console.log(`[FIT-720] Areas exist but no versionsResult - will hydrate anyway`);
+      console.log("[FIT-720] Areas exist but no versionsResult - will hydrate anyway");
     }
 
     const annotationId = annotation.pk;
@@ -1115,7 +1115,7 @@ export class LSFWrapper {
 
       // Check if this annotation is still the selected one
       const currentSelected = this.lsf?.annotationStore?.selected;
-      console.log(`[FIT-720] Current selected annotation:`, currentSelected?.pk, `hydrating:`, annotationId);
+      console.log("[FIT-720] Current selected annotation:", currentSelected?.pk, "hydrating:", annotationId);
 
       if (fullAnnotation?.result && !fullAnnotation.error) {
         console.log(
@@ -1128,12 +1128,12 @@ export class LSFWrapper {
         // Deserialize the results into the annotation
         annotation.deserializeResults(fullAnnotation.result);
 
-        console.log(`[FIT-720] After deserializeResults, areas.size:`, annotation.areas?.size);
+        console.log("[FIT-720] After deserializeResults, areas.size:", annotation.areas?.size);
 
         // Critical: updateObjects() MUST be called to render visual regions after deserializing
         annotation.updateObjects?.();
 
-        console.log(`[FIT-720] After updateObjects, areas.size:`, annotation.areas?.size);
+        console.log("[FIT-720] After updateObjects, areas.size:", annotation.areas?.size);
 
         // Unfreeze history
         annotation.history?.safeUnfreeze?.();

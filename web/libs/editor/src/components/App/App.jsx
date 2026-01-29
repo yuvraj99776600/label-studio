@@ -276,7 +276,6 @@ class App extends Component {
                 <>
                   {store.showingDescription && (
                     <div className="p-base mb-base">
-                      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: we need html here and it's sanitized */}
                       <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(store.description) }} />
                     </div>
                   )}
