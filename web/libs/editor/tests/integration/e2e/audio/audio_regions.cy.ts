@@ -1,16 +1,9 @@
 import { AudioView, Labels, LabelStudio, Relations } from "@humansignal/frontend-test/helpers/LSF";
 import { audioOneRegionResult, audioWithLabelsConfig, audioWithLabelsData } from "../../data/audio/audio_regions";
 
-// Audio regions test suite with improved stability through canvas synchronization
-// Reduced retries from 3 to 1 due to improved timing and pixel sampling reliability
-const suiteConfig = {
-  retries: {
-    runMode: 1,
-    openMode: 0,
-  },
-};
-
-describe("Audio regions", suiteConfig, () => {
+// Audio regions test suite with stability through canvas synchronization
+// Uses waitForCanvasStable() and getStablePixelColorRelative() for reliable pixel sampling
+describe("Audio regions", () => {
   it("Should have indication of selected state", () => {
     cy.log("=== Testing audio region selected state indication ===");
     LabelStudio.params()

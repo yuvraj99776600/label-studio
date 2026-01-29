@@ -32,15 +32,20 @@ jobs:
       migrations: ${{ steps.changes.outputs.migrations }}
       commit-message: ${{ steps.commit-details.outputs.commit-message }}
       membership: ${{ steps.check-membership.outputs.membership }}
+      # Frontend test selection outputs
+      skip_frontend_tests: ${{ steps.select-tests.outputs.skip_tests }}
+      run_all_frontend_tests: ${{ steps.select-tests.outputs.run_all }}
+      cypress_specs: ${{ steps.select-tests.outputs.cypress_specs }}
+      codecept_tests: ${{ steps.select-tests.outputs.codecept_tests }}
     timeout-minutes: 25
     steps:
       - uses: hmarr/debug-action@v3.0.0
 
       - name: Checkout
-        if: github.event_name == 'push'
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
 
       - uses: dorny/paths-filter@v3
         id: changes
@@ -71,6 +76,15 @@ jobs:
               - '.github/workflows/docker-build.yml'
             migrations:
               - 'label_studio/*/migrations/**'
+
+      - name: Select frontend tests
+        id: select-tests
+        if: steps.changes.outputs.frontend == 'true'
+        env:
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref && format('origin/{0}', github.event.pull_request.base.ref) || 'origin/develop' }}
+        run: |
+          chmod +x .github/scripts/select-frontend-tests.sh
+          .github/scripts/select-frontend-tests.sh
 
       - uses: actions/github-script@v8
         id: commit-details
@@ -500,8 +514,25 @@ jobs:
     name: "Tests"
     needs:
       - changed_files
-    if: needs.changed_files.outputs.frontend == 'true'
+    if: |
+      needs.changed_files.outputs.frontend == 'true' &&
+      needs.changed_files.outputs.skip_frontend_tests != 'true'
     uses: ./.github/workflows/tests-yarn-integration.yml
+    with:
+      head_sha: ${{ github.event.pull_request.head.sha || github.event.after }}
+      run_all: ${{ needs.changed_files.outputs.run_all_frontend_tests == 'true' }}
+      specs: ${{ needs.changed_files.outputs.cypress_specs }}
+    secrets: inherit
+
+  tests-yarn-integration-flaky:
+    name: "Tests (Flaky - Non-blocking)"
+    needs:
+      - changed_files
+    if: |
+      needs.changed_files.outputs.frontend == 'true' &&
+      needs.changed_files.outputs.skip_frontend_tests != 'true'
+    continue-on-error: true
+    uses: ./.github/workflows/tests-yarn-integration-flaky.yml
     with:
       head_sha: ${{ github.event.pull_request.head.sha || github.event.after }}
     secrets: inherit
@@ -510,10 +541,14 @@ jobs:
     name: "Tests"
     needs:
       - changed_files
-    if: needs.changed_files.outputs.frontend == 'true'
+    if: |
+      needs.changed_files.outputs.frontend == 'true' &&
+      needs.changed_files.outputs.skip_frontend_tests != 'true'
     uses: ./.github/workflows/tests-yarn-e2e.yml
     with:
       head_sha: ${{ github.event.pull_request.head.sha || github.event.after }}
+      run_all: ${{ needs.changed_files.outputs.run_all_frontend_tests == 'true' }}
+      tests: ${{ needs.changed_files.outputs.codecept_tests }}
     secrets: inherit
 
   check_gate:

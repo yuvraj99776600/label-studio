@@ -7,18 +7,8 @@ import {
   overlappingTimelineRegionsResult,
   multipleTimelineRegionsLongResult,
 } from "../../data/video_segmentation/timeline_regions";
-import { TWO_FRAMES_TIMEOUT } from "../utils/constants";
 
-// This test suite has exhibited flakiness in CI environments, so we are using retries
-// while we work on improving CI stability for visual comparisons.
-const suiteConfig = {
-  retries: {
-    runMode: 3, // Retry 3 times in CI (headless mode)
-    openMode: 0, // No retries in local development (interactive mode)
-  },
-};
-
-describe("Video Timeline Region Loop Playback", suiteConfig, () => {
+describe("Video Timeline Region Loop Playback", () => {
   beforeEach(() => {
     LabelStudio.addFeatureFlagsOnPageLoad({
       fflag_fix_front_optic_1608_improve_video_frame_seek_precision_short: true,
@@ -266,11 +256,12 @@ describe("Video Timeline Region Loop Playback", suiteConfig, () => {
         .init();
 
       LabelStudio.waitForObjectsReady();
+      VideoView.waitForStableState();
       Sidebar.hasRegions(2);
 
       // Start with first region selected
       Sidebar.toggleRegionSelection(1);
-      cy.wait(TWO_FRAMES_TIMEOUT);
+      VideoView.waitForStableState();
       VideoView.play();
 
       VideoView.verifyPlayingRange(20, 15, true);
@@ -279,7 +270,7 @@ describe("Video Timeline Region Loop Playback", suiteConfig, () => {
       Sidebar.toggleRegionSelection(0); // Select another region
 
       VideoView.verifyPlayingRange(9, 10);
-      cy.wait(TWO_FRAMES_TIMEOUT);
+      VideoView.waitForFrame(10);
       VideoView.getCurrentFrame().should("be.eq", 10);
     });
 
@@ -291,11 +282,13 @@ describe("Video Timeline Region Loop Playback", suiteConfig, () => {
         .init();
 
       LabelStudio.waitForObjectsReady();
+      VideoView.waitForStableState();
       Sidebar.hasRegions(1);
       Sidebar.hasSelectedRegions(0); // No regions selected by default
 
       // Try to play without selected regions
       VideoView.clickAtFrame(2);
+      VideoView.waitForFrame(2);
       VideoView.play();
 
       VideoView.verifyPlayingRange(10, 40, true);

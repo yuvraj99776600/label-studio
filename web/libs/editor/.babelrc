@@ -36,6 +36,9 @@
     },
     "test": {
       "plugins": ["babel-plugin-istanbul"]
+    },
+    "ci": {
+      "plugins": ["babel-plugin-istanbul"]
     }
   }
 }

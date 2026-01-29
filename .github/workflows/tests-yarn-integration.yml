@@ -6,6 +6,16 @@ on:
       head_sha:
         required: true
         type: string
+      run_all:
+        required: false
+        type: boolean
+        default: true
+        description: "Run all tests (true) or only specific specs (false)"
+      specs:
+        required: false
+        type: string
+        default: ""
+        description: "Comma-separated list of spec patterns to run (when run_all is false)"
 
 env:
   NODE: "22"
@@ -29,7 +39,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.head_sha }}
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend-environment
@@ -37,28 +47,64 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
-      - name: Run server
-        id: run-server
-        timeout-minutes: 2
+      - name: Cache editor build
+        uses: actions/cache@v4
+        id: build-cache
+        with:
+          path: |
+            ${{ env.FRONTEND_MONOREPO_DIR }}/dist/libs/editor
+            ${{ env.FRONTEND_MONOREPO_DIR }}/.nx/cache
+          key: editor-build-${{ hashFiles('web/libs/editor/src/**', 'web/libs/core/src/**', 'web/libs/ui/src/**', 'web/libs/frontend-test/src/**', 'web/package.json', 'web/yarn.lock', 'web/tsconfig.base.json', 'web/tsconfig.json', 'web/babel.config.json', 'web/webpack.config.js', 'web/libs/editor/project.json', 'web/libs/editor/tsconfig*.json', 'web/libs/editor/.babelrc') }}
+          restore-keys: |
+            editor-build-
+
+      - name: Build editor
+        if: steps.build-cache.outputs.cache-hit != 'true'
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         env:
-          NODE_ENV: development
+          NODE_ENV: production
+          BABEL_ENV: ci
+          LSF_TEST_MODE: "true"
         run: |
-          set -xeuo pipefail
-          
-          yarn lsf:serve &
-          pid=$!
-          echo "pid=${pid}" >> $GITHUB_OUTPUT
-          
-          while ! curl -s -o /dev/null -L "http://localhost:3000"; do
-            echo "=> Waiting for service to become available"
-            sleep 2s
-          done
+          yarn nx run editor:build:production
 
-      - name: Run tests
+      - name: Start static server
+        id: run-server
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         run: |
-          COLLECT_COVERAGE=1 yarn test:integration
+          npx serve dist/libs/editor -l 3000 &
+          pid=$!
+          echo "pid=${pid}" >> $GITHUB_OUTPUT
+          npx wait-on http://localhost:3000 --timeout 30000
+
+      # Flaky tests are quarantined in tests-yarn-integration-flaky.yml
+      # Exclude them from the main test run
+      # Use cypress-parallel to utilize both CPU cores on the runner
+      - name: Run tests (all, parallel)
+        if: inputs.run_all == true || inputs.specs == ''
+        working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
+        run: |
+          # Use 2 threads (matching ubuntu-latest CPU cores) for parallel execution
+          # Exclude quarantined flaky tests
+          COLLECT_COVERAGE=1 npx cypress-parallel \
+            -s "cypress run --config excludeSpecPattern=['**/video/regions.cy.ts','**/video/timeline_region_loop.cy.ts','**/audio/audio_regions.cy.ts']" \
+            -t 2 \
+            -d "libs/editor/tests/integration/e2e" \
+            -m
+
+      - name: Run tests (selective)
+        if: inputs.run_all == false && inputs.specs != ''
+        working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
+        env:
+          SPECS: ${{ inputs.specs }}
+        run: |
+          # For selective tests, run directly without parallelization (smaller test set)
+          SPEC_PATTERN=$(echo "$SPECS" | tr ',' '\n' | sed 's|^|libs/editor/tests/integration/e2e/|' | tr '\n' ',' | sed 's/,$//')
+          echo "Running specs: $SPEC_PATTERN"
+          # Exclude quarantined flaky tests even from selective runs
+          COLLECT_COVERAGE=1 yarn cypress run \
+            --spec "$SPEC_PATTERN" \
+            --config '{"excludeSpecPattern":["**/video/regions.cy.ts","**/video/timeline_region_loop.cy.ts","**/audio/audio_regions.cy.ts"]}'
 
       - name: Upload coverage to Codecov
         if: ${{ always() && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' }}
