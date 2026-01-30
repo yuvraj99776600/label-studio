@@ -530,11 +530,26 @@ export class LSFWrapper {
       const fullAnnotation = await taskStore.loadAnnotation(annotationPk);
 
       if (fullAnnotation && !fullAnnotation.error) {
-        // Hydrate the LSF annotation with the full result
-        // Note: Don't modify this.task.annotations directly - it may be an MST model
-        // which would cause "object is protected" errors
+        // IMPORTANT: Re-fetch the annotation from the store after async operation
+        // The original reference might be stale (user navigated, scrolled, etc.)
+        // which causes MST "object is protected" errors
         const lsfAnnotation = this.annotations.find((a) => String(a.pk) === String(annotationPk));
-        if (lsfAnnotation && fullAnnotation.result) {
+        if (!lsfAnnotation) {
+          // Annotation no longer exists in the store
+          return fullAnnotation;
+        }
+
+        // Check if already hydrated while we were fetching
+        const versionsResult = lsfAnnotation.versions?.result;
+        const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
+        const hasRegions = lsfAnnotation.areas?.size > 0;
+
+        if (hasVersionsResult || hasRegions) {
+          // Already hydrated
+          return fullAnnotation;
+        }
+
+        if (fullAnnotation.result) {
           lsfAnnotation.history.freeze();
           lsfAnnotation.deserializeResults(fullAnnotation.result);
           // Critical: updateObjects() is required to render visual regions after deserializing
@@ -1198,35 +1213,48 @@ export class LSFWrapper {
       return;
     }
 
-    const annotationId = annotation.pk;
+    const annotationPk = annotation.pk;
 
     try {
       const fullAnnotation = await this.datamanager.apiCall("fetchAnnotation", {
-        annotationID: annotationId,
+        annotationID: annotationPk,
       });
 
       if (fullAnnotation?.result && !fullAnnotation.error) {
+        // IMPORTANT: Re-fetch the annotation from the store after async operation
+        // The original reference might be stale (user navigated, scrolled, etc.)
+        // which causes MST "object is protected" errors
+        const freshAnnotation = this.annotations.find((a) => String(a.pk) === String(annotationPk));
+        if (!freshAnnotation) {
+          // Annotation no longer exists in the store
+          return;
+        }
+
+        // Check if annotation was already hydrated while we were fetching
+        const freshVersionsResult = freshAnnotation.versions?.result;
+        const freshHasVersionsResult = Array.isArray(freshVersionsResult) && freshVersionsResult.length > 0;
+        const freshHasRegions = freshAnnotation.areas?.size > 0;
+
+        if (freshHasVersionsResult || freshHasRegions) {
+          // Already hydrated (possibly by another code path)
+          return;
+        }
+
         // Freeze history to prevent undo/redo issues during hydration
-        annotation.history?.freeze?.();
+        freshAnnotation.history?.freeze?.();
 
         // Deserialize the results into the annotation
-        annotation.deserializeResults(fullAnnotation.result);
+        freshAnnotation.deserializeResults(fullAnnotation.result);
 
         // Critical: updateObjects() MUST be called to render visual regions after deserializing
-        annotation.updateObjects?.();
+        freshAnnotation.updateObjects?.();
 
         // Unfreeze history
-        annotation.history?.safeUnfreeze?.();
+        freshAnnotation.history?.safeUnfreeze?.();
 
         // reinitHistory cancels autosave and sets initial values so LSF knows this is the base state
         // This prevents the hydration from being treated as a user modification
-        annotation.reinitHistory?.();
-
-        // Force React/MobX to re-render by triggering updateObjects again after a microtask
-        // This ensures the canvas picks up the new regions
-        setTimeout(() => {
-          annotation.updateObjects?.();
-        }, 0);
+        freshAnnotation.reinitHistory?.();
       }
     } catch {
       // Failed to hydrate annotation - will show stub state

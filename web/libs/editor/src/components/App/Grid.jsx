@@ -213,8 +213,9 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
   const hydrateAnnotation = useCallback(
     async (annotation) => {
       const annotationPk = annotation.pk || annotation.id;
+      const annotationId = annotation.id;
 
-      setHydratingIds((prev) => new Set([...prev, annotation.id]));
+      setHydratingIds((prev) => new Set([...prev, annotationId]));
 
       try {
         // Access the root store to get the SDK
@@ -238,26 +239,47 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
         }
 
         if (fullAnnotation && !fullAnnotation.error && fullAnnotation.result) {
+          // IMPORTANT: Re-fetch the annotation from the store after async operation
+          // The original reference might be stale (user navigated, scrolled, etc.)
+          // which causes MST "object is protected" errors
+          const freshAnnotation = annotations.find((a) => a.id === annotationId);
+          if (!freshAnnotation) {
+            // Annotation no longer exists in the store
+            return;
+          }
+
+          // Check if annotation is still valid and not already hydrated
+          const versionsResult = freshAnnotation.versions?.result;
+          const hasVersionsResult = Array.isArray(versionsResult) && versionsResult.length > 0;
+          const regions = freshAnnotation.regions;
+          const hasRegions = regions && regions.length > 0;
+
+          if (hasVersionsResult || hasRegions) {
+            // Already hydrated (possibly by another code path)
+            hydratedIds.current.add(annotationId);
+            return;
+          }
+
           // Hydrate the annotation with the loaded result
-          annotation.history?.freeze?.();
-          annotation.deserializeResults?.(fullAnnotation.result);
+          freshAnnotation.history?.freeze?.();
+          freshAnnotation.deserializeResults?.(fullAnnotation.result);
 
           // Critical: updateObjects() is required to render visual regions after deserializing
-          annotation.updateObjects?.();
+          freshAnnotation.updateObjects?.();
 
           // Unfreeze history
-          annotation.history?.safeUnfreeze?.();
+          freshAnnotation.history?.safeUnfreeze?.();
 
           // reinitHistory cancels autosave and sets initial values so the hydration
           // isn't treated as a user modification (prevents unwanted draft creation)
-          annotation.reinitHistory?.();
+          freshAnnotation.reinitHistory?.();
 
           // Mark as successfully hydrated to avoid re-hydrating
           // Note: Don't directly modify MST model (is_stub) - it causes protection errors
-          hydratedIds.current.add(annotation.id);
+          hydratedIds.current.add(annotationId);
         } else {
           // Even if no results, mark as hydrated to avoid repeated attempts
-          hydratedIds.current.add(annotation.id);
+          hydratedIds.current.add(annotationId);
         }
       } catch (error) {
         // Silently ignore cancellation errors - they're expected when scrolling
@@ -267,12 +289,12 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
       } finally {
         setHydratingIds((prev) => {
           const next = new Set(prev);
-          next.delete(annotation.id);
+          next.delete(annotationId);
           return next;
         });
       }
     },
-    [store, fetchAnnotationCached],
+    [store, fetchAnnotationCached, annotations],
   );
 
   // FIT-720: Handle items rendered - hydrate visible stubs (debounced to avoid hammering on scroll)
