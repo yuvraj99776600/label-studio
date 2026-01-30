@@ -11,13 +11,16 @@ from rest_framework.test import APITestCase
 from tasks.serializers import AnnotationSerializer, AnnotationStubSerializer
 from tasks.tests.factories import AnnotationFactory, TaskFactory
 
+# Patch at source so all modules (tasks.api, data_manager.serializers) get mocked flag
+FLAG_SET_PATCH = 'core.feature_flags.flag_set'
+
 
 class TestAnnotationStubSerializer(APITestCase):
     """Test the AnnotationStubSerializer excludes result field and includes is_stub flag."""
 
     @classmethod
     def setUpTestData(cls):
-        cls.organization = OrganizationFactory()
+        cls.organization = OrganizationFactory(created_by_active_organization=True)
         cls.project = ProjectFactory(organization=cls.organization)
         cls.user = cls.organization.created_by
         cls.task = TaskFactory(project=cls.project, data={'text': 'test'})
@@ -99,7 +102,7 @@ class TestAnnotationsStubQueryParameter(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.organization = OrganizationFactory()
+        cls.organization = OrganizationFactory(created_by_active_organization=True)
         cls.project = ProjectFactory(organization=cls.organization)
         cls.user = cls.organization.created_by
         cls.task = TaskFactory(project=cls.project, data={'text': 'test'})
@@ -116,7 +119,7 @@ class TestAnnotationsStubQueryParameter(APITestCase):
             ],
         )
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_task_api_with_annotations_stub_enabled(self, mock_flag_set):
         """Test that TaskAPI returns stub annotations when feature flag is enabled and annotations_stub=true."""
         mock_flag_set.return_value = True
@@ -135,7 +138,7 @@ class TestAnnotationsStubQueryParameter(APITestCase):
         assert 'result' not in annotation_data
         assert annotation_data.get('is_stub') is True
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_task_api_without_annotations_stub(self, mock_flag_set):
         """Test that TaskAPI returns full annotations when annotations_stub is not set."""
         mock_flag_set.return_value = True
@@ -154,7 +157,7 @@ class TestAnnotationsStubQueryParameter(APITestCase):
         assert 'result' in annotation_data
         assert 'is_stub' not in annotation_data
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_task_api_with_feature_flag_disabled(self, mock_flag_set):
         """Test that TaskAPI ignores annotations_stub when feature flag is disabled."""
         mock_flag_set.return_value = False
@@ -180,7 +183,7 @@ class TestSingleAnnotationEndpoint(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.organization = OrganizationFactory()
+        cls.organization = OrganizationFactory(created_by_active_organization=True)
         cls.project = ProjectFactory(organization=cls.organization)
         cls.user = cls.organization.created_by
         cls.task = TaskFactory(project=cls.project, data={'text': 'test'})
@@ -217,12 +220,12 @@ class TestTaskDistributionAPI(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.organization = OrganizationFactory()
+        cls.organization = OrganizationFactory(created_by_active_organization=True)
         cls.project = ProjectFactory(organization=cls.organization)
         cls.user = cls.organization.created_by
         cls.task = TaskFactory(project=cls.project, data={'text': 'test'})
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_distribution_endpoint_requires_feature_flag(self, mock_flag_set):
         """Test that distribution endpoint returns 404 when feature flag is disabled."""
         mock_flag_set.return_value = False
@@ -233,7 +236,7 @@ class TestTaskDistributionAPI(APITestCase):
         assert response.status_code == 404
         assert response.json()['error'] == 'Feature not enabled'
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_distribution_endpoint_empty_task(self, mock_flag_set):
         """Test distribution endpoint returns empty distribution for task with no annotations."""
         mock_flag_set.return_value = True
@@ -247,7 +250,7 @@ class TestTaskDistributionAPI(APITestCase):
         assert data['total_annotations'] == 0
         assert data['distributions'] == {}
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_distribution_endpoint_with_labels(self, mock_flag_set):
         """Test distribution endpoint correctly aggregates label annotations."""
         mock_flag_set.return_value = True
@@ -308,7 +311,7 @@ class TestTaskDistributionAPI(APITestCase):
         # Car appears twice, Person once, Dog once
         assert data['distributions']['label']['labels'] == {'Car': 2, 'Person': 1, 'Dog': 1}
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_distribution_endpoint_with_choices(self, mock_flag_set):
         """Test distribution endpoint correctly aggregates choices."""
         mock_flag_set.return_value = True
@@ -360,7 +363,7 @@ class TestTaskDistributionAPI(APITestCase):
         assert data['distributions']['sentiment']['type'] == 'choices'
         assert data['distributions']['sentiment']['labels'] == {'Positive': 2, 'Negative': 1}
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_distribution_endpoint_with_ratings(self, mock_flag_set):
         """Test distribution endpoint correctly calculates rating average."""
         mock_flag_set.return_value = True
@@ -413,7 +416,7 @@ class TestTaskDistributionAPI(APITestCase):
         assert data['distributions']['rating']['average'] == 4.0  # (5 + 3 + 4) / 3
         assert data['distributions']['rating']['count'] == 3
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_distribution_endpoint_excludes_cancelled_annotations(self, mock_flag_set):
         """Test that cancelled annotations are not included in distribution."""
         mock_flag_set.return_value = True
@@ -458,7 +461,7 @@ class TestTaskDistributionAPI(APITestCase):
         # Skipped should not appear as it was from cancelled annotation
         assert 'Skipped' not in data['distributions']['label']['labels']
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_distribution_endpoint_with_multiple_controls(self, mock_flag_set):
         """Test distribution endpoint handles multiple control types in one annotation."""
         mock_flag_set.return_value = True
@@ -503,7 +506,7 @@ class TestTaskDistributionAPI(APITestCase):
         assert data['distributions']['sentiment']['labels'] == {'Positive': 1}
         assert data['distributions']['quality']['average'] == 5.0
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_distribution_endpoint_task_not_found(self, mock_flag_set):
         """Test that distribution endpoint returns 404 for non-existent task."""
         mock_flag_set.return_value = True
@@ -514,7 +517,7 @@ class TestTaskDistributionAPI(APITestCase):
         assert response.status_code == 404
         assert response.json()['error'] == 'Task not found'
 
-    @patch('tasks.api.flag_set')
+    @patch(FLAG_SET_PATCH)
     def test_distribution_endpoint_with_taxonomy(self, mock_flag_set):
         """Test distribution endpoint correctly handles taxonomy labels."""
         mock_flag_set.return_value = True
