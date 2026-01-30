@@ -10,6 +10,7 @@ import {
 } from "../constants";
 import { Comments, History, Info, Relations } from "../DetailsPanel/DetailsPanel";
 import { OutlinerComponent } from "../OutlinerPanel/OutlinerPanel";
+import { Pages } from "../PagesPanel/PagesPanel";
 import type { PanelProps } from "../PanelBase";
 import {
   emptyPanel,
@@ -125,6 +126,7 @@ export const panelComponents: { [key: string]: FC<PanelProps> } = {
   relations: Relations as FC<PanelProps>,
   comments: Comments as FC<PanelProps>,
   info: Info as FC<PanelProps>,
+  pages: Pages as FC<PanelProps>,
 };
 
 const panelViews = [
@@ -133,6 +135,12 @@ const panelViews = [
     title: "Regions",
     component: panelComponents.regions as FC<PanelProps>,
     active: true,
+  },
+  {
+    name: "pages",
+    title: "Pages",
+    component: panelComponents.pages as FC<PanelProps>,
+    active: false,
   },
   {
     name: "history",
@@ -175,9 +183,9 @@ export const enterprisePanelDefault: Record<string, PanelBBox> = {
     detached: false,
     alignment: Side.right,
     maxHeight: DEFAULT_PANEL_MAX_HEIGHT,
-    panelViews: [panelViews[3], panelViews[4], panelViews[1]],
+    panelViews: [panelViews[4], panelViews[5], panelViews[2]],
   },
-  "regions-relations": {
+  "regions-pages-relations": {
     order: 2,
     top: 0,
     left: 0,
@@ -190,7 +198,7 @@ export const enterprisePanelDefault: Record<string, PanelBBox> = {
     detached: false,
     alignment: Side.right,
     maxHeight: DEFAULT_PANEL_MAX_HEIGHT,
-    panelViews: [panelViews[0], panelViews[2]],
+    panelViews: [panelViews[0], panelViews[1], panelViews[3]],
   },
 };
 
@@ -208,9 +216,9 @@ export const openSourcePanelDefault: Record<string, PanelBBox> = {
     detached: false,
     alignment: Side.right,
     maxHeight: DEFAULT_PANEL_MAX_HEIGHT,
-    panelViews: [panelViews[3], panelViews[1]],
+    panelViews: [panelViews[4], panelViews[2]],
   },
-  "regions-relations": {
+  "regions-pages-relations": {
     order: 2,
     top: 0,
     left: 0,
@@ -223,7 +231,7 @@ export const openSourcePanelDefault: Record<string, PanelBBox> = {
     detached: false,
     alignment: Side.right,
     maxHeight: DEFAULT_PANEL_MAX_HEIGHT,
-    panelViews: [panelViews[0], panelViews[2]],
+    panelViews: [panelViews[0], panelViews[1], panelViews[3]],
   },
 };
 
@@ -245,7 +253,7 @@ export const partialEmptyBaseProps = {
   setSidePanelCollapsed: () => {},
   dragTop: false,
   dragBottom: false,
-  panelViews: [panelViews[0], panelViews[1], panelViews[2], panelViews[3], panelViews[4]],
+  panelViews: [panelViews[0], panelViews[1], panelViews[2], panelViews[3], panelViews[4], panelViews[5]],
 };
 
 export const resizers = ["top-left", "top-right", "bottom-left", "bottom-right", "top", "bottom", "right", "left"];
