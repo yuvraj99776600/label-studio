@@ -437,8 +437,8 @@ class TaskDistributionAPI(generics.RetrieveAPIView):
         except Task.DoesNotExist:
             return Response({'error': 'Task not found'}, status=404)
 
-        # Check project access
-        if not request.user.has_perm('projects.view_project', task.project):
+        # Check project access using LSO's native permission check
+        if not task.project.has_permission(request.user):
             raise PermissionDenied('You do not have permission to view this task')
 
         # Get all annotations for this task with their results in a single query

@@ -3,6 +3,7 @@
 This module tests the AnnotationStubSerializer and the annotations_stub
 query parameter for the TaskAPI endpoint.
 """
+import os
 from unittest.mock import patch
 
 from organizations.tests.factories import OrganizationFactory
@@ -11,17 +12,8 @@ from rest_framework.test import APITestCase
 from tasks.serializers import AnnotationSerializer, AnnotationStubSerializer
 from tasks.tests.factories import AnnotationFactory, TaskFactory
 
-# Feature flag name used in tasks.api
-FF_LAZY_LOAD = 'fflag_fix_all_fit_720_lazy_load_annotations'
-
-
-def make_flag_set_mock(enabled_flags):
-    """Create a mock for flag_set that returns True only for specified flags."""
-
-    def mock_flag_set(flag_name, *args, **kwargs):
-        return flag_name in enabled_flags
-
-    return mock_flag_set
+# Feature flag name used in tasks.api (environment variable format)
+FF_LAZY_LOAD_ENV = 'fflag_fix_all_fit_720_lazy_load_annotations'
 
 
 class TestAnnotationStubSerializer(APITestCase):
@@ -128,57 +120,60 @@ class TestAnnotationsStubQueryParameter(APITestCase):
             ],
         )
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_task_api_with_annotations_stub_enabled(self, mock_flag_set):
+    def test_task_api_with_annotations_stub_enabled(self):
         """Test that TaskAPI returns stub annotations when feature flag is enabled and annotations_stub=true."""
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/?annotations_stub=true')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/?annotations_stub=true')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        assert 'annotations' in data
-        assert len(data['annotations']) == 1
+            assert 'annotations' in data
+            assert len(data['annotations']) == 1
 
-        annotation_data = data['annotations'][0]
-        # When stub mode is enabled, result should be excluded and is_stub should be True
-        assert 'result' not in annotation_data
-        assert annotation_data.get('is_stub') is True
+            annotation_data = data['annotations'][0]
+            # When stub mode is enabled, result should be excluded and is_stub should be True
+            assert 'result' not in annotation_data
+            assert annotation_data.get('is_stub') is True
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_task_api_without_annotations_stub(self, mock_flag_set):
+    def test_task_api_without_annotations_stub(self):
         """Test that TaskAPI returns full annotations when annotations_stub is not set."""
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        assert 'annotations' in data
-        assert len(data['annotations']) == 1
+            assert 'annotations' in data
+            assert len(data['annotations']) == 1
 
-        annotation_data = data['annotations'][0]
-        # Without stub mode, result should be included
-        assert 'result' in annotation_data
-        assert 'is_stub' not in annotation_data
+            annotation_data = data['annotations'][0]
+            # Without stub mode, result should be included
+            assert 'result' in annotation_data
+            assert 'is_stub' not in annotation_data
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock(set()))
-    def test_task_api_with_feature_flag_disabled(self, mock_flag_set):
+    def test_task_api_with_feature_flag_disabled(self):
         """Test that TaskAPI ignores annotations_stub when feature flag is disabled."""
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/?annotations_stub=true')
+        # Disable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'false'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/?annotations_stub=true')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        assert 'annotations' in data
-        assert len(data['annotations']) == 1
+            assert 'annotations' in data
+            assert len(data['annotations']) == 1
 
-        annotation_data = data['annotations'][0]
-        # With feature flag disabled, annotations_stub should be ignored
-        # and full annotations should be returned
-        assert 'result' in annotation_data
-        assert 'is_stub' not in annotation_data
+            annotation_data = data['annotations'][0]
+            # With feature flag disabled, annotations_stub should be ignored
+            # and full annotations should be returned
+            assert 'result' in annotation_data
+            assert 'is_stub' not in annotation_data
 
 
 class TestSingleAnnotationEndpoint(APITestCase):
@@ -228,29 +223,30 @@ class TestTaskDistributionAPI(APITestCase):
         cls.user = cls.organization.created_by
         cls.task = TaskFactory(project=cls.project, data={'text': 'test'})
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock(set()))
-    def test_distribution_endpoint_requires_feature_flag(self, mock_flag_set):
+    def test_distribution_endpoint_requires_feature_flag(self):
         """Test that distribution endpoint returns 404 when feature flag is disabled."""
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+        # Disable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'false'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
 
-        assert response.status_code == 404
-        assert response.json()['error'] == 'Feature not enabled'
+            assert response.status_code == 404
+            assert response.json()['error'] == 'Feature not enabled'
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_distribution_endpoint_empty_task(self, mock_flag_set):
+    def test_distribution_endpoint_empty_task(self):
         """Test distribution endpoint returns empty distribution for task with no annotations."""
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        assert data['total_annotations'] == 0
-        assert data['distributions'] == {}
+            assert data['total_annotations'] == 0
+            assert data['distributions'] == {}
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_distribution_endpoint_with_labels(self, mock_flag_set):
+    def test_distribution_endpoint_with_labels(self):
         """Test distribution endpoint correctly aggregates label annotations."""
         # Create multiple annotations with different labels
         AnnotationFactory(
@@ -296,20 +292,21 @@ class TestTaskDistributionAPI(APITestCase):
             ],
         )
 
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        assert data['total_annotations'] == 3
-        assert 'label' in data['distributions']
-        assert data['distributions']['label']['type'] == 'labels'
-        # Car appears twice, Person once, Dog once
-        assert data['distributions']['label']['labels'] == {'Car': 2, 'Person': 1, 'Dog': 1}
+            assert data['total_annotations'] == 3
+            assert 'label' in data['distributions']
+            assert data['distributions']['label']['type'] == 'labels'
+            # Car appears twice, Person once, Dog once
+            assert data['distributions']['label']['labels'] == {'Car': 2, 'Person': 1, 'Dog': 1}
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_distribution_endpoint_with_choices(self, mock_flag_set):
+    def test_distribution_endpoint_with_choices(self):
         """Test distribution endpoint correctly aggregates choices."""
         AnnotationFactory(
             task=self.task,
@@ -348,18 +345,19 @@ class TestTaskDistributionAPI(APITestCase):
             ],
         )
 
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        assert data['total_annotations'] == 3
-        assert data['distributions']['sentiment']['type'] == 'choices'
-        assert data['distributions']['sentiment']['labels'] == {'Positive': 2, 'Negative': 1}
+            assert data['total_annotations'] == 3
+            assert data['distributions']['sentiment']['type'] == 'choices'
+            assert data['distributions']['sentiment']['labels'] == {'Positive': 2, 'Negative': 1}
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_distribution_endpoint_with_ratings(self, mock_flag_set):
+    def test_distribution_endpoint_with_ratings(self):
         """Test distribution endpoint correctly calculates rating average."""
         AnnotationFactory(
             task=self.task,
@@ -398,19 +396,20 @@ class TestTaskDistributionAPI(APITestCase):
             ],
         )
 
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        assert data['total_annotations'] == 3
-        assert data['distributions']['rating']['type'] == 'rating'
-        assert data['distributions']['rating']['average'] == 4.0  # (5 + 3 + 4) / 3
-        assert data['distributions']['rating']['count'] == 3
+            assert data['total_annotations'] == 3
+            assert data['distributions']['rating']['type'] == 'rating'
+            assert data['distributions']['rating']['average'] == 4.0  # (5 + 3 + 4) / 3
+            assert data['distributions']['rating']['count'] == 3
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_distribution_endpoint_excludes_cancelled_annotations(self, mock_flag_set):
+    def test_distribution_endpoint_excludes_cancelled_annotations(self):
         """Test that cancelled annotations are not included in distribution."""
         # Create a normal annotation
         AnnotationFactory(
@@ -440,20 +439,21 @@ class TestTaskDistributionAPI(APITestCase):
             ],
         )
 
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        # Only 1 annotation should be counted (the non-cancelled one)
-        assert data['total_annotations'] == 1
-        assert data['distributions']['label']['labels'] == {'Valid': 1}
-        # Skipped should not appear as it was from cancelled annotation
-        assert 'Skipped' not in data['distributions']['label']['labels']
+            # Only 1 annotation should be counted (the non-cancelled one)
+            assert data['total_annotations'] == 1
+            assert data['distributions']['label']['labels'] == {'Valid': 1}
+            # Skipped should not appear as it was from cancelled annotation
+            assert 'Skipped' not in data['distributions']['label']['labels']
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_distribution_endpoint_with_multiple_controls(self, mock_flag_set):
+    def test_distribution_endpoint_with_multiple_controls(self):
         """Test distribution endpoint handles multiple control types in one annotation."""
         AnnotationFactory(
             task=self.task,
@@ -480,32 +480,34 @@ class TestTaskDistributionAPI(APITestCase):
             ],
         )
 
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        assert data['total_annotations'] == 1
-        # All three controls should be present
-        assert 'label' in data['distributions']
-        assert 'sentiment' in data['distributions']
-        assert 'quality' in data['distributions']
-        assert data['distributions']['label']['labels'] == {'Car': 1}
-        assert data['distributions']['sentiment']['labels'] == {'Positive': 1}
-        assert data['distributions']['quality']['average'] == 5.0
+            assert data['total_annotations'] == 1
+            # All three controls should be present
+            assert 'label' in data['distributions']
+            assert 'sentiment' in data['distributions']
+            assert 'quality' in data['distributions']
+            assert data['distributions']['label']['labels'] == {'Car': 1}
+            assert data['distributions']['sentiment']['labels'] == {'Positive': 1}
+            assert data['distributions']['quality']['average'] == 5.0
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_distribution_endpoint_task_not_found(self, mock_flag_set):
+    def test_distribution_endpoint_task_not_found(self):
         """Test that distribution endpoint returns 404 for non-existent task."""
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get('/api/tasks/99999999/distribution/')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get('/api/tasks/99999999/distribution/')
 
-        assert response.status_code == 404
-        assert response.json()['error'] == 'Task not found'
+            assert response.status_code == 404
+            assert response.json()['error'] == 'Task not found'
 
-    @patch('tasks.api.flag_set', side_effect=make_flag_set_mock({FF_LAZY_LOAD}))
-    def test_distribution_endpoint_with_taxonomy(self, mock_flag_set):
+    def test_distribution_endpoint_with_taxonomy(self):
         """Test distribution endpoint correctly handles taxonomy labels."""
         AnnotationFactory(
             task=self.task,
@@ -532,11 +534,13 @@ class TestTaskDistributionAPI(APITestCase):
             ],
         )
 
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
+        # Enable feature flag via environment variable
+        with patch.dict(os.environ, {FF_LAZY_LOAD_ENV: 'true'}):
+            self.client.force_authenticate(user=self.user)
+            response = self.client.get(f'/api/tasks/{self.task.id}/distribution/')
 
-        assert response.status_code == 200
-        data = response.json()
+            assert response.status_code == 200
+            data = response.json()
 
-        # Taxonomy aggregates leaf nodes
-        assert data['distributions']['taxonomy']['labels'] == {'Dog': 2, 'Cat': 1}
+            # Taxonomy aggregates leaf nodes
+            assert data['distributions']['taxonomy']['labels'] == {'Dog': 2, 'Cat': 1}
