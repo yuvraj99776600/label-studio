@@ -68,6 +68,12 @@ export const FF_FIT_720_LAZY_LOAD_ANNOTATIONS = "fflag_fix_all_fit_720_lazy_load
  */
 export const FF_INTERACTIVE_JSON_VIEWER = "fflag_feat_front_interactive_json_viewer_short";
 
+/**
+ * Strict task overlap enforcement - prevents annotators from submitting
+ * annotations when task overlap limit has been reached
+ */
+export const FF_FIT_1304_STRICT_OVERLAP = "fflag_feat_all_fit_1304_strict_overlap";
+
 // Customize flags
 const flags = {};
 
