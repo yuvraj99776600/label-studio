@@ -458,9 +458,7 @@ describe("TaskSummary", () => {
       const annotations = [
         createMockAnnotation({
           versions: {
-            result: [
-              { from_name: "label", to_name: "text", type: "choices", value: { choices: ["positive"] } },
-            ],
+            result: [{ from_name: "label", to_name: "text", type: "choices", value: { choices: ["positive"] } }],
           },
         }),
       ];
