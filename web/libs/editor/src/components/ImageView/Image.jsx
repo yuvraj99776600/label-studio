@@ -40,6 +40,13 @@ export const Image = observer(
       [updateImageSize, imageEntity],
     );
 
+    const onError = useCallback(() => {
+      // Handle image load failure (e.g., revoked blob URL, empty blob, network error)
+      // This sets the error state so the UI can show an error message
+      imageEntity.setError(true);
+      imageEntity.setImageLoaded(false);
+    }, [imageEntity]);
+
     return (
       <div className={cn("image").toClassName()} style={imageSize}>
         {overlay}
@@ -56,6 +63,7 @@ export const Image = observer(
             ref={ref}
             src={imageEntity.currentSrc}
             onLoad={onLoad}
+            onError={onError}
             isLoaded={imageEntity.imageLoaded}
             imageTransform={imageTransform}
           />
@@ -85,7 +93,7 @@ const ImageProgress = observer(({ downloading, progress, error, src, usedValue }
 const imgDefaultProps = { crossOrigin: "anonymous" };
 
 const ImageRenderer = observer(
-  forwardRef(({ src, onLoad, imageTransform, isLoaded }, ref) => {
+  forwardRef(({ src, onLoad, onError, imageTransform, isLoaded }, ref) => {
     const imageStyles = useMemo(() => {
       // We can't just skip rendering the image because we need its dimensions to be set
       // so we just hide it with 0x0 dimensions.
@@ -106,7 +114,9 @@ const ImageRenderer = observer(
     }, [imageTransform, isLoaded]);
 
     // biome-ignore lint/a11y/noRedundantAlt: The use of this component justifies this alt text
-    return <img {...imgDefaultProps} ref={ref} alt="image" src={src} onLoad={onLoad} style={imageStyles} />;
+    return (
+      <img {...imgDefaultProps} ref={ref} alt="image" src={src} onLoad={onLoad} onError={onError} style={imageStyles} />
+    );
   }),
 );
 
