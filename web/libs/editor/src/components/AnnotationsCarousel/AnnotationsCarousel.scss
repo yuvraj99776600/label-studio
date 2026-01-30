@@ -23,8 +23,15 @@
   }
 
   &_scrolled {
-    &::before {       
+    &::before {
       opacity: 1;
+    }
+  }
+
+  // FIT-720: Virtualized carousel styles
+  &_virtualized {
+    .annotations-carousel__container {
+      overflow: visible;
     }
   }
 
