@@ -3,12 +3,11 @@
 This module tests the AnnotationStubSerializer and the annotations_stub
 query parameter for the TaskAPI endpoint.
 
-Feature flag fixtures are defined in tests/conftest.py:
+Feature flag fixtures are defined in tasks/tests/conftest.py:
 - fflag_fix_all_fit_720_lazy_load_annotations_on: Enable the feature flag
 - fflag_fix_all_fit_720_lazy_load_annotations_off: Disable the feature flag
 """
 import pytest
-
 from organizations.tests.factories import OrganizationFactory
 from projects.tests.factories import ProjectFactory
 from rest_framework.test import APITestCase
