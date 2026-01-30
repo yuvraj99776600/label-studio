@@ -40,7 +40,8 @@
       "a11y": {
         "noAutofocus": "off",
         "useKeyWithClickEvents": "off",
-        "noLabelWithoutControl": "off"
+        "noLabelWithoutControl": "off",
+        "noRedundantAlt": "off"
       },
       "suspicious": {
         "noExplicitAny": "off",
