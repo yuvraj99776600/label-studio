@@ -1,12 +1,37 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { cnm, IconChevronDown } from "@humansignal/ui";
 import type { Header } from "@tanstack/react-table";
+import { useQuery } from "@tanstack/react-query";
 import type { RawResult } from "../../stores/types";
 import { Chip } from "./Chip";
 import type { AnnotationSummary, ControlTag } from "./types";
 import { getLabelCounts } from "./utils";
+import { FF_FIT_720_LAZY_LOAD_ANNOTATIONS, isFF } from "../../utils/feature-flags";
 
 import styles from "./TaskSummary.module.scss";
+
+// FIT-720: Type for distribution API response
+type DistributionData = {
+  total_annotations: number;
+  distributions: Record<
+    string,
+    {
+      type: string;
+      labels: Record<string, number>;
+      average?: number;
+      count?: number;
+    }
+  >;
+};
+
+// FIT-720: Fetch function for distribution data
+const fetchDistribution = async (taskId: number | string): Promise<DistributionData> => {
+  const response = await fetch(`/api/tasks/${taskId}/distribution/`);
+  if (!response.ok) {
+    throw new Error("Failed to load distribution");
+  }
+  return response.json();
+};
 
 const resultValue = (result: RawResult) => {
   if (result.type === "textarea") {
@@ -168,23 +193,120 @@ export const AggregationCell = ({
   return <span className="text-neutral-content-subtler text-xs italic">N/A</span>;
 };
 
+// FIT-720: Skeleton loader for distribution cells
+const DistributionSkeleton = () => (
+  <div className="flex items-center gap-2">
+    <div className="h-5 w-16 bg-neutral-surface-subtle rounded animate-pulse" />
+    <div className="h-5 w-12 bg-neutral-surface-subtle rounded animate-pulse" />
+  </div>
+);
+
+// FIT-720: Cell component that renders from API distribution data
+const ApiAggregationCell = ({
+  control,
+  distribution,
+  totalAnnotations,
+  isExpanded,
+}: {
+  control: ControlTag;
+  distribution?: { type: string; labels: Record<string, number>; average?: number; count?: number };
+  totalAnnotations: number;
+  isExpanded: boolean;
+}) => {
+  if (!distribution || Object.keys(distribution.labels).length === 0) {
+    // Check if it's a numeric type with average
+    if (distribution?.average !== undefined) {
+      return (
+        <span className="text-sm font-medium text-neutral-content-subtle">
+          Avg: <span className="font-bold">{distribution.average.toFixed(1)}</span>
+          {distribution.type === "rating" && <span className="text-yellow-500"> ★</span>}
+        </span>
+      );
+    }
+    return <span className="text-neutral-content-subtler text-xs italic">No data</span>;
+  }
+
+  // Sort labels by count descending
+  const sortedLabels = Object.entries(distribution.labels).sort(([, a], [, b]) => b - a);
+
+  // Handle choices/taxonomy with percentages
+  if (distribution.type === "choices" || distribution.type === "taxonomy") {
+    return (
+      <div className={cnm("text-ellipsis", !isExpanded && "line-clamp-2")}>
+        {sortedLabels.map(([label, count]) => (
+          <Chip
+            key={label}
+            prefix={`${((count / totalAnnotations) * 100).toFixed(1)}%`}
+            colors={{ background: control.label_attrs[label]?.background }}
+            className="mr-tighter mb-tighter"
+          >
+            {label}
+          </Chip>
+        ))}
+      </div>
+    );
+  }
+
+  // Handle labels and other types with counts
+  return (
+    <div className={cnm("text-ellipsis", !isExpanded && "line-clamp-2")}>
+      {sortedLabels.map(([label, count]) => (
+        <Chip
+          key={label}
+          prefix={count}
+          colors={{
+            background: control.label_attrs[label]?.background,
+            border: control.label_attrs[label]?.border,
+            color: control.label_attrs[label]?.color,
+          }}
+          className="mr-tighter mb-tighter"
+          thickBorder={distribution.type.endsWith("labels")}
+        >
+          {label}
+        </Chip>
+      ))}
+    </div>
+  );
+};
+
 /**
  * Renders the complete aggregation/distribution row across all columns.
  * Includes a toggle button in the first cell that only appears when content overflows.
  * The toggle expands/collapses the cells to show full content.
+ *
+ * FIT-720: With lazy loading, fetches distribution from dedicated API endpoint
+ * for efficient aggregation without N+1 queries.
  */
 export const AggregationTableRow = ({
   headers,
   controls,
   annotations,
+  taskId,
 }: {
   headers: Header<AnnotationSummary, unknown>[];
   controls: ControlTag[];
   annotations: AnnotationSummary[];
+  taskId?: number | string;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
   const rowRef = useRef<HTMLTableRowElement>(null);
+
+  // For non-lazy loading mode, compute from annotations as before
+  const useApiData = isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS) && taskId;
+
+  // FIT-720: Use TanStack Query for distribution data - handles deduplication and caching
+  const {
+    data: distributionData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["task-distribution", taskId],
+    queryFn: () => fetchDistribution(taskId!),
+    enabled: useApiData && !!taskId,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes (formerly cacheTime)
+  });
 
   useLayoutEffect(() => {
     if (!rowRef.current) return;
@@ -196,7 +318,7 @@ export const AggregationTableRow = ({
     });
 
     setHasOverflow(hasOverflowingCells);
-  }, [annotations, controls]);
+  }, [annotations, controls, distributionData]);
 
   return (
     <tr ref={rowRef} className={cnm("relative z-2", styles["aggregation-row"])}>
@@ -210,18 +332,26 @@ export const AggregationTableRow = ({
             )}
             style={{ width: header.getSize() }}
           >
-            {hasOverflow ? (
-              <button
-                type="button"
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center gap-2 font-semibold text-neutral-content hover:text-neutral-content transition-colors cursor-pointer"
-              >
-                <IconChevronDown size={16} className={cnm("transition-transform", isExpanded && "rotate-180")} />
-                Distribution
-              </button>
-            ) : (
-              <span className="font-semibold text-neutral-content">Distribution</span>
-            )}
+            <div className="flex flex-col">
+              {hasOverflow ? (
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="flex items-center gap-2 font-semibold text-neutral-content hover:text-neutral-content transition-colors cursor-pointer"
+                >
+                  <IconChevronDown size={16} className={cnm("transition-transform", isExpanded && "rotate-180")} />
+                  Distribution
+                </button>
+              ) : (
+                <span className="font-semibold text-neutral-content">Distribution</span>
+              )}
+              {/* FIT-720: Show total count from API */}
+              {useApiData && distributionData && (
+                <span className="text-xs text-neutral-content-subtle">
+                  {distributionData.total_annotations} annotations
+                </span>
+              )}
+            </div>
           </td>
         ) : (
           <td
@@ -229,7 +359,20 @@ export const AggregationTableRow = ({
             className="px-4 py-2.5 overflow-hidden border-y-2 border-neutral-border-bold"
             style={{ width: header.getSize() }}
           >
-            <AggregationCell control={controls[index - 1]} annotations={annotations} isExpanded={isExpanded} />
+            {isLoading ? (
+              <DistributionSkeleton />
+            ) : error ? (
+              <span className="text-neutral-content-subtler text-xs italic">Failed to load</span>
+            ) : useApiData && distributionData ? (
+              <ApiAggregationCell
+                control={controls[index - 1]}
+                distribution={distributionData.distributions[controls[index - 1]?.name]}
+                totalAnnotations={distributionData.total_annotations}
+                isExpanded={isExpanded}
+              />
+            ) : (
+              <AggregationCell control={controls[index - 1]} annotations={annotations} isExpanded={isExpanded} />
+            )}
           </td>
         ),
       )}

@@ -2,6 +2,7 @@
 
 import logging
 
+from core.feature_flags import flag_set
 from core.mixins import GetParentObjectMixin
 from core.permissions import ViewClassPermission, all_permissions
 from core.utils.common import is_community
@@ -374,6 +375,162 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
     @extend_schema(exclude=True)
     def put(self, request, *args, **kwargs):
         return super(TaskAPI, self).put(request, *args, **kwargs)
+
+
+@method_decorator(
+    name='get',
+    decorator=extend_schema(
+        tags=['Tasks'],
+        summary='Get task label distribution',
+        description='Get aggregated label distribution across all annotations for a task. '
+        'Returns counts of each label value grouped by control tag. '
+        'This is an efficient endpoint that avoids N+1 queries.',
+        responses={
+            '200': OpenApiResponse(
+                description='Label distribution data',
+                examples=[
+                    OpenApiExample(
+                        name='response',
+                        value={
+                            'total_annotations': 100,
+                            'distributions': {
+                                'label': {
+                                    'type': 'rectanglelabels',
+                                    'labels': {'Car': 45, 'Person': 30, 'Dog': 25},
+                                },
+                            },
+                        },
+                        media_type='application/json',
+                    )
+                ],
+            )
+        },
+        extensions={
+            'x-fern-audiences': ['internal'],
+        },
+    ),
+)
+class TaskDistributionAPI(generics.RetrieveAPIView):
+    """
+    FIT-720: Efficient endpoint for getting label distribution without fetching all annotations.
+
+    This endpoint aggregates annotation results at the database level to avoid N+1 queries.
+    It returns pre-computed label counts for the Distribution row in the Summary view.
+    """
+
+    permission_required = ViewClassPermission(GET=all_permissions.tasks_view)
+    queryset = Task.objects.all()
+
+    def get(self, request, pk):
+        # FIT-720: This endpoint is gated by feature flag
+        if not flag_set('fflag_fix_all_fit_720_lazy_load_annotations', user=request.user):
+            return Response({'error': 'Feature not enabled'}, status=404)
+
+        try:
+            task = Task.objects.get(pk=pk)
+        except Task.DoesNotExist:
+            return Response({'error': 'Task not found'}, status=404)
+
+        # Check project access using LSO's native permission check
+        if not task.project.has_permission(request.user):
+            raise PermissionDenied('You do not have permission to view this task')
+
+        # Get all annotations for this task with their results in a single query
+        # We only need the 'result' field, not the full annotation
+        annotations = Annotation.objects.filter(
+            task=task,
+            was_cancelled=False,
+        ).values_list('result', flat=True)
+
+        total_annotations = len(annotations)
+        distributions = {}
+
+        # Process results to extract label distributions
+        for result in annotations:
+            if not result:
+                continue
+
+            # result is a list of labeling results
+            for item in result:
+                if not isinstance(item, dict):
+                    continue
+
+                from_name = item.get('from_name', '')
+                result_type = item.get('type', '')
+                value = item.get('value', {})
+
+                # Initialize distribution for this control if not exists
+                if from_name not in distributions:
+                    distributions[from_name] = {
+                        'type': result_type,
+                        'labels': {},
+                        'values': [],
+                    }
+
+                # Extract values based on type
+                if result_type.endswith('labels'):
+                    # Labels type: rectanglelabels, polygonlabels, etc.
+                    labels = value.get(result_type, [])
+                    if isinstance(labels, list):
+                        for label in labels:
+                            if label not in distributions[from_name]['labels']:
+                                distributions[from_name]['labels'][label] = 0
+                            distributions[from_name]['labels'][label] += 1
+
+                elif result_type == 'choices':
+                    # Choices type
+                    choices = value.get('choices', [])
+                    if isinstance(choices, list):
+                        for choice in choices:
+                            if choice not in distributions[from_name]['labels']:
+                                distributions[from_name]['labels'][choice] = 0
+                            distributions[from_name]['labels'][choice] += 1
+
+                elif result_type == 'rating':
+                    # Rating type - collect values for averaging
+                    rating = value.get('rating')
+                    if rating is not None:
+                        distributions[from_name]['values'].append(rating)
+
+                elif result_type == 'number':
+                    # Number type - collect values for averaging
+                    number = value.get('number')
+                    if number is not None:
+                        distributions[from_name]['values'].append(number)
+
+                elif result_type == 'taxonomy':
+                    # Taxonomy type - extract leaf nodes
+                    taxonomy = value.get('taxonomy', [])
+                    if isinstance(taxonomy, list):
+                        for path in taxonomy:
+                            if isinstance(path, list) and path:
+                                leaf = path[-1]  # Get leaf node
+                                if leaf not in distributions[from_name]['labels']:
+                                    distributions[from_name]['labels'][leaf] = 0
+                                distributions[from_name]['labels'][leaf] += 1
+
+                elif result_type == 'pairwise':
+                    # Pairwise type
+                    selected = value.get('selected')
+                    if selected:
+                        if selected not in distributions[from_name]['labels']:
+                            distributions[from_name]['labels'][selected] = 0
+                        distributions[from_name]['labels'][selected] += 1
+
+        # Post-process: calculate averages for numeric types
+        for from_name, dist in distributions.items():
+            if dist['values']:
+                dist['average'] = sum(dist['values']) / len(dist['values'])
+                dist['count'] = len(dist['values'])
+            # Remove raw values from response to keep it lightweight
+            del dist['values']
+
+        return Response(
+            {
+                'total_annotations': total_annotations,
+                'distributions': distributions,
+            }
+        )
 
 
 @method_decorator(
