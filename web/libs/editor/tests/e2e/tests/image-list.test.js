@@ -1,6 +1,7 @@
 Feature("MIG");
 
 const assert = require("assert");
+const { FFlagMatrix, FFlagScenario } = require("../utils/feature-flags");
 
 const rectConfig = `
   <View>
@@ -184,52 +185,56 @@ Scenario("Image list with hotkey navigation", async ({ I, AtImageView, LabelStud
   I.see("1 of 4");
 });
 
-Scenario("View All disables MIG pagination", async ({ I, AtImageView, LabelStudio }) => {
-  const params = {
-    config: rectConfig,
-    data,
-    annotations: [
-      { id: 1, result: [] },
-      { id: 2, result: [] },
-    ],
-    additionalInterfaces: ["annotations:view-all"],
-  };
+FFlagMatrix(["fflag_fix_all_fit_720_lazy_load_annotations"], (flags) => {
+  FFlagScenario("View All disables MIG pagination", async ({ I, AtImageView, LabelStudio }) => {
+    const params = {
+      config: rectConfig,
+      data,
+      annotations: [
+        { id: 1, result: [] },
+        { id: 2, result: [] },
+      ],
+      additionalInterfaces: ["annotations:view-all"],
+    };
 
-  const prevSelector = ".lsf-pagination__btn_arrow-left";
-  const nextSelector = ".lsf-pagination__btn_arrow-right";
+    const prevSelector = ".lsf-pagination__btn_arrow-left";
+    const nextSelector = ".lsf-pagination__btn_arrow-right";
 
-  // FFs for a proper interface with View All button
-  LabelStudio.setFeatureFlags({
-    fflag_feat_front_dev_3873_labeling_ui_improvements_short: true,
+    // FFs for a proper interface with View All button
+    // FIT-720 runs in both states via FFlagMatrix
+    LabelStudio.setFeatureFlags({
+      fflag_feat_front_dev_3873_labeling_ui_improvements_short: true,
+      ...flags,
+    });
+
+    I.amOnPage("/");
+    LabelStudio.init(params);
+
+    LabelStudio.waitForObjectsReady();
+    await AtImageView.lookForStage();
+
+    I.say("Move to next page to have a changed state");
+    I.click(locate(nextSelector));
+    I.seeElement(`img[src="${data.images[1]}"]`);
+    I.see("2 of 4");
+
+    I.say("Enable View All mode");
+    I.click('[aria-label="Compare all annotations"]');
+
+    I.say("Navigation buttons should be disabled");
+    I.seeElement(locate(`${nextSelector}[class$=disabled]`));
+    I.seeElement(locate(`${prevSelector}[class$=disabled]`));
+    I.see("2 of 4");
+
+    I.say("Hotkeys for navigation should not work");
+    await AtImageView.multiImageGoForwardWithHotkey();
+    I.seeElement(`img[src="${data.images[1]}"]`);
+    I.see("2 of 4");
+
+    await AtImageView.multiImageGoBackwardWithHotkey();
+    I.seeElement(`img[src="${data.images[1]}"]`);
+    I.see("2 of 4");
   });
-
-  I.amOnPage("/");
-  LabelStudio.init(params);
-
-  LabelStudio.waitForObjectsReady();
-  await AtImageView.lookForStage();
-
-  I.say("Move to next page to have a changed state");
-  I.click(locate(nextSelector));
-  I.seeElement(`img[src="${data.images[1]}"]`);
-  I.see("2 of 4");
-
-  I.say("Enable View All mode");
-  I.click('[aria-label="Compare all annotations"]');
-
-  I.say("Navigation buttons should be disabled");
-  I.seeElement(locate(`${nextSelector}[class$=disabled]`));
-  I.seeElement(locate(`${prevSelector}[class$=disabled]`));
-  I.see("2 of 4");
-
-  I.say("Hotkeys for navigation should not work");
-  await AtImageView.multiImageGoForwardWithHotkey();
-  I.seeElement(`img[src="${data.images[1]}"]`);
-  I.see("2 of 4");
-
-  await AtImageView.multiImageGoBackwardWithHotkey();
-  I.seeElement(`img[src="${data.images[1]}"]`);
-  I.see("2 of 4");
 });
 
 Scenario(
