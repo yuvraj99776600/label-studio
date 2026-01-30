@@ -530,18 +530,9 @@ export class LSFWrapper {
       const fullAnnotation = await taskStore.loadAnnotation(annotationPk);
 
       if (fullAnnotation && !fullAnnotation.error) {
-        // Update the original task annotation data
-        const annotationIndex = this.task.annotations.findIndex((a) => String(a.id) === String(annotationPk));
-        if (annotationIndex !== -1) {
-          // Merge full annotation data, removing stub flag
-          this.task.annotations[annotationIndex] = {
-            ...this.task.annotations[annotationIndex],
-            ...fullAnnotation,
-            is_stub: false,
-          };
-        }
-
         // Hydrate the LSF annotation with the full result
+        // Note: Don't modify this.task.annotations directly - it may be an MST model
+        // which would cause "object is protected" errors
         const lsfAnnotation = this.annotations.find((a) => String(a.pk) === String(annotationPk));
         if (lsfAnnotation && fullAnnotation.result) {
           lsfAnnotation.history.freeze();

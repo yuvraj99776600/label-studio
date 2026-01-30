@@ -70,10 +70,9 @@ const VirtualizedAnnotationPanel = observer(({ annotation, root, style, onSelect
   // Force MobX to track areas by accessing the regions getter (which iterates areas)
   const regions = annotation.regions;
   const hasRegions = regions && regions.length > 0;
-  // FIT-720: Check if annotation was previously hydrated (is_stub explicitly set to false)
-  const wasHydrated = annotation.is_stub === false;
-  // Annotation is ready to display if it has versionsResult OR has regions OR was previously hydrated
-  const isStub = !wasHydrated && !hasVersionsResult && !hasRegions && annotation.pk && !annotation.userGenerate;
+  // Annotation is a stub if it has no data and is not user-generated
+  // After hydration, hasRegions will be true (deserializeResults populates regions)
+  const isStub = !hasVersionsResult && !hasRegions && annotation.pk && !annotation.userGenerate;
 
   return (
     <div style={{ ...style, paddingRight: PANEL_GAP }}>
@@ -143,12 +142,9 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
       const regions = annotation.regions;
       const hasRegions = regions && regions.length > 0;
 
-      if (hasDataInMST || hasRegions || annotation.is_stub === false) {
-        // This annotation was previously hydrated
+      if (hasDataInMST || hasRegions) {
+        // This annotation was previously hydrated or has data
         hydratedIds.current.add(annotation.id);
-        if (annotation.is_stub !== undefined) {
-          annotation.is_stub = false;
-        }
         return;
       }
 
@@ -161,9 +157,7 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
         annotation.updateObjects?.();
         annotation.history?.safeUnfreeze?.();
         annotation.reinitHistory?.();
-        if (annotation.is_stub !== undefined) {
-          annotation.is_stub = false;
-        }
+        // Track as hydrated (don't directly modify MST model - causes protection errors)
         hydratedIds.current.add(annotation.id);
       }
     });
@@ -258,18 +252,10 @@ const VirtualizedGrid = observer(({ store, annotations, root }) => {
           // isn't treated as a user modification (prevents unwanted draft creation)
           annotation.reinitHistory?.();
 
-          // FIT-720: Clear is_stub flag so we don't show skeleton on remount
-          if (annotation.is_stub !== undefined) {
-            annotation.is_stub = false;
-          }
-
           // Mark as successfully hydrated to avoid re-hydrating
+          // Note: Don't directly modify MST model (is_stub) - it causes protection errors
           hydratedIds.current.add(annotation.id);
         } else {
-          // FIT-720: Clear is_stub flag even for empty results (they're still valid)
-          if (annotation.is_stub !== undefined) {
-            annotation.is_stub = false;
-          }
           // Even if no results, mark as hydrated to avoid repeated attempts
           hydratedIds.current.add(annotation.id);
         }

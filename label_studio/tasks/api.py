@@ -336,9 +336,7 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
         # The expand mechanism would override get_annotations and use AnnotationSerializer
         # instead of AnnotationStubSerializer
         expand = [] if context.get('annotations_stub') else ['annotations.completed_by']
-        serializer = self.get_serializer_class()(
-            self.task, many=False, context=context, expand=expand
-        )
+        serializer = self.get_serializer_class()(self.task, many=False, context=context, expand=expand)
         data = serializer.data
         return Response(data)
 
