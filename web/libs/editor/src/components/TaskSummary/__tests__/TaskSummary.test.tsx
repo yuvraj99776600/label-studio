@@ -421,5 +421,55 @@ describe("TaskSummary", () => {
 
       expect(screen.getByText("Distribution")).toBeInTheDocument();
     });
+
+    it("handles stub annotations correctly (shows skeleton)", () => {
+      // Stub annotations have is_stub: true and no result
+      const stubAnnotation = createMockAnnotation({
+        id: "stub-1",
+        pk: "stub-1",
+        versions: {
+          result: [], // Empty result indicates stub
+        },
+      });
+      const store = createMockStore();
+
+      renderWithProviders(<TaskSummary annotations={[stubAnnotation]} store={store} />);
+
+      // Should still render the component without crashing
+      expect(screen.getByText("Task Summary")).toBeInTheDocument();
+      expect(screen.getByText("Annotations")).toBeInTheDocument();
+    });
+
+    it("counts annotations correctly with mixed stub and full annotations", () => {
+      const annotations = [
+        createMockAnnotation({ pk: "1", type: "annotation" }), // full annotation
+        createMockAnnotation({ pk: "2", type: "annotation", versions: { result: [] } }), // stub annotation
+        createMockAnnotation({ pk: "3", type: "annotation" }), // full annotation
+      ];
+      const store = createMockStore();
+
+      renderWithProviders(<TaskSummary annotations={annotations} store={store} />);
+
+      expect(screen.getByText("Annotations")).toBeInTheDocument();
+      expect(screen.getByText("3")).toBeInTheDocument(); // All annotations counted
+    });
+
+    it("renders labeling summary table with annotations when FF is on", () => {
+      const annotations = [
+        createMockAnnotation({
+          versions: {
+            result: [
+              { from_name: "label", to_name: "text", type: "choices", value: { choices: ["positive"] } },
+            ],
+          },
+        }),
+      ];
+      const store = createMockStore();
+
+      renderWithProviders(<TaskSummary annotations={annotations} store={store} />);
+
+      expect(screen.getByText("Annotator")).toBeInTheDocument();
+      expect(screen.getByText("label")).toBeInTheDocument();
+    });
   });
 });

@@ -14,7 +14,7 @@ def fflag_fix_all_fit_720_lazy_load_annotations_on():
             return True
         return flag_set(*args, **kwargs)
 
-    with mock.patch('tasks.api.flag_set', wraps=fake_flag_set):
+    with mock.patch('tasks.api.flag_set', side_effect=fake_flag_set):
         yield
 
 
@@ -28,5 +28,5 @@ def fflag_fix_all_fit_720_lazy_load_annotations_off():
             return False
         return flag_set(*args, **kwargs)
 
-    with mock.patch('tasks.api.flag_set', wraps=fake_flag_set):
+    with mock.patch('tasks.api.flag_set', side_effect=fake_flag_set):
         yield
