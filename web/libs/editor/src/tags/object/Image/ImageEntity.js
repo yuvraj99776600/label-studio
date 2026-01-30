@@ -2,7 +2,7 @@ import { types, getParent } from "mobx-state-tree";
 import { FileLoader } from "../../../utils/FileLoader";
 import { imageCache } from "../../../utils/ImageCache";
 import { clamp } from "../../../utils/utilities";
-import { FF_IMAGE_MEMORY_USAGE, isFF } from "../../../utils/feature-flags";
+import { FF_FIT_720_LAZY_LOAD_ANNOTATIONS, FF_IMAGE_MEMORY_USAGE, isFF } from "../../../utils/feature-flags";
 
 const fileLoader = new FileLoader();
 
@@ -88,28 +88,51 @@ export const ImageEntity = types
       self._originalUrl = self.src;
 
       // FIT-720: Use global image cache to prevent re-downloading on annotation switch
-      const crossOrigin = self.imageCrossOrigin;
+      if (isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
+        const crossOrigin = self.imageCrossOrigin;
 
-      // Check if already cached in global cache
-      const cached = imageCache.get(self.src);
-      if (cached) {
-        // Add reference to prevent cache eviction while we're using this image
-        imageCache.addRef(self.src);
-        self.setCurrentSrc(cached.blobUrl);
-        self.setDownloaded(true);
-        self.setProgress(1);
-        self.setDownloading(false);
-        // DO NOT set imageLoaded here - wait for the actual <img> onLoad event
-        // This prevents false positives when blob URLs are invalid/revoked
-        return;
-      }
+        // Check if already cached in global cache
+        const cached = imageCache.get(self.src);
+        if (cached) {
+          // Add reference to prevent cache eviction while we're using this image
+          imageCache.addRef(self.src);
+          self.setCurrentSrc(cached.blobUrl);
+          self.setDownloaded(true);
+          self.setProgress(1);
+          self.setDownloading(false);
+          // DO NOT set imageLoaded here - wait for the actual <img> onLoad event
+          // This prevents false positives when blob URLs are invalid/revoked
+          return;
+        }
 
-      // Check if currently loading (deduplication)
-      if (imageCache.isLoading(self.src)) {
+        // Check if currently loading (deduplication)
+        if (imageCache.isLoading(self.src)) {
+          self.setDownloading(true);
+          imageCache
+            .getPendingLoad(self.src)
+            ?.then((result) => {
+              imageCache.addRef(self.src);
+              self.setCurrentSrc(result.blobUrl);
+              self.setDownloaded(true);
+              self.setProgress(1);
+              self.setDownloading(false);
+              // DO NOT set imageLoaded here - wait for <img> onLoad
+            })
+            .catch(() => {
+              self.setError(true);
+              self.setDownloading(false);
+            });
+          return;
+        }
+
         self.setDownloading(true);
+
+        // Use the global cache for loading
         imageCache
-          .getPendingLoad(self.src)
-          ?.then((result) => {
+          .load(self.src, crossOrigin, (progress) => {
+            self.setProgress(progress);
+          })
+          .then((result) => {
             imageCache.addRef(self.src);
             self.setCurrentSrc(result.blobUrl);
             self.setDownloaded(true);
@@ -118,74 +141,104 @@ export const ImageEntity = types
             // DO NOT set imageLoaded here - wait for <img> onLoad
           })
           .catch(() => {
-            self.setError(true);
-            self.setDownloading(false);
+            // Fallback to old behavior if global cache fails
+            self.fallbackPreload();
           });
         return;
       }
 
-      self.setDownloading(true);
+      if (isFF(FF_IMAGE_MEMORY_USAGE)) {
+        self.setDownloading(true);
+        new Promise((resolve) => {
+          const img = new Image();
+          // Get from the image tag
+          const crossOrigin = self.imageCrossOrigin;
+          if (crossOrigin) img.crossOrigin = crossOrigin;
+          img.onload = () => {
+            self.setCurrentSrc(self.src);
+            self.setDownloaded(true);
+            self.setProgress(1);
+            self.setDownloading(false);
+            self.setImageLoaded(true);
+            resolve();
+          };
+          img.onerror = () => {
+            self.setError(true);
+            self.setDownloading(false);
+            resolve();
+          };
+          img.src = self.src;
+        });
+        return;
+      }
 
-      // Use the global cache for loading
-      imageCache
-        .load(self.src, crossOrigin, (progress) => {
+      self.setDownloading(true);
+      fileLoader
+        .download(self.src, (_t, _l, progress) => {
           self.setProgress(progress);
         })
-        .then((result) => {
-          imageCache.addRef(self.src);
-          self.setCurrentSrc(result.blobUrl);
+        .then((url) => {
+          self.setDownloaded(true);
+          self.setDownloading(false);
+          self.setCurrentSrc(url);
+        })
+        .catch(() => {
+          self.setDownloading(false);
+          self.setError(true);
+        });
+    },
+
+    /**
+     * Fallback preload method for when global cache fails
+     */
+    fallbackPreload() {
+      const crossOrigin = self.imageCrossOrigin;
+      if (isFF(FF_IMAGE_MEMORY_USAGE)) {
+        const img = new Image();
+        if (crossOrigin) img.crossOrigin = crossOrigin;
+        img.onload = () => {
+          self.setCurrentSrc(self.src);
           self.setDownloaded(true);
           self.setProgress(1);
           self.setDownloading(false);
-          // DO NOT set imageLoaded here - wait for <img> onLoad
-        })
-        .catch(() => {
-          // Fallback to old behavior if global cache fails
-          if (isFF(FF_IMAGE_MEMORY_USAGE)) {
-            const img = new Image();
-            if (crossOrigin) img.crossOrigin = crossOrigin;
-            img.onload = () => {
-              self.setCurrentSrc(self.src);
-              self.setDownloaded(true);
-              self.setProgress(1);
-              self.setDownloading(false);
-              // imageLoaded will be set by <img> onLoad in the component
-            };
-            img.onerror = () => {
-              self.setError(true);
-              self.setDownloading(false);
-            };
-            img.src = self.src;
-          } else {
-            fileLoader
-              .download(self.src, (_t, _l, progress) => {
-                self.setProgress(progress);
-              })
-              .then((url) => {
-                self.setDownloaded(true);
-                self.setDownloading(false);
-                self.setCurrentSrc(url);
-                // imageLoaded will be set by <img> onLoad in the component
-              })
-              .catch(() => {
-                self.setDownloading(false);
-                self.setError(true);
-              });
-          }
-        });
+          // imageLoaded will be set by <img> onLoad in the component
+        };
+        img.onerror = () => {
+          self.setError(true);
+          self.setDownloading(false);
+        };
+        img.src = self.src;
+      } else {
+        fileLoader
+          .download(self.src, (_t, _l, progress) => {
+            self.setProgress(progress);
+          })
+          .then((url) => {
+            self.setDownloaded(true);
+            self.setDownloading(false);
+            self.setCurrentSrc(url);
+            // imageLoaded will be set by <img> onLoad in the component
+          })
+          .catch(() => {
+            self.setDownloading(false);
+            self.setError(true);
+          });
+      }
     },
 
     ensurePreloaded() {
       // FIT-720: First check global image cache
-      const cached = imageCache.get(self.src);
-      if (cached) {
-        imageCache.addRef(self.src);
-        self.setDownloading(false);
-        self.setDownloaded(true);
-        self.setProgress(1);
-        self.setCurrentSrc(cached.blobUrl);
-        // DO NOT set imageLoaded here - wait for <img> onLoad
-        return true;
+      if (isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
+        const cached = imageCache.get(self.src);
+        if (cached) {
+          imageCache.addRef(self.src);
+          self.setDownloading(false);
+          self.setDownloaded(true);
+          self.setProgress(1);
+          self.setCurrentSrc(cached.blobUrl);
+          // DO NOT set imageLoaded here - wait for <img> onLoad
+          return true;
+        }
       }
 
       if (isFF(FF_IMAGE_MEMORY_USAGE)) return self.currentSrc !== undefined;
@@ -210,7 +263,7 @@ export const ImageEntity = types
      * Should be called when the component unmounts or switches images
      */
     releaseImage() {
-      if (self.src) {
+      if (self.src && isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
         imageCache.releaseRef(self.src);
       }
     },
@@ -240,7 +293,7 @@ export const ImageEntity = types
      * @param {boolean} value - Whether to set error state
      */
     setError(value = true) {
-      if (value && !self._retryAttempted && self._originalUrl) {
+      if (value && !self._retryAttempted && self._originalUrl && isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
         // Attempt recovery: force re-fetch from original URL
         self._retryAttempted = true;
         self.error = false;
@@ -272,9 +325,9 @@ export const ImageEntity = types
             self.error = true;
             self.setDownloading(false);
           });
-      } else {
-        self.error = value;
+        return;
       }
+      self.error = value;
     },
   }))
   .actions((self) => ({
