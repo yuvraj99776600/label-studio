@@ -113,9 +113,11 @@ const ImageRenderer = observer(
       };
     }, [imageTransform, isLoaded]);
 
-    // biome-ignore lint/a11y/noRedundantAlt: The use of this component justifies this alt text
     return (
-      <img {...imgDefaultProps} ref={ref} alt="image" src={src} onLoad={onLoad} onError={onError} style={imageStyles} />
+      <>
+        {/* biome-ignore lint/a11y/noRedundantAlt: The use of this component justifies this alt text */}
+        <img {...imgDefaultProps} ref={ref} alt="image" src={src} onLoad={onLoad} onError={onError} style={imageStyles} />
+      </>
     );
   }),
 );
