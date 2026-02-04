@@ -15,10 +15,10 @@ const OVERFLOW_BUTTON_WIDTH = 80; // "+N" button approximate width
 const ADD_BUTTON_WIDTH = 40; // "+" button width
 
 // Virtualized list constants
-const ITEM_HEIGHT = 44; // Height of each AnnotationButton in dropdown
+const ITEM_HEIGHT = 42; // Height of each AnnotationButton in dropdown
 const MAX_VISIBLE_ITEMS = 10;
 const MAX_HEIGHT = ITEM_HEIGHT * MAX_VISIBLE_ITEMS;
-const DROPDOWN_WIDTH = 240;
+const DROPDOWN_WIDTH = 220;
 
 interface AnnotationsTabsProps {
   store: any;
@@ -150,19 +150,19 @@ export const AnnotationsTabs = observer(({ store, annotationStore }: Annotations
     const calculateTotalWidth = (numTabs: number, hasOverflow: boolean): number => {
       // Width for N tabs: N * TAB_MIN_WIDTH
       const tabsWidth = numTabs * TAB_MIN_WIDTH;
-      
+
       // Gaps between tabs: (N - 1) gaps if N > 0
       const gapsBetweenTabs = numTabs > 0 ? (numTabs - 1) * TAB_GAP : 0;
-      
+
       // Gap after last tab before buttons (if there are tabs)
       const gapAfterTabs = numTabs > 0 ? TAB_GAP : 0;
-      
+
       // Overflow button width + gap after it (if needed)
       const overflowWidth = hasOverflow ? OVERFLOW_BUTTON_WIDTH + TAB_GAP : 0;
-      
+
       // Add button width (if enabled)
       const addButtonWidth = enableCreateAnnotation ? ADD_BUTTON_WIDTH : 0;
-      
+
       return tabsWidth + gapsBetweenTabs + gapAfterTabs + overflowWidth + addButtonWidth;
     };
 

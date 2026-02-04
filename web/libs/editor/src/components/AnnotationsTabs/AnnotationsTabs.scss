@@ -16,7 +16,7 @@
   }
 
   &__overflow-menu {
-    padding: var(--spacing-tighter);
+    padding: var(--spacing-tight) var(--spacing-tighter) var(--spacing-tighter);
     background: var(--color-neutral-background);
     border-radius: var(--corner-radius-small);
     box-shadow: 0 4px 12px rgba(var(--color-neutral-shadow-raw) / 12%), 0 2px 8px rgba(var(--color-neutral-shadow-raw) / 16%);
@@ -27,7 +27,6 @@
 
   &__overflow-item {
     padding: 0 var(--spacing-tighter);
-    margin-bottom: var(--spacing-tighter);
 
     // Adjust AnnotationButton styles for vertical dropdown display
     .annotation-button {
