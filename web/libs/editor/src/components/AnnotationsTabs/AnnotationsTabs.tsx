@@ -11,7 +11,7 @@ import "./AnnotationsTabs.scss";
 // Constants from AnnotationButton.scss
 const TAB_MIN_WIDTH = 186; // min-width in SCSS
 const TAB_GAP = 4; // gap between tabs (--spacing-tighter = 0.25rem = 4px)
-const OVERFLOW_BUTTON_WIDTH = 80; // "+N" button approximate width
+const OVERFLOW_BUTTON_WIDTH = 62; // "+N" button approximate width
 const ADD_BUTTON_WIDTH = 40; // "+" button width
 
 // Virtualized list constants
