@@ -1,0 +1,48 @@
+.annotations-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-tighter);
+  height: 100%;
+  min-width: 0;
+  flex: 1;
+  padding-left: var(--spacing-tighter);
+
+  &__overflow-button {
+    flex-shrink: 0;
+  }
+
+  &__add-button {
+    flex-shrink: 0;
+  }
+
+  &__overflow-menu {
+    padding: var(--spacing-tight);
+    background: var(--color-neutral-background);
+    border-radius: var(--corner-radius-small);
+    box-shadow: 0 4px 12px rgba(var(--color-neutral-shadow-raw) / 15%);
+
+    // Ensure the virtualized list scrolls properly
+    overflow: hidden;
+  }
+
+  &__overflow-item {
+    padding: 0 var(--spacing-tighter);
+
+    // Adjust AnnotationButton styles for vertical dropdown display
+    .annotation-button {
+      width: 100%;
+      border-radius: var(--corner-radius-small);
+      margin-top: 0;
+      height: auto;
+      min-width: auto;
+      
+      // Remove the tab-like bottom border styling for dropdown items
+      border-radius: var(--corner-radius-small);
+      border-width: 1px;
+      
+      &::before {
+        border-radius: var(--corner-radius-small);
+      }
+    }
+  }
+}

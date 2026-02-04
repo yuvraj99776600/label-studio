@@ -1,11 +1,9 @@
 import { observer } from "mobx-react";
 
-import { IconPlus } from "@humansignal/icons";
-import { Button } from "@humansignal/ui";
 import { ff, isStarterCloudPlan } from "@humansignal/core";
 import { cn } from "../../utils/bem";
 import { FF_BULK_ANNOTATION, FF_DEV_3873, isFF } from "../../utils/feature-flags";
-import { AnnotationsCarousel } from "../AnnotationsCarousel/AnnotationsCarousel";
+import { AnnotationsTabs } from "../AnnotationsTabs/AnnotationsTabs";
 import { ViewAllToggle } from "../AnnotationsCarousel/ViewAllToggle";
 import { DynamicPreannotationsToggle } from "../AnnotationTab/DynamicPreannotationsToggle";
 import { Actions } from "./Actions";
@@ -39,27 +37,8 @@ export const TopBar = observer(({ store }) => {
           {store.hasInterface("annotations:view-all") && (
             <ViewAllToggle isActive={isViewAll} onClick={annotationStore.toggleViewingAllAnnotations} />
           )}
-          {store.hasInterface("annotations:add-new") && (
-            <Button
-              className={cn("topbar").elem("button").toClassName()}
-              type={isViewAll ? undefined : "text"}
-              aria-label="Create an annotation"
-              variant="neutral"
-              size="small"
-              look="outlined"
-              tooltip="Create a new annotation"
-              onClick={(event) => {
-                event.preventDefault();
-                const created = store.annotationStore.createAnnotation();
-
-                store.annotationStore.selectAnnotation(created.id, { exitViewAll: true });
-              }}
-            >
-              <IconPlus />
-            </Button>
-          )}
           {(!isViewAll || ff.isActive(ff.FF_SUMMARY)) && (
-            <AnnotationsCarousel
+            <AnnotationsTabs
               store={store}
               annotationStore={store.annotationStore}
               commentStore={store.commentStore}
