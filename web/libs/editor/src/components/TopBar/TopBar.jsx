@@ -38,11 +38,7 @@ export const TopBar = observer(({ store }) => {
             <ViewAllToggle isActive={isViewAll} onClick={annotationStore.toggleViewingAllAnnotations} />
           )}
           {(!isViewAll || ff.isActive(ff.FF_SUMMARY)) && (
-            <AnnotationsTabs
-              store={store}
-              annotationStore={store.annotationStore}
-              commentStore={store.commentStore}
-            />
+            <AnnotationsTabs store={store} annotationStore={store.annotationStore} commentStore={store.commentStore} />
           )}
         </div>
       ) : (
