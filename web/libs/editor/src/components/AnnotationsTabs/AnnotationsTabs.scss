@@ -16,10 +16,10 @@
   }
 
   &__overflow-menu {
-    padding: var(--spacing-tight);
+    padding: var(--spacing-tighter);
     background: var(--color-neutral-background);
     border-radius: var(--corner-radius-small);
-    box-shadow: 0 4px 12px rgba(var(--color-neutral-shadow-raw) / 15%);
+    box-shadow: 0 4px 12px rgba(var(--color-neutral-shadow-raw) / 12%), 0 2px 8px rgba(var(--color-neutral-shadow-raw) / 16%);
 
     // Ensure the virtualized list scrolls properly
     overflow: hidden;
@@ -27,21 +27,56 @@
 
   &__overflow-item {
     padding: 0 var(--spacing-tighter);
+    margin-bottom: var(--spacing-tighter);
 
     // Adjust AnnotationButton styles for vertical dropdown display
     .annotation-button {
       width: 100%;
-      border-radius: var(--corner-radius-small);
       margin-top: 0;
       height: auto;
       min-width: auto;
+      border: none;
+      background-color: transparent;
       
       // Remove the tab-like bottom border styling for dropdown items
       border-radius: var(--corner-radius-small);
       border-width: 1px;
       
       &::before {
-        border-radius: var(--corner-radius-small);
+        border-bottom-left-radius: var(--corner-radius-small);
+        border-top-right-radius: 0;
+        border-top-style: transparent;
+        border-top-width: 0;
+        border-left-style: solid;
+        border-left-width: 2px;
+        left: -1px;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+        height: unset;
+      }
+
+      &::after {
+        border-bottom-left-radius: var(--corner-radius-small);
+        border-top-right-radius: 0;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+        height: unset;
+        background-repeat: repeat-y;
+        background-position: left;
+        background-size: 2px 100%;
+        transform: translateY(0) translateX(-1px);
+        background-image: repeating-linear-gradient(-32deg, transparent 1px, var(--accent-base) 2px, var(--accent-base) 6px, var(--accent-subtle) 7px, var(--accent-subtle) 10px);
+      }
+
+      &:hover:not(&_selected) {
+        background-color: var(--color-primary-emphasis-subtle);
+      }
+
+      &_selected {
+        background-color: var(--color-primary-emphasis);
+        box-shadow: none;
       }
     }
   }

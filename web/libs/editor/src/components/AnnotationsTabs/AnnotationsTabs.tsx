@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FixedSizeList as List } from "react-window";
 import { observer } from "mobx-react";
 import { IconPlus } from "@humansignal/icons";
-import { Button, Dropdown } from "@humansignal/ui";
+import { Button, Dropdown, useDropdown } from "@humansignal/ui";
 import { cn } from "../../utils/bem";
 import { sortAnnotations } from "../../utils/utilities";
 import { AnnotationButton } from "../AnnotationsCarousel/AnnotationButton";
@@ -15,8 +15,8 @@ const OVERFLOW_BUTTON_WIDTH = 80; // "+N" button approximate width
 const ADD_BUTTON_WIDTH = 40; // "+" button width
 
 // Virtualized list constants
-const ITEM_HEIGHT = 56; // Height of each AnnotationButton in dropdown
-const MAX_VISIBLE_ITEMS = 8;
+const ITEM_HEIGHT = 44; // Height of each AnnotationButton in dropdown
+const MAX_VISIBLE_ITEMS = 12;
 const MAX_HEIGHT = ITEM_HEIGHT * MAX_VISIBLE_ITEMS;
 const DROPDOWN_WIDTH = 280;
 
@@ -28,6 +28,7 @@ interface AnnotationsTabsProps {
 
 interface VirtualizedOverflowMenuProps {
   entities: any[];
+  store: any;
   annotationStore: any;
   capabilities: {
     enablePredictions: boolean;
@@ -42,39 +43,48 @@ interface VirtualizedOverflowMenuProps {
  * Virtualized overflow menu for annotations that don't fit in the tab bar.
  * Uses react-window to efficiently render large lists of annotations.
  */
-const VirtualizedOverflowMenu = memo(
-  ({ entities, annotationStore, capabilities }: VirtualizedOverflowMenuProps) => {
-    const rootClass = cn("annotations-tabs");
+const VirtualizedOverflowMenu = memo(({ entities, store, annotationStore, capabilities }: VirtualizedOverflowMenuProps) => {
+  const rootClass = cn("annotations-tabs");
+  const dropdown = useDropdown();
 
-    // Calculate list height - shorter if fewer items
-    const listHeight = Math.min(entities.length * ITEM_HEIGHT, MAX_HEIGHT);
+  // Calculate list height - shorter if fewer items
+  const listHeight = Math.min(entities.length * ITEM_HEIGHT, MAX_HEIGHT);
 
-    const Row = useCallback(
-      ({ index, style }: { index: number; style: React.CSSProperties }) => {
-        const entity = entities[index];
-        return (
-          <div style={style} className={rootClass.elem("overflow-item").toClassName()}>
-            <AnnotationButton
-              key={entity?.id}
-              entity={entity}
-              capabilities={capabilities}
-              annotationStore={annotationStore}
-            />
-          </div>
-        );
-      },
-      [entities, annotationStore, capabilities, rootClass],
-    );
+  // Close dropdown when an annotation is selected
+  const handleAnnotationClick = useCallback(() => {
+    dropdown?.close?.();
+  }, [dropdown]);
 
-    return (
-      <div className={rootClass.elem("overflow-menu").toClassName()}>
-        <List height={listHeight} itemCount={entities.length} itemSize={ITEM_HEIGHT} width={DROPDOWN_WIDTH}>
-          {Row}
-        </List>
-      </div>
-    );
-  },
-);
+  const Row = useCallback(
+    ({ index, style }: { index: number; style: React.CSSProperties }) => {
+      const entity = entities[index];
+      return (
+        <div 
+          style={style} 
+          className={rootClass.elem("overflow-item").toClassName()}
+          onClick={handleAnnotationClick}
+        >
+          <AnnotationButton
+            key={entity?.id}
+            entity={entity}
+            store={store}
+            capabilities={capabilities}
+            annotationStore={annotationStore}
+          />
+        </div>
+      );
+    },
+    [entities, store, annotationStore, capabilities, rootClass, handleAnnotationClick],
+  );
+
+  return (
+    <div className={rootClass.elem("overflow-menu").toClassName()}>
+      <List height={listHeight} itemCount={entities.length} itemSize={ITEM_HEIGHT} width={DROPDOWN_WIDTH}>
+        {Row}
+      </List>
+    </div>
+  );
+});
 
 VirtualizedOverflowMenu.displayName = "VirtualizedOverflowMenu";
 
@@ -156,15 +166,9 @@ export const AnnotationsTabs = observer(({ store, annotationStore }: Annotations
   }, [containerWidth, sortedEntities.length, enableCreateAnnotation]);
 
   // Only slice the entities we need to render (O(1) slice, not O(n) render)
-  const visibleEntities = useMemo(
-    () => sortedEntities.slice(0, maxVisibleTabs),
-    [sortedEntities, maxVisibleTabs],
-  );
+  const visibleEntities = useMemo(() => sortedEntities.slice(0, maxVisibleTabs), [sortedEntities, maxVisibleTabs]);
 
-  const hiddenEntities = useMemo(
-    () => sortedEntities.slice(maxVisibleTabs),
-    [sortedEntities, maxVisibleTabs],
-  );
+  const hiddenEntities = useMemo(() => sortedEntities.slice(maxVisibleTabs), [sortedEntities, maxVisibleTabs]);
 
   // Watch container size with ResizeObserver
   useEffect(() => {
@@ -202,6 +206,7 @@ export const AnnotationsTabs = observer(({ store, annotationStore }: Annotations
         <AnnotationButton
           key={entity?.id}
           entity={entity}
+          store={store}
           capabilities={capabilities}
           annotationStore={annotationStore}
         />
@@ -213,6 +218,7 @@ export const AnnotationsTabs = observer(({ store, annotationStore }: Annotations
           content={
             <VirtualizedOverflowMenu
               entities={hiddenEntities}
+              store={store}
               annotationStore={annotationStore}
               capabilities={capabilities}
             />
