@@ -10,15 +10,15 @@ import "./AnnotationsTabs.scss";
 
 // Constants from AnnotationButton.scss
 const TAB_MIN_WIDTH = 186; // min-width in SCSS
-const TAB_GAP = 4; // gap between tabs (--spacing-tighter)
+const TAB_GAP = 4; // gap between tabs (--spacing-tighter = 0.25rem = 4px)
 const OVERFLOW_BUTTON_WIDTH = 80; // "+N" button approximate width
 const ADD_BUTTON_WIDTH = 40; // "+" button width
 
 // Virtualized list constants
 const ITEM_HEIGHT = 44; // Height of each AnnotationButton in dropdown
-const MAX_VISIBLE_ITEMS = 12;
+const MAX_VISIBLE_ITEMS = 10;
 const MAX_HEIGHT = ITEM_HEIGHT * MAX_VISIBLE_ITEMS;
-const DROPDOWN_WIDTH = 280;
+const DROPDOWN_WIDTH = 240;
 
 interface AnnotationsTabsProps {
   store: any;
@@ -43,48 +43,46 @@ interface VirtualizedOverflowMenuProps {
  * Virtualized overflow menu for annotations that don't fit in the tab bar.
  * Uses react-window to efficiently render large lists of annotations.
  */
-const VirtualizedOverflowMenu = memo(({ entities, store, annotationStore, capabilities }: VirtualizedOverflowMenuProps) => {
-  const rootClass = cn("annotations-tabs");
-  const dropdown = useDropdown();
+const VirtualizedOverflowMenu = memo(
+  ({ entities, store, annotationStore, capabilities }: VirtualizedOverflowMenuProps) => {
+    const rootClass = cn("annotations-tabs");
+    const dropdown = useDropdown();
 
-  // Calculate list height - shorter if fewer items
-  const listHeight = Math.min(entities.length * ITEM_HEIGHT, MAX_HEIGHT);
+    // Calculate list height - shorter if fewer items
+    const listHeight = Math.min(entities.length * ITEM_HEIGHT, MAX_HEIGHT);
 
-  // Close dropdown when an annotation is selected
-  const handleAnnotationClick = useCallback(() => {
-    dropdown?.close?.();
-  }, [dropdown]);
+    // Close dropdown when an annotation is selected
+    const handleAnnotationClick = useCallback(() => {
+      dropdown?.close?.();
+    }, [dropdown]);
 
-  const Row = useCallback(
-    ({ index, style }: { index: number; style: React.CSSProperties }) => {
-      const entity = entities[index];
-      return (
-        <div 
-          style={style} 
-          className={rootClass.elem("overflow-item").toClassName()}
-          onClick={handleAnnotationClick}
-        >
-          <AnnotationButton
-            key={entity?.id}
-            entity={entity}
-            store={store}
-            capabilities={capabilities}
-            annotationStore={annotationStore}
-          />
-        </div>
-      );
-    },
-    [entities, store, annotationStore, capabilities, rootClass, handleAnnotationClick],
-  );
+    const Row = useCallback(
+      ({ index, style }: { index: number; style: React.CSSProperties }) => {
+        const entity = entities[index];
+        return (
+          <div style={style} className={rootClass.elem("overflow-item").toClassName()} onClick={handleAnnotationClick}>
+            <AnnotationButton
+              key={entity?.id}
+              entity={entity}
+              store={store}
+              capabilities={capabilities}
+              annotationStore={annotationStore}
+            />
+          </div>
+        );
+      },
+      [entities, store, annotationStore, capabilities, rootClass, handleAnnotationClick],
+    );
 
-  return (
-    <div className={rootClass.elem("overflow-menu").toClassName()}>
-      <List height={listHeight} itemCount={entities.length} itemSize={ITEM_HEIGHT} width={DROPDOWN_WIDTH}>
-        {Row}
-      </List>
-    </div>
-  );
-});
+    return (
+      <div className={rootClass.elem("overflow-menu").toClassName()}>
+        <List height={listHeight} itemCount={entities.length} itemSize={ITEM_HEIGHT} width={DROPDOWN_WIDTH}>
+          {Row}
+        </List>
+      </div>
+    );
+  },
+);
 
 VirtualizedOverflowMenu.displayName = "VirtualizedOverflowMenu";
 
@@ -146,23 +144,52 @@ export const AnnotationsTabs = observer(({ store, annotationStore }: Annotations
   const maxVisibleTabs = useMemo(() => {
     if (containerWidth === 0 || sortedEntities.length === 0) return sortedEntities.length;
 
-    // Reserve space for add button
-    let reservedWidth = enableCreateAnnotation ? ADD_BUTTON_WIDTH + TAB_GAP : 0;
+    const totalEntities = sortedEntities.length;
 
-    // If there might be overflow, reserve space for overflow button
-    const tabWidthWithGap = TAB_MIN_WIDTH + TAB_GAP;
-    const availableWidthForTabs = containerWidth - reservedWidth;
-    const maxPossibleTabs = Math.floor(availableWidthForTabs / tabWidthWithGap);
+    // Helper function to calculate total width needed for N tabs + buttons
+    const calculateTotalWidth = (numTabs: number, hasOverflow: boolean): number => {
+      // Width for N tabs: N * TAB_MIN_WIDTH
+      const tabsWidth = numTabs * TAB_MIN_WIDTH;
+      
+      // Gaps between tabs: (N - 1) gaps if N > 0
+      const gapsBetweenTabs = numTabs > 0 ? (numTabs - 1) * TAB_GAP : 0;
+      
+      // Gap after last tab before buttons (if there are tabs)
+      const gapAfterTabs = numTabs > 0 ? TAB_GAP : 0;
+      
+      // Overflow button width + gap after it (if needed)
+      const overflowWidth = hasOverflow ? OVERFLOW_BUTTON_WIDTH + TAB_GAP : 0;
+      
+      // Add button width (if enabled)
+      const addButtonWidth = enableCreateAnnotation ? ADD_BUTTON_WIDTH : 0;
+      
+      return tabsWidth + gapsBetweenTabs + gapAfterTabs + overflowWidth + addButtonWidth;
+    };
 
-    // If not all tabs fit, we need space for overflow button
-    if (maxPossibleTabs < sortedEntities.length) {
-      reservedWidth += OVERFLOW_BUTTON_WIDTH + TAB_GAP;
+    // Try to fit all tabs without overflow
+    const widthWithoutOverflow = calculateTotalWidth(totalEntities, false);
+    if (widthWithoutOverflow <= containerWidth) {
+      return totalEntities;
     }
 
-    const finalAvailableWidth = containerWidth - reservedWidth;
-    const visibleCount = Math.max(1, Math.floor(finalAvailableWidth / tabWidthWithGap));
+    // Binary search to find maximum tabs that fit with overflow button
+    let left = 1;
+    let right = totalEntities - 1;
+    let result = 1;
 
-    return Math.min(visibleCount, sortedEntities.length);
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      const widthWithOverflow = calculateTotalWidth(mid, true);
+
+      if (widthWithOverflow <= containerWidth) {
+        result = mid;
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+    return result;
   }, [containerWidth, sortedEntities.length, enableCreateAnnotation]);
 
   // Only slice the entities we need to render (O(1) slice, not O(n) render)
