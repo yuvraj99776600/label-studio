@@ -249,9 +249,9 @@ function AnnotationButtonTooltip({
   const tooltipData = useMemo(() => {
     const rows: Array<{ label: string; value: string }> = [];
 
-    // Add Annotation ID first if available
+    // Add Annotation/Prediction ID first if available
     if (annotationId) {
-      rows.push({ label: "Annotation ID", value: String(annotationId) });
+      rows.push({ label: isPrediction ? "Prediction ID" : "Annotation ID", value: String(annotationId) });
     }
 
     // Add Type for all annotations/predictions
