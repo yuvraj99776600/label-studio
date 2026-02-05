@@ -97,7 +97,7 @@ class ProjectSerializer(FlexFieldsModelSerializer):
     control_weights = OpenApiObjectJSONField(
         required=False,
         allow_null=True,
-        help_text=Project._meta.get_field('control_weights').help_text,
+        help_text='Dict of weights for each control tag in metric calculation.'
     )
     parsed_label_config = OpenApiObjectJSONField(
         default=None, read_only=True, help_text='JSON-formatted labeling configuration'
