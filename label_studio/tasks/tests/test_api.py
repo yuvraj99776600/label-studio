@@ -3,7 +3,7 @@ from unittest.mock import patch
 from organizations.tests.factories import OrganizationFactory
 from projects.tests.factories import ProjectFactory
 from rest_framework.test import APITestCase
-from tasks.tests.factories import AnnotationFactory, TaskFactory
+from tasks.tests.factories import AnnotationFactory, PredictionFactory, TaskFactory
 
 
 class TestTaskAPI(APITestCase):
@@ -559,3 +559,39 @@ class TestTaskDistributionAPI(APITestCase):
         data = response.json()
         assert data['total_annotations'] == 1
         assert data['distributions']['label']['labels'] == {'Car': 1}
+
+    @patch('tasks.api.flag_set')
+    def test_distribution_includes_predictions_in_label_counts(self, mock_flag_set):
+        """Predictions are merged into distributions so aggregate matches client-side (develop / FF off)."""
+        mock_flag_set.return_value = True
+        task = TaskFactory(project=self.project)
+        AnnotationFactory(
+            task=task,
+            project=self.project,
+            result=[
+                {
+                    'from_name': 'label',
+                    'to_name': 'image',
+                    'type': 'rectanglelabels',
+                    'value': {'rectanglelabels': ['Car', 'Car']},
+                }
+            ],
+        )
+        PredictionFactory(
+            task=task,
+            project=self.project,
+            result=[
+                {
+                    'from_name': 'label',
+                    'to_name': 'image',
+                    'type': 'rectanglelabels',
+                    'value': {'rectanglelabels': ['Car']},
+                }
+            ],
+        )
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f'/api/tasks/{task.id}/distribution/')
+        assert response.status_code == 200
+        data = response.json()
+        assert data['total_annotations'] == 1
+        assert data['distributions']['label']['labels'] == {'Car': 3}

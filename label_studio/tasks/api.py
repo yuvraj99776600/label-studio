@@ -465,7 +465,6 @@ class TaskDistributionAPI(generics.RetrieveAPIView):
             raise PermissionDenied('You do not have permission to view this task')
 
         # Get all annotations for this task with their results in a single query
-        # We only need the 'result' field, not the full annotation
         annotations = Annotation.objects.filter(
             task=task,
             was_cancelled=False,
@@ -474,21 +473,17 @@ class TaskDistributionAPI(generics.RetrieveAPIView):
         total_annotations = len(annotations)
         distributions = {}
 
-        # Process results to extract label distributions
-        for result in annotations:
-            if not result:
-                continue
-
-            # result is a list of labeling results
+        def merge_result_into_distributions(result):
+            """Merge a single result (list of labeling items) into distributions in place."""
+            if not result or not isinstance(result, list):
+                return
             for item in result:
                 if not isinstance(item, dict):
                     continue
-
                 from_name = item.get('from_name', '')
                 result_type = item.get('type', '')
                 value = item.get('value', {})
 
-                # Initialize distribution for this control if not exists
                 if from_name not in distributions:
                     distributions[from_name] = {
                         'type': result_type,
@@ -496,9 +491,7 @@ class TaskDistributionAPI(generics.RetrieveAPIView):
                         'values': [],
                     }
 
-                # Extract values based on type
                 if result_type.endswith('labels'):
-                    # Labels type: rectanglelabels, polygonlabels, etc.
                     labels = value.get(result_type, [])
                     if isinstance(labels, list):
                         for label in labels:
@@ -507,7 +500,6 @@ class TaskDistributionAPI(generics.RetrieveAPIView):
                             distributions[from_name]['labels'][label] += 1
 
                 elif result_type == 'choices':
-                    # Choices type
                     choices = value.get('choices', [])
                     if isinstance(choices, list):
                         for choice in choices:
@@ -516,35 +508,43 @@ class TaskDistributionAPI(generics.RetrieveAPIView):
                             distributions[from_name]['labels'][choice] += 1
 
                 elif result_type == 'rating':
-                    # Rating type - collect values for averaging
                     rating = value.get('rating')
                     if rating is not None:
                         distributions[from_name]['values'].append(rating)
 
                 elif result_type == 'number':
-                    # Number type - collect values for averaging
                     number = value.get('number')
                     if number is not None:
                         distributions[from_name]['values'].append(number)
 
                 elif result_type == 'taxonomy':
-                    # Taxonomy type - extract leaf nodes
                     taxonomy = value.get('taxonomy', [])
                     if isinstance(taxonomy, list):
                         for path in taxonomy:
                             if isinstance(path, list) and path:
-                                leaf = path[-1]  # Get leaf node
+                                leaf = path[-1]
                                 if leaf not in distributions[from_name]['labels']:
                                     distributions[from_name]['labels'][leaf] = 0
                                 distributions[from_name]['labels'][leaf] += 1
 
                 elif result_type == 'pairwise':
-                    # Pairwise type
                     selected = value.get('selected')
                     if selected:
                         if selected not in distributions[from_name]['labels']:
                             distributions[from_name]['labels'][selected] = 0
                         distributions[from_name]['labels'][selected] += 1
+
+        # Process annotation results
+        for result in annotations:
+            merge_result_into_distributions(result)
+
+        # Include prediction results in distribution counts so aggregate matches
+        # client-side (develop / FF off). total_annotations stays annotation count only.
+        predictions = Prediction.objects.filter(task=task).values_list('result', flat=True)
+        for result in predictions:
+            # Prediction.result can be list (same as annotation) or dict
+            if isinstance(result, list):
+                merge_result_into_distributions(result)
 
         # Post-process: calculate averages for numeric types
         for from_name, dist in distributions.items():
