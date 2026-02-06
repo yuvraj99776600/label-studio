@@ -441,7 +441,7 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
 )
 class TaskDistributionAPI(generics.RetrieveAPIView):
     """
-    FIT-720: Efficient endpoint for getting label distribution without fetching all annotations.
+    Efficient endpoint for getting label distribution without fetching all annotations.
 
     This endpoint aggregates annotation results at the database level to avoid N+1 queries.
     It returns pre-computed label counts for the Distribution row in the Summary view.
@@ -451,7 +451,7 @@ class TaskDistributionAPI(generics.RetrieveAPIView):
     queryset = Task.objects.all()
 
     def get(self, request, pk):
-        # FIT-720: This endpoint is gated by feature flag
+        # This endpoint is gated by feature flag
         if not flag_set('fflag_fix_all_fit_720_lazy_load_annotations', user=request.user):
             return Response({'error': 'Feature not enabled'}, status=404)
 
