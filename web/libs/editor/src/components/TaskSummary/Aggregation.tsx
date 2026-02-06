@@ -355,9 +355,9 @@ export const AggregationTableRow = ({
             className="px-4 py-2.5 overflow-hidden border-y-2 border-neutral-border-bold"
             style={{ width: header.getSize() }}
           >
-            {isLoading ? (
+            {useApiData && isLoading ? (
               <DistributionSkeleton />
-            ) : error ? (
+            ) : useApiData && error ? (
               <span className="text-neutral-content-subtler text-xs italic">Failed to load</span>
             ) : useApiData && distributionData ? (
               <ApiAggregationCell
