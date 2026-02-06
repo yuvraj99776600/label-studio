@@ -270,7 +270,7 @@ const ApiAggregationCell = ({
  * Includes a toggle button in the first cell that only appears when content overflows.
  * The toggle expands/collapses the cells to show full content.
  *
- * FIT-720: With lazy loading, fetches distribution from dedicated API endpoint
+ * With lazy loading, fetches distribution from dedicated API endpoint
  * for efficient aggregation without N+1 queries.
  */
 export const AggregationTableRow = ({
@@ -340,7 +340,7 @@ export const AggregationTableRow = ({
               ) : (
                 <span className="font-semibold text-neutral-content">Distribution</span>
               )}
-              {/* FIT-720: Show total count from API */}
+              {/* Show total count from API */}
               {useApiData && distributionData && (
                 <span className="text-xs text-neutral-content-subtle">
                   {distributionData.total_annotations} annotations
