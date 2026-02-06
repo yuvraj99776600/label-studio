@@ -10,7 +10,6 @@ import { FF_FIT_720_LAZY_LOAD_ANNOTATIONS, isFF } from "../../utils/feature-flag
 
 import styles from "./TaskSummary.module.scss";
 
-// FIT-720: Type for distribution API response
 type DistributionData = {
   total_annotations: number;
   distributions: Record<
@@ -24,7 +23,6 @@ type DistributionData = {
   >;
 };
 
-// FIT-720: Fetch function for distribution data
 const fetchDistribution = async (taskId: number | string): Promise<DistributionData> => {
   const response = await fetch(`/api/tasks/${taskId}/distribution/`);
   if (!response.ok) {
@@ -193,7 +191,6 @@ export const AggregationCell = ({
   return <span className="text-neutral-content-subtler text-xs italic">N/A</span>;
 };
 
-// FIT-720: Skeleton loader for distribution cells
 const DistributionSkeleton = () => (
   <div className="flex items-center gap-2">
     <div className="h-5 w-16 bg-neutral-surface-subtle rounded animate-pulse" />
@@ -201,7 +198,6 @@ const DistributionSkeleton = () => (
   </div>
 );
 
-// FIT-720: Cell component that renders from API distribution data
 const ApiAggregationCell = ({
   control,
   distribution,
@@ -295,7 +291,6 @@ export const AggregationTableRow = ({
   // For non-lazy loading mode, compute from annotations as before
   const useApiData = isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS) && taskId;
 
-  // FIT-720: Use TanStack Query for distribution data - handles deduplication and caching
   const {
     data: distributionData,
     isLoading,
