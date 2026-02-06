@@ -48,10 +48,11 @@ export const AggregationCell = ({
   isExpanded,
 }: { control: ControlTag; annotations: AnnotationSummary[]; isExpanded: boolean }) => {
   const allResults = annotations.flatMap((ann) => ann.results.filter((r) => r.from_name === control.name));
-  const totalAnnotations = annotations.length;
+  // Exclude predictions for percentage denominator to match backend TaskDistributionAPI
+  const totalAnnotations = annotations.filter((a) => a.type === "annotation").length;
 
   if (!allResults.length) {
-    return <span className="text-neutral-content-subtler text-xs italic">No data</span>;
+    return <span className="text-neutral-content-subtler text-xs italic">N/A</span>;
   }
 
   // Handle labels-type controls (rectanglelabels, polygonlabels, labels, etc.)
@@ -161,12 +162,12 @@ export const AggregationCell = ({
     );
   }
 
-  // Handle rating - calculate average rating across all annotations
+  // Handle rating - average over annotations that have a value (matches backend TaskDistributionAPI)
   if (control.type === "rating") {
     const ratings = allResults.map((r) => resultValue(r)).filter(Boolean);
     if (!ratings.length) return <span className="text-neutral-content-subtler text-xs italic">No ratings</span>;
 
-    const avgRating = ratings.reduce((sum, val) => sum + val, 0) / totalAnnotations;
+    const avgRating = ratings.reduce((sum, val) => sum + val, 0) / ratings.length;
     return (
       <span className="text-sm font-medium text-neutral-content-subtle">
         Avg: <span className="font-bold">{avgRating.toFixed(1)}</span> <span className="text-yellow-500">★</span>
@@ -174,12 +175,12 @@ export const AggregationCell = ({
     );
   }
 
-  // Handle number - calculate average number value across all annotations
+  // Handle number - average over annotations that have a value (matches backend TaskDistributionAPI)
   if (control.type === "number") {
     const numbers = allResults.map((r) => resultValue(r)).filter((v) => v !== null && v !== undefined);
     if (!numbers.length) return <span className="text-neutral-content-subtler text-xs italic">No data</span>;
 
-    const avg = numbers.reduce((sum, val) => sum + Number(val), 0) / totalAnnotations;
+    const avg = numbers.reduce((sum, val) => sum + Number(val), 0) / numbers.length;
     return (
       <span className="text-sm font-medium text-neutral-content-subtle">
         Avg: <span className="font-bold">{avg.toFixed(1)}</span>
@@ -219,7 +220,7 @@ const ApiAggregationCell = ({
         </span>
       );
     }
-    return <span className="text-neutral-content-subtler text-xs italic">No data</span>;
+    return <span className="text-neutral-content-subtler text-xs italic">N/A</span>;
   }
 
   // Sort labels by count descending
