@@ -66,12 +66,12 @@ The details will vary depending on your IdP, but in general you will complete th
 
 **The default attribute names are:**
 
-    | Data | Default Attribute |
-    | --- | --- |
-    | Email address | Email |
-    | First or given name | FirstName |
-    | Last or family name | LastName |
-    | Group name | Groups | 
+| Data | Default Attribute |
+| --- | --- |
+| Email address | Email |
+| First or given name | FirstName |
+| Last or family name | LastName |
+| Group name | Groups | 
 
 !!! note Note
     Different Identity Providers use different attribute names. Label Studio provides **presets** in the SSO & SAML settings page to quickly configure the correct attribute mappings for popular IdPs. You can also manually configure custom attribute names if your IdP uses different values.
