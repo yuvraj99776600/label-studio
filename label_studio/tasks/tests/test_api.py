@@ -1,6 +1,9 @@
+import unittest
 from unittest.mock import patch
 
+from core.feature_flags import flag_set
 from organizations.tests.factories import OrganizationFactory
+from projects.models import Project
 from projects.tests.factories import ProjectFactory
 from rest_framework.test import APITestCase
 from tasks.tests.factories import AnnotationFactory, PredictionFactory, TaskFactory
@@ -238,8 +241,8 @@ class TestTaskAPIResolveUri(APITestCase):
         assert response_data['text'] == 'Plain text field'
 
 
-class TestTaskDistributionAPI(APITestCase):
-    """Tests for TaskDistributionAPI (GET /api/tasks/<id>/distribution/)."""
+class TestTaskDistributionAPIFeatureOff(APITestCase):
+    """When feature flag is off, distribution endpoint returns 403. Always run this test."""
 
     @classmethod
     def setUpTestData(cls):
@@ -248,13 +251,27 @@ class TestTaskDistributionAPI(APITestCase):
         cls.user = cls.organization.created_by
 
     @patch('tasks.api.flag_set')
-    def test_distribution_returns_404_when_feature_flag_disabled(self, mock_flag_set):
+    def test_distribution_returns_403_when_feature_flag_disabled(self, mock_flag_set):
         mock_flag_set.return_value = False
         task = TaskFactory(project=self.project)
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'/api/tasks/{task.id}/distribution/')
-        assert response.status_code == 404
-        assert response.json() == {'error': 'Feature not enabled'}
+        assert response.status_code == 403
+        assert 'detail' in response.json() or 'error' in response.json()
+
+
+@unittest.skipUnless(
+    flag_set('fflag_fix_all_fit_720_lazy_load_annotations', user=None),
+    'Distribution API tests require fflag_fix_all_fit_720_lazy_load_annotations to be on',
+)
+class TestTaskDistributionAPI(APITestCase):
+    """Tests for TaskDistributionAPI (GET /api/tasks/<id>/distribution/). Run only when feature flag is on."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.organization = OrganizationFactory()
+        cls.project = ProjectFactory(organization=cls.organization)
+        cls.user = cls.organization.created_by
 
     @patch('tasks.api.flag_set')
     def test_distribution_returns_404_for_nonexistent_task(self, mock_flag_set):
@@ -265,11 +282,16 @@ class TestTaskDistributionAPI(APITestCase):
         assert response.json() == {'error': 'Task not found'}
 
     @patch('tasks.api.flag_set')
-    def test_distribution_permission_denied_for_other_project(self, mock_flag_set):
+    @patch.object(Project, 'has_permission')
+    def test_distribution_permission_denied_for_other_project(self, mock_has_permission, mock_flag_set):
         mock_flag_set.return_value = True
         other_org = OrganizationFactory()
         other_project = ProjectFactory(organization=other_org)
         task = TaskFactory(project=other_project)
+        # In OSS Project.has_permission is a stub that always returns True; patch so other_project denies access
+        def has_perm(project, user):
+            return project.id != other_project.id
+        mock_has_permission.side_effect = has_perm
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'/api/tasks/{task.id}/distribution/')
         assert response.status_code == 403

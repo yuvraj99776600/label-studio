@@ -453,7 +453,7 @@ class TaskDistributionAPI(generics.RetrieveAPIView):
     def get(self, request, pk):
         # This endpoint is gated by feature flag
         if not flag_set('fflag_fix_all_fit_720_lazy_load_annotations', user=request.user):
-            return Response({'error': 'Feature not enabled'}, status=404)
+            raise PermissionDenied('Feature not enabled')
 
         try:
             task = Task.objects.get(pk=pk)
