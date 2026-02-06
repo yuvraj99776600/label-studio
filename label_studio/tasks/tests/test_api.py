@@ -291,6 +291,7 @@ class TestTaskDistributionAPI(APITestCase):
         # In OSS Project.has_permission is a stub that always returns True; patch so other_project denies access
         def has_perm(project, user):
             return project.id != other_project.id
+
         mock_has_permission.side_effect = has_perm
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'/api/tasks/{task.id}/distribution/')
