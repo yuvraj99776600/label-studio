@@ -6,7 +6,7 @@ import type { RawResult } from "../../stores/types";
 import { Chip } from "./Chip";
 import type { AnnotationSummary, ControlTag } from "./types";
 import { getLabelCounts } from "./utils";
-import { FF_FIT_720_LAZY_LOAD_ANNOTATIONS, isFF } from "../../utils/feature-flags";
+import { isActive, FF_FIT_720_LAZY_LOAD_ANNOTATIONS } from "@humansignal/core/lib/utils/feature-flags";
 
 import styles from "./TaskSummary.module.scss";
 
@@ -289,7 +289,7 @@ export const AggregationTableRow = ({
   const rowRef = useRef<HTMLTableRowElement>(null);
 
   // For non-lazy loading mode, compute from annotations as before
-  const useApiData = isFF(FF_FIT_720_LAZY_LOAD_ANNOTATIONS) && taskId;
+  const useApiData = isActive(FF_FIT_720_LAZY_LOAD_ANNOTATIONS) && taskId;
 
   const {
     data: distributionData,
