@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import type { MSTAnnotation, MSTControlTag, MSTStore } from "../../stores/types";
+import { isFF } from "../../utils/feature-flags";
 import { DataSummary } from "./DataSummary";
 import { LabelingSummary } from "./LabelingSummary";
 import { NumbersSummary } from "./NumbersSummary";
@@ -81,12 +83,38 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
     ]),
   );
 
+  // Extract per-dimension agreement values from the task source (LSE-only, behind FF)
+  const dimensionAgreements = useMemo(() => {
+    if (!isFF("fflag_utc_428_consensus_control_tag_agreement")) return undefined;
+    const sourceStr = task?.dataObj?.source;
+    if (!sourceStr) return undefined;
+    try {
+      const taskSource = typeof sourceStr === "string" ? JSON.parse(sourceStr) : sourceStr;
+      const dmColumns = (window as any).DM?.viewsStore?.columns ?? [];
+      const map: Record<string, number | null> = {};
+      for (const col of dmColumns) {
+        if (col.alias?.startsWith("dimension_agreement__")) {
+          const value = taskSource[col.alias];
+          map[col.title] = typeof value === "number" ? value : null;
+        }
+      }
+      return Object.keys(map).length > 0 ? map : undefined;
+    } catch {
+      return undefined;
+    }
+  }, [task]);
+
+  // Read stored methodology name from the DM project (LSE-only, behind FF)
+  const methodology: string | undefined = isFF("fflag_utc_428_consensus_control_tag_agreement")
+    ? (window as any).DM?.project?.agreement_methodology
+    : undefined;
+    
   const values = [
     // if agreement is unavailable for current user it's undefined
     ...(typeof task?.agreement === "number"
       ? [
           {
-            title: "Agreement",
+            title: methodology ? `Agreement (${methodology})` : "Agreement",
             // 2 decimals but without trailing zeros
             value: `${Math.round(task.agreement * 100) / 100}%`,
             info: "Overall agreement over all submitted annotations",
@@ -117,6 +145,7 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
           controls={controls}
           onSelect={onSelect}
           hideInfo={annotationStore.store.hasInterface("annotations:hide-info")}
+          dimensionAgreements={dimensionAgreements}
         />
       </div>
       <div className="mb-relaxed">

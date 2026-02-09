@@ -177,10 +177,13 @@ export const AggregationTableRow = ({
   headers,
   controls,
   annotations,
+  dimensionAgreements,
 }: {
   headers: Header<AnnotationSummary, unknown>[];
   controls: ControlTag[];
   annotations: AnnotationSummary[];
+  /** Per-control agreement percentages (0-100), keyed by control.name. Undefined when FF is off. */
+  dimensionAgreements?: Record<string, number | null>;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);

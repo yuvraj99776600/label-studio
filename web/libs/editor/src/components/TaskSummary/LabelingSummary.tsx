@@ -27,6 +27,8 @@ type Props = {
   controls: ControlTag[];
   onSelect: (entity: AnnotationSummary) => void;
   hideInfo: boolean;
+  /** Per-control agreement percentages (0-100), keyed by control.name. Undefined when FF is off. */
+  dimensionAgreements?: Record<string, number | null>;
 };
 
 const cellFn = (control: ControlTag, render: RendererType) => (props: { row: Row<AnnotationSummary> }) => {
@@ -57,7 +59,7 @@ const convertPredictionResult = (result: MSTResult) => {
 
 const columnHelper = createColumnHelper<AnnotationSummary>();
 
-export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect }: Props) => {
+export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect, dimensionAgreements }: Props) => {
   const currentUser = window.APP_SETTINGS?.user;
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const tableRef = useRef<HTMLTableElement>(null);
@@ -103,14 +105,22 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
     const columns: ColumnDef<AnnotationSummary, unknown>[] = controls.map((control) =>
       columnHelper.display({
         id: control.name,
-        header: () => (
-          <div>
-            <span className="font-semibold text-sm pb-small">{getControlDisplayName(control)}</span>
-            <Chip prefix={control.per_region ? "per-region " : ""} className="px-small ml-2">
-              {control.type}
-            </Chip>
-          </div>
-        ),
+        header: () => {
+          const agreement = dimensionAgreements?.[control.name];
+          return (
+            <div>
+              <span className="font-semibold text-sm pb-small">{getControlDisplayName(control)}</span>
+              <Chip prefix={control.per_region ? "per-region " : ""} className="px-small ml-2">
+                {control.type}
+              </Chip>
+              {agreement != null && (
+                <div className="text-xs text-neutral-content-subtle mt-tighter">
+                  Agreement: {Math.round(agreement * 100) / 100}%
+                </div>
+              )}
+            </div>
+          );
+        },
         cell: cellFn(control, renderers[control.type]),
         size: columnWidths[control.name] || 150,
         minSize: 120,
@@ -147,7 +157,7 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
       },
     });
     return columns;
-  }, [controls, onSelect, hideInfo, columnWidths]);
+  }, [controls, onSelect, hideInfo, columnWidths, dimensionAgreements]);
 
   const table = useReactTable<AnnotationSummary>({
     data: annotations,
@@ -218,6 +228,7 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
                 headers={table.getHeaderGroups()[0]?.headers ?? []}
                 controls={controls}
                 annotations={annotations}
+                dimensionAgreements={dimensionAgreements}
               />
             )}
             {/* Annotation Rows */}
