@@ -439,7 +439,7 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
         },
     ),
 )
-class TaskDistributionAPI(generics.RetrieveAPIView):
+class TaskAgreementAPI(generics.RetrieveAPIView):
     """
     Efficient endpoint for getting label distribution without fetching all annotations.
 
