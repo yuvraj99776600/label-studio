@@ -4,6 +4,7 @@ import { cnb as cn } from "@humansignal/core/lib/utils/bem";
 import { isDefined } from "@humansignal/core/lib/utils/helpers";
 import { aroundTransition } from "@humansignal/core/lib/utils/transition";
 import { setRef } from "@humansignal/core/lib/utils/unwrapRef";
+import { Block, Elem } from "./ModalContext";
 import { ModalBody } from "./ModalBody";
 import { ModalCloseButton } from "./ModalCloseButton";
 import { ModalFooter } from "./ModalFooter";
@@ -55,7 +56,7 @@ export class Modal<BP = unknown> extends Component<ModalProps<BP>, ModalState> {
   static Body = ModalBody;
   static CloseButton = ModalCloseButton;
 
-  modalRef = createRef<HTMLDivElement>();
+  modalRef = createRef<HTMLElement>();
   mouseDownTarget: HTMLElement | null = null;
 
   constructor(props: ModalProps<BP>) {
@@ -129,6 +130,8 @@ export class Modal<BP = unknown> extends Component<ModalProps<BP>, ModalState> {
     };
     const styles: Record<string, string | number> = {};
 
+    const mixes = [this.transitionClass, this.props.className];
+
     const modalSizeStyle: React.CSSProperties = {};
 
     if (this.props.width) modalSizeStyle.width = this.props.width;
@@ -146,42 +149,33 @@ export class Modal<BP = unknown> extends Component<ModalProps<BP>, ModalState> {
       }
     }
 
-    const blockClassName = [
-      cn("modal-ls").mod(mods).mix(this.transitionClass, this.props.className).toClassName(),
-      this.props.rawClassName,
-    ]
-      .filter(Boolean)
-      .join(" ");
-
     const modalContent = (
       <ModalContext.Provider value={this}>
-        <div
+        <Block
+          name="modal-ls"
           ref={(el) => setRef(this.modalRef, el)}
-          className={blockClassName}
+          mod={mods}
+          mix={mixes}
           onMouseDown={this.onMouseDown}
           onClick={this.onClickOutside}
           data-testid={this.props["data-testid"]}
           style={styles}
+          rawClassName={this.props.rawClassName}
         >
-          <div className={cn("modal-ls").elem("wrapper").toClassName()}>
-            <div
-              className={cn("modal-ls").elem("content").toClassName()}
-              style={Object.assign({}, this.props.style, modalSizeStyle)}
-            >
+          <Elem name="wrapper">
+            <Elem name="content" style={Object.assign({}, this.props.style, modalSizeStyle)}>
               {!bare && (
                 <ModalHeader>
                   <ModalTitle>{this.props.title}</ModalTitle>
-                  {this.props.header && (
-                    <div className={cn("modal-ls").elem("header-content").toClassName()}>{this.props.header}</div>
-                  )}
+                  {this.props.header && <Elem name="header-content">{this.props.header}</Elem>}
                   {this.props.allowClose !== false && <ModalCloseButton />}
                 </ModalHeader>
               )}
               <ModalBody bare={bare}>{this.body}</ModalBody>
               {this.props.footer && <ModalFooter bare={this.props.bareFooter}>{this.footer}</ModalFooter>}
-            </div>
-          </div>
-        </div>
+            </Elem>
+          </Elem>
+        </Block>
       </ModalContext.Provider>
     );
 

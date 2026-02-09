@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from "react";
-import { cnb as cn } from "@humansignal/core/lib/utils/bem";
+import { Elem } from "./ModalContext";
 
 type ModalHeaderProps = PropsWithChildren<{
   /**
@@ -9,5 +9,9 @@ type ModalHeaderProps = PropsWithChildren<{
 }>;
 
 export const ModalHeader = ({ children, divided }: ModalHeaderProps) => {
-  return <div className={cn("modal-ls").elem("header").mod({ divided }).toClassName()}>{children}</div>;
+  return (
+    <Elem name="header" mod={{ divided }}>
+      {children}
+    </Elem>
+  );
 };

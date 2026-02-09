@@ -1,6 +1,10 @@
 import type { PropsWithChildren } from "react";
-import { cnb as cn } from "@humansignal/core/lib/utils/bem";
+import { Elem } from "./ModalContext";
 
 export const ModalBody = ({ bare, children }: PropsWithChildren<{ bare?: boolean }>) => {
-  return <div className={cn("modal-ls").elem("body").mod({ bare }).toClassName()}>{children}</div>;
+  return (
+    <Elem name="body" mod={{ bare }}>
+      {children}
+    </Elem>
+  );
 };
