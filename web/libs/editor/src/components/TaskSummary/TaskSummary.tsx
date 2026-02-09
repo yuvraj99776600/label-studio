@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { MSTAnnotation, MSTControlTag, MSTStore } from "../../stores/types";
-import { isFF } from "../../utils/feature-flags";
+import { FF_PER_CONTROL_AGREEMENT, isFF } from "../../utils/feature-flags";
 import { DataSummary } from "./DataSummary";
 import { LabelingSummary } from "./LabelingSummary";
 import { NumbersSummary } from "./NumbersSummary";
@@ -85,7 +85,7 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
 
   // Extract per-dimension agreement values from the task source (LSE-only, behind FF)
   const dimensionAgreements = useMemo(() => {
-    if (!isFF("fflag_utc_428_consensus_control_tag_agreement")) return undefined;
+    if (!isFF(FF_PER_CONTROL_AGREEMENT)) return undefined;
     const sourceStr = task?.dataObj?.source;
     if (!sourceStr) return undefined;
     try {
@@ -105,7 +105,7 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
   }, [task]);
 
   // Read stored methodology name from the DM project (LSE-only, behind FF)
-  const methodology: string | undefined = isFF("fflag_utc_428_consensus_control_tag_agreement")
+  const methodology: string | undefined = isFF(FF_PER_CONTROL_AGREEMENT)
     ? (window as any).DM?.project?.agreement_methodology
     : undefined;
     

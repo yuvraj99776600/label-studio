@@ -169,6 +169,12 @@ export const FF_VIDEO_FRAME_SEEK_PRECISION = "fflag_fix_front_optic_1608_improve
  */
 export const FF_FIT_1304_STRICT_OVERLAP = "fflag_feat_all_fit_1304_strict_overlap";
 
+/**
+ * Show per-control agreement scores and methodology label in Task Summary view
+ * @link https://app.launchdarkly.com/default/production/features/fflag_utc_428_consensus_control_tag_agreement
+ */
+export const FF_PER_CONTROL_AGREEMENT = "fflag_utc_428_consensus_control_tag_agreement";
+
 Object.assign(window, {
   APP_SETTINGS: {
     ...(window.APP_SETTINGS ?? {}),
