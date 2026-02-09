@@ -54,6 +54,21 @@ import { ViewAll } from "./ViewAll";
 import "./App.scss";
 
 /**
+ * Check if annotation has any tag that should be rendered in sidebar
+ * Used to conditionally show the custom tab in the side panel
+ * @returns {boolean|string} - false or the title of the tab that should be rendered in sidebar
+ */
+const hasTagInSidebar = (annotation) => {
+  if (!annotation?.names) return false;
+  for (const tag of annotation.names.values()) {
+    if (tag.renderInSidebar) {
+      return tag.sidebar;
+    }
+  }
+  return false;
+};
+
+/**
  * App
  */
 class App extends Component {
@@ -285,6 +300,7 @@ class App extends Component {
                     currentEntity={as.selectedHistory ?? as.selected}
                     regions={as.selected.regionStore}
                     showComments={store.hasInterface("annotations:comments")}
+                    showCustomTab={hasTagInSidebar(as.selected)}
                     focusTab={store.commentStore.tooltipMessage ? "comments" : null}
                   >
                     {mainContent}
