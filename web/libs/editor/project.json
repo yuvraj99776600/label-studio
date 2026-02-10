@@ -57,6 +57,13 @@
         }
       }
     },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "editor:build:production",
+        "port": 3000
+      }
+    },
     "unit": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],

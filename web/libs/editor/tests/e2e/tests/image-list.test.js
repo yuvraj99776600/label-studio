@@ -198,11 +198,6 @@ Scenario("View All disables MIG pagination", async ({ I, AtImageView, LabelStudi
   const prevSelector = ".lsf-pagination__btn_arrow-left";
   const nextSelector = ".lsf-pagination__btn_arrow-right";
 
-  // FFs for a proper interface with View All button
-  LabelStudio.setFeatureFlags({
-    fflag_feat_front_dev_3873_labeling_ui_improvements_short: true,
-  });
-
   I.amOnPage("/");
   LabelStudio.init(params);
 

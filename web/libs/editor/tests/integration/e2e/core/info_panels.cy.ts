@@ -1,14 +1,9 @@
 import { Labels, LabelStudio } from "@humansignal/frontend-test/helpers/LSF";
 import { RichText } from "@humansignal/frontend-test/helpers/LSF/RichText";
-import { FF_DEV_3873 } from "libs/editor/src/utils/feature-flags";
 import { configSimple, dataSimple, resultSimple } from "../../data/core/info_panels";
 
 describe("Label Studio UI info panels", () => {
   it("Open every panel and interact with regions", () => {
-    LabelStudio.setFeatureFlagsOnPageLoad({
-      [FF_DEV_3873]: true,
-    });
-
     LabelStudio.init({
       config: configSimple,
       task: {

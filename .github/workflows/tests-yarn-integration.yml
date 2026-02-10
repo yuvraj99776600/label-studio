@@ -12,10 +12,10 @@ env:
   FRONTEND_MONOREPO_DIR: "web"
 
 jobs:
-  main:
-    name: "yarn integration"
+  build-editor:
+    name: "Build editor"
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 15
     steps:
       - uses: hmarr/debug-action@v3.0.0
 
@@ -29,7 +29,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.head_sha }}
 
       - name: Setup frontend environment
         uses: ./.github/actions/setup-frontend-environment
@@ -37,28 +37,93 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
-      - name: Run server
-        id: run-server
-        timeout-minutes: 2
+      # Nx cache is content-addressable: each task (e.g. editor:build) is keyed by Nx's own hash of inputs.
+      # We persist .nx/cache so that when deps (package.json/yarn.lock) are unchanged we restore the same
+      # cache; Nx then reuses any matching task outputs and only rebuilds what changed.
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.FRONTEND_MONOREPO_DIR }}/.nx/cache
+          key: nx-${{ runner.os }}-${{ env.NODE }}-${{ hashFiles('web/package.json', 'web/yarn.lock') }}
+          restore-keys: |
+            nx-${{ runner.os }}-${{ env.NODE }}-
+
+      - name: Build editor (production)
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
-        env:
-          NODE_ENV: development
+        run: MODE=standalone yarn nx run editor:build:production
+
+      - name: Upload editor build
+        uses: actions/upload-artifact@v4
+        with:
+          name: editor-build
+          path: ${{ env.FRONTEND_MONOREPO_DIR }}/dist/libs/editor
+
+  # Optional: use ubuntu-latest-4-cores or ubuntu-latest-8-cores for faster Cypress runs if budget allows
+  cypress:
+    name: "Cypress"
+    needs: build-editor
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: hmarr/debug-action@v3.0.0
+
+      - name: Configure git
+        shell: bash
         run: |
           set -xeuo pipefail
-          
-          yarn lsf:serve &
+          git config --global user.name 'robot-ci-heartex'
+          git config --global user.email 'robot-ci-heartex@users.noreply.github.com'
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.head_sha }}
+
+      - name: Setup frontend environment
+        uses: ./.github/actions/setup-frontend-environment
+        with:
+          node-version: "${{ env.NODE }}"
+          directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
+
+      - name: Download editor build
+        uses: actions/download-artifact@v4
+        with:
+          name: editor-build
+          path: ${{ env.FRONTEND_MONOREPO_DIR }}/dist/libs/editor
+
+      - name: Run server
+        id: run-server
+        timeout-minutes: 1
+        working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
+        run: |
+          set -xeuo pipefail
+          npx serve dist/libs/editor -l 3000 &
           pid=$!
           echo "pid=${pid}" >> $GITHUB_OUTPUT
-          
           while ! curl -s -o /dev/null -L "http://localhost:3000"; do
             echo "=> Waiting for service to become available"
             sleep 2s
           done
 
-      - name: Run tests
+      - name: Run Cypress
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
-        run: |
-          COLLECT_COVERAGE=1 yarn test:integration
+        run: COLLECT_COVERAGE=1 npx cypress run --config-file libs/editor/cypress.config.ts
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: cypress-coverage
+          path: ${{ env.FRONTEND_MONOREPO_DIR }}/libs/editor/coverage
+
+      - name: Upload test results and screenshots
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: cypress-output
+          path: |
+            ${{ env.FRONTEND_MONOREPO_DIR }}/dist/cypress/libs/frontend-test/src/screenshots
+            ${{ env.FRONTEND_MONOREPO_DIR }}/dist/cypress/libs/frontend-test/src/videos
 
       - name: Upload coverage to Codecov
         if: ${{ always() && github.event.pull_request.head.repo.fork == false && github.event.pull_request.user.login != 'dependabot[bot]' }}
@@ -66,28 +131,12 @@ jobs:
         with:
           name: lsf-integration
           flags: lsf-integration
-          files: web/libs/editor/.nyc_output/out.json
+          files: ${{ env.FRONTEND_MONOREPO_DIR }}/libs/editor/.nyc_output/out.json
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
-          fail_ci_if_error: true
-
-      - name: Upload coverage
-        uses: actions/upload-artifact@v6
-        if: always()
-        with:
-          name: cypress coverage
-          path: web/libs/editor/coverage
-
-      - name: Upload test results and screenshots
-        uses: actions/upload-artifact@v6
-        if: always()
-        with:
-          name: cypress test output
-          path: |
-            dist/cypress/libs/frontend-test/src/screenshots
-            dist/cypress/libs/frontend-test/src/videos
+          fail_ci_if_error: false
 
       - name: Kill server
         if: always()
         continue-on-error: true
-        run: kill -9 "${{ steps.run-server.outputs.pid }}"
+        run: kill -9 "${{ steps.run-server.outputs.pid }}" 2>/dev/null || true

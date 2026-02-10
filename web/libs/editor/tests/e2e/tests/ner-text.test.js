@@ -268,10 +268,6 @@ Scenario("NER Text regions in Outliner", async ({ I, LabelStudio }) => {
   };
 
   I.amOnPage("/");
-  // enabling both flags for New UI, but will work with Outliner one only as well
-  LabelStudio.setFeatureFlags({
-    fflag_feat_front_dev_3873_labeling_ui_improvements_short: true,
-  });
   LabelStudio.init(params);
 
   I.waitForElement(".lsf-richtext__line", 60);
