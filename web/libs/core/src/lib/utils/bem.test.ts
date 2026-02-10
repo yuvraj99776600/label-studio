@@ -291,6 +291,39 @@ describe("BEM utility (cn/cnb)", () => {
     });
   });
 
+  describe("select()", () => {
+    it("returns null when no element in document has the class", () => {
+      const result = cn("no-such-block-name-xyz").select();
+      expect(result).toBeNull();
+    });
+
+    it("returns first element matching BEM class", () => {
+      const container = document.createElement("div");
+      container.className = cn("holder").toClassName();
+      container.id = "select-test-holder";
+      document.body.appendChild(container);
+
+      const found = cn("holder").select();
+      expect(found).not.toBeNull();
+      expect(found?.id).toBe("select-test-holder");
+
+      document.body.removeChild(container);
+    });
+
+    it("uses same selector as closest (space-separated classes become .class1.class2)", () => {
+      const container = document.createElement("div");
+      container.className = cn("foo").mix("bar").toClassName();
+      container.id = "select-mix-test";
+      document.body.appendChild(container);
+
+      const found = cn("foo").mix("bar").select();
+      expect(found).not.toBeNull();
+      expect(found?.id).toBe("select-mix-test");
+
+      document.body.removeChild(container);
+    });
+  });
+
   describe("Edge cases", () => {
     it("handles hyphenated block names", () => {
       expect(cn("my-component").toClassName()).toBe("ls-my-component");

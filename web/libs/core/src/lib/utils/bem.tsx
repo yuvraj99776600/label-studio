@@ -23,6 +23,8 @@ export type CN = {
   mod(mod?: CNMod): CN;
   /** Mix in additional class names (supports strings, CN objects, and arrays) */
   mix(...mix: (CNMix | CNMix[])[]): CN;
+  /** Find the first element in the document matching this BEM selector */
+  select(): Element | null;
   /** Find the closest ancestor matching this BEM selector */
   closest(root: Element): Element | null;
   /** Convert to class name string */
@@ -117,6 +119,11 @@ const cnProto = {
 
   mix(this: CNInstance, ...newMix: (CNMix | CNMix[])[]): CN {
     return createCN(this._block, this._elem, this._mod, newMix);
+  },
+
+  select(this: CNInstance): Element | null {
+    const selector = `.${this.toString().replace(SPACE_REGEX, ".")}`;
+    return document.querySelector(selector);
   },
 
   closest(this: CNInstance, root: Element): Element | null {
