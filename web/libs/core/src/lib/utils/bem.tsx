@@ -4,44 +4,31 @@
  * This utility provides a flexible way to create BEM-style CSS class names
  * with support for blocks, elements, modifiers, and mixing.
  *
- * @note This utility uses `any` types intentionally for flexibility with BEM patterns.
- * @note Non-null assertions are used where type safety is guaranteed by the BEM structure.
+ * Usage:
+ *   import { cnb as cn } from "@humansignal/core/lib/utils/bem";
+ *   cn("block").elem("element").mod({ active: true }).toClassName()
+ *   // → "ls-block__element ls-block__element_active"
  */
-import {
-  type Context,
-  type FC,
-  type ComponentClass,
-  type FunctionComponent,
-  type ReactHTML,
-  type ReactSVG,
-  type CSSProperties,
-  type DOMAttributes,
-  createElement,
-  createContext,
-  forwardRef,
-  useContext,
-} from "react";
 
 type CNMod = Record<string, string | boolean | number | null | undefined>;
 type CNMix = string | CN | undefined | null;
 
-type TagNames = keyof HTMLElementTagNameMap | FC<any>;
-type ComponentType = FC<any> | ComponentClass<unknown, unknown> | FunctionComponent<unknown>;
-type TagNameType = keyof ReactHTML | keyof ReactSVG | string;
-
-export type CNTagName = ComponentType | TagNameType;
+/** Type alias for HTML element tag names */
+export type CNTagName = keyof JSX.IntrinsicElements;
 
 export type CN = {
-  block(name: string): CN;
+  /** Create an element within the block */
   elem(name: string): CN;
+  /** Add modifier(s) to the block or element */
   mod(mod?: CNMod): CN;
+  /** Mix in additional class names */
   mix(...mix: CNMix[]): CN;
-  select(root?: Element | Document): Element | null;
-  selectAll(root?: Element | Document): NodeListOf<Element>;
+  /** Find the closest ancestor matching this BEM selector */
   closest(root: Element): Element | null;
+  /** Convert to class name string */
   toString(): string;
+  /** Convert to class name string (alias for toString) */
   toClassName(): string;
-  toCSSSelector(): string;
 };
 
 type CNOptions = {
@@ -49,40 +36,6 @@ type CNOptions = {
   mix?: CNMix | CNMix[];
   mod?: CNMod;
 };
-
-type WrappedComponentProps<CN extends FC<any>, TN extends TagNames> = Omit<
-  Parameters<CN>[0],
-  "tag" | "name" | "mod" | "mix" | "block"
-> &
-  Omit<JSX.IntrinsicElements[TN extends keyof HTMLElementTagNameMap ? TN : "div"], "ref"> & {
-    tag?: TN;
-    component?: CN;
-    name: string;
-    mod?: CNMod;
-    mix?: CNMix | CNMix[];
-    block?: CN;
-    rawClassName?: string;
-  } & (TN extends keyof HTMLElementTagNameMap
-    ? {
-        [key in keyof JSX.IntrinsicElements[TN]]: JSX.IntrinsicElements[TN][key];
-      }
-    : {
-        [key in keyof Parameters<CN>[0]]: Parameters<CN>[0][key];
-      });
-
-type CNComponentProps = {
-  name: string;
-  tag?: CNTagName;
-  block?: string;
-  mod?: CNMod;
-  mix?: CNMix | CNMix[];
-  className?: string;
-  component?: CNTagName;
-  style?: CSSProperties;
-  rawClassName?: string;
-} & DOMAttributes<HTMLElement>;
-
-export type BemComponent = FunctionComponent<CNComponentProps>;
 
 const CSS_PREFIX = process.env.CSS_PREFIX ?? "ls-";
 
@@ -146,37 +99,27 @@ const assembleClass = (block: string, elem?: string, mix?: CNMix | CNMix[], mod?
     .join(" ");
 };
 
-export const BlockContext = createContext<CN | null>(null);
+// Internal type that includes toCSSSelector (not exposed publicly)
+type CNInternal = CN & {
+  /** @internal Convert to CSS selector string - used by closest() */
+  toCSSSelector(): string;
+};
 
 const cn = (block: string, options: CNOptions = {}): CN => {
   const { elem, mix, mod } = options ?? {};
-  const blockName = block;
 
-  const classNameBuilder: CN = {
-    block(name) {
-      return cn(name, { elem, mix, mod });
-    },
-
+  const classNameBuilder: CNInternal = {
     elem(name) {
       return cn(block, { elem: name, mix, mod });
     },
 
     mod(newMod = {}) {
       const stateOverride = Object.assign({}, mod ?? {}, newMod);
-
-      return cn(block ?? blockName, { elem, mix, mod: stateOverride });
+      return cn(block, { elem, mix, mod: stateOverride });
     },
 
     mix(...mix) {
       return cn(block, { elem, mix, mod });
-    },
-
-    select(root = document) {
-      return root.querySelector(this.toCSSSelector());
-    },
-
-    selectAll(root = document) {
-      return root.querySelectorAll(this.toCSSSelector());
     },
 
     closest(root) {
@@ -200,76 +143,3 @@ const cn = (block: string, options: CNOptions = {}): CN => {
 };
 
 export { cn as cnb };
-
-export const BemWithSpecificContext = (context?: Context<CN | null>) => {
-  const Context = context ?? createContext<CN | null>(null);
-
-  const Block = forwardRef(
-    <T extends FC<any>, D extends TagNames>(
-      { tag = "div", name, mod, mix, rawClassName, ...rest }: WrappedComponentProps<T, D>,
-      ref: any,
-    ) => {
-      const rootClass = cn(name);
-      const finalMix = ([] as [CNMix?]).concat(mix).filter((cn) => !!cn);
-      const className = [
-        rootClass
-          .mod(mod)
-          .mix(...(finalMix as CNMix[]), rest.className)
-          .toClassName(),
-        rawClassName,
-      ]
-        .filter(Boolean)
-        .join(" ");
-      const finalProps = { ...rest, ref, className } as any;
-
-      return createElement(
-        Context.Provider,
-        {
-          value: rootClass,
-        },
-        createElement(tag as any, finalProps),
-      );
-    },
-  );
-
-  const Elem = forwardRef(
-    <T extends FC<any>, D extends TagNames>(
-      { tag = "div", component, block, name, mod, mix, rawClassName, ...rest }: WrappedComponentProps<T, D>,
-      ref: any,
-    ) => {
-      const blockCtx = useContext(Context);
-
-      const finalMix = ([] as [CNMix?]).concat(mix).filter((cn) => !!cn);
-
-      const className = [
-        (block ? cn(block) : blockCtx)!
-          .elem(name)
-          .mod(mod)
-          .mix(...(finalMix as CNMix[]), rest.className)
-          .toClassName(),
-        rawClassName,
-      ]
-        .filter(Boolean)
-        .join(" ");
-
-      const finalProps: any = { ...rest, ref, className };
-
-      if (typeof tag !== "string") finalProps.block = blockCtx;
-      if (component) finalProps.tag = tag;
-
-      return createElement(component ?? tag, finalProps);
-    },
-  );
-
-  Block.displayName = "Block";
-
-  Elem.displayName = "Elem";
-
-  return { Block, Elem, Context };
-};
-
-export const { Block, Elem } = BemWithSpecificContext(BlockContext);
-
-export const useBEM = () => {
-  return useContext(BlockContext)!;
-};
