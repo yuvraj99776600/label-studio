@@ -58,7 +58,6 @@ jobs:
           name: editor-build
           path: ${{ env.FRONTEND_MONOREPO_DIR }}/dist/libs/editor
 
-  # Optional: use ubuntu-latest-4-cores or ubuntu-latest-8-cores for faster Cypress runs if budget allows
   cypress:
     name: "Cypress"
     needs: build-editor
