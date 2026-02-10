@@ -15,6 +15,7 @@ describe("BEM utility (cn/cnb)", () => {
     });
 
     it("creates block class in string concatenation", () => {
+      // biome-ignore lint/style/useTemplate: Testing string concatenation specifically
       expect("class: " + cn("button")).toBe("class: ls-button");
     });
   });
@@ -92,25 +93,23 @@ describe("BEM utility (cn/cnb)", () => {
   describe("Element + Modifier", () => {
     it("creates element with modifier using toString()", () => {
       expect(cn("button").elem("icon").mod({ visible: true }).toString()).toBe(
-        "ls-button__icon ls-button__icon_visible"
+        "ls-button__icon ls-button__icon_visible",
       );
     });
 
     it("creates element with modifier using toClassName()", () => {
       expect(cn("button").elem("icon").mod({ visible: true }).toClassName()).toBe(
-        "ls-button__icon ls-button__icon_visible"
+        "ls-button__icon ls-button__icon_visible",
       );
     });
 
     it("creates element with modifier using implicit coercion", () => {
-      expect(`${cn("button").elem("icon").mod({ visible: true })}`).toBe(
-        "ls-button__icon ls-button__icon_visible"
-      );
+      expect(`${cn("button").elem("icon").mod({ visible: true })}`).toBe("ls-button__icon ls-button__icon_visible");
     });
 
     it("creates element with string modifier", () => {
       expect(cn("button").elem("icon").mod({ size: "small" }).toClassName()).toBe(
-        "ls-button__icon ls-button__icon_size_small"
+        "ls-button__icon ls-button__icon_size_small",
       );
     });
   });
@@ -160,7 +159,7 @@ describe("BEM utility (cn/cnb)", () => {
 
     it("handles mixed null/undefined/valid values", () => {
       expect(cn("button").mix(null, "valid", undefined, "also-valid").toClassName()).toBe(
-        "ls-button ls-valid ls-also-valid"
+        "ls-button ls-valid ls-also-valid",
       );
     });
 
@@ -185,7 +184,9 @@ describe("BEM utility (cn/cnb)", () => {
     });
 
     it("handles array with null/undefined values", () => {
-      expect(cn("button").mix(["class1", null, "class2", undefined]).toClassName()).toBe("ls-button ls-class1 ls-class2");
+      expect(cn("button").mix(["class1", null, "class2", undefined]).toClassName()).toBe(
+        "ls-button ls-class1 ls-class2",
+      );
     });
 
     it("handles array with CN objects", () => {
@@ -194,11 +195,15 @@ describe("BEM utility (cn/cnb)", () => {
     });
 
     it("handles mixed arrays and strings", () => {
-      expect(cn("button").mix(["arr-class"], "string-class").toClassName()).toBe("ls-button ls-arr-class ls-string-class");
+      expect(cn("button").mix(["arr-class"], "string-class").toClassName()).toBe(
+        "ls-button ls-arr-class ls-string-class",
+      );
     });
 
     it("handles array with space-separated strings", () => {
-      expect(cn("button").mix(["class1 class2", "class3"]).toClassName()).toBe("ls-button ls-class1 ls-class2 ls-class3");
+      expect(cn("button").mix(["class1 class2", "class3"]).toClassName()).toBe(
+        "ls-button ls-class1 ls-class2 ls-class3",
+      );
     });
 
     it("deduplicates classes from array", () => {
@@ -212,20 +217,12 @@ describe("BEM utility (cn/cnb)", () => {
 
   describe("Chaining combinations", () => {
     it("elem + mod + mix with toString()", () => {
-      const result = cn("button")
-        .elem("icon")
-        .mod({ active: true })
-        .mix("extra")
-        .toString();
+      const result = cn("button").elem("icon").mod({ active: true }).mix("extra").toString();
       expect(result).toBe("ls-button__icon ls-button__icon_active ls-extra");
     });
 
     it("elem + mod + mix with toClassName()", () => {
-      const result = cn("button")
-        .elem("icon")
-        .mod({ active: true })
-        .mix("extra")
-        .toClassName();
+      const result = cn("button").elem("icon").mod({ active: true }).mix("extra").toClassName();
       expect(result).toBe("ls-button__icon ls-button__icon_active ls-extra");
     });
 
@@ -308,9 +305,7 @@ describe("BEM utility (cn/cnb)", () => {
     });
 
     it("handles special characters in values", () => {
-      expect(cn("button").mod({ type: "primary-large" }).toClassName()).toBe(
-        "ls-button ls-button_type_primary-large"
-      );
+      expect(cn("button").mod({ type: "primary-large" }).toClassName()).toBe("ls-button ls-button_type_primary-large");
     });
 
     it("multiple toClassName calls return same result", () => {

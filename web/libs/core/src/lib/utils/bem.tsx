@@ -137,8 +137,7 @@ const cnProto = {
       for (const key in mod) {
         const value = mod[key];
         if (value === null || value === undefined || value === false) continue;
-        result +=
-          value === true ? ` ${prefixClass(`${base}_${key}`)}` : ` ${prefixClass(`${base}_${key}_${value}`)}`;
+        result += value === true ? ` ${prefixClass(`${base}_${key}`)}` : ` ${prefixClass(`${base}_${key}_${value}`)}`;
       }
     }
 
@@ -178,7 +177,10 @@ const createCN = (block: string, elem?: string, mod?: CNMod, mix?: (CNMix | CNMi
 };
 
 // Public API: cn(block, options?)
-const cnb = (block: string, options: { elem?: string; mix?: CNMix | CNMix[] | (CNMix | CNMix[])[]; mod?: CNMod } = {}): CN => {
+const cnb = (
+  block: string,
+  options: { elem?: string; mix?: CNMix | CNMix[] | (CNMix | CNMix[])[]; mod?: CNMod } = {},
+): CN => {
   const mix = options.mix ? (Array.isArray(options.mix) ? options.mix : [options.mix]) : undefined;
   return createCN(block, options.elem, options.mod, mix as (CNMix | CNMix[])[] | undefined);
 };
