@@ -21,8 +21,8 @@ export type CN = {
   elem(name: string): CN;
   /** Add modifier(s) to the block or element */
   mod(mod?: CNMod): CN;
-  /** Mix in additional class names */
-  mix(...mix: CNMix[]): CN;
+  /** Mix in additional class names (supports strings, CN objects, and arrays) */
+  mix(...mix: (CNMix | CNMix[])[]): CN;
   /** Find the closest ancestor matching this BEM selector */
   closest(root: Element): Element | null;
   /** Convert to class name string */
@@ -31,115 +31,156 @@ export type CN = {
   toClassName(): string;
 };
 
-type CNOptions = {
-  elem?: string;
-  mix?: CNMix | CNMix[];
-  mod?: CNMod;
+const CSS_PREFIX = process.env.CSS_PREFIX ?? "ls-";
+const SPACE_REGEX = /\s+/;
+
+// Prefix a class name - inlined check for performance
+const prefixClass = (cls: string): string =>
+  cls.startsWith(CSS_PREFIX) || CSS_PREFIX === "" ? cls : `${CSS_PREFIX}${cls}`;
+
+// Get string value from a mix item - handles strings, CN objects, and arrays
+const getMixString = (m: CNMix | CNMix[]): string => {
+  if (m === null || m === undefined) return "";
+  if (typeof m === "string") return m.trim();
+  // Handle arrays passed to mix (e.g., .mix(["class1", "class2"]))
+  if (Array.isArray(m)) {
+    return m
+      .map((item) => getMixString(item))
+      .filter(Boolean)
+      .join(" ");
+  }
+  // CN object
+  return m.toClassName();
 };
 
-const CSS_PREFIX = process.env.CSS_PREFIX ?? "ls-";
+// Process mix classes and append to result - handles deduplication
+const appendMixClasses = (result: string, mix: (CNMix | CNMix[])[]): string => {
+  // For small mixes, avoid Set overhead when possible
+  if (mix.length === 1) {
+    const mixStr = getMixString(mix[0]);
+    if (!mixStr) return result;
 
-const assembleClass = (block: string, elem?: string, mix?: CNMix | CNMix[], mod?: CNMod) => {
-  const rootName = block;
-  const elemName = elem ? `${rootName}__${elem}` : null;
-
-  const stateName = Object.entries(mod ?? {}).reduce((res, [key, value]) => {
-    const stateClass = [elemName ?? rootName];
-
-    if (value === null || value === undefined) return res;
-
-    if (value !== false) {
-      stateClass.push(key);
-
-      if (value !== true) stateClass.push(value as string);
-
-      res.push(stateClass.join("_"));
+    // Fast path: no spaces means single class (no dedup needed)
+    if (!SPACE_REGEX.test(mixStr)) {
+      return `${result} ${prefixClass(mixStr)}`;
     }
-    return res;
-  }, [] as string[]);
 
-  const finalClass: string[] = [];
-
-  finalClass.push(elemName ?? rootName);
-
-  finalClass.push(...stateName);
-
-  if (mix) {
-    const mixes = Array.isArray(mix) ? mix : [mix];
-    const mixMap = ([] as CNMix[])
-      .concat(...mixes)
-      .filter((m) => {
-        if (typeof m === "string") {
-          return m.trim() !== "";
-        }
-        return m !== undefined && m !== null;
-      })
-      .map((m) => {
-        if (typeof m === "string") {
-          return m;
-        }
-        return m?.toClassName?.();
-      })
-      .reduce((res, cls) => [...res, ...cls!.split(/\s+/)], [] as string[]);
-
-    finalClass.push(...Array.from(new Set(mixMap)));
+    // Has spaces - split and dedupe
+    const classes = mixStr.split(SPACE_REGEX);
+    const seen = new Set<string>();
+    for (const cls of classes) {
+      if (cls && !seen.has(cls)) {
+        seen.add(cls);
+        result += ` ${prefixClass(cls)}`;
+      }
+    }
+    return result;
   }
 
-  const attachNamespace = (cls: string) => {
-    // Safely convert to string and filter out invalid values
-    if (!cls) return ""; // Empty value null/undefined/""
-    const className = String(cls).trim();
-    if (!className) return ""; // Empty string " "
-    return className.startsWith(CSS_PREFIX) || CSS_PREFIX === "" ? className : `${CSS_PREFIX}${className}`;
-  };
+  // Multiple mixes - use Set for deduplication
+  const seen = new Set<string>();
+  for (const m of mix) {
+    const mixStr = getMixString(m);
+    if (!mixStr) continue;
 
-  return finalClass
-    .map(attachNamespace)
-    .filter((cls) => cls !== "")
-    .join(" ");
+    // Fast path for single class (no spaces)
+    if (!SPACE_REGEX.test(mixStr)) {
+      if (!seen.has(mixStr)) {
+        seen.add(mixStr);
+        result += ` ${prefixClass(mixStr)}`;
+      }
+      continue;
+    }
+
+    // Has spaces - split and dedupe
+    const classes = mixStr.split(SPACE_REGEX);
+    for (const cls of classes) {
+      if (cls && !seen.has(cls)) {
+        seen.add(cls);
+        result += ` ${prefixClass(cls)}`;
+      }
+    }
+  }
+  return result;
 };
 
-// Internal type that includes toCSSSelector (not exposed publicly)
-type CNInternal = CN & {
-  /** @internal Convert to CSS selector string - used by closest() */
-  toCSSSelector(): string;
+// Shared prototype for CN instances - methods are created once
+const cnProto = {
+  elem(this: CNInstance, name: string): CN {
+    return createCN(this._block, name, this._mod, this._mix);
+  },
+
+  mod(this: CNInstance, newMod: CNMod = {}): CN {
+    const merged = this._mod ? { ...this._mod, ...newMod } : newMod;
+    return createCN(this._block, this._elem, merged, this._mix);
+  },
+
+  mix(this: CNInstance, ...newMix: (CNMix | CNMix[])[]): CN {
+    return createCN(this._block, this._elem, this._mod, newMix);
+  },
+
+  closest(this: CNInstance, root: Element): Element | null {
+    const selector = `.${this.toString().replace(SPACE_REGEX, ".")}`;
+    return root.closest(selector);
+  },
+
+  toString(this: CNInstance): string {
+    if (this._cached !== null) return this._cached;
+
+    // Build base class
+    const base = this._elem ? `${this._block}__${this._elem}` : this._block;
+    let result = prefixClass(base);
+
+    // Add modifiers
+    const mod = this._mod;
+    if (mod) {
+      for (const key in mod) {
+        const value = mod[key];
+        if (value === null || value === undefined || value === false) continue;
+        result +=
+          value === true ? ` ${prefixClass(`${base}_${key}`)}` : ` ${prefixClass(`${base}_${key}_${value}`)}`;
+      }
+    }
+
+    // Add mixes
+    const mix = this._mix;
+    if (mix && mix.length > 0) {
+      result = appendMixClasses(result, mix);
+    }
+
+    this._cached = result;
+    return result;
+  },
+
+  toClassName(this: CNInstance): string {
+    return this.toString();
+  },
 };
 
-const cn = (block: string, options: CNOptions = {}): CN => {
-  const { elem, mix, mod } = options ?? {};
-
-  const classNameBuilder: CNInternal = {
-    elem(name) {
-      return cn(block, { elem: name, mix, mod });
-    },
-
-    mod(newMod = {}) {
-      const stateOverride = Object.assign({}, mod ?? {}, newMod);
-      return cn(block, { elem, mix, mod: stateOverride });
-    },
-
-    mix(...mix) {
-      return cn(block, { elem, mix, mod });
-    },
-
-    closest(root) {
-      return root.closest(this.toCSSSelector());
-    },
-
-    toString() {
-      return assembleClass(block, elem, mix, mod);
-    },
-
-    toClassName() {
-      return this.toString();
-    },
-
-    toCSSSelector() {
-      return `.${this.toClassName().replace(/(\s+)/g, ".")}`;
-    },
-  };
-
-  return classNameBuilder;
+// Internal instance type with private fields
+type CNInstance = CN & {
+  _block: string;
+  _elem: string | undefined;
+  _mod: CNMod | undefined;
+  _mix: (CNMix | CNMix[])[] | undefined;
+  _cached: string | null;
 };
 
-export { cn as cnb };
+// Factory function - creates minimal object, methods come from prototype
+const createCN = (block: string, elem?: string, mod?: CNMod, mix?: (CNMix | CNMix[])[]): CN => {
+  const instance = Object.create(cnProto) as CNInstance;
+  instance._block = block;
+  instance._elem = elem;
+  instance._mod = mod;
+  instance._mix = mix;
+  instance._cached = null;
+  return instance;
+};
+
+// Public API: cn(block, options?)
+const cnb = (block: string, options: { elem?: string; mix?: CNMix | CNMix[] | (CNMix | CNMix[])[]; mod?: CNMod } = {}): CN => {
+  const mix = options.mix ? (Array.isArray(options.mix) ? options.mix : [options.mix]) : undefined;
+  return createCN(block, options.elem, options.mod, mix as (CNMix | CNMix[])[] | undefined);
+};
+
+export { cnb };
