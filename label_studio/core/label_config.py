@@ -132,6 +132,69 @@ def validate_label_config(config_string: Union[str, None]) -> None:
             if toName not in names:
                 raise ValidationError(f'toName="{toName}" not found in names: {sorted(names)}')
 
+    # validate Video tag playback speed parameters
+    xml = parse_config_to_xml(config_string)
+    if xml is not None:
+        _validate_video_playback_speed(xml)
+
+
+def _validate_video_playback_speed(xml):
+    """
+    Validate Video tag playback speed parameters:
+    1. minPlaybackSpeed must not be greater than defaultPlaybackSpeed
+    2. Both speeds must not exceed 10
+
+    Args:
+        xml: Parsed XML ElementTree
+
+    Raises:
+        ValidationError: If validation fails
+    """
+    video_tags = xml.findall('.//Video')
+
+    for video_tag in video_tags:
+        video_name = video_tag.get('name', 'unnamed')
+
+        # Get attribute values (case-insensitive check for both camelCase and lowercase)
+        min_speed_attr = video_tag.get('minPlaybackSpeed') or video_tag.get('minplaybackspeed')
+        default_speed_attr = video_tag.get('defaultPlaybackSpeed') or video_tag.get('defaultplaybackspeed')
+
+        # Parse values if present
+        min_speed = None
+        default_speed = None
+
+        if min_speed_attr is not None:
+            try:
+                min_speed = float(min_speed_attr)
+            except (ValueError, TypeError):
+                pass
+
+        if default_speed_attr is not None:
+            try:
+                default_speed = float(default_speed_attr)
+            except (ValueError, TypeError):
+                pass
+
+        # Validate maximum speed limit
+        if min_speed is not None and min_speed > 10:
+            raise ValidationError(
+                f'Video tag "{video_name}": minPlaybackSpeed ({min_speed}) cannot be greater than 10.'
+            )
+
+        if default_speed is not None and default_speed > 10:
+            raise ValidationError(
+                f'Video tag "{video_name}": defaultPlaybackSpeed ({default_speed}) cannot be greater than 10.'
+            )
+
+        # Validate relationship between min and default
+        if min_speed is not None and default_speed is not None:
+            if min_speed > default_speed:
+                raise ValidationError(
+                    f'Video tag "{video_name}": minPlaybackSpeed ({min_speed}) cannot be greater than '
+                    f'defaultPlaybackSpeed ({default_speed}). The minimum playback speed must be less than '
+                    f'or equal to the default playback speed.'
+                )
+
 
 def extract_data_types(label_config):
     # load config
