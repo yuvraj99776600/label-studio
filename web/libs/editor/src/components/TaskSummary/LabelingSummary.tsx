@@ -27,6 +27,7 @@ type Props = {
   controls: ControlTag[];
   onSelect: (entity: AnnotationSummary) => void;
   hideInfo: boolean;
+  taskId?: number | string;
 };
 
 const cellFn = (control: ControlTag, render: RendererType) => (props: { row: Row<AnnotationSummary> }) => {
@@ -57,7 +58,7 @@ const convertPredictionResult = (result: MSTResult) => {
 
 const columnHelper = createColumnHelper<AnnotationSummary>();
 
-export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect }: Props) => {
+export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect, taskId }: Props) => {
   const currentUser = window.APP_SETTINGS?.user;
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const tableRef = useRef<HTMLTableElement>(null);
@@ -218,6 +219,7 @@ export const LabelingSummary = ({ hideInfo, annotations: all, controls, onSelect
                 headers={table.getHeaderGroups()[0]?.headers ?? []}
                 controls={controls}
                 annotations={annotations}
+                taskId={taskId}
               />
             )}
             {/* Annotation Rows */}
