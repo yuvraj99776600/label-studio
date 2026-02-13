@@ -2,7 +2,8 @@ import { ff } from "@humansignal/core";
 import { usePersistentState } from "@humansignal/core/lib/hooks/usePersistentState";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@humansignal/ui/lib/tabs";
 import type { MSTAnnotation, MSTStore } from "../../stores/types";
-import TaskSummary from "../TaskSummary/TaskSummary";
+// import TaskSummary from "../TaskSummary/TaskSummary";
+import TaskSummary from "../TaskSummary/TaskSummaryV2";
 import Grid from "./Grid";
 
 type Props = {
