@@ -106,7 +106,7 @@ jobs:
 
       - name: Run Cypress
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
-        run: COLLECT_COVERAGE=1 npx cypress run --config-file libs/editor/cypress.config.ts
+        run: COLLECT_COVERAGE=1 npx nx run editor:integration
 
       - name: Upload coverage
         uses: actions/upload-artifact@v6
