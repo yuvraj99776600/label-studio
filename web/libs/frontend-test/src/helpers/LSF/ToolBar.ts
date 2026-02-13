@@ -27,7 +27,10 @@ export const ToolBar = {
   },
 
   get updateBtn() {
-    return this.sectionTwo.find('[aria-label="Update current annotation"]');
+    // New UI (BottomBar): main update button has data-testid; old UI had aria-label "Update current annotation"
+    return this.sectionTwo.find(
+      '[data-testid="bottombar-update-button"], [aria-label="Update current annotation"]',
+    );
   },
 
   get annotationDropdownTrigger() {
