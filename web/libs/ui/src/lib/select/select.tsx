@@ -13,7 +13,7 @@ import type { SelectOption, OptionProps, SelectProps } from "./types.ts";
 import { Checkbox, Label, Typography } from "@humansignal/ui";
 import { Badge } from "../badge/badge";
 import { isDefined } from "@humansignal/core/lib/utils/helpers";
-import { IconChevron, IconChevronDown } from "@humansignal/icons";
+import { IconChevron, IconChevronDown, IconChevronRight } from "@humansignal/icons";
 import clsx from "clsx";
 import styles from "./select.module.scss";
 import { cnm } from "../../utils/utils";
@@ -89,13 +89,13 @@ const SelectedItemsGroup = ({
       >
         {/* Caret icon */}
         {expanded ? (
-          <IconChevron
+          <IconChevronDown
             className={styles.selectedItemsCaret}
             aria-hidden="true"
             style={{ opacity: hasNoItems ? 0.3 : 1 }}
           />
         ) : (
-          <IconChevronDown
+          <IconChevronRight
             className={styles.selectedItemsCaret}
             aria-hidden="true"
             style={{ opacity: hasNoItems ? 0.3 : 1 }}
