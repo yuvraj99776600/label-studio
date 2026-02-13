@@ -13,7 +13,7 @@ import type { SelectOption, OptionProps, SelectProps } from "./types.ts";
 import { Checkbox, Label, Typography } from "@humansignal/ui";
 import { Badge } from "../badge/badge";
 import { isDefined } from "@humansignal/core/lib/utils/helpers";
-import { IconChevron, IconChevronDown, IconChevronRight } from "@humansignal/icons";
+import { IconChevron, IconChevronDown } from "@humansignal/icons";
 import clsx from "clsx";
 import styles from "./select.module.scss";
 import { cnm } from "../../utils/utils";
@@ -87,20 +87,12 @@ const SelectedItemsGroup = ({
         disabled={hasNoItems}
         style={{ cursor: hasNoItems ? "default" : "pointer" }}
       >
-        {/* Caret icon */}
-        {expanded ? (
-          <IconChevronDown
-            className={styles.selectedItemsCaret}
-            aria-hidden="true"
-            style={{ opacity: hasNoItems ? 0.3 : 1 }}
-          />
-        ) : (
-          <IconChevronRight
-            className={styles.selectedItemsCaret}
-            aria-hidden="true"
-            style={{ opacity: hasNoItems ? 0.3 : 1 }}
-          />
-        )}
+        {/* Caret icon - rotates from right-pointing (-90deg) to down-pointing (0deg) */}
+        <IconChevronDown
+          className={clsx(styles.selectedItemsCaret, expanded && styles.selectedItemsCaretExpanded)}
+          aria-hidden="true"
+          style={{ opacity: hasNoItems ? 0.3 : 1 }}
+        />
 
         {/* Deselect all checkbox */}
         <Checkbox

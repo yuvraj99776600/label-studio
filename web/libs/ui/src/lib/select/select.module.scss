@@ -128,7 +128,12 @@
 }
 
 .selectedItemsCaret {
-  transition: opacity 150ms ease-out;
+  transform: rotate(-90deg);
+  transition: transform 150ms ease-out, opacity 150ms ease-out;
+
+  &Expanded {
+    transform: rotate(0deg);
+  }
 }
 
 .selectedItemsContent {
