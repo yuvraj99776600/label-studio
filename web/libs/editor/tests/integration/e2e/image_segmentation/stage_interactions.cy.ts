@@ -117,8 +117,8 @@ describe("Image Segmentation Stage Interactions", () => {
       ],
       false,
     );
-    // Wait for polygon segments to be rendered on canvas (deterministic instead of TWO_FRAMES_TIMEOUT)
-    ImageView.drawingArea.find(".konva-shape").should("have.length.at.least", 1);
+    // Wait for polygon segments to be rendered on canvas (production build may render slower)
+    ImageView.drawingArea.find(".konva-shape", { timeout: 10000 }).should("have.length.at.least", 1);
     ImageView.clickAtRelative(0.8, 0.1);
     Sidebar.hasRegions(1);
     // dblclick

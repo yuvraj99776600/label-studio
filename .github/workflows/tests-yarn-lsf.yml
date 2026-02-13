@@ -89,6 +89,21 @@ jobs:
           name: editor-build
           path: ${{ env.FRONTEND_MONOREPO_DIR }}/dist/libs/editor
 
+      - name: Verify build contains assets and CSS
+        working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
+        run: |
+          set -e
+          echo "Build output:"
+          ls -la dist/libs/editor/
+          test -f dist/libs/editor/index.html || (echo "Missing index.html" && exit 1)
+          # Ensure CSS is present (webpack emits main.css or similar)
+          if ! find dist/libs/editor -maxdepth 1 -name "*.css" -print -quit | grep -q .; then
+            echo "No CSS file in build - styles may not load. Contents:"
+            ls dist/libs/editor/
+            exit 1
+          fi
+          echo "Build contains index.html and CSS assets."
+
       - name: Run server
         id: run-server
         timeout-minutes: 1
@@ -102,6 +117,16 @@ jobs:
             echo "=> Waiting for service to become available"
             sleep 2s
           done
+          # Verify root and that CSS is served (same origin as page)
+          code=$(curl -s -o /dev/null -w "%{http_code}" -L "http://localhost:3000/")
+          test "$code" = "200" || (echo "Root URL returned $code" && exit 1)
+          css_ref=$(curl -s -L "http://localhost:3000/" | grep -oE 'href="[^"]+\.css[^"]*"' | head -1 | cut -d'"' -f2)
+          if [ -n "$css_ref" ]; then
+            css_url="http://localhost:3000/${css_ref#/}"
+            css_code=$(curl -s -o /dev/null -w "%{http_code}" -L "$css_url")
+            test "$css_code" = "200" || (echo "CSS URL $css_url returned $css_code" && exit 1)
+            echo "Root and CSS are served correctly."
+          fi
 
       - name: Run Cypress
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
