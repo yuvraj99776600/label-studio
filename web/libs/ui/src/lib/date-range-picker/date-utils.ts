@@ -120,7 +120,15 @@ export const mapSelected = (
   );
 };
 
-export const incrementMonth = ({ month, year, changeValue }: { month: number; year: number; changeValue: number }) => {
+export const incrementMonth = ({
+  month,
+  year,
+  changeValue,
+}: {
+  month: number;
+  year: number;
+  changeValue: number;
+}) => {
   const newDate = new Date(year, month, 1);
 
   newDate.setMonth(newDate.getMonth() + changeValue);
@@ -144,8 +152,13 @@ export const compareRangeEquivalencyByNumber = (
 export const isSameMonth = (dateOne: Date, dateTwo: Date) =>
   dateOne.getFullYear() === dateTwo.getFullYear() && dateOne.getMonth() === dateTwo.getMonth();
 
-export const isSameMonthByNumbers = ({ start, end }: { start: DateTimeByNumbers; end: DateTimeByNumbers }) =>
-  isSameMonth(new Date(start.year, start.month), new Date(end.year, end.month));
+export const isSameMonthByNumbers = ({
+  start,
+  end,
+}: {
+  start: DateTimeByNumbers;
+  end: DateTimeByNumbers;
+}) => isSameMonth(new Date(start.year, start.month), new Date(end.year, end.month));
 
 export const calculateDisplayMonthsFromSelection = (dates: {
   start: DateOrDateTimeByNumbers;
