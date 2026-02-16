@@ -600,7 +600,7 @@ After adding the storage, click **Sync**.
 
 You can also use the API to programmatically create connections. [See our API documentation.](https://api.labelstud.io/api-reference/introduction/getting-started)
 
-## IP Filtering and VPN for Enhanced Security for S3 storage
+## IP filtering and VPN for enhanced security for S3 storage
 
 To maximize security and data isolation behind a VPC, restrict access to the Label Studio backend and internal network users by setting IP restrictions for storage, allowing only trusted networks to perform task synchronization and generate pre-signed URLs. Additionally, establish a secure connection between storage and users' browsers by configuring a VPC private endpoint or limiting storage access to specific IPs or VPCs. 
 
