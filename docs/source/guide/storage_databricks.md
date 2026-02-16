@@ -14,7 +14,7 @@ parent_enterprise: "storage"
 
 <div class="opensource-only">
 
-In Label Studio Enterprise, you can set connect to Databricks Unity Catalog (UC) volumes for your source and target storage. 
+In Label Studio Enterprise, you can connect to Databricks Unity Catalog (UC) volumes for your source and target storage. 
 
 For more information, see [Databricks Files (UC Volumes)](https://docs.humansignal.com/guide/storage_databricks) in our Enterprise documentation.
 
