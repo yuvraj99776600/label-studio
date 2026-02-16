@@ -788,7 +788,7 @@ Read more about [Source storage behind your VPC](security.html#Source-storage-be
 
 !!! note
     If you're using Label Studio Enterprise at app.humansignal.com and accessing it from your office network:
-    - Add Label Studio Enterprise outgoing IP addresses (see [IP ranges](saas.html#IP-range))
+    - Add Label Studio Enterprise outgoing IP addresses (see [IP ranges](saas.html#IP-ranges))
     - Add your office network IP range (e.g. 192.168.1.0/24)
     - If both Label Studio Enterprise and your office are on the same VPN network (e.g. 10.0.0.0/16), you only need to add that VPN subnet
 

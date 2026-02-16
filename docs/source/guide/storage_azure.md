@@ -207,7 +207,7 @@ After adding the storage, click **Sync**.
 
 In Label Studio Enterprise, you can use Azure Service Principal authentication to securely connect Label Studio to Azure Blob Storage without using storage account access keys.
 
-For more information, see [Azure Blob Storage with Service Principal](https://docs.humansignal.com/guide/storage_gcp.html#Azure-Blob-Storage-with-Service-Principal) in our Enterprise documentation.
+For more information, see [Azure Blob Storage with Service Principal](https://docs.humansignal.com/guide/storage_azure.html#Azure-Blob-Storage-with-Service-Principal) in our Enterprise documentation.
 
 </div>
 

@@ -33,7 +33,7 @@ Each source and target storage setup is project-specific. You can connect multip
 
 Label Studio does not automatically sync data from source storage. If you upload new data to a connected cloud storage bucket, sync the storage connection using the UI to add the new labeling tasks to Label Studio without restarting. You can also use the API to set up or sync storage connections. See [Label Studio API](https://api.labelstud.io/api-reference/introduction/getting-started) and locate the relevant storage connection type. 
 
-Task data synced from cloud storage is not stored in Label Studio. Instead, the data is accessed using presigned URLs. You can also secure access to cloud storage using VPC and IP restrictions for your storage. For details, see [Secure access to cloud storage](security.html#Secure-access-to-cloud-storages).
+Task data synced from cloud storage is not stored in Label Studio. Instead, the data is accessed using presigned URLs. You can also secure access to cloud storage using VPC and IP restrictions for your storage. For details, see [Secure access to cloud storages](security.html#Secure-access-to-cloud-storages).
 
 ### Source storage permissions
 
@@ -284,7 +284,7 @@ When annotators click **Submit** or **Update** while labeling tasks, Label Studi
 
 If you configure target storage, annotations are sent to target storage after you click **Sync** for the configured target storage connection. The target storage receives a JSON-formatted export of each annotation. See [Label Studio JSON format of annotated tasks](export.html#Label-Studio-JSON-format-of-annotated-tasks) for details about how exported tasks appear in  target storage.
 
-You can also delete annotations in target storage when they are deleted in Label Studio. See [Set up target storage connection in the Label Studio UI](storage.html#Set-up-target-storage-connection-in-the-Label-Studio-UI) for more details.
+You can also delete annotations in target storage when they are deleted in Label Studio. 
 
 ### Target storage permissions
 

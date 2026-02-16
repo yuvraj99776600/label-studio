@@ -41,6 +41,7 @@ Connect Label Studio Enterprise to Databricks Unity Catalog (UC) Volumes to impo
 
 - [Proxying](storage#Pre-signed-URLs-vs-Storage-proxies) must be enabled for your organization (**Organization > Usage & License > Features**).
 
+- Before you begin, review the information in [Cloud storage for projects](storage) and [Secure access to cloud storage](security.html#Secure-access-to-cloud-storage).
 
 ## Authentication options
 
@@ -163,6 +164,9 @@ Complete the following fields and then click **Load preview** to ensure you are 
 
 If everything looks correct, click **Save & Sync** to sync immediately, or click **Save** to save your settings and sync later.
 
+!!! info Tip
+    You can also use the API to [sync import storage](https://api.labelstud.io/api-reference/api-reference/import-storage/databricks/sync).
+
 !!! note "URI schema"
     To reference Databricks files directly in task JSON (without using source storage), use Label Studio’s Databricks URI scheme:
     
@@ -193,6 +197,13 @@ When file deletion is enabled, if you delete an annotation in Label Studio (via 
 Note that this only affects files that were exported by that target storage, not your source media or tasks. Your PAT or SP permissions must also allow deletion.
 
 After adding, click **Sync** to export annotations as JSON files to your target volume.
+
+!!! info Tip
+    You can also use the API to [sync export storage](https://api.labelstud.io/api-reference/api-reference/export-storage/databricks/sync).
+
+## Add storage with the Label Studio API
+
+You can also use the API to programmatically create connections. [See our API documentation.](https://api.labelstud.io/api-reference/introduction/getting-started)
 
 </div>
 
