@@ -14,7 +14,7 @@ parent_enterprise: "storage"
 
 Dynamically import tasks and export annotations to Google Cloud Storage (GCS) buckets in Label Studio. For details about how Label Studio secures access to cloud storage, see [Secure access to cloud storage](security#Secure-access-to-cloud-storage).
 
-## Configure access to your GCS bucket
+## Configure access to your Google Cloud Storage bucket
 
 First, review the information in [Cloud storage for projects](storage) and [Secure access to cloud storage](security#Secure-access-to-cloud-storage).
 

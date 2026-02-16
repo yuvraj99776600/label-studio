@@ -1,5 +1,5 @@
 ---
-title: Redis database project storage
+title: Set up Redis database project storage
 short: Redis
 type: guide
 tier: all

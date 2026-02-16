@@ -1,5 +1,5 @@
 ---
-title: Databricks Files (UC Volumes)
+title: Set up Databricks UC volume storage
 short: Databricks
 type: guide
 tier: all
@@ -203,7 +203,7 @@ After adding, click **Sync** to export annotations as JSON files to your target 
 
 ## Add storage with the Label Studio API
 
-You can also use the API to programmatically create connections. [See our API documentation.](https://api.labelstud.io/api-reference/introduction/getting-started)
+You can also use the API to programmatically create connections. [See our API documentation.](https://api.labelstud.io/api-reference/introduction/getting-started).
 
 </div>
 

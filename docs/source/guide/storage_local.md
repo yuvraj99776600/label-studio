@@ -1,5 +1,5 @@
 ---
-title: Local project storage
+title: Set up local project storage
 short: Local
 type: guide
 tier: all

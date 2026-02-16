@@ -299,7 +299,7 @@ After adding the storage, click **Sync**.
 !!! info Tip
     You can also use the API to [sync export storage](https://api.labelstud.io/api-reference/api-reference/export-storage/s-3/sync).
 
-## Add storage for Amazon S3 with IAM role 
+## Amazon S3 with IAM role 
 
 <div class="opensource-only">
 

@@ -1,5 +1,5 @@
 ---
-title: Microsoft Azure Blob storage
+title: Set up Microsoft Azure Blob storage
 short: Microsoft Azure
 type: guide
 tier: all
@@ -201,7 +201,7 @@ After adding the storage, click **Sync**.
     You can also use the API to [sync export storage](https://api.labelstud.io/api-reference/api-reference/export-storage/azure/sync).
 
 
-## Azure Blob Storage with Service Principal
+## Azure blob storage with Service Principal
 
 <div class="opensource-only">
 
