@@ -11,9 +11,10 @@
 
 import { useMemo } from "react";
 import { cnm, Tooltip, Userpic } from "@humansignal/ui";
+import { IconAnnotationGroundTruth, IconCheckAlt, IconCrossAlt } from "@humansignal/icons";
 import { computeMajorityVote, isConflict } from "./agreement-utils";
 import { GroundTruthRow } from "./ground-truth-row";
-import type { AnnotatorInfo, DimensionInfo, DimensionScore, GroundTruthCell, GroundTruthSource, MajorityVoteResult } from "./types";
+import type { AnnotationMeta, AnnotatorInfo, DimensionInfo, DimensionScore, GroundTruthCell, GroundTruthSource, MajorityVoteResult } from "./types";
 import type { ValueCount } from "./use-ground-truth";
 
 // ---------------------------------------------------------------------------
@@ -23,6 +24,10 @@ import type { ValueCount } from "./use-ground-truth";
 interface AnnotatorsDimensionsTableProps {
   dimensions: DimensionInfo[];
   annotators: AnnotatorInfo[];
+  /** Optional per-annotation metadata aligned with annotators (ground truth, review, comments) */
+  annotationsMeta?: AnnotationMeta[];
+  /** Called when a row is clicked with the annotation's database ID (pk) */
+  onAnnotationClick?: (annotationId: number) => void;
   /** Optional per-dimension scores to render as agreement bars under the table */
   dimensionScores?: DimensionScore[];
   /** Ground Truth Mode props (all optional — table works without them) */
@@ -40,6 +45,8 @@ interface AnnotatorsDimensionsTableProps {
 export const AnnotatorsDimensionsTable = ({
   dimensions,
   annotators,
+  annotationsMeta,
+  onAnnotationClick,
   dimensionScores,
   groundTruthActive,
   groundTruthCells,
@@ -116,9 +123,38 @@ export const AnnotatorsDimensionsTable = ({
           {/* Annotator rows */}
           {annotators.map((annotator, rowIndex) => {
             const isEvenRow = rowIndex % 2 === 0;
+            const meta = annotationsMeta?.[annotator.index];
+            const lastReview = meta?.reviews?.length ? meta.reviews[meta.reviews.length - 1] : null;
+
+            const reviewBadge = lastReview ? (
+              <div
+                style={{
+                  width: 10,
+                  height: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 2,
+                  color: "var(--color-neutral-background)",
+                  backgroundColor: lastReview.accepted
+                    ? "var(--color-accent-kale-base)"
+                    : "var(--color-accent-persimmon-base)",
+                  boxShadow: "0 0 0 2px var(--color-neutral-background)",
+                  transform: "translate(2px, 2px)",
+                }}
+              >
+                {lastReview.accepted ? <IconCheckAlt /> : <IconCrossAlt />}
+              </div>
+            ) : null;
+
+            const isClickable = !!(meta?.id && onAnnotationClick);
 
             return (
-              <tr key={annotator.id} className="group">
+              <tr
+                key={annotator.id}
+                className={cnm("group", isClickable && "cursor-pointer")}
+                onClick={isClickable ? () => onAnnotationClick(meta.id) : undefined}
+              >
                 {/* Annotator name cell */}
                 <td
                   className={cnm(
@@ -130,8 +166,18 @@ export const AnnotatorsDimensionsTable = ({
                   style={{ minWidth: 160 }}
                 >
                   <div className="flex gap-tight items-center">
-                    <Userpic user={annotator.user} />
-                    <span className="text-label-small font-medium">{annotator.displayName}</span>
+                    <Userpic
+                      user={annotator.user}
+                      badge={reviewBadge ? { bottomRight: reviewBadge } : undefined}
+                    />
+                    <span className="text-label-small font-medium flex-1 truncate">{annotator.displayName}</span>
+                    {meta?.ground_truth && (
+                      <Tooltip title="Ground Truth">
+                        <span className="flex-shrink-0" style={{ color: "var(--canteloupe_400)" }}>
+                          <IconAnnotationGroundTruth />
+                        </span>
+                      </Tooltip>
+                    )}
                   </div>
                 </td>
 

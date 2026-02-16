@@ -10,7 +10,7 @@
  * build ground truth annotations from the dashboard.
  */
 
-import { useCallback, useMemo, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, type ReactNode } from "react";
 import { Toggle, Tooltip } from "@humansignal/ui";
 import type { MSTAnnotation, MSTControlTag, MSTStore } from "../../stores/types";
 import { DataSummary } from "./DataSummary";
@@ -101,6 +101,17 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
     }
   };
 
+  // Navigate to a specific annotation by its database pk
+  const handleAnnotationClick = useCallback(
+    (annotationPk: number) => {
+      const match = annotations.find((a) => String(a.pk) === String(annotationPk));
+      if (match) {
+        annotationStore.selectAnnotation(match.id, { exitViewAll: true });
+      }
+    },
+    [annotations, annotationStore],
+  );
+
   // Build control tags (same as OSS)
   const controlTags: [string, MSTControlTag][] = allTags.filter(([_, control]) => control.isControlTag) as [
     string,
@@ -186,6 +197,20 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
     hideInfo,
   });
 
+  const nonCategoricalDimensions = useMemo(
+    () => agreementData.dimensions.filter((d) => !d.isCategorical),
+    [agreementData.dimensions],
+  );
+  const hasNonCategoricalDimensions = nonCategoricalDimensions.length > 0;
+
+  // "All dimensions" only makes sense when there are non-categorical dimensions.
+  // If persisted state points to it but there are no non-categorical dims, normalize.
+  useEffect(() => {
+    if (!hasNonCategoricalDimensions && conflictFilter === "all_dimensions") {
+      setConflictFilter("all");
+    }
+  }, [hasNonCategoricalDimensions, conflictFilter, setConflictFilter]);
+
   // Initialize visible columns to all categorical dimensions when first loaded
   const effectiveVisibleColumnIds = useMemo(() => {
     if (visibleColumnIds !== null) return visibleColumnIds;
@@ -202,6 +227,28 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
     dimensionScores: agreementData.dimensionScores,
     annotators: agreementData.annotators,
   });
+
+  const groundTruthDisabledReason = useMemo(() => {
+    if (!hasNonCategoricalDimensions) {
+      return null;
+    }
+
+    const listed = nonCategoricalDimensions
+      .slice(0, 3)
+      .map((d) => `${d.name} (${d.controlTag || "unknown"})`)
+      .join(", ");
+    const suffix = nonCategoricalDimensions.length > 3 ? ", ..." : "";
+
+    return `Ground Truth Mode is only available for categorical dimensions. Current config includes non-categorical dimensions: ${listed}${suffix}`;
+  }, [hasNonCategoricalDimensions, nonCategoricalDimensions]);
+
+  // Auto-disable Ground Truth Mode if non-categorical dimensions are present.
+  useEffect(() => {
+    if (hasNonCategoricalDimensions && groundTruth.isActive) {
+      groundTruth.actions.toggleActive();
+    }
+  }, [hasNonCategoricalDimensions, groundTruth.isActive, groundTruth.actions]);
+  const isGroundTruthActive = !hasNonCategoricalDimensions && groundTruth.isActive;
 
   const handleCreateGroundTruth = useCallback(() => {
     if (!task?.id) return;
@@ -306,34 +353,49 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
 
           {/* Annotators × Dimensions Table (always visible) */}
           <section className="mb-base">
-              <div className="flex items-center justify-between mb-tight">
-                <Tooltip title={groundTruth.isActive ? "Exit Ground Truth Mode" : "Adjudicate and create ground truth annotations"}>
-                  <span>
-                    <Toggle
-                      label="Ground Truth Mode"
-                      checked={groundTruth.isActive}
-                      onChange={() => groundTruth.actions.toggleActive()}
-                    />
-                  </span>
-                </Tooltip>
-                <ColumnPicker
-                  totalDimensionCount={agreementData.dimensions.length}
-                  shownCount={agreementData.filteredDimensions.length}
-                  allDimensions={agreementData.dimensions}
-                  visibleColumnIds={effectiveVisibleColumnIds}
-                  onVisibleColumnsChange={setVisibleColumnIds}
-                  conflictFilter={conflictFilter}
-                  onConflictFilterChange={setConflictFilter}
-                  conflictsOnly={conflictsOnly}
-                  onConflictsOnlyChange={setConflictsOnly}
-                />
-              </div>
+            <div className="flex items-center justify-between mb-tight">
+              <Tooltip
+                title={
+                  groundTruthDisabledReason
+                  ?? (groundTruth.isActive
+                    ? "Exit Ground Truth Mode"
+                    : "Adjudicate and create ground truth annotations")
+                }
+              >
+                <span>
+                  <Toggle
+                    label="Ground Truth Mode"
+                    checked={isGroundTruthActive}
+                    onChange={() => {
+                      if (!hasNonCategoricalDimensions) {
+                        groundTruth.actions.toggleActive();
+                      }
+                    }}
+                    disabled={hasNonCategoricalDimensions}
+                  />
+                </span>
+              </Tooltip>
+              <ColumnPicker
+                totalDimensionCount={agreementData.dimensions.length}
+                shownCount={agreementData.filteredDimensions.length}
+                allDimensions={agreementData.dimensions}
+                visibleColumnIds={effectiveVisibleColumnIds}
+                onVisibleColumnsChange={setVisibleColumnIds}
+                conflictFilter={conflictFilter}
+                onConflictFilterChange={setConflictFilter}
+                conflictsOnly={conflictsOnly}
+                onConflictsOnlyChange={setConflictsOnly}
+                hasNonCategoricalDimensions={hasNonCategoricalDimensions}
+              />
+            </div>
 
               <AnnotatorsDimensionsTable
                 dimensions={agreementData.filteredDimensions}
                 annotators={agreementData.annotators}
+                annotationsMeta={agreementData.agreementResult?.annotations_meta ?? undefined}
+                onAnnotationClick={handleAnnotationClick}
                 dimensionScores={agreementData.dimensionScores}
-                groundTruthActive={groundTruth.isActive}
+                groundTruthActive={isGroundTruthActive}
                 groundTruthCells={groundTruth.cells}
                 groundTruthValueCounts={groundTruth.valueCounts}
                 onSetGroundTruthCell={groundTruth.actions.setCell}
@@ -341,7 +403,7 @@ const TaskSummary = ({ annotations: all, store: annotationStore }: TaskSummaryPr
               />
 
               {/* Resolution Summary Bar (Ground Truth Mode only) — below the table */}
-              {groundTruth.isActive && (
+              {isGroundTruthActive && (
                 <FadeIn>
                   <ResolutionSummaryBar
                     resolvedCount={groundTruth.resolvedCount}

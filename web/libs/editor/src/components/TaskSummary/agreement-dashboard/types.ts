@@ -26,11 +26,34 @@ export interface DistributionEntry {
   count?: number;
 }
 
+/** Lightweight review info attached to an annotation */
+export interface AnnotationReviewMeta {
+  accepted: boolean;
+}
+
+/** Lightweight comment summary attached to an annotation */
+export interface AnnotationCommentMeta {
+  text: string | null;
+  region_ref: Record<string, unknown> | null;
+  classifications: unknown[] | null;
+}
+
+/** Per-annotation metadata (excludes heavy result/history fields) */
+export interface AnnotationMeta {
+  id: number;
+  ground_truth: boolean;
+  lead_time: number | null;
+  reviews: AnnotationReviewMeta[];
+  comments: AnnotationCommentMeta[];
+}
+
 /** Serialized from dimensions.pipeline.types.TaskAgreementResult */
 export interface TaskAgreementResult {
   dimension_results: DimensionMatchResult[];
   aggregation: AggregationResult;
   annotator_ids: number[];
+  /** Per-annotation metadata aligned with annotator_ids (optional) */
+  annotations_meta?: AnnotationMeta[];
   /** Added by LseTaskAgreementAPI: dimension_id -> metadata */
   dimension_meta: Record<number, DimensionMeta>;
 }

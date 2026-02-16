@@ -32,6 +32,8 @@ interface ColumnPickerProps {
   /** Whether dimensions with unanimous agreement are hidden */
   conflictsOnly: boolean;
   onConflictsOnlyChange: (value: boolean) => void;
+  /** Whether at least one non-categorical dimension exists */
+  hasNonCategoricalDimensions: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -58,6 +60,7 @@ export const ColumnPicker = ({
   onConflictFilterChange,
   conflictsOnly,
   onConflictsOnlyChange,
+  hasNonCategoricalDimensions,
 }: ColumnPickerProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -106,6 +109,10 @@ export const ColumnPicker = ({
   }, [onVisibleColumnsChange]);
 
   const isCustom = conflictFilter === "custom";
+  const availableFilterOptions = useMemo(
+    () => FILTER_OPTIONS.filter((opt) => hasNonCategoricalDimensions || opt.value !== "all_dimensions"),
+    [hasNonCategoricalDimensions],
+  );
 
   return (
     <div className="flex items-center gap-tight">
@@ -171,7 +178,7 @@ export const ColumnPicker = ({
                 Column selection
               </span>
               <div className="mt-tighter">
-                {FILTER_OPTIONS.map((opt) => (
+                {availableFilterOptions.map((opt) => (
                   <label
                     key={opt.value}
                     className={cnm(
