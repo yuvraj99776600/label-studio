@@ -181,7 +181,7 @@ Label Studio tasks can have multiple sources of resource files:
 * Files added through a [local storage connection](storage_local).  
     Example: `task['data'] = {"image": "https://ls-instance/data/local-files/?d=folder/photo_1.jpg"}`
 
-* Files added through a [cloud storage](storage) (S3, GCS, Azure) connection
+* Files added through a [cloud storage](storage) (S3, GCS, Azure) connection.
     Example: `task['data'] = {"image": "s3://bucket/prefix/photo_1.jpg"}`
 
 When Label Studio invokes the `predict(tasks)` method on an ML backend, it sends tasks containing data sub-dictionaries with links to resource files. 
