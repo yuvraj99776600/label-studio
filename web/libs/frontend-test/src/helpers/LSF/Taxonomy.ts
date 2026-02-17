@@ -48,6 +48,10 @@ class TaxonomyHelper {
   findItem(text) {
     return this.dropdown.contains(this.selectors.item, text).scrollIntoView();
   }
+  /** Click a taxonomy item (uses force: true so it works when dropdown is partially covered by BottomBar). */
+  clickItem(text: string) {
+    return this.findItem(text).click({ force: true });
+  }
   hasSelected(text) {
     return this.selected.contains("div", text).should("exist");
   }

@@ -79,11 +79,11 @@ export const Sidebar = {
   },
   collapseDetailsRightPanel() {
     // New UI (SideTabsPanels): right-aligned panel has collapse toggle with Collapse tooltip
-    cy.get('.lsf-tabs-panel_alignment_right [data-tooltip="Collapse"]').should("be.visible").click();
+    cy.get('.lsf-tabs-panel_alignment_right [data-tooltip="Collapse"]').should("be.visible").first().click();
   },
   expandDetailsRightPanel() {
     // New UI (SideTabsPanels): click the right-aligned panel header to expand when collapsed
-    cy.get(".lsf-tabs-panel_alignment_right .lsf-tabs-panel__header").should("be.visible").click();
+    cy.get(".lsf-tabs-panel_alignment_right .lsf-tabs-panel__header").should("be.visible").first().click();
   },
   assertRegionHidden(idx: number, id: string, shouldBeHidden: boolean) {
     const expectation = shouldBeHidden ? "have.class" : "not.have.class";

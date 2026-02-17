@@ -46,8 +46,9 @@ export const Relations = {
     const sectionHeadSelector =
       "[class*='lsf-details__section-head'], [class*='lsf-relations__section-head']";
     if (count === 0) {
-      // Text may be in a collapsed or tabbed panel; match anywhere in document
-      cy.get("body").invoke("text").then((text) => {
+      // Text may be in a tabbed panel; retry so we allow time for the details panel to render
+      cy.get("body", { timeout: 10000 }).should(($body) => {
+        const text = $body.text();
         const hasZeroHeader = text.includes("Relations (0)");
         const hasEmptyState = text.includes("Create relations between regions");
         expect(
