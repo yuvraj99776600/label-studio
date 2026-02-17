@@ -350,8 +350,8 @@ describe("Multiple Label Blocks - All Object Tags", () => {
   });
 
   describe("Video Object Tag", () => {
-    // @Todo: This test do not work because in `VideoRectangleResult` we have `mergeLabelsAndResults: true` and it just removes all labels. It should be investigated.
-    it.skip("should create separate results for each label block", () => {
+    // Video uses mergeLabelsAndResults: true — one region produces one result with labels from all Labels blocks merged
+    it("should apply two label blocks (mergeLabelsAndResults)", () => {
       cy.log("Initialize LSF with Video and multiple Labels blocks");
       LabelStudio.params()
         .config(videoLabelsConfig)
@@ -363,32 +363,26 @@ describe("Multiple Label Blocks - All Object Tags", () => {
       LabelStudio.waitForObjectsReady();
       Sidebar.hasNoRegions();
 
-      cy.log("Select video labels from different blocks");
+      cy.log("Select labels from both blocks (Person from objects, Walking from actions)");
       Labels.select("Person"); // From objects block
       Labels.select("Walking"); // From actions block
+      // Wait deterministically for both selections to be applied before drawing (avoids race where only one is in activeStates())
+      cy.get(".lsf-label_selected").should("have.length", 2);
+      cy.get(".lsf-label_selected").contains("Person").should("be.visible");
+      cy.get(".lsf-label_selected").contains("Walking").should("be.visible");
 
-      cy.log("Create video region by drawing rectangle using VideoView helper");
+      cy.log("Create video region by drawing rectangle");
       VideoView.drawRectRelative(0.3, 0.3, 0.4, 0.4);
 
       cy.log("Verify region was created");
       Sidebar.hasRegions(1);
 
-      cy.log("Verify separate results for each label block");
+      cy.log("Verify single serialized result with merged labels from both blocks");
       LabelStudio.serialize().then((results) => {
-        expect(results).to.have.length(2);
-
-        const objectsResult = results.find((r: any) => r.from_name === "objects");
-        const actionsResult = results.find((r: any) => r.from_name === "actions");
-
-        expect(objectsResult).to.exist;
-        expect(actionsResult).to.exist;
-
-        expect(objectsResult.value.labels).to.include("Person");
-        expect(actionsResult.value.labels).to.include("Walking");
-
-        // Both should reference the same video region
-        expect(objectsResult.value.x).to.approximately(actionsResult.value.x, 1);
-        expect(objectsResult.value.y).to.approximately(actionsResult.value.y, 1);
+        expect(results).to.have.length(1);
+        const result = results[0];
+        expect(result.value?.labels).to.be.an("array");
+        expect(result.value?.labels).to.include.members(["Person", "Walking"]);
       });
     });
 
