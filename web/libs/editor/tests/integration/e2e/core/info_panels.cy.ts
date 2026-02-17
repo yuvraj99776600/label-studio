@@ -25,7 +25,9 @@ describe("Label Studio UI info panels", () => {
 
     // Change regions grouping by openining dropdown; it will be closed automatically
     cy.contains("Manual").click();
-    cy.contains("Group by Label").should("be.visible").click();
+    cy.contains("Group by Label").should("be.visible");
+    cy.wait(200);
+    cy.contains("Group by Label").click();
     cy.get("[class$=lsf-outliner-item__title").contains("Word1").should("be.visible");
     cy.contains("Group by Label").should("not.exist");
 

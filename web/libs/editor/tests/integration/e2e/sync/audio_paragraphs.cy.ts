@@ -369,9 +369,10 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     AudioView.playButton.click();
+    // Auto-scroll needs time to move; no stable DOM signal for "scrolled enough"
+    cy.wait(5100);
 
-    // Wait for auto-scroll to move (scrollTop > 100)
-    cy.get('[data-testid="phrases-wrapper"]').should(($el) => {
+    cy.get('[data-testid="phrases-wrapper"]').then(($el) => {
       expect($el[0].scrollTop).to.be.greaterThan(100);
     });
   });
@@ -387,13 +388,13 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     AudioView.playButton.click();
-    // Wait for some playback so seeking has an effect
-    AudioView.waitForPlayState(true, 8000, false);
+    cy.wait(3000);
+
     AudioView.clickAt(0, 0);
-    AudioView.waitForStableState();
+    cy.wait(1000);
 
     AudioView.pauseButton.click();
-    AudioView.waitForPlayState(false, 8000, false);
+    cy.wait(1000);
 
     cy.get('[data-testid="phrases-wrapper"]').then(($el) => {
       const scrollTop = $el[0].scrollTop;
