@@ -13,8 +13,7 @@ beforeEach(commonBeforeEach);
 
 /* <Taxonomy /> */
 describe("Control Tags - MIG perItem - Taxonomy", () => {
-  // Skip: taxonomy selection not persisting to serialize() in headless (result stays [])
-  it.skip("should create result with item_index", () => {
+  it("should create result with item_index", () => {
     LabelStudio.params().config(perItemMIGTaxonomyConfig).data(simpleMIGData).withResult([]).init();
 
     ImageView.waitForImage();
@@ -22,7 +21,7 @@ describe("Control Tags - MIG perItem - Taxonomy", () => {
     Taxonomy.open();
     Taxonomy.clickItem("Choice 1");
 
-    cy.wait(300); // allow annotation store to update after taxonomy selection
+    Taxonomy.hasSelected("Choice 1");
     LabelStudio.serialize().then((result) => {
       expect(result).to.have.length.at.least(1);
       expect(result[0]).to.have.property("item_index", 0);
@@ -69,27 +68,27 @@ describe("Control Tags - MIG perItem - Taxonomy", () => {
     // });
   });
 
-  // Skip: taxonomy selection not persisting to serialize() in headless (result stays [])
-  it.skip("should be able to create more that one result", () => {
+  it("should be able to create more that one result", () => {
     LabelStudio.params().config(perItemMIGTaxonomyConfig).data(simpleMIGData).withResult([]).init();
 
     ImageView.waitForImage();
 
     Taxonomy.open();
     Taxonomy.clickItem("Choice 1");
+    Taxonomy.hasSelected("Choice 1");
 
     ImageView.paginationNextBtn.click();
     ImageView.waitForImage();
     Taxonomy.open();
     Taxonomy.clickItem("Choice 2");
+    Taxonomy.hasSelected("Choice 2");
 
     ImageView.paginationNextBtn.click();
     ImageView.waitForImage();
     Taxonomy.open();
-    cy.wait(500);
     Taxonomy.clickItem("Choice 3");
+    Taxonomy.hasSelected("Choice 3");
 
-    cy.wait(300); // allow annotation store to update
     LabelStudio.serialize().then((result) => {
       expect(result).to.have.length.at.least(3);
       expect(result[0]).to.include({ item_index: 0 });
@@ -132,8 +131,7 @@ describe("Control Tags - MIG perItem - Taxonomy", () => {
     Modals.hasWarning(TAXONOMY_REQUIRED_WARNING);
   });
 
-  // Skip: warning modal appears on Update when test expects none (depends on serialized result)
-  it.skip("should not require result if there are all of them", () => {
+  it("should not require result if there are all of them", () => {
     LabelStudio.params()
       .config(requiredPerItemMIGTaxonomyConfig)
       .data(simpleMIGData)
@@ -144,21 +142,25 @@ describe("Control Tags - MIG perItem - Taxonomy", () => {
 
     Taxonomy.open();
     Taxonomy.clickItem("Choice 1");
+    Taxonomy.hasSelected("Choice 1");
     ImageView.paginationNextBtn.click();
     ImageView.waitForImage();
 
     Taxonomy.open();
     Taxonomy.clickItem("Choice 2");
+    Taxonomy.hasSelected("Choice 2");
     ImageView.paginationNextBtn.click();
     ImageView.waitForImage();
 
     Taxonomy.open();
     Taxonomy.clickItem("Choice 3");
+    Taxonomy.hasSelected("Choice 3");
     ImageView.paginationNextBtn.click();
     ImageView.waitForImage();
 
     Taxonomy.open();
     Taxonomy.clickItem("Choice 2");
+    Taxonomy.hasSelected("Choice 2");
 
     ToolBar.updateBtn.click();
     Modals.hasNoWarnings();

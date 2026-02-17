@@ -6,8 +6,7 @@ beforeEach(commonBeforeEach);
 
 /* <Taxonomy /> */
 describe("Classification - single image - Taxonomy", () => {
-  // Skip: taxonomy selection not persisting to serialize() in headless (result[0] null)
-  it.skip("should create result without item_index", () => {
+  it("should create result without item_index", () => {
     LabelStudio.params().config(simpleImageTaxonomyConfig).data(simpleImageData).withResult([]).init();
 
     ImageView.waitForImage();
@@ -16,7 +15,11 @@ describe("Classification - single image - Taxonomy", () => {
     Taxonomy.clickItem("Choice 2");
     Taxonomy.close();
 
+    // Wait for selection to be reflected in the UI before asserting on serialized result
+    Taxonomy.hasSelected("Choice 2");
+
     LabelStudio.serialize().then((result) => {
+      expect(result).to.have.length(1);
       expect(result[0]).not.to.haveOwnProperty("item_index");
     });
   });
