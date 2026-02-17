@@ -158,7 +158,7 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     AudioView.playButton.click();
-    cy.wait(100);
+    AudioView.waitForPlayState(true, 8000, false);
 
     cy.log("Audio is playing");
     cy.get("audio").then(([audio]) => {
@@ -166,7 +166,7 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     AudioView.pauseButton.click();
-    cy.wait(100);
+    AudioView.waitForPlayState(false, 8000, false);
 
     cy.log("Audio is played and now paused");
     cy.get("audio").then(([audio]) => {
@@ -221,7 +221,7 @@ describe("Sync: Audio Paragraphs", () => {
     // Set playback speed before playing
     AudioView.setPlaybackSpeedInput(1.5, false); // false = audio-only, don't check video
     AudioView.playButton.click();
-    cy.wait(1000);
+    AudioView.waitForPlayState(true, 8000, false);
 
     // Check sync during playback
     cy.get('[data-testid="waveform-audio"]').then(([mainAudio]) => {
@@ -236,7 +236,7 @@ describe("Sync: Audio Paragraphs", () => {
 
     // Change speed during playback
     AudioView.setPlaybackSpeedInput(1, false); // false = audio-only, don't check video
-    cy.wait(1000);
+    AudioView.waitForPlaybackRate(1, 8000, false);
 
     // Check sync after speed change
     cy.get('[data-testid="waveform-audio"]').then(([mainAudio]) => {
@@ -272,7 +272,7 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     cy.get('[data-testid="phrase:0"]').siblings('button[aria-label="play"]').click();
-    cy.wait(100);
+    AudioView.waitForPlayState(true, 8000, false);
 
     cy.log("Audio is playing");
     cy.get("audio").then(([audio]) => {
@@ -280,6 +280,7 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     cy.get('[data-testid="phrase:0"]').siblings('button[aria-label="pause"]').click();
+    AudioView.waitForPlayState(false, 8000, false);
 
     cy.log("Audio is played and now paused");
     cy.get("audio").then(([audio]) => {
@@ -298,14 +299,14 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     cy.get('[data-testid="phrase:0"]').siblings('button[aria-label="play"]').click();
-    cy.wait(100);
+    AudioView.waitForPlayState(true, 8000, false);
 
     cy.get("audio").then(([audio]) => {
       expect(audio.currentTime).to.not.equal(0);
     });
 
     cy.get('[data-testid="phrase:1"]').siblings('button[aria-label="play"]').click();
-    cy.wait(100);
+    AudioView.waitForPlayState(true, 8000, false);
 
     cy.get("audio").then(([audio]) => {
       expect(audio.currentTime).to.not.equal(0);
@@ -331,18 +332,14 @@ describe("Sync: Audio Paragraphs", () => {
     cy.get('[data-testid="phrase:3"]').siblings('button[aria-label="play"]').should("exist");
     cy.get('[data-testid="phrase:4"]').siblings('button[aria-label="play"]').should("exist");
 
-    cy.wait(2000);
-
-    // Plays the second paragraph segment when the audio progresses to the second paragraph segment
+    // Wait for playback to progress to second segment (phrase:1 shows pause)
     cy.get('[data-testid="phrase:1"]').siblings('button[aria-label="pause"]').should("exist");
     cy.get('[data-testid="phrase:0"]').siblings('button[aria-label="play"]').should("exist");
     cy.get('[data-testid="phrase:2"]').siblings('button[aria-label="play"]').should("exist");
     cy.get('[data-testid="phrase:3"]').siblings('button[aria-label="play"]').should("exist");
     cy.get('[data-testid="phrase:4"]').siblings('button[aria-label="play"]').should("exist");
 
-    cy.wait(2000);
-
-    // Plays the third paragraph segment when the audio progresses to the third paragraph segment
+    // Wait for playback to progress to third segment (phrase:2 shows pause)
     cy.get('[data-testid="phrase:2"]').siblings('button[aria-label="pause"]').should("exist");
     cy.get('[data-testid="phrase:0"]').siblings('button[aria-label="play"]').should("exist");
     cy.get('[data-testid="phrase:1"]').siblings('button[aria-label="play"]').should("exist");
@@ -372,9 +369,9 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     AudioView.playButton.click();
-    cy.wait(5100);
 
-    cy.get('[data-testid="phrases-wrapper"]').then(($el) => {
+    // Wait for auto-scroll to move (scrollTop > 100)
+    cy.get('[data-testid="phrases-wrapper"]').should(($el) => {
       expect($el[0].scrollTop).to.be.greaterThan(100);
     });
   });
@@ -390,13 +387,13 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     AudioView.playButton.click();
-    cy.wait(3000);
-
+    // Wait for some playback so seeking has an effect
+    AudioView.waitForPlayState(true, 8000, false);
     AudioView.clickAt(0, 0);
-    cy.wait(1000);
+    AudioView.waitForStableState();
 
     AudioView.pauseButton.click();
-    cy.wait(1000);
+    AudioView.waitForPlayState(false, 8000, false);
 
     cy.get('[data-testid="phrases-wrapper"]').then(($el) => {
       const scrollTop = $el[0].scrollTop;
@@ -418,7 +415,8 @@ describe("Sync: Audio Paragraphs", () => {
 
     cy.get('[data-testid="auto-scroll-toggle"]').click();
     AudioView.playButton.click();
-    cy.wait(5000);
+    // Wait for playback; with auto-scroll off, scrollTop should stay 0
+    AudioView.waitForPlayState(true, 8000, false);
 
     cy.get('[data-testid="phrases-wrapper"]').then(($el) => {
       expect($el[0].scrollTop).to.equal(0);
@@ -436,7 +434,7 @@ describe("Sync: Audio Paragraphs", () => {
     });
 
     AudioView.playButton.click();
-    cy.wait(100);
+    AudioView.waitForStableState();
 
     cy.get('[data-testid="phrases-wrapper"]').then(($el) => {
       $el[0].scrollTo(0, 1000);
@@ -444,9 +442,8 @@ describe("Sync: Audio Paragraphs", () => {
       $el[0].dispatchEvent(wheelEvt);
     });
 
-    cy.wait(5000);
-
-    cy.get('[data-testid="phrases-wrapper"]').then(($el) => {
+    // Wait for scroll position to reflect manual scroll
+    cy.get('[data-testid="phrases-wrapper"]').should(($el) => {
       expect($el[0].scrollTop).to.be.greaterThan(190);
     });
   });
