@@ -2,7 +2,7 @@
 
 import { destroy, detach, flow, getEnv, getParent, getSnapshot, isRoot, types, walk } from "mobx-state-tree";
 
-import uniqBy from "lodash/uniqBy";
+import { uniqBy } from "@humansignal/core/lib/utils/lodash-replacements";
 import InfoModal from "../components/Infomodal/Infomodal";
 import { Hotkey } from "../core/Hotkey";
 import { destroy as destroySharedStore } from "../mixins/SharedChoiceStore/mixin";
@@ -26,6 +26,8 @@ import {
   FF_SIMPLE_INIT,
   isFF,
 } from "../utils/feature-flags";
+import { imageCache } from "@humansignal/core";
+import { isActive, FF_FIT_720_LAZY_LOAD_ANNOTATIONS } from "@humansignal/core/lib/utils/feature-flags";
 import { CommentStore } from "./Comment/CommentStore";
 import { CustomButton } from "./CustomButton";
 
@@ -128,6 +130,17 @@ export default types
      * Flag for no access to specific task
      */
     noAccess: types.optional(types.boolean, false),
+    /**
+     * Flag for overlap reached - prevents annotation submission
+     */
+    overlapReached: types.optional(types.boolean, false),
+    /**
+     * Message to show when overlap is reached
+     */
+    overlapReachedMessage: types.optional(
+      types.string,
+      "Annotation overlap has been reached for this task. Your draft is preserved but cannot be submitted.",
+    ),
     /**
      * Finish of labeling
      */
@@ -283,6 +296,8 @@ export default types
         "isSubmitting",
         "noTask",
         "noAccess",
+        "overlapReached",
+        "overlapReachedMessage",
         "labeledSuccess",
         "awaitingSuggestions",
       ];
@@ -798,6 +813,12 @@ export default types
         }
         detach(oldAnnotationStore);
         destroy(oldAnnotationStore);
+      }
+
+      // forceClear() revokes all blob URLs regardless of reference count
+      // This is safe here because we're destroying the annotation store anyway
+      if (isActive(FF_FIT_720_LAZY_LOAD_ANNOTATIONS)) {
+        imageCache.forceClear();
       }
 
       self.annotationStore = AnnotationStore.create({ annotations: [] });

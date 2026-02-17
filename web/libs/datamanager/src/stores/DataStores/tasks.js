@@ -29,6 +29,8 @@ export const create = (columns) => {
     drafts: types.frozen(),
     source: types.maybeNull(types.string),
     was_cancelled: false,
+    overlap_reached: types.maybeNull(types.boolean),
+    overlap_reached_message: types.maybeNull(types.string),
     assigned_task: false,
     queue: types.optional(types.maybeNull(types.string), null),
     // annotation to select on rejected queue
@@ -203,9 +205,11 @@ export const create = (columns) => {
         const isLabelStream = getRoot(self).SDK?.mode === "labelstream";
         if (isLabelStream) {
           const selectedAnnotationID = getRoot(self).annotationStore.selected?.id;
-          console.log(
-            `[LABEL STREAM] ${task.queue}, task ${task.id}, project ${getRoot(self)?.SDK?.project?.id}, user ${getRoot(self).LSF.lsf.user.id}${selectedAnnotationID ? `, annotation ${selectedAnnotationID}` : ""}`,
-          );
+          if (task && selectedAnnotationID) {
+            console.log(
+              `[LABEL STREAM] ${task.queue}, task ${task.id}, project ${getRoot(self)?.SDK?.project?.id}, user ${getRoot(self).LSF.lsf.user.id}${selectedAnnotationID ? `, annotation ${selectedAnnotationID}` : ""}`,
+            );
+          }
         }
 
         return task;
