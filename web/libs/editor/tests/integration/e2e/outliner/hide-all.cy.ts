@@ -169,8 +169,7 @@ describe("Outliner - Hide all regions", () => {
     Sidebar.hasRegions(3);
 
     cy.get('[data-testid="grouping-manual"]').click();
-    cy.wait(500);
-    cy.contains("Group by Tool").click({ force: true });
+    cy.contains("Group by Tool").should("be.visible").click({ force: true });
     Sidebar.toggleRegionVisibility(0);
     Sidebar.hasHiddenRegion(3);
   });
