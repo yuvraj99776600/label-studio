@@ -201,7 +201,7 @@ const Model = types
       if (self.overviewchannels) {
         // Infer headers from dataObj if headers array is not set
         let headers = self.headers;
-        if (!headers && self.dataObj) {
+        if ((!headers || headers.length === 0) && self.dataObj) {
           headers = Object.keys(self.dataObj);
         }
 
