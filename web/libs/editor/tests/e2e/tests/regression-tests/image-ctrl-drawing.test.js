@@ -112,17 +112,14 @@ const createShape = {
   // },
 };
 
-Scenario("Drawing with ctrl pressed", async ({ I, LabelStudio, AtOutliner, AtImageView, AtPanels }) => {
+Scenario("Drawing with ctrl pressed", async ({ I, LabelStudio, AtOutliner, AtImageView }) => {
   const params = {
     config: getConfigWithShapes(Object.keys(createShape), 'strokewidth="5"'),
     data: { image: IMAGE },
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
 
   I.amOnPage("/");
   LabelStudio.init(params);
-  AtDetailsPanel.collapsePanel();
-  AtDetailsPanel.seeExpandButton();
   LabelStudio.waitForObjectsReady();
   await AtImageView.lookForStage();
   I.waitForInvisible(".lsf-image-progress", 30);
@@ -158,7 +155,6 @@ Scenario("Drawing with ctrl pressed", async ({ I, LabelStudio, AtOutliner, AtIma
     await AtImageView.lookForStage();
     I.waitForInvisible(".lsf-image-progress", 30);
     AtOutliner.seeRegions(0);
-    AtDetailsPanel.seeExpandButton();
     I.say(`Drawing ${innerRegion.shape} on ${outerRegion.shape}`);
     I.pressKey(outerRegion.hotKey);
     AtImageView[outerRegion.action](...outerRegion.params);

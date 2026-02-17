@@ -114,18 +114,16 @@ Before(async ({ LabelStudio }) => {
 
 Data(shapesTable).Scenario(
   "Simple rotation",
-  async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
+  async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
     const config = getConfigWithShape(current.shape, current.props);
 
     const params = {
       config,
       data: { image: IMAGE },
     };
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
 
     I.amOnPage("/");
     LabelStudio.init(params);
-    AtDetailsPanel.collapsePanel();
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
     I.waitForInvisible(".lsf-image-progress", 30);
@@ -160,16 +158,14 @@ Data(shapesTable).Scenario(
   },
 );
 
-Data(shapesTable).Scenario("Rotate zoomed", async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
+Data(shapesTable).Scenario("Rotate zoomed", async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
   const params = {
     config: getConfigWithShape(current.shape, current.props),
     data: { image: IMAGE },
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
 
   I.amOnPage("/");
   LabelStudio.init(params);
-  AtDetailsPanel.collapsePanel();
   LabelStudio.waitForObjectsReady();
   await AtImageView.lookForStage();
   I.waitForInvisible(".lsf-image-progress", 30);
@@ -210,22 +206,17 @@ windowSizesTable.add([1017, 970]);
 
 Data(windowSizesTable).Scenario(
   "Rotation with different window sizes",
-  async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels, current }) => {
+  async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
     const config = getConfigWithShape("Rectangle");
 
     const params = {
       config,
       data: { image: IMAGE },
     };
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
 
     I.amOnPage("/");
     I.resizeWindow(current.width, current.height);
     LabelStudio.init(params);
-    // On small screens you can't see the details panel from the beginning
-    if (current.width > 1000) {
-      AtDetailsPanel.collapsePanel();
-    }
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
     I.waitForInvisible(".lsf-image-progress", 30);
@@ -296,7 +287,7 @@ const compareSize = async (I, AtImageView, message1, message2) => {
 
 Data(layoutVariations).Scenario(
   "Rotation in the two columns template",
-  async ({ I, LabelStudio, AtImageView, AtOutliner, AtSettings, AtPanels, current }) => {
+  async ({ I, LabelStudio, AtImageView, AtOutliner, AtSettings, current }) => {
     I.amOnPage("/");
     let isVerticalLayout = false;
 
@@ -334,12 +325,10 @@ Data(layoutVariations).Scenario(
         },
       ],
     };
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
 
     I.say(`Two columns [config: ${twoColumnsConfigs.indexOf(config)}] [${direction}]`);
 
     LabelStudio.init(params);
-    AtDetailsPanel.collapsePanel();
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
     I.waitForInvisible(".lsf-image-progress", 30);

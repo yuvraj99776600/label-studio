@@ -64,17 +64,15 @@ const annotationWithPerRegion = {
 
 const image = "/public/files/images/nick-owuor-unsplash.jpg";
 
-Scenario("Check Rect region for Image", async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels }) => {
+Scenario("Check Rect region for Image", async ({ I, LabelStudio, AtImageView, AtOutliner }) => {
   const params = {
     config,
     data: { image },
     annotations: [annotationMoonwalker],
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
 
   I.amOnPage("/");
   LabelStudio.init(params);
-  AtDetailsPanel.collapsePanel();
 
   LabelStudio.waitForObjectsReady();
   await AtImageView.lookForStage();
@@ -148,9 +146,7 @@ Scenario("Image with perRegion tags", async ({ I, LabelStudio, AtOutliner }) => 
 
 Scenario(
   "Can't create rectangles outside of canvas",
-  async ({ I, AtLabels, AtOutliner, AtImageView, LabelStudio, AtPanels }) => {
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
-
+  async ({ I, AtLabels, AtOutliner, AtImageView, LabelStudio }) => {
     I.amOnPage("/");
 
     LabelStudio.init({
@@ -162,7 +158,6 @@ Scenario(
         predictions: [],
       },
     });
-    AtDetailsPanel.collapsePanel();
 
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
@@ -211,9 +206,7 @@ Scenario(
 
 Scenario(
   "Can't create ellipses outside of canvas",
-  async ({ I, AtLabels, AtOutliner, AtImageView, LabelStudio, AtPanels }) => {
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
-
+  async ({ I, AtLabels, AtOutliner, AtImageView, LabelStudio }) => {
     I.amOnPage("/");
 
     LabelStudio.init({
@@ -225,7 +218,6 @@ Scenario(
         predictions: [],
       },
     });
-    AtDetailsPanel.collapsePanel();
 
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();

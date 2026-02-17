@@ -103,8 +103,6 @@ Scenario(
     AtDetails.seeFieldWithValue("X", "88.567");
     I.pressKey("U");
 
-    I.say("Collapse the details panel");
-    AtDetailsPanel.collapsePanel();
     await AtImageView.lookForStage();
 
     I.say("Check that there is a region at the center of visible area");
@@ -132,7 +130,6 @@ Scenario(
     }
 
     I.say("Reset changes");
-    AtDetailsPanel.expandPanel();
     AtOutlinerPanel.expandPanel();
     await AtImageView.lookForStage();
     I.pressKey(["Shift", "1"]);
@@ -158,8 +155,6 @@ Scenario(
     AtDetails.seeFieldWithValue("X", "68.75");
     I.pressKey("U");
 
-    I.say("Collapse the details panel");
-    AtDetailsPanel.collapsePanel();
     await AtImageView.lookForStage();
 
     I.say("Check that the region is still at the center of visible area");
@@ -168,7 +163,6 @@ Scenario(
     I.pressKey("U");
 
     I.say("Resize panels");
-    AtDetailsPanel.expandPanel();
 
     for (const [shiftX, steps] of [
       [100, 10],
@@ -207,7 +201,6 @@ Scenario(
 Scenario(
   "Keeping the zoom center for different image sizes and scaling algorithms",
   async ({ I, LabelStudio, AtImageView, AtPanels }) => {
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
     const AtOutlinerPanel = AtPanels.usePanel(AtPanels.PANEL.OUTLINER);
     const strokecolor = "rgb(0,111,222)";
 
@@ -264,8 +257,6 @@ Scenario(
       I.pressKey("K");
       AtImageView.drawByClick(AtImageView.percToX(50), AtImageView.percToY(50));
 
-      I.say("Collapse the details panel");
-      AtDetailsPanel.collapsePanel();
       await AtImageView.lookForStage();
 
       I.say("Check that the region is still at the center of visible area");
@@ -282,7 +273,6 @@ Scenario(
       await keyPointBeSelected();
       I.pressKey("U");
 
-      AtDetailsPanel.expandPanel();
       AtOutlinerPanel.expandPanel();
     }
   },

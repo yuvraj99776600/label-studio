@@ -259,15 +259,11 @@ Scenario("Panels manipulations", async ({ I, LabelStudio, AtPanels }) => {
 
   I.say("Collapse both panels");
   AtOutlinerPanel.collapsePanel();
-  AtDetailsPanel.collapsePanel();
 
   I.say("Make sure there is no body or collapse button");
   AtOutlinerPanel.dontSeePanelBody();
-  AtDetailsPanel.dontSeePanelBody();
   AtOutlinerPanel.dontSeeСollapseButton();
-  AtDetailsPanel.dontSeeСollapseButton();
   AtOutlinerPanel.seeExpandButton();
-  AtDetailsPanel.seeExpandButton();
 
   I.say("Try to move collapsed panel");
   await AtOutlinerPanel.dragPanelBy(400, 0);
@@ -474,12 +470,6 @@ Scenario("Panels manipulations", async ({ I, LabelStudio, AtPanels }) => {
     await AtDetailsPanel.dragPanelTo(panelsContainerCenter.x, panelsContainerCenter.y - panelBbox.height / 2);
     AtDetailsPanel.seePanelDetached();
   }
-  I.say("Collapse detached panel");
-  AtDetailsPanel.collapsePanel();
-  AtDetailsPanel.dontSeePanelBody();
-  AtDetailsPanel.dontSeeСollapseButton();
-  AtDetailsPanel.seeExpandButton();
-
   I.say("Make sure that it is still movable");
   await AtDetailsPanel.dragPanelToLeftSocket();
   I.say("and attachable");

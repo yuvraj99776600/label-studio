@@ -54,8 +54,7 @@ async function assertMagicWandPixel(I, x, y, assertValue, rgbArray, msg) {
 
 Scenario(
   "Make sure the magic wand works in a variety of scenarios",
-  async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels }) => {
-    const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
+  async ({ I, LabelStudio, AtImageView, AtOutliner }) => {
     const params = {
       config,
       data,
@@ -66,7 +65,6 @@ Scenario(
 
     LabelStudio.init(params);
 
-    AtDetailsPanel.collapsePanel();
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
 

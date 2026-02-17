@@ -171,16 +171,14 @@ const createShape = {
   },
 };
 
-Scenario("Creating regions by various gestures", async ({ I, LabelStudio, AtImageView, AtOutliner, AtPanels }) => {
+Scenario("Creating regions by various gestures", async ({ I, LabelStudio, AtImageView, AtOutliner }) => {
   const params = {
     config: getConfigWithShapes(Object.keys(createShape)),
     data: { image: IMAGE },
   };
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
 
   I.amOnPage("/");
   LabelStudio.init(params);
-  AtDetailsPanel.collapsePanel();
   LabelStudio.waitForObjectsReady();
   AtOutliner.seeRegions(0);
   const canvasSize = await AtImageView.getCanvasSize();
