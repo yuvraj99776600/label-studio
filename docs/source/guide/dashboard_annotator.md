@@ -1,6 +1,6 @@
 ---
 title: Member performance dashboard
-short: Performance dashboard
+short: Member performance
 tier: enterprise
 type: guide
 order: 0
@@ -88,11 +88,11 @@ The metrics are calculated from the following data:
 | **Time Annotating** | Sum of `lead_times` | The total time spent annotating during the selected time frame. This is calculated based on annotations that meet the criteria for `submitted_or_reviewed`. <br /><br />All annotations have a lead time. The lead time reflects how much time a user spent labeling from the moment the task was opened until they click **Submit** or **Update**. This includes idle time and time spent updating previously submitted annotations. <br /><br />The total time does not include time spent on annotations that have not been submitted and/or updated. For example, it does not include time spent on drafts or time spent on skipped annotations. <br /><br />Lead time is cumulative across sessions. That means if they leave or log out, and then return to an annotation draft or a previously skipped annotation, then their earlier time spent on the annotation is included when calculating their lead time.  | 
 | **Performance Score** | Calculated from reviewer actions | The Performance Score reflects the overall performance of annotators in terms of review actions (**Accept**, **Reject**, **Fix+Accept**). <br /><br />The calculation is as follows:<ul><li>Each annotation review action (**Accept**, **Reject**, **Fix+Accept**) contributes to the score.</li><li>The score is calculated by summing the scores of all review actions and dividing by the total number of review actions. For example: </li><ul><li>If an annotation is rejected twice and then accepted once, the Performance Score would be (0 + 0 + 1) / 3 = 33%.</li><li>If an annotation is rejected once and then fixed+accepted with an agreement score of 42%, the Performance Score would be (0 + 0.42) / 2 = 21%. The agreement here is measured between what the annotator submitted and what the reviewer submitted when fixing it.</li></ul></ul> | 
 
-### Annotation graphs
+### Annotation charts
 
 ![Screenshot of annotator dashboard graphs](/images/analytics/annotator-graphs.png)
 
-| Graph | Description | 
+| Chart | Description | 
 | --- | --- | 
 | **Annotation States Over Time** | A summary of all annotations completed by the user, segmented by date over the selected time period.    | 
 | **Time Spent Annotating** | The time spent annotating (the lead time), segmented by date over the selected time period. <br /><br />This includes two metrics: The total time spent annotating in hours, and the average time per annotation in minutes. |
@@ -138,11 +138,11 @@ The **Reviews** tab shows information related to a user's activity reviewing oth
 !!! note
     Data collection for review time began on September 25, 2025 for cloud environments, or for 2.30 for on-prem deployments. If you filter for earlier dates, review time will not be calculated.
 
-### Review graphs
+### Review charts
 
 ![Screenshot of review dashboard graphs](/images/analytics/reviewer-graphs.png)
 
-| Graph | Description | 
+| Chart | Description | 
 | --- | --- | 
 | **Review States Over Time** | A summary of all reviews completed by the user, segmented by date over the selected time period.    | 
 | **Time Spent Reviewing** | The time spent reviewing, segmented by date over the selected time period. <br /><br />This includes two metrics: The total time spent reviewing in hours, and the average review time per annotation in minutes.  |
