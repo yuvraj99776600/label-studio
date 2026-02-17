@@ -94,8 +94,7 @@ Scenario("Check required param", async ({ I, LabelStudio, Modals }) => {
   LabelStudio.init(params);
 
   // Add new Annotation to be able to submit it
-  I.click('[aria-label="Annotations List Toggle"]');
-  I.click('[aria-label="Create Annotation"]');
+  I.click('[aria-label="Create an annotation"]');
   I.submitAnnotation();
   waitForError("validation-label");
 
@@ -116,8 +115,7 @@ Scenario("Check required param", async ({ I, LabelStudio, Modals }) => {
   LabelStudio.init(params);
   // Page is reloaded, there are no new annotation from prev steps
   I.dontSee("New annotation");
-  I.click('[aria-label="Annotations List Toggle"]');
-  I.click('[aria-label="Create Annotation"]');
+  I.click('[aria-label="Create an annotation"]');
   I.click("Valid");
   I.submitAnnotation();
   I.see("Warning");
@@ -184,8 +182,7 @@ Scenario("Check required param in complex config", async ({ I, LabelStudio, AtOu
   I.updateAnnotation();
   I.dontSee("Valid");
 
-  I.click('[aria-label="Annotations List Toggle"]');
-  I.click('[aria-label="Create Annotation"]');
+  I.click('[aria-label="Create an annotation"]');
   I.submitAnnotation();
   waitForError("common-description");
   I.fillField("common-description", "some text");
@@ -204,8 +201,7 @@ Scenario("Check required param with visibleWhen='choice-unselected'", async ({ I
   LabelStudio.init(params);
 
   // Add new Annotation to be able to submit it
-  I.click('[aria-label="Annotations List Toggle"]');
-  I.click('[aria-label="Create Annotation"]');
+  I.click('[aria-label="Create an annotation"]');
 
   // Select one from each choices groups, except the one with visibleWhen condition
   I.click("Valid");
@@ -225,8 +221,7 @@ Scenario("Check required param with visibleWhen='choice-unselected'", async ({ I
   LabelStudio.init(params);
   // LabelStudio is reloaded, there are no new annotation from prev steps
   I.dontSee("New annotation");
-  I.click('[aria-label="Annotations List Toggle"]');
-  I.click('[aria-label="Create Annotation"]');
+  I.click('[aria-label="Create an annotation"]');
 
   // Select all required options we have
   I.click("Valid");

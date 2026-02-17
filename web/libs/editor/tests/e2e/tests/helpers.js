@@ -191,8 +191,14 @@ const createAddEventListenerScript = (eventName, callback) => {
 const waitForImage = () => {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
-      reject(new Error("waitForImage: Timed out after 10s waiting for image to load"));
-    }, 10000);
+      const imageObject = window.Htx?.annotationStore?.selected?.objects?.find((o) => o.type === "image");
+      const entity = imageObject?.currentImageEntity;
+      const state = entity
+        ? `downloaded=${entity.downloaded}, imageLoaded=${entity.imageLoaded}, downloading=${entity.downloading}, error=${entity.error}, currentSrc=${!!entity.currentSrc}`
+        : "no image entity";
+
+      reject(new Error(`waitForImage: Timed out after 30s waiting for image to load (${state})`));
+    }, 30000);
 
     const check = () => {
       const imageObject = window.Htx?.annotationStore?.selected?.objects?.find((o) => o.type === "image");

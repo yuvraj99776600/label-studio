@@ -33,7 +33,7 @@ Scenario("TextArea should not be serialized when parent View is not visible", as
   I.say("Check initial state - nested elements should not be visible");
   I.dontSee("X");
   I.dontSee("Y");
-  I.dontSee("details");
+  I.dontSeeElement('[data-testid="textarea-control"]');
 
   I.say("Select choice A to show nested elements");
   I.see("A");
@@ -53,7 +53,7 @@ Scenario("TextArea should not be serialized when parent View is not visible", as
   I.say("Check that nested elements are hidden again");
   I.dontSee("X");
   I.dontSee("Y");
-  I.dontSee("details");
+  I.dontSeeElement('[data-testid="textarea-control"]');
 
   I.wait(1);
   I.say("Check serialization - details should not be included");

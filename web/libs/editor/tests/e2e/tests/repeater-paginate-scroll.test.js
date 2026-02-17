@@ -127,8 +127,7 @@ const checkPaginationButtons = (I) => {
 };
 
 const checkSubmit = (I) => {
-  I.click('[aria-label="Annotations List Toggle"]');
-  I.click('[aria-label="Create Annotation"]');
+  I.click('[aria-label="Create an annotation"]');
   I.submitAnnotation();
   I.seeAnnotationSubmitted();
 };

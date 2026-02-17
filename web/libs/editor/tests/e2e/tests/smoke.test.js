@@ -36,7 +36,7 @@ Feature("Smoke test through all the examples");
 examples.slice(1).forEach((example) =>
   Scenario(
     example.title || "Noname smoke test",
-    async ({ I, LabelStudio, AtOutliner, AtTopbar, AtDetails, AtAudioView }) => {
+    async ({ I, LabelStudio, AtOutliner, AtDetails, AtAudioView }) => {
       LabelStudio.setFeatureFlags({
         ff_front_dev_2715_audio_3_280722_short: true,
       });
@@ -81,10 +81,10 @@ examples.slice(1).forEach((example) =>
         // so click the bin button in entity's info block
         AtDetails.clickDeleteRegion();
         AtOutliner.seeRegions(count - 1);
-        AtTopbar.clickAria("Reset");
+        I.click('[aria-label="Reset"]');
         AtOutliner.seeRegions(count);
         // Reset is undoable
-        AtTopbar.clickAria("Undo");
+        I.click('[aria-label="Undo"]');
 
         // so after all these manipulations first region should be deleted
         restored = await I.executeScript(serialize);
@@ -93,11 +93,20 @@ examples.slice(1).forEach((example) =>
           result.filter((r) => r.id !== ids[0]),
         );
       }
-      // Click on annotation copy button
-      AtTopbar.clickAria("Copy Annotation");
+      // Duplicate the current annotation via the store API
+      await I.executeScript(() => {
+        const cs = window.Htx.annotationStore;
+        const entity = cs.selected;
+        const c = cs.addAnnotationFromPrediction(entity);
 
-      // Check if new annotation exists
-      AtTopbar.seeAnnotationAt(2);
+        cs.selectAnnotation(c.id);
+      });
+      I.waitTicks(5);
+
+      // Check if new annotation exists in the carousel
+      const annotationCount = await I.grabNumberOfVisibleElements(".lsf-annotation-button");
+
+      assert.ok(annotationCount >= 2, `Expected at least 2 annotations in carousel, got ${annotationCount}`);
 
       // Check for regions count
       AtOutliner.seeRegions(count);

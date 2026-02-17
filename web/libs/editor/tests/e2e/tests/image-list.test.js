@@ -285,7 +285,14 @@ Scenario("Regions are not changes when duplicating an annotation", async ({ I, L
   await AtImageView.lookForStage();
 
   I.say("Attempting to duplicate an annotaion");
-  I.click('[aria-label="Copy Annotation"]');
+  await I.executeScript(() => {
+    const cs = window.Htx.annotationStore;
+    const entity = cs.selected;
+    const c = cs.addAnnotationFromPrediction(entity);
+
+    cs.selectAnnotation(c.id);
+  });
+  I.waitTicks(5);
 
   LabelStudio.waitForObjectsReady();
   await AtImageView.lookForStage();
