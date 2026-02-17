@@ -221,7 +221,7 @@ const useDataTree = ({ regions, rootClass, footer }: any) => {
         "--selection-color": color.alpha(0.1).css(),
       },
       className: rootClass.elem("node").mod(mods).toClassName(),
-      title: (data: any) => <RootTitle {...data} />,
+      title: ({ key: _key, ...data }: any) => <RootTitle {...data} />,
       locked,
     };
   }, []);
@@ -487,7 +487,7 @@ const RegionControls: FC<RegionControlsProps> = injector(
     }, [entity, type, regions]);
 
     const onToggleHidden = useCallback(() => {
-      if (type?.includes("region") || type?.includes("range")) {
+      if (type?.includes("region") || type?.includes("range") || type?.includes("reactcode")) {
         entity.toggleHidden();
       } else if (!type || type.includes("label")) {
         regionStore.setHiddenByLabel(!hidden, entity);

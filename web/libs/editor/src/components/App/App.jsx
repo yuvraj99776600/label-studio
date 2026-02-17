@@ -5,6 +5,7 @@ import React, { Component } from "react";
 import { Result, Spin } from "antd";
 import { getEnv, getRoot } from "mobx-state-tree";
 import { observer, Provider } from "mobx-react";
+import { QueryClientProvider } from "@tanstack/react-query";
 
 /**
  * Core
@@ -32,7 +33,6 @@ import { sanitizeHtml } from "../../utils/html";
 import { reactCleaner } from "../../utils/reactCleaner";
 import { guidGenerator } from "../../utils/unique";
 import { isDefined, sortAnnotations } from "../../utils/utilities";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@humansignal/core/lib/utils/query-client";
 import { ToastProvider, ToastViewport } from "@humansignal/ui/lib/toast/toast";
 
@@ -303,6 +303,7 @@ class App extends Component {
                       currentEntity={as.selectedHistory ?? as.selected}
                       regions={as.selected.regionStore}
                       showComments={store.hasInterface("annotations:comments")}
+                      showCustomTab={hasTagInSidebar(as.selected)}
                       focusTab={store.commentStore.tooltipMessage ? "comments" : null}
                     >
                       {mainContent}
