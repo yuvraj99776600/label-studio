@@ -47,7 +47,7 @@ For more information about the states referenced in the Overview dashboard, see 
 
 !!! note
 
-    Project and task state data tracking did not start until state management was implemented for your organization. The exact date varies by organization, but should be some time in February 2026 for Label Studio Cloud organizations. 
+    Project and task state history tracking did not start until state management was implemented for your organization. For most Label Studio Cloud organizations, state management was implemented in February 2026. 
 
     This means that the **Overview** dashboard will not reflect when a project or task changed states if that change happened before state management was implemented. 
 
