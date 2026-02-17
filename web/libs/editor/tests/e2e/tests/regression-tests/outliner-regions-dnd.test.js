@@ -30,7 +30,7 @@ function generateResults(n) {
   return results;
 }
 
-Scenario("Dnd at the outliner after switching annotations", async ({ I, LabelStudio, AtOutliner, AtTopbar }) => {
+Scenario("Dnd at the outliner after switching annotations", async ({ I, LabelStudio, AtOutliner }) => {
   I.amOnPage("/");
   LabelStudio.init({
     annotations: [
@@ -53,8 +53,8 @@ Scenario("Dnd at the outliner after switching annotations", async ({ I, LabelStu
   await AtOutliner.dragAndDropRegion(7, 3);
 
   I.say("Switch annotation");
-  AtTopbar.openAnnotaions();
-  AtTopbar.selectAnnotationAt(2);
+  I.click(locate(".lsf-annotation-button").at(2));
+  I.waitTicks(5);
   AtOutliner.seeRegions(10);
 
   I.say("Check that we still able to drag and drop regions");
