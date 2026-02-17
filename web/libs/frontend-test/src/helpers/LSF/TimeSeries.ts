@@ -244,7 +244,7 @@ class TimeSeriesHelper {
     return this;
   }
 
-  // Verify that chart client bounding boxes align with their clip-path containers
+  // Verify that chart client bounding boxes stay within their clip-path containers
   // Only checks odd-indexed paths (1st, 3rd, 5th, etc.) in each clip-path container group
   // Optional tolerance (px): multi-channel + viewport resize may need higher tolerance (e.g. 20)
   verifyChartBoundingBoxAlignment(tolerancePx = 2) {
