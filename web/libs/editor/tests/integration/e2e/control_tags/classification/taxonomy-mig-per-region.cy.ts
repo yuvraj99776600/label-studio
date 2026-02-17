@@ -13,8 +13,7 @@ beforeEach(commonBeforeEach);
 
 /* <Taxonomy /> */
 describe("Control Tags - MIG perRegion - Taxonomy", () => {
-  // Skip: taxonomy selection not persisting to serialize() in headless (result length 2 vs expected 3)
-  it.skip("should create result with item_index", () => {
+  it("should create result with item_index", () => {
     LabelStudio.params()
       .config(perRegionMIGTaxonomyConfig)
       .data(simpleMIGData)
@@ -29,6 +28,9 @@ describe("Control Tags - MIG perRegion - Taxonomy", () => {
     Taxonomy.open();
     Taxonomy.clickItem("Choice 1");
     Taxonomy.close();
+
+    // Wait for selection to be reflected in the UI before asserting on serialized result
+    Taxonomy.hasSelected("Choice 1");
 
     LabelStudio.serialize().then((result) => {
       expect(result.length).to.be.eq(3);
@@ -92,8 +94,7 @@ describe("Control Tags - MIG perRegion - Taxonomy", () => {
     Modals.hasWarning(TAXONOMY_REQUIRED_WARNING);
   });
 
-  // Skip: warning modal appears on Update when test expects none
-  it.skip("should not require result if there are all of them", () => {
+  it("should not require result if there are all of them", () => {
     LabelStudio.params()
       .config(requiredPerRegionMIGTaxonomyConfig)
       .data(simpleMIGData)
@@ -105,11 +106,13 @@ describe("Control Tags - MIG perRegion - Taxonomy", () => {
     Sidebar.findRegionByIndex(0).click();
     Taxonomy.open();
     Taxonomy.clickItem("Choice 1");
+    Taxonomy.hasSelected("Choice 1");
 
     Sidebar.findRegionByIndex(1).click();
     ImageView.waitForImage();
     Taxonomy.open();
     Taxonomy.clickItem("Choice 2");
+    Taxonomy.hasSelected("Choice 2");
 
     ToolBar.updateBtn.click();
     Modals.hasNoWarnings();
