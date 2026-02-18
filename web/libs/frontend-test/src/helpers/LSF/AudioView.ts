@@ -431,8 +431,7 @@ class AudioViewHelper extends withMedia(
       const startTime = Date.now();
       const graceMs = 4000; // when close to timeout with no content, wait this long then proceed
 
-      const isTransparent = (c: Uint8ClampedArray) =>
-        c[0] === 0 && c[1] === 0 && c[2] === 0 && c[3] === 0;
+      const isTransparent = (c: Uint8ClampedArray) => c[0] === 0 && c[1] === 0 && c[2] === 0 && c[3] === 0;
 
       const checkStability = (): Cypress.Chainable => {
         const elapsed = Date.now() - startTime;
@@ -485,7 +484,7 @@ class AudioViewHelper extends withMedia(
         return trySample(0);
       };
 
-      cy.log(`🏁 Starting canvas stabilization check (multiple sample points)`);
+      cy.log("🏁 Starting canvas stabilization check (multiple sample points)");
       return checkStability();
     }
 
@@ -497,8 +496,7 @@ class AudioViewHelper extends withMedia(
      */
     waitForCanvasContent(timeout = 15000) {
       const startTime = Date.now();
-      const isTransparent = (c: Uint8ClampedArray) =>
-        c[0] === 0 && c[1] === 0 && c[2] === 0 && c[3] === 0;
+      const isTransparent = (c: Uint8ClampedArray) => c[0] === 0 && c[1] === 0 && c[2] === 0 && c[3] === 0;
 
       const trySample = (pointIndex: number): Cypress.Chainable => {
         if (Date.now() - startTime > timeout) {

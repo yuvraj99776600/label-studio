@@ -263,11 +263,7 @@ const waitForImageSrc = (expectedSrc) => {
         ? `src=${entity.src}, downloaded=${entity.downloaded}, imageLoaded=${entity.imageLoaded}, downloading=${entity.downloading}, error=${entity.error}`
         : "no image entity";
 
-      reject(
-        new Error(
-          `waitForImageSrc: Timed out after 30s. Expected "${expectedSrc}" but current state: ${state}`,
-        ),
-      );
+      reject(new Error(`waitForImageSrc: Timed out after 30s. Expected "${expectedSrc}" but current state: ${state}`));
     }, 30000);
 
     let preloadRetried = false;
@@ -749,7 +745,18 @@ const getCanvasSize = () => {
 };
 const getImageSize = () => {
   const image = window.document.querySelector('img[alt="image"]');
-  const clientRect = image.getBoundingClientRect();
+
+  if (image) {
+    const clientRect = image.getBoundingClientRect();
+
+    return {
+      width: clientRect.width,
+      height: clientRect.height,
+    };
+  }
+
+  const konva = window.document.querySelector(".konvajs-content");
+  const clientRect = konva.getBoundingClientRect();
 
   return {
     width: clientRect.width,
@@ -757,14 +764,124 @@ const getImageSize = () => {
   };
 };
 const getImageFrameSize = () => {
-  const image = window.document.querySelector('img[alt="image"]').parentElement;
-  const clientRect = image.getBoundingClientRect();
+  const ff = window.APP_SETTINGS?.feature_flags;
+  const zoomOptim =
+    ff?.fflag_fix_front_leap_32_zoom_perf_190923_short ?? window.APP_SETTINGS?.feature_flags_default_value ?? false;
+
+  if (zoomOptim) {
+    // With FF_ZOOM_OPTIM, the Stage uses containerWidth/Height (not canvasSize).
+    // The actual image frame is canvasSize, so read it from the model.
+    const imageObject = window.Htx?.annotationStore?.selected?.objects?.find((o) => o.type === "image");
+
+    if (imageObject) {
+      return {
+        width: imageObject.canvasSize.width,
+        height: imageObject.canvasSize.height,
+      };
+    }
+  }
+
+  const stage = window.Konva && window.Konva.stages && window.Konva.stages[0];
+
+  if (stage) {
+    return {
+      width: stage.width(),
+      height: stage.height(),
+    };
+  }
+
+  const konva = window.document.querySelector(".konvajs-content");
+
+  if (konva) {
+    const clientRect = konva.getBoundingClientRect();
+
+    return {
+      width: clientRect.width,
+      height: clientRect.height,
+    };
+  }
+
+  const lsfImage = window.document.querySelector(".lsf-image");
+
+  if (lsfImage) {
+    const clientRect = lsfImage.getBoundingClientRect();
+
+    return {
+      width: clientRect.width,
+      height: clientRect.height,
+    };
+  }
+
+  const image = window.document.querySelector('img[alt="image"]');
+  const clientRect = image.parentElement.getBoundingClientRect();
 
   return {
-    width: Math.round(clientRect.width),
-    height: Math.round(clientRect.height),
+    width: clientRect.width,
+    height: clientRect.height,
   };
 };
+/**
+ * Wait until the Konva Stage dimensions match the expected model values.
+ * After rotation or layout changes, the MobX model recomputes immediately,
+ * but the React render (which updates the Stage) is async.
+ *
+ * When FF_ZOOM_OPTIM is on, the Stage uses containerWidth/containerHeight
+ * (not canvasSize), so we compare against those instead.
+ */
+const waitForCanvasSizeSync = () => {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      const imageObject = window.Htx?.annotationStore?.selected?.objects?.find((o) => o.type === "image");
+      const stage = window.Konva?.stages?.[0];
+      const cs = imageObject?.canvasSize;
+      const cw = imageObject?.containerWidth;
+      const ch = imageObject?.containerHeight;
+      const sw = stage?.width();
+      const sh = stage?.height();
+
+      reject(
+        new Error(
+          `waitForCanvasSizeSync: Timed out after 5s. canvasSize=${cs?.width}x${cs?.height}, container=${cw}x${ch}, stage=${sw}x${sh}`,
+        ),
+      );
+    }, 5000);
+
+    const check = () => {
+      const imageObject = window.Htx?.annotationStore?.selected?.objects?.find((o) => o.type === "image");
+      const stage = window.Konva?.stages?.[0];
+
+      if (imageObject && stage) {
+        const ff = window.APP_SETTINGS?.feature_flags;
+        const zoomOptim =
+          ff?.fflag_fix_front_leap_32_zoom_perf_190923_short ??
+          window.APP_SETTINGS?.feature_flags_default_value ??
+          false;
+
+        let expectedW, expectedH;
+
+        if (zoomOptim) {
+          expectedW = imageObject.containerWidth;
+          expectedH = imageObject.containerHeight;
+        } else {
+          const cs = imageObject.canvasSize;
+
+          expectedW = cs.width;
+          expectedH = cs.height;
+        }
+
+        if (Math.abs(expectedW - stage.width()) < 1 && Math.abs(expectedH - stage.height()) < 1) {
+          clearTimeout(timeout);
+          resolve();
+          return;
+        }
+      }
+      requestAnimationFrame(check);
+    };
+
+    check();
+  });
+};
+
 const setZoom = ([scale, x, y]) => {
   return new Promise((resolve) => {
     Htx.annotationStore.selected.objects.find((o) => o.type === "image").setZoom(scale);
@@ -1095,6 +1212,7 @@ module.exports = {
   getCanvasSize,
   getImageSize,
   getImageFrameSize,
+  waitForCanvasSizeSync,
   getRegionAbsoultePosition,
   setKonvaLayersOpacity,
   setZoom,

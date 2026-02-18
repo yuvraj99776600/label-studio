@@ -41,12 +41,10 @@ Scenario("Basic scenario", async ({ I, LabelStudio, AtImageView, AtSettings, AtL
     },
   });
   LabelStudio.waitForObjectsReady();
-  AtSettings.open();
   AtSettings.setGeneralSettings({
     [AtSettings.GENERAL_SETTINGS.AUTO_SELECT_REGION]: true,
     [AtSettings.GENERAL_SETTINGS.SHOW_LABELS]: true,
   });
-  AtSettings.close();
   AtLabels.clickLabel("Paragraph");
   const canvasSize = await AtImageView.getCanvasSize();
 
@@ -167,11 +165,9 @@ Scenario(
     I.amOnPage("/");
     LabelStudio.init({ config: createConfig(), data });
     LabelStudio.waitForObjectsReady();
-    AtSettings.open();
     AtSettings.setGeneralSettings({
       [AtSettings.GENERAL_SETTINGS.SHOW_LABELS]: true,
     });
-    AtSettings.close();
     AtLabels.clickLabel("blank");
     const canvasSize = await AtImageView.getCanvasSize();
 

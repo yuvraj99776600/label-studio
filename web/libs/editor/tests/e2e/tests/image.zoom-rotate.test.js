@@ -112,51 +112,48 @@ Before(async ({ LabelStudio }) => {
   });
 });
 
-Data(shapesTable).Scenario(
-  "Simple rotation",
-  async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
-    const config = getConfigWithShape(current.shape, current.props);
+Data(shapesTable).Scenario("Simple rotation", async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
+  const config = getConfigWithShape(current.shape, current.props);
 
-    const params = {
-      config,
-      data: { image: IMAGE },
-    };
+  const params = {
+    config,
+    data: { image: IMAGE },
+  };
 
-    I.amOnPage("/");
-    LabelStudio.init(params);
-    LabelStudio.waitForObjectsReady();
-    await AtImageView.lookForStage();
-    I.waitForInvisible(".lsf-image-progress", 30);
-    AtOutliner.seeRegions(0);
-    const canvasSize = await AtImageView.getCanvasSize();
+  I.amOnPage("/");
+  LabelStudio.init(params);
+  LabelStudio.waitForObjectsReady();
+  await AtImageView.lookForStage();
+  I.waitForInvisible(".lsf-image-progress", 30);
+  AtOutliner.seeRegions(0);
+  const canvasSize = await AtImageView.getCanvasSize();
 
-    for (const region of current.regions) {
-      I.pressKey(["u"]);
-      I.pressKey("1");
-      AtImageView[current.action](...region.params);
+  for (const region of current.regions) {
+    I.pressKey(["u"]);
+    I.pressKey("1");
+    AtImageView[current.action](...region.params);
+  }
+  const standard = await I.executeScript(serialize);
+  const rotationQueue = ["right", "right", "right", "right", "left", "left", "left", "left"];
+  let degree = 0;
+  let hasPixel = await AtImageView.hasPixelColor(100, 100, BLUEVIOLET.rgbArray);
+
+  assert.equal(hasPixel, true);
+  for (const rotate of rotationQueue) {
+    I.click(locate(`[aria-label='rotate-${rotate}']`));
+    degree += rotate === "right" ? 90 : -90;
+    hasPixel = await AtImageView.hasPixelColor(
+      ...rotateCoords([100, 100], degree, canvasSize.width, canvasSize.height).map(Math.round),
+      BLUEVIOLET.rgbArray,
+    );
+    assert.strictEqual(hasPixel, true);
+    const result = await I.executeScript(serialize);
+
+    for (let i = 0; i < standard.length; i++) {
+      assert.deepEqual(standard[i].result, result[i].result);
     }
-    const standard = await I.executeScript(serialize);
-    const rotationQueue = ["right", "right", "right", "right", "left", "left", "left", "left"];
-    let degree = 0;
-    let hasPixel = await AtImageView.hasPixelColor(100, 100, BLUEVIOLET.rgbArray);
-
-    assert.equal(hasPixel, true);
-    for (const rotate of rotationQueue) {
-      I.click(locate(`[aria-label='rotate-${rotate}']`));
-      degree += rotate === "right" ? 90 : -90;
-      hasPixel = await AtImageView.hasPixelColor(
-        ...rotateCoords([100, 100], degree, canvasSize.width, canvasSize.height).map(Math.round),
-        BLUEVIOLET.rgbArray,
-      );
-      assert.strictEqual(hasPixel, true);
-      const result = await I.executeScript(serialize);
-
-      for (let i = 0; i < standard.length; i++) {
-        assert.deepEqual(standard[i].result, result[i].result);
-      }
-    }
-  },
-);
+  }
+});
 
 Data(shapesTable).Scenario("Rotate zoomed", async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
   const params = {
@@ -220,6 +217,8 @@ Data(windowSizesTable).Scenario(
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
     I.waitForInvisible(".lsf-image-progress", 30);
+    I.waitTicks(3);
+    await AtImageView.waitForCanvasSizeSync();
     AtOutliner.seeRegions(0);
     const canvasSize = await AtImageView.getCanvasSize();
     const imageSize = await AtImageView.getImageFrameSize();
@@ -229,8 +228,7 @@ Data(windowSizesTable).Scenario(
     assert(Math.abs(canvasSize.height - imageSize.height) < 1);
     for (const rotate of rotationQueue) {
       I.click(locate(`[aria-label='rotate-${rotate}']`));
-      // Wait for rotating to be finished and correctly rendered
-      I.waitTicks(2);
+      await AtImageView.waitForCanvasSizeSync();
       const rotatedCanvasSize = await AtImageView.getCanvasSize();
       const rotatedImageSize = await AtImageView.getImageFrameSize();
 
@@ -287,9 +285,8 @@ const compareSize = async (I, AtImageView, message1, message2) => {
 
 Data(layoutVariations).Scenario(
   "Rotation in the two columns template",
-  async ({ I, LabelStudio, AtImageView, AtOutliner, AtSettings, current }) => {
+  async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
     I.amOnPage("/");
-    let isVerticalLayout = false;
 
     const { config, inline, reversed } = current;
 
@@ -336,26 +333,22 @@ Data(layoutVariations).Scenario(
 
     I.click(locate("[aria-label='rotate-right']"));
     AtOutliner.seeRegions(1);
-
-    I.wait(0.1);
+    await AtImageView.waitForCanvasSizeSync();
     await compareSize(I, AtImageView, "Dimensions must be equal in landscape", "landscape, rotated");
 
-    I.say("Change to vertcal layout");
-    AtSettings.open();
-    isVerticalLayout = !isVerticalLayout;
-    AtSettings.setLayoutSettings({
-      [AtSettings.LAYOUT_SETTINGS.VERTICAL_LAYOUT]: isVerticalLayout,
+    I.say("Change to vertical layout");
+    I.executeScript(() => {
+      window.Htx.settings.toggleBottomSP();
     });
-    AtSettings.close();
+    I.waitTicks(5);
+    await AtImageView.waitForCanvasSizeSync();
 
     AtOutliner.seeRegions(1);
-    I.wait(0.1);
     await compareSize(I, AtImageView, "Dimensions must be equal in portrait", "portrait");
 
     I.click(locate("[aria-label='rotate-right']"));
-
     AtOutliner.seeRegions(1);
-    I.wait(0.1);
+    await AtImageView.waitForCanvasSizeSync();
     await compareSize(I, AtImageView, "Dimensions must be equal after rotation in portrain", "portrait, rotated");
   },
 );
