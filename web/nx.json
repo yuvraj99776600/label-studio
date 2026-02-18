@@ -1,14 +1,8 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "tasksRunnerOptions": {
-    "default": {
-      "options": {
-        "cacheableOperations": ["build-storybook", "version"]
-      }
-    }
-  },
   "targetDefaults": {
     "build": {
+      "cache": true,
       "inputs": ["production", "^production"]
     },
     "e2e": {

@@ -37,17 +37,6 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
-      # Nx cache is content-addressable: each task (e.g. editor:build) is keyed by Nx's own hash of inputs.
-      # We persist .nx/cache so that when deps (package.json/yarn.lock) are unchanged we restore the same
-      # cache; Nx then reuses any matching task outputs and only rebuilds what changed.
-      - name: Cache Nx
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.FRONTEND_MONOREPO_DIR }}/.nx/cache
-          key: nx-${{ runner.os }}-${{ env.NODE }}-${{ hashFiles('web/package.json', 'web/yarn.lock') }}
-          restore-keys: |
-            nx-${{ runner.os }}-${{ env.NODE }}-
-
       - name: Build editor (production)
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         run: MODE=standalone yarn nx run editor:build:production
