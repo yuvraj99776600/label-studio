@@ -13,9 +13,8 @@ benchmark
 benchmarks
 perf
 
-# Documentation
+# Documentation (do not add "doc" - some modules require doc/directives.js at runtime)
 docs
-doc
 website
 demo
 
