@@ -119,7 +119,9 @@ describe("Image Segmentation Stage Interactions", () => {
     );
     // Wait for polygon segments to be rendered before closing (yield to render loop)
     ImageView.drawingArea.get("canvas").should("be.visible");
-    cy.window().then((win) => new Promise<void>((r) => win.requestAnimationFrame(() => win.requestAnimationFrame(() => r()))));
+    cy.window().then(
+      (win) => new Promise<void>((r) => win.requestAnimationFrame(() => win.requestAnimationFrame(() => r()))),
+    );
     ImageView.clickAtRelative(0.8, 0.1);
     Sidebar.hasRegions(1);
     // dblclick

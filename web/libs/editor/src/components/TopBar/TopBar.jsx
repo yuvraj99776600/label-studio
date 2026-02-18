@@ -49,11 +49,7 @@ export const TopBar = observer(({ store }) => {
             <IconPlus />
           </Button>
         )}
-        <AnnotationsCarousel
-          store={store}
-          annotationStore={store.annotationStore}
-          commentStore={store.commentStore}
-        />
+        <AnnotationsCarousel store={store} annotationStore={store.annotationStore} commentStore={store.commentStore} />
       </div>
     </div>
   ) : null;

@@ -263,11 +263,7 @@ const waitForImageSrc = (expectedSrc) => {
         ? `src=${entity.src}, downloaded=${entity.downloaded}, imageLoaded=${entity.imageLoaded}, downloading=${entity.downloading}, error=${entity.error}`
         : "no image entity";
 
-      reject(
-        new Error(
-          `waitForImageSrc: Timed out after 30s. Expected "${expectedSrc}" but current state: ${state}`,
-        ),
-      );
+      reject(new Error(`waitForImageSrc: Timed out after 30s. Expected "${expectedSrc}" but current state: ${state}`));
     }, 30000);
 
     let preloadRetried = false;

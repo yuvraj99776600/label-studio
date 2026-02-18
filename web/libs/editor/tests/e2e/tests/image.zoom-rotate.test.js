@@ -112,51 +112,48 @@ Before(async ({ LabelStudio }) => {
   });
 });
 
-Data(shapesTable).Scenario(
-  "Simple rotation",
-  async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
-    const config = getConfigWithShape(current.shape, current.props);
+Data(shapesTable).Scenario("Simple rotation", async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
+  const config = getConfigWithShape(current.shape, current.props);
 
-    const params = {
-      config,
-      data: { image: IMAGE },
-    };
+  const params = {
+    config,
+    data: { image: IMAGE },
+  };
 
-    I.amOnPage("/");
-    LabelStudio.init(params);
-    LabelStudio.waitForObjectsReady();
-    await AtImageView.lookForStage();
-    I.waitForInvisible(".lsf-image-progress", 30);
-    AtOutliner.seeRegions(0);
-    const canvasSize = await AtImageView.getCanvasSize();
+  I.amOnPage("/");
+  LabelStudio.init(params);
+  LabelStudio.waitForObjectsReady();
+  await AtImageView.lookForStage();
+  I.waitForInvisible(".lsf-image-progress", 30);
+  AtOutliner.seeRegions(0);
+  const canvasSize = await AtImageView.getCanvasSize();
 
-    for (const region of current.regions) {
-      I.pressKey(["u"]);
-      I.pressKey("1");
-      AtImageView[current.action](...region.params);
+  for (const region of current.regions) {
+    I.pressKey(["u"]);
+    I.pressKey("1");
+    AtImageView[current.action](...region.params);
+  }
+  const standard = await I.executeScript(serialize);
+  const rotationQueue = ["right", "right", "right", "right", "left", "left", "left", "left"];
+  let degree = 0;
+  let hasPixel = await AtImageView.hasPixelColor(100, 100, BLUEVIOLET.rgbArray);
+
+  assert.equal(hasPixel, true);
+  for (const rotate of rotationQueue) {
+    I.click(locate(`[aria-label='rotate-${rotate}']`));
+    degree += rotate === "right" ? 90 : -90;
+    hasPixel = await AtImageView.hasPixelColor(
+      ...rotateCoords([100, 100], degree, canvasSize.width, canvasSize.height).map(Math.round),
+      BLUEVIOLET.rgbArray,
+    );
+    assert.strictEqual(hasPixel, true);
+    const result = await I.executeScript(serialize);
+
+    for (let i = 0; i < standard.length; i++) {
+      assert.deepEqual(standard[i].result, result[i].result);
     }
-    const standard = await I.executeScript(serialize);
-    const rotationQueue = ["right", "right", "right", "right", "left", "left", "left", "left"];
-    let degree = 0;
-    let hasPixel = await AtImageView.hasPixelColor(100, 100, BLUEVIOLET.rgbArray);
-
-    assert.equal(hasPixel, true);
-    for (const rotate of rotationQueue) {
-      I.click(locate(`[aria-label='rotate-${rotate}']`));
-      degree += rotate === "right" ? 90 : -90;
-      hasPixel = await AtImageView.hasPixelColor(
-        ...rotateCoords([100, 100], degree, canvasSize.width, canvasSize.height).map(Math.round),
-        BLUEVIOLET.rgbArray,
-      );
-      assert.strictEqual(hasPixel, true);
-      const result = await I.executeScript(serialize);
-
-      for (let i = 0; i < standard.length; i++) {
-        assert.deepEqual(standard[i].result, result[i].result);
-      }
-    }
-  },
-);
+  }
+});
 
 Data(shapesTable).Scenario("Rotate zoomed", async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
   const params = {

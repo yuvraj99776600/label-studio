@@ -43,8 +43,7 @@ export const Relations = {
   hasRelations(count: number) {
     // Support both GeneralPanel (lsf-details__section-head) and RelationsTab (lsf-relations__section-head).
     // When count is 0, RelationsTab may show EmptyState; section heads may use CSS module hashes so match by text.
-    const sectionHeadSelector =
-      "[class*='lsf-details__section-head'], [class*='lsf-relations__section-head']";
+    const sectionHeadSelector = "[class*='lsf-details__section-head'], [class*='lsf-relations__section-head']";
     if (count === 0) {
       // Text may be in a tabbed panel; retry so we allow time for the details panel to render
       cy.get("body", { timeout: 10000 }).should(($body) => {
