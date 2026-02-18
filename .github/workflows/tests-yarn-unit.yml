@@ -37,6 +37,7 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
+      # Nx rejects artifacts from other machines by default; in CI we allow restored cache.
       - name: Cache Nx
         uses: actions/cache@v4
         with:
@@ -49,6 +50,7 @@ jobs:
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         env:
           NODE_ENV: "development"
+          NX_REJECT_UNKNOWN_LOCAL_CACHE: "0"
         run: |
           yarn test:unit:coverage
 
