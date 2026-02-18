@@ -39,9 +39,8 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
-      # Nx cache must be restored/saved in the workflow (not in the action) so we save
-      # after the build runs. Nx rejects artifacts from other machines by default; in CI we allow restored cache.
-      # See https://nx.dev/troubleshooting/unknown-local-cache
+      # Nx cache is restored/saved here. With Nx's db cache, artifacts from other runners are not used
+      # (machine ID mismatch). For shared CI cache, use Nx Cloud (Nx Replay) instead.
       - name: Cache Nx
         uses: actions/cache@v4
         with:
@@ -52,8 +51,6 @@ jobs:
 
       - name: Build editor (production)
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
-        env:
-          NX_REJECT_UNKNOWN_LOCAL_CACHE: "0"
         run: MODE=standalone yarn nx run editor:build:production
 
       - name: Upload editor build
