@@ -1,0 +1,123 @@
+# Test directories
+__tests__
+test
+tests
+powered-test
+fixtures
+coverage
+__mocks__
+__snapshots__
+
+# Benchmarks
+benchmark
+benchmarks
+perf
+
+# Documentation
+docs
+doc
+website
+demo
+
+# Examples
+example
+examples
+
+# Source directories (compiled JS/DTS is sufficient)
+# Note: some packages only ship src/ so this can't be a blanket rule.
+# .yarnclean only removes these from within node_modules packages.
+
+# Markdown and text files
+*.md
+!LICENSE.md
+!license.md
+
+# Source maps (not needed in CI)
+*.js.map
+*.mjs.map
+*.ts.map
+*.css.map
+*.d.ts.map
+*.map
+
+# Changelogs
+CHANGELOG
+CHANGELOG.md
+CHANGES
+CHANGES.md
+HISTORY
+HISTORY.md
+
+# Contributor metadata
+AUTHORS
+AUTHORS.txt
+CONTRIBUTORS
+CONTRIBUTORS.txt
+
+# CI and editor config files
+.npmignore
+.travis.yml
+appveyor.yml
+circle.yml
+codecov.yml
+codeship-services.yml
+codeship-steps.yml
+wercker.yml
+.coveralls.yml
+.zuul.yml
+.nycrc
+.nycrc.json
+.documentup.json
+.yarn-resolve
+.yarn-metadata.json
+
+# Linter and formatter configs
+.eslintrc
+.eslintrc.js
+.eslintrc.json
+.eslintrc.yml
+.eslintrc.yaml
+.jshintrc
+.prettierrc
+.prettierrc.js
+.prettierrc.json
+.prettierrc.yml
+.prettierrc.yaml
+.stylelintrc
+.stylelintrc.json
+.stylelintrc.yaml
+.babelrc
+.babelrc.js
+.flowconfig
+
+# Editor configs
+.editorconfig
+.tern-project
+.gitattributes
+.gitmodules
+.idea
+.vscode
+
+# Build tool configs
+tsconfig.json
+tsconfig.*.json
+tslint.json
+tslint.yaml
+*.tsbuildinfo
+Makefile
+Gruntfile.js
+Gulpfile.js
+karma.conf.js
+wallaby.js
+wallaby.conf.js
+jest.config.js
+jest.config.ts
+jest.setup.js
+jest.setup.ts
+.babelrc.json
+rollup.config.js
+rollup.config.mjs
+webpack.config.js
+
+# GitHub metadata
+.github
