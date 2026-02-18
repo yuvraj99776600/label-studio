@@ -8,6 +8,7 @@
     "build": {
       "executor": "@nx/webpack:webpack",
       "defaultConfiguration": "production",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "compiler": "babel",
         "webpackConfig": "webpack.config.js",

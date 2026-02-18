@@ -3,7 +3,7 @@
   "targetDefaults": {
     "build": {
       "cache": true,
-      "inputs": ["production", "^production"]
+      "inputs": ["production", "^production", "{workspaceRoot}/webpack.config.js"]
     },
     "e2e": {
       "inputs": ["default", "^production"]
@@ -32,7 +32,9 @@
       "!{projectRoot}/.storybook/**/*",
       "!{projectRoot}/tsconfig.storybook.json",
       "!{projectRoot}/.eslintrc.json",
-      "!{projectRoot}/eslint.config.js"
+      "!{projectRoot}/eslint.config.js",
+      "!{projectRoot}/**/node_modules",
+      "!{workspaceRoot}/node_modules"
     ],
     "sharedGlobals": ["{workspaceRoot}/babel.config.json"]
   },

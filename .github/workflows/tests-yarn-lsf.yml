@@ -39,6 +39,14 @@ jobs:
           node-version: "${{ env.NODE }}"
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.FRONTEND_MONOREPO_DIR }}/.nx/cache
+          key: nx-${{ runner.os }}-${{ env.NODE }}-${{ hashFiles('web/package.json', 'web/yarn.lock') }}
+          restore-keys: |
+            nx-${{ runner.os }}-${{ env.NODE }}-
+
       - name: Build editor (production)
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
         run: MODE=standalone yarn nx run editor:build:production
