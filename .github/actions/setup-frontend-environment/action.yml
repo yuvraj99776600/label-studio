@@ -36,7 +36,7 @@ runs:
         path: |
           ${{ inputs.directory }}/node_modules
           !${{ inputs.directory }}/node_modules/.cache
-        key: ${{ runner.os }}-node-${{ inputs.node-version }}-node-modules-v1-${{ hashFiles('web/yarn.lock') }}
+        key: ${{ runner.os }}-node-${{ inputs.node-version }}-node-modules-v2-${{ hashFiles('web/yarn.lock') }}
 
     - name: Get yarn cache directory path
       if: steps.node-modules-cache.outputs.cache-hit != 'true'
