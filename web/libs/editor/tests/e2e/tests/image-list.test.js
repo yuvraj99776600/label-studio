@@ -301,7 +301,7 @@ Scenario("Regions are not changes when duplicating an annotation", async ({ I, L
   await LabelStudio.resultsNotChanged(result);
 });
 
-Scenario("No errors during brush export in MIG", async ({ I, LabelStudio, AtImageView, AtLabels, AtPanels }) => {
+Scenario("No errors during brush export in MIG", async ({ I, LabelStudio, AtImageView, AtLabels }) => {
   const params = {
     config: brushConfig,
     data,
@@ -315,11 +315,9 @@ Scenario("No errors during brush export in MIG", async ({ I, LabelStudio, AtImag
     [40, 20],
     [20, 20],
   ];
-  const AtDetailsPanel = AtPanels.usePanel(AtPanels.PANEL.DETAILS);
 
   I.amOnPage("/");
   LabelStudio.init(params);
-  AtDetailsPanel.collapsePanel();
 
   LabelStudio.waitForObjectsReady();
   await AtImageView.lookForStage();

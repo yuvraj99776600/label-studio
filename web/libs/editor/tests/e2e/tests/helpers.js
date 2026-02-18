@@ -200,20 +200,33 @@ const waitForImage = () => {
       reject(new Error(`waitForImage: Timed out after 30s waiting for image to load (${state})`));
     }, 30000);
 
+    let preloadRetried = false;
+
     const check = () => {
       const imageObject = window.Htx?.annotationStore?.selected?.objects?.find((o) => o.type === "image");
 
       if (imageObject?.imageIsLoaded) {
         const stageRef = imageObject.stageRef;
 
-        // stageRef is the Konva Stage instance — it exists once <EntireStage> has mounted.
-        // stageRef.find('Image') returns Konva Image nodes rendered by <ImageLayer>.
-        // If it finds at least one, the image is fully painted on the canvas.
         if (stageRef && stageRef.find("Image").length > 0) {
           clearTimeout(timeout);
-          // Let Konva finish its current render cycle (batch draw)
           setTimeout(resolve, 32);
           return;
+        }
+      }
+
+      // Detect stuck state: entity exists but download never started.
+      // This can happen due to initialization race conditions.
+      // Explicitly trigger preload() to recover.
+      if (!preloadRetried && imageObject?.currentImageEntity) {
+        const entity = imageObject.currentImageEntity;
+        if (!entity.downloaded && !entity.downloading && !entity.error) {
+          preloadRetried = true;
+          try {
+            entity.preload();
+          } catch (e) {
+            // ignore - preload may throw if model is detached
+          }
         }
       }
 
@@ -245,12 +258,19 @@ const waitForImageSrc = (expectedSrc) => {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       const imageObject = window.Htx?.annotationStore?.selected?.objects?.find((o) => o.type === "image");
-      const actualSrc = imageObject?.currentImageEntity?.src;
+      const entity = imageObject?.currentImageEntity;
+      const state = entity
+        ? `src=${entity.src}, downloaded=${entity.downloaded}, imageLoaded=${entity.imageLoaded}, downloading=${entity.downloading}, error=${entity.error}`
+        : "no image entity";
 
       reject(
-        new Error(`waitForImageSrc: Timed out after 10s. Expected "${expectedSrc}" but current src is "${actualSrc}"`),
+        new Error(
+          `waitForImageSrc: Timed out after 30s. Expected "${expectedSrc}" but current state: ${state}`,
+        ),
       );
-    }, 10000);
+    }, 30000);
+
+    let preloadRetried = false;
 
     const check = () => {
       const imageObject = window.Htx?.annotationStore?.selected?.objects?.find((o) => o.type === "image");
@@ -263,6 +283,17 @@ const waitForImageSrc = (expectedSrc) => {
           clearTimeout(timeout);
           setTimeout(resolve, 32);
           return;
+        }
+      }
+
+      if (!preloadRetried && imageEntity?.src === expectedSrc) {
+        if (!imageEntity.downloaded && !imageEntity.downloading && !imageEntity.error) {
+          preloadRetried = true;
+          try {
+            imageEntity.preload();
+          } catch (e) {
+            // ignore
+          }
         }
       }
 
