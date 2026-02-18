@@ -38,14 +38,15 @@ jobs:
           directory: "${{ env.FRONTEND_MONOREPO_DIR }}"
 
       # Nx cache must be restored/saved in the workflow (not in the action) so we save
-      # after the build runs. Increment CACHE_VERSION to force a one-time miss if cache was corrupted.
+      # after the build runs. "integration" in key avoids collision with tests-yarn-lsf.
+      # Increment CACHE_VERSION to force a one-time miss if cache was corrupted.
       - name: Cache Nx
         uses: actions/cache@v4
         with:
           path: ${{ env.FRONTEND_MONOREPO_DIR }}/.nx/cache
-          key: nx-v2-${{ runner.os }}-${{ env.NODE }}-${{ hashFiles('web/package.json', 'web/yarn.lock') }}
+          key: nx-v2-integration-${{ runner.os }}-${{ env.NODE }}-${{ hashFiles('web/package.json', 'web/yarn.lock') }}
           restore-keys: |
-            nx-v2-${{ runner.os }}-${{ env.NODE }}-
+            nx-v2-integration-${{ runner.os }}-${{ env.NODE }}-
 
       - name: Build editor (production)
         working-directory: ${{ env.FRONTEND_MONOREPO_DIR }}
