@@ -163,7 +163,11 @@ Scenario(
   "Drawing multiple blank regions and then attaching labels",
   async ({ I, LabelStudio, AtImageView, AtSettings, AtLabels, AtOutliner }) => {
     I.amOnPage("/");
-    LabelStudio.init({ config: createConfig(), data });
+    LabelStudio.init({
+      config: createConfig(),
+      data,
+      settings: { continuousLabeling: true },
+    });
     LabelStudio.waitForObjectsReady();
     AtSettings.setGeneralSettings({
       [AtSettings.GENERAL_SETTINGS.SHOW_LABELS]: true,
