@@ -857,7 +857,8 @@ const waitForCanvasSizeSync = () => {
           window.APP_SETTINGS?.feature_flags_default_value ??
           false;
 
-        let expectedW, expectedH;
+        let expectedW;
+        let expectedH;
 
         if (zoomOptim) {
           expectedW = imageObject.containerWidth;
