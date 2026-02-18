@@ -160,26 +160,23 @@ Scenario("Can't create rectangles outside of canvas", async ({ I, AtLabels, AtOu
   LabelStudio.waitForObjectsReady();
   await AtImageView.lookForStage();
 
-  const canvasSize = await AtImageView.getCanvasSize();
+  const stage = AtImageView.stageBBox();
 
-  const draws = [
-    // upper-left corner: start inside, drag outside top-left
-    [100, 100, -200, -200],
-    // upper-right corner: start inside, drag outside top-right
-    [canvasSize.width - 100, 100, 200, -200],
-    // bottom-left corner: start inside, drag outside bottom-left
-    [100, canvasSize.height - 100, -200, 200],
-    // bottom-right corner: start inside, drag outside bottom-right
-    [canvasSize.width - 100, canvasSize.height - 100, 200, 200],
-  ];
+  I.say("Drawing region in the upper left corner");
+  AtLabels.clickLabel("Planet");
+  AtImageView.drawByDrag(100, 100, -200, -200);
 
-  for (let i = 0; i < draws.length; i++) {
-    I.say(`Drawing rectangle region #${i + 1}`);
-    AtLabels.clickLabel("Planet");
-    I.waitTicks(1);
-    await I.executeScript(dragKonva, draws[i]);
-    I.waitTicks(3);
-  }
+  I.say("Drawing region in the upper right corner");
+  AtLabels.clickLabel("Planet");
+  AtImageView.drawByDrag(stage.width - 100, 100, stage.width + 100, -100);
+
+  I.say("Drawing region in the bottom left corner");
+  AtLabels.clickLabel("Planet");
+  AtImageView.drawByDrag(100, stage.height - 100, -100, stage.height + 100);
+
+  I.say("Drawing region in the bottom right corner");
+  AtLabels.clickLabel("Planet");
+  AtImageView.drawByDrag(stage.width - 100, stage.height - 100, stage.width + 100, stage.height + 100);
 
   AtOutliner.seeRegions(4);
 
@@ -220,31 +217,29 @@ Scenario("Can't create ellipses outside of canvas", async ({ I, AtLabels, AtOutl
   LabelStudio.waitForObjectsReady();
   await AtImageView.lookForStage();
 
-  const canvasSize = await AtImageView.getCanvasSize();
+  const stage = AtImageView.stageBBox();
   const ellipses = [
-    // top-left corner: start inside, drag outside top-left
+    // top-left corner
     [100, 100, -200, -200],
-    // top-right corner: start inside, drag outside top-right
-    [canvasSize.width - 100, 100, 200, -200],
-    // bottom-left corner: start inside, drag outside bottom-left
-    [100, canvasSize.height - 100, -200, 200],
-    // bottom-right corner: start inside, drag outside bottom-right
-    [canvasSize.width - 100, canvasSize.height - 100, 200, 200],
+    // top-right corner
+    [stage.width - 100, 100, stage.width + 100, -100],
+    // bottom-left corner
+    [100, stage.height - 100, -100, stage.height + 100],
+    // bottom-right corner
+    [stage.width - 100, stage.height - 100, stage.width + 100, stage.height + 100],
   ];
 
-  for (let i = 0; i < ellipses.length; i++) {
-    I.say(`Drawing ellipse region #${i + 1}`);
+  for (const ellipse of ellipses) {
+    I.say("Drawing region in the upper left corner");
     AtLabels.clickLabel("Planet");
-    I.waitTicks(1);
-    await I.executeScript(dragKonva, ellipses[i]);
-    I.waitTicks(3);
+    AtImageView.drawByDrag(...ellipse);
   }
 
   AtOutliner.seeRegions(4);
 
   const result = await LabelStudio.serialize();
-  const radiusX = (100 / canvasSize.width) * 100;
-  const radiusY = (100 / canvasSize.height) * 100;
+  const radiusX = (100 / stage.width) * 100;
+  const radiusY = (100 / stage.height) * 100;
 
   for (let i = 0; i < result.length; i++) {
     const res = result[i].value;
@@ -256,7 +251,7 @@ Scenario("Can't create ellipses outside of canvas", async ({ I, AtLabels, AtOutl
     assert.strictEqual(res.radiusY.toFixed(3), radiusY.toFixed(3));
 
     I.say("Make sure that center is in correct spot");
-    const [expectedX, expectedY] = [(region[0] / canvasSize.width) * 100, (region[1] / canvasSize.height) * 100];
+    const [expectedX, expectedY] = [(region[0] / stage.width) * 100, (region[1] / stage.height) * 100];
 
     assert.strictEqual(res.x.toFixed(3), expectedX.toFixed(3));
     assert.strictEqual(res.y.toFixed(3), expectedY.toFixed(3));
