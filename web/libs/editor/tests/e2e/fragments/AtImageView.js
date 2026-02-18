@@ -129,6 +129,10 @@ module.exports = {
     return sizes;
   },
 
+  async waitForCanvasSizeSync() {
+    await I.executeScript(Helpers.waitForCanvasSizeSync);
+  },
+
   setZoom(scale, x, y) {
     I.executeScript(Helpers.setZoom, [scale, x, y]);
     I.waitTicks(3);

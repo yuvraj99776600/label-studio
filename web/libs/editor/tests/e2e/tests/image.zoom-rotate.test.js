@@ -217,6 +217,8 @@ Data(windowSizesTable).Scenario(
     LabelStudio.waitForObjectsReady();
     await AtImageView.lookForStage();
     I.waitForInvisible(".lsf-image-progress", 30);
+    I.waitTicks(3);
+    await AtImageView.waitForCanvasSizeSync();
     AtOutliner.seeRegions(0);
     const canvasSize = await AtImageView.getCanvasSize();
     const imageSize = await AtImageView.getImageFrameSize();
@@ -226,8 +228,7 @@ Data(windowSizesTable).Scenario(
     assert(Math.abs(canvasSize.height - imageSize.height) < 1);
     for (const rotate of rotationQueue) {
       I.click(locate(`[aria-label='rotate-${rotate}']`));
-      // Wait for rotating to be finished and correctly rendered
-      I.waitTicks(2);
+      await AtImageView.waitForCanvasSizeSync();
       const rotatedCanvasSize = await AtImageView.getCanvasSize();
       const rotatedImageSize = await AtImageView.getImageFrameSize();
 
@@ -284,9 +285,8 @@ const compareSize = async (I, AtImageView, message1, message2) => {
 
 Data(layoutVariations).Scenario(
   "Rotation in the two columns template",
-  async ({ I, LabelStudio, AtImageView, AtOutliner, AtSettings, current }) => {
+  async ({ I, LabelStudio, AtImageView, AtOutliner, current }) => {
     I.amOnPage("/");
-    let isVerticalLayout = false;
 
     const { config, inline, reversed } = current;
 
@@ -333,26 +333,22 @@ Data(layoutVariations).Scenario(
 
     I.click(locate("[aria-label='rotate-right']"));
     AtOutliner.seeRegions(1);
-
-    I.wait(0.1);
+    await AtImageView.waitForCanvasSizeSync();
     await compareSize(I, AtImageView, "Dimensions must be equal in landscape", "landscape, rotated");
 
-    I.say("Change to vertcal layout");
-    AtSettings.open();
-    isVerticalLayout = !isVerticalLayout;
-    AtSettings.setLayoutSettings({
-      [AtSettings.LAYOUT_SETTINGS.VERTICAL_LAYOUT]: isVerticalLayout,
+    I.say("Change to vertical layout");
+    I.executeScript(() => {
+      window.Htx.settings.toggleBottomSP();
     });
-    AtSettings.close();
+    I.waitTicks(5);
+    await AtImageView.waitForCanvasSizeSync();
 
     AtOutliner.seeRegions(1);
-    I.wait(0.1);
     await compareSize(I, AtImageView, "Dimensions must be equal in portrait", "portrait");
 
     I.click(locate("[aria-label='rotate-right']"));
-
     AtOutliner.seeRegions(1);
-    I.wait(0.1);
+    await AtImageView.waitForCanvasSizeSync();
     await compareSize(I, AtImageView, "Dimensions must be equal after rotation in portrain", "portrait, rotated");
   },
 );

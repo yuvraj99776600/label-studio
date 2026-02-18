@@ -495,11 +495,9 @@ Data(selectedPolygonAfterCreatingVariants).Scenario(
     });
 
     if (shouldSelect) {
-      AtSettings.open();
       AtSettings.setGeneralSettings({
         [AtSettings.GENERAL_SETTINGS.AUTO_SELECT_REGION]: shouldSelect,
       });
-      AtSettings.close();
     }
 
     LabelStudio.waitForObjectsReady();

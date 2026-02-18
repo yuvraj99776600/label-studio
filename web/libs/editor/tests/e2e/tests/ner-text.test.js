@@ -145,7 +145,11 @@ Scenario("NERText", async ({ I, LabelStudio, AtOutliner }) => {
   I.wait(1);
   I.click(locate(".htx-highlight").withText("come"));
 
-  I.see("Relations (1)");
+  const relationsCount = await I.executeScript(() => {
+    return window.Htx?.annotationStore?.selected?.relationStore?.size ?? 0;
+  });
+
+  assert.equal(relationsCount, 1);
 
   result = await I.executeScript(serialize);
   assert.equal(result.length, 4);
