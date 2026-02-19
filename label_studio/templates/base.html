@@ -16,11 +16,7 @@
   <meta name="msapplication-navbutton-color" content="#272727">  <!-- Windows Phone -->
   <meta name="apple-mobile-web-app-status-bar-style" content="#272727">  <!-- iOS Safari -->
 
-  <!-- Preload fonts -->
-  <link rel="preload" href="{{ settings.HOSTNAME }}/static/fonts/Figtree-Regular.ttf" as="font" type="font/ttf"
-    crossorigin="anonymous">
-  <link rel="preload" href="{{ settings.HOSTNAME }}/static/fonts/Figtree-SemiBold.ttf" as="font" type="font/ttf"
-    crossorigin="anonymous">
+  <!-- Fonts: Inter loaded via Google Fonts in simple.html -->
 
 
   <!-- CSS -->
@@ -196,7 +192,7 @@
     },
 
     {% block app_more_settings %}
-      page_title: "Label Studio",
+      page_title: "MLTL Annotate",
       flags: {
         allow_organization_webhooks: {{settings.ALLOW_ORGANIZATION_WEBHOOKS|yesno:"true,false"}},
         storage_persistence: {{ settings.STORAGE_PERSISTENCE|yesno:"true,false" }},

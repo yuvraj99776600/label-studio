@@ -20,15 +20,7 @@
   text-align: center;
 }
 
-.ls-global-error__heidi {
-  width: 812px;
-  position: absolute;
-  top: -22px;
-  left: -22px;
-  height: 100%;
-  user-select: none;
-  -webkit-user-select: none;
-}
+/* Mascot removed — error pages use simple text layout */
 
 .ls-global-error h1 {
   font-size: 48px;
@@ -60,7 +52,7 @@ body > .ls-global-error .button {
   display: inline-flex;
   background-color: var(--color-neutral-background);
   align-items: center;
-  border-radius: 5px;
+  border-radius: 8px;
   text-align: center;
   text-decoration: none;
   justify-content: center;
