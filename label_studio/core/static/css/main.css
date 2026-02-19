@@ -3,27 +3,27 @@ html {
 }
 
 :root {
-  --font-sans: 'Figtree', sans-serif !important;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif !important;
   --font-mono: Monaco, monospace;
 
   /* Deprecated: [DO NOT USE] */
-  --sand_900: #12110D;
-  --sand_800: #262522;
-  --sand_700: #45433E;
-  --sand_600: #6B6860;
-  --sand_500: #A49F95;
-  --sand_400: #CAC5B8;
-  --sand_300: #E1DED5;
-  --sand_200: #F0EFEB;
-  --sand_100: #F9F8F6;
-  --sand_0: #FDFDFC;
+  --sand_900: #171717;
+  --sand_800: #262626;
+  --sand_700: #404040;
+  --sand_600: #525252;
+  --sand_500: #737373;
+  --sand_400: #a3a3a3;
+  --sand_300: #d4d4d4;
+  --sand_200: #e5e5e5;
+  --sand_100: #f5f5f5;
+  --sand_0: #fafafa;
 
-  --grape_0: #F0F3FE;
-  --grape_100: #D4DBFB; 
-  --grape_500: #566FCF;
-  --grape_600: #576CC1;
-  --grape_700: #4C5FA9;
-  --grape_800: #37447A;
+  --grape_0: #eef2ff;
+  --grape_100: #e0e7ff;
+  --grape_500: #6366f1;
+  --grape_600: #4f46e5;
+  --grape_700: #4338ca;
+  --grape_800: #3730a3;
 
   --kale_0: #F4F9F9;
   --kale_400: #57B7AB;
@@ -48,8 +48,7 @@ html {
   --red_7: #CF1322;
   --red_10: #5C0011;
 
-  --primary_link: #566FCF;
-
+  --primary_link: #6366f1;
   overflow-x: unset !important;
 
   /* Primitive Tokens [DO NOT USE] */
@@ -87,17 +86,17 @@ html {
   --color-fig-800: rgb(109 74 136);
   --color-fig-900: rgb(91 62 114);
   --color-fig-950: rgb(31 21 38);
-  --color-grape-000: rgb(240 243 254);
-  --color-grape-100: rgb(212 219 251);
-  --color-grape-200: rgb(182 195 248);
-  --color-grape-300: rgb(153 171 245);
-  --color-grape-400: rgb(109 135 241);
-  --color-grape-500: rgb(97 122 218);
-  --color-grape-600: rgb(87 108 193);
-  --color-grape-700: rgb(76 95 169);
-  --color-grape-800: rgb(55 68 122);
-  --color-grape-900: rgb(43 54 96);
-  --color-grape-950: rgb(17 22 38);
+  --color-grape-000: rgb(238 242 255);
+  --color-grape-100: rgb(224 231 255);
+  --color-grape-200: rgb(199 210 254);
+  --color-grape-300: rgb(165 180 252);
+  --color-grape-400: rgb(129 140 248);
+  --color-grape-500: rgb(99 102 241);
+  --color-grape-600: rgb(79 70 229);
+  --color-grape-700: rgb(67 56 202);
+  --color-grape-800: rgb(55 48 163);
+  --color-grape-900: rgb(49 46 129);
+  --color-grape-950: rgb(30 27 75);
   --color-kale-000: rgb(244 249 249);
   --color-kale-100: rgb(212 241 235);
   --color-kale-200: rgb(171 228 218);
@@ -153,18 +152,18 @@ html {
   --color-plum-800: rgb(136 74 128);
   --color-plum-900: rgb(114 62 106);
   --color-plum-950: rgb(38 21 36);
-  --color-sand-000: rgb(253 253 252);
-  --color-sand-100: rgb(249 248 246);
-  --color-sand-200: rgb(240 239 235);
-  --color-sand-300: rgb(225 222 213);
-  --color-sand-400: rgb(202 197 184);
-  --color-sand-500: rgb(164 159 149);
-  --color-sand-600: rgb(107 104 96);
-  --color-sand-700: rgb(69 67 62);
-  --color-sand-800: rgb(38 37 34);
-  --color-sand-850: rgb(30 29 26);
-  --color-sand-900: rgb(18 17 13);
-  --color-sand-950: rgb(13 12 9);
+  --color-sand-000: rgb(250 250 250);
+  --color-sand-100: rgb(245 245 245);
+  --color-sand-200: rgb(229 229 229);
+  --color-sand-300: rgb(212 212 212);
+  --color-sand-400: rgb(163 163 163);
+  --color-sand-500: rgb(115 115 115);
+  --color-sand-600: rgb(82 82 82);
+  --color-sand-700: rgb(64 64 64);
+  --color-sand-800: rgb(38 38 38);
+  --color-sand-850: rgb(26 26 26);
+  --color-sand-900: rgb(23 23 23);
+  --color-sand-950: rgb(10 10 10);
 
   /* Semantic Tokens */
   /* Semantic Tokens: Colors */
