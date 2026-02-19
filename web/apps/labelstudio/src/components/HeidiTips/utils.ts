@@ -1,10 +1,10 @@
 import { defaultTipsCollection } from "./content";
 import type { Tip, TipsCollection } from "./types";
 
-const STORE_KEY = "heidi_ignored_tips";
-const EVENT_NAMESPACE_KEY = "heidi_tips";
-const CACHE_KEY = "heidi_live_tips_collection";
-const CACHE_FETCHED_AT_KEY = "heidi_live_tips_collection_fetched_at";
+const STORE_KEY = "mltl_ignored_tips";
+const EVENT_NAMESPACE_KEY = "mltl_tips";
+const CACHE_KEY = "mltl_live_tips_collection";
+const CACHE_FETCHED_AT_KEY = "mltl_live_tips_collection_fetched_at";
 const CACHE_STALE_TIME = 1000 * 60 * 60; // 1 hour
 const MAX_TIMEOUT = 5000; // 5 seconds
 

@@ -24,7 +24,7 @@ const LARGE_EXPORT_TASK_THRESHOLD = 1000;
 const EXPORT_TIMEOUT_DOCS_URL = "https://labelstud.io/guide/export.html#Export-timeout-in-Community-Edition";
 const EXPORT_CONSOLE_DOCS_URL = "https://labelstud.io/guide/export.html#Export-using-console-command";
 const EXPORT_SNAPSHOT_SDK_URL = "https://api.labelstud.io/api-reference/api-reference/projects/exports/create";
-const ENTERPRISE_URL = "https://docs.humansignal.com/guide/label_studio_compare";
+const ENTERPRISE_URL = "#";
 
 // const formats = {
 //   json: 'JSON',
@@ -246,11 +246,7 @@ const FormatInfo = ({ availableFormats, selected, onClick }) => {
       <div className={cn("formats").elem("feedback").toClassName()}>
         Can't find an export format?
         <br />
-        Please let us know in{" "}
-        <a className="no-go" href="https://slack.labelstud.io/?source=product-export" target="_blank" rel="noreferrer">
-          Slack
-        </a>{" "}
-        or submit an issue to the{" "}
+        Please submit an issue to the{" "}
         <a
           className="no-go"
           href="https://github.com/HumanSignal/label-studio-converter/issues"

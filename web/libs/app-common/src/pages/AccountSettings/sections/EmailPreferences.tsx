@@ -69,7 +69,7 @@ export const EmailPreferences = () => {
   const message = useMemo(() => {
     return window.APP_SETTINGS?.whitelabel_is_active
       ? "Subscribe for news and tips"
-      : "Subscribe to HumanSignal news and tips from Heidi";
+      : "Subscribe for news and tips";
   }, []);
 
   return (

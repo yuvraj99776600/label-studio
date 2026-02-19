@@ -3,9 +3,9 @@
 <script nonce="{{request.csp_nonce}}">
 
   const SERVER_ID = {{ request.server_id|json_dumps_ensure_ascii|safe }};
-  const EVENT_NAMESPACE_KEY = "heidi_tips";
-  const CACHE_KEY = "heidi_live_tips_collection";
-  const CACHE_FETCHED_AT_KEY = "heidi_live_tips_collection_fetched_at";
+  const EVENT_NAMESPACE_KEY = "mltl_tips";
+  const CACHE_KEY = "mltl_live_tips_collection";
+  const CACHE_FETCHED_AT_KEY = "mltl_live_tips_collection_fetched_at";
   const CACHE_STALE_TIME = 1000 * 60 * 60; // 1 hour
   const MAX_TIMEOUT = 5000; // 5 seconds
   const TIP_COLLECTION_NAME = "authPage";
@@ -15,10 +15,10 @@
       {
         title: "Did you know?",
         description:
-          "You can sync data from all popular cloud storage providers to collect new items for labeling as they are uploaded, and return the annotation results to train and continuously improve models.",
+          "You can sync data from popular cloud storage providers to collect new items for labeling as they are uploaded, and return the annotation results to continuously improve your models.",
         link: {
-          label: "Learn more",
-          url: "https://labelstud.io/guide/storage",
+          label: "Get started",
+          url: "#",
           params: {
             experiment: "login_revamp",
             treatment: "sync_cloud_data",
@@ -28,23 +28,10 @@
       {
         title: "Did you know?",
         description:
-          "There's an Enterprise version of Label Studio packed with more features and automation to label data faster while ensuring the highest quality.",
+          "MLTL Annotate supports dozens of pre-built templates for all data types — from image classification to sentiment analysis to supervised LLM fine-tuning.",
         link: {
-          label: "Learn more",
-          url: "https://humansignal.com/goenterprise/",
-          params: {
-            experiment: "login_revamp",
-            treatment: "enterprise_platform",
-          },
-        },
-      },
-      {
-        title: "Did you know?",
-        description:
-          "Label Studio has dozens of pre-built templates for all data types you can use to configure your labeling UI, from image classification to sentiment analysis to supervised LLM fine-tuning. ",
-        link: {
-          label: "See all templates",
-          url: "https://labelstud.io/templates",
+          label: "Explore templates",
+          url: "#",
           params: {
             experiment: "login_revamp",
             treatment: "templates",
@@ -53,15 +40,16 @@
       },
       {
         title: "Did you know?",
-        description: "Label Studio now has a Starter Cloud offering optimized for small teams and projects.",
+        description:
+          "You can collaborate with your team on labeling projects, manage quality with review workflows, and export annotations in multiple formats.",
         link: {
           label: "Learn more",
-          url: "https://humansignal.com/pricing/",
+          url: "#",
           params: {
             experiment: "login_revamp",
-            treatment: "starter_cloud"
-          }
-        }
+            treatment: "collaboration",
+          },
+        },
       },
     ],
   };
@@ -111,7 +99,7 @@
         }
       })
       .catch((e) => {
-        console.warn("Failed to load live Heidi tips collection", e);
+        console.warn("Failed to load live tips collection", e);
       })
       .finally(() => {
         // Wait until the content is fetched to clear the abort timeout

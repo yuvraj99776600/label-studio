@@ -66,7 +66,7 @@ const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, 
             Simplify project management by organizing projects into workspaces.{" "}
             <a
               href={createURL(
-                "https://docs.humansignal.com/guide/manage_projects#Create-workspaces-to-organize-projects",
+                "https://labelstud.io/guide/setup_project",
                 {
                   experiment: "project_creation_dropdown",
                   treatment: "simplify_project_management",
