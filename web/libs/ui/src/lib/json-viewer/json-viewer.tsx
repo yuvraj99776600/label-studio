@@ -8,12 +8,12 @@ import type { JsonViewerProps } from "./types";
 import { ReaderViewButton } from "./reader-view-button";
 import styles from "./json-viewer.module.scss";
 
-// Custom Label Studio theme for json-edit-react
+// Custom MLTL Annotate theme for json-edit-react
 // Note: Colors are applied via SCSS using :global selectors because
 // json-edit-react doesn't support CSS variables in theme configuration
 const labelStudioTheme = {
   ...defaultTheme,
-  displayName: "Label Studio",
+  displayName: "MLTL Annotate",
   styles: {
     ...defaultTheme.styles,
     container: {

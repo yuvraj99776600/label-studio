@@ -3,7 +3,7 @@ import { create } from "storybook/theming/create";
 
 const theme = create({
   base: "dark",
-  brandTitle: "Label Studio",
+  brandTitle: "MLTL Annotate",
   brandUrl: "https://labelstud.io",
   brandImage: "logo.svg",
   brandTarget: "_blank",
