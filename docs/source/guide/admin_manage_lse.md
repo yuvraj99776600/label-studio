@@ -15,7 +15,7 @@ date: 2024-02-06 12:00:25
 
 
 !!! note
-    If you are using SSO/SAML or SCIM, you can map groups to roles on the organization level and the project level. For more information, see [Set up SSO authentication for Label Studio](auth_setup) and [Set up SCIM2 for Label Studio](scim_setup). 
+    If you are using SSO/SAML or SCIM, you can map groups to roles on the organization level and the project level. For more information, see [Set up SSO authentication for MLTL Annotate](auth_setup) and [Set up SCIM2 for MLTL Annotate](scim_setup). 
 
     If you are using an IdP with SCIM or SAML/SSO, you should also handle user deactivations and deletions from the IdP. 
 
@@ -27,7 +27,7 @@ If you invite users using the [invite link option](admin_user#Invite-users-to-La
 !!! info Tip
     You can use the role filter above the table to see all Pending users. Select the **Not Activated** role.
 
-1. Open Label Studio and click the menu in the upper left. 
+1. Open MLTL Annotate and click the menu in the upper left. 
 2. Select **Organization**. 
 
     If you do not see the **Organization** option, you do not have access to the Organization page. Only users in the Owner or Administrator role can access this page. 

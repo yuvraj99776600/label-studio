@@ -3,7 +3,7 @@ title: Number
 type: tags
 order: 414
 meta_title: Number Tag to Numerically Classify
-meta_description: Customize Label Studio with the Number tag to numerically classify tasks in your machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the Number tag to numerically classify tasks in your machine learning and data science projects.
 ---
 
 The Number tag supports numeric classification. Use to classify tasks using numbers.

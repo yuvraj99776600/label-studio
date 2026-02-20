@@ -33,8 +33,8 @@ stages:
     headers:
       content-type: application/json
     json:
-    - wrong_field: http://pytest.heartex.com/image1.jpg
-    - wrong_field: http://pytest.heartex.com/image2.jpg
+    - wrong_field: http://pytest.mltl.com/image1.jpg
+    - wrong_field: http://pytest.mltl.com/image2.jpg
     method: POST
     url: '{django_live_url}/api/projects/{pk}/import'
   response:

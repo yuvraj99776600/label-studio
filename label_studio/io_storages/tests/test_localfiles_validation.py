@@ -11,7 +11,7 @@ def test_validate_connection_rejects_document_root_path(settings, tmp_path, proj
     """Ensure validate_connection fails when the storage path equals LOCAL_FILES_DOCUMENT_ROOT.
 
     This test validates step by step:
-    - Creating a temporary document root and configuring Label Studio to use it
+    - Creating a temporary document root and configuring MLTL Annotate to use it
     - Initializing LocalFilesImportStorage with a path that matches the document root exactly
     - Calling validate_connection to trigger the new guard clause
     - Verifying that a ValidationError is raised with a helpful explanation so the user knows to pick a subfolder

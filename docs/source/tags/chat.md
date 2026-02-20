@@ -13,7 +13,7 @@ The `Chat` tag displays a conversational transcript and lets annotators extend i
 Use with the following data types: JSON array of message objects
 
 !!! error Enterprise
-    This tag is only available for Label Studio Enterprise and Starter Cloud users. 
+    This tag is only available for MLTL Annotate and Starter Cloud users. 
 
 
 ### Use with an LLM
@@ -22,7 +22,7 @@ Optionally, the tag can send requests to an LLM and then post the replies.
 
 To use an LLM, you need to do two things:
 
-1. Add a model provider API key to your organization. See [Model provider API keys for organizations](https://docs.humansignal.com/guide/model_providers). 
+1. Add a model provider API key to your organization. See [Model provider API keys for organizations](https://docs.mltl.us/guide/model_providers). 
 
 2.  Once you have added an API key for a model provider, set the `llm` attribute on the `<Chat>` tag to the model you want to use. 
 

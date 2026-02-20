@@ -5,7 +5,7 @@ category: Computer Vision
 cat: computer-vision
 order: 115
 meta_title: Object Detection with Ellipses Data Labeling Template
-meta_description: Template for adding elliptical regions to images for object detection and segmentation use cases with Label Studio for your machine learning and data science projects.
+meta_description: Template for adding elliptical regions to images for object detection and segmentation use cases with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates-misc/object-detection-ellipses.png" alt="" class="gif-border" width="600px" height="408px" />

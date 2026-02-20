@@ -152,7 +152,7 @@ def samples_paragraphs(request):
 
 def heidi_tips(request):
     """Fetch live tips from github raw liveContent.json to avoid caching and client side CORS issues"""
-    url = 'https://raw.githubusercontent.com/HumanSignal/label-studio/refs/heads/develop/web/apps/labelstudio/src/components/HeidiTips/liveContent.json'
+    url = 'https://raw.githubusercontent.com/yuvraj99776600/label-studio/refs/heads/develop/web/apps/labelstudio/src/components/HeidiTips/liveContent.json'
 
     response = None
     try:

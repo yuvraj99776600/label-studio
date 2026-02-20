@@ -14,12 +14,12 @@ date: 2024-02-06 22:28:14
 ---
 
 !!! error Enterprise
-    Many settings are only available in Label Studio Enterprise Edition. If you're using Label Studio Community Edition, see [Label Studio Features](label_studio_compare) to learn more.
+    Many settings are only available in MLTL Annotate Edition. If you're using Label Studio Community Edition, see [Label Studio Features](label_studio_compare) to learn more.
 
 !!! error Starter Cloud
     If you see an Enterprise badge: <span class="badge"></span>
     
-    This means the setting is not available in Label Studio Starter Cloud. 
+    This means the setting is not available in MLTL Annotate Starter Cloud. 
 
 
 ## General
@@ -32,7 +32,7 @@ Use these settings to specify some basic information about the project.
 | **Project Name** | Enter a name for the project. |
 | **Description**       | Enter a description for the project. |
 | **Color**      | You can select a color for the project. The project is highlighted with this color when viewing the Projects page. |
-| **Proxy Credentials**     | Enter proxy credentials. These might be necessary if your task data is protected with basic HTTP access authentication.<br><br> For example, if your Label Studio instance needs to access the internet through a corporate proxy server. |
+| **Proxy Credentials**     | Enter proxy credentials. These might be necessary if your task data is protected with basic HTTP access authentication.<br><br> For example, if your MLTL Annotate instance needs to access the internet through a corporate proxy server. |
 
 ## Labeling interface
 
@@ -88,7 +88,7 @@ Select the order in which tasks are presented to annotators.
 | ------------- | ------------ |
 | **By Task ID** | Tasks are shown to annotators in ascending order by ID. |
 | **Random** | Tasks are shown in random order.  |
-| **Uncertainty**         | This option is for when you are using a machine learning backend and want to employ [active learning](active_learning). Active learning mode continuously trains and reviews predictions from a connected machine learning model, allowing the model to improve iteratively as new annotations are created.<br /><br />When Uncertainty Sampling is enabled, Label Studio strategically selects tasks with the least confident, or most uncertain, prediction scores from your model. The goal is to minimize the amount of data that needs to be labeled while maximizing the performance of the model. |
+| **Uncertainty**         | This option is for when you are using a machine learning backend and want to employ [active learning](active_learning). Active learning mode continuously trains and reviews predictions from a connected machine learning model, allowing the model to improve iteratively as new annotations are created.<br /><br />When Uncertainty Sampling is enabled, MLTL Annotate strategically selects tasks with the least confident, or most uncertain, prediction scores from your model. The goal is to minimize the amount of data that needs to be labeled while maximizing the performance of the model. |
 
 
 </dd>
@@ -256,7 +256,7 @@ Unlike the other skip queue options, in this case skipped tasks do not adversely
 
 | Field          | Description    |
 | ------------- | ------------ |
-| **Use predictions to pre-label tasks** | If you have an ML backend or model connected, or if you're using [Prompts](prompts_overview) to generate predictions, you can use this setting to determine whether tasks should be pre-labeled using predictions. For more information, see [Integrate Label Studio into your machine learning pipeline](ml) and [Generate predictions from a prompt](prompts_predictions).  |
+| **Use predictions to pre-label tasks** | If you have an ML backend or model connected, or if you're using [Prompts](prompts_overview) to generate predictions, you can use this setting to determine whether tasks should be pre-labeled using predictions. For more information, see [Integrate MLTL Annotate into your machine learning pipeline](ml) and [Generate predictions from a prompt](prompts_predictions).  |
 | **Model or predictions to use** | Use the drop-down menu to select the predictions source. For example, you can select a [connected model](#Model) or a set of [predictions](#Predictions). |
 | **Reveal pre-annotations interactively** | When enabled, pre-annotation regions (such as bounding boxes or text spans) are not automatically displayed to the annotator. Instead, annotators can draw a selection rectangle to reveal pre-annotation regions within that area. This allows annotators to first review the image or text without being influenced by the model’s predictions. Pre-annotation regions must have the attribute `"hidden": true`. <br /><br />This feature is particularly useful when there are multiple low-confidence regions that you prefer not to display all at once to avoid clutter. |
 
@@ -918,12 +918,12 @@ And the following actions are available from the overflow menu next to a connect
 | ------------- | ------------ |
 | **Start Training**         | Manually initiate training. Use this action if you want to control when the model training occurs, such as after a specific number of annotations have been collected or at certain intervals.  |
 | **Send Test Request**         | (Available from the overflow menu next to the connected model)<br /><br />Use this for troubleshooting and sending a test resquest to the connected model.   |
-| **Edit**         | Edit the model name, URL, and parameters. For more information, see [Connect a model to Label Studio](ml#Connect-a-model-to-Label-Studio). |
+| **Edit**         | Edit the model name, URL, and parameters. For more information, see [Connect a model to MLTL Annotate](ml#Connect-a-model-to-Label-Studio). |
 | **Delete**         | Remove the connection to the model. |
 
 ## Predictions
 
-From here you can view predictions that have been imported, generated with [Prompts](prompts_predictions), or generated when executing the **Batch Predictions** action from the Data Manager. For more information on using predictions, see [Import pre-annotated data into Label Studio](predictions). 
+From here you can view predictions that have been imported, generated with [Prompts](prompts_predictions), or generated when executing the **Batch Predictions** action from the Data Manager. For more information on using predictions, see [Import pre-annotated data into MLTL Annotate](predictions). 
 
 To remove predictions from the project, click the overflow menu next to the predictions set and select **Delete**.  
 
@@ -931,17 +931,17 @@ To determine which predictions are show to annotators, use the [**Annotation > L
 
 ## Cloud storage
 
-This is where you connect Label Studio to a cloud storage provider:
+This is where you connect MLTL Annotate to a cloud storage provider:
 
-* **Source Cloud Storage**--This is where the source data for your project is saved. When you sync your source storage, Label Studio retrieves data to be annotated. 
-* **Target Cloud Storage**--This is where your annotations are saved. When you sync your target storage, annotations are sent from Label Studio to the target storage location. 
+* **Source Cloud Storage**--This is where the source data for your project is saved. When you sync your source storage, MLTL Annotate retrieves data to be annotated. 
+* **Target Cloud Storage**--This is where your annotations are saved. When you sync your target storage, annotations are sent from MLTL Annotate to the target storage location. 
 
 For more information, see [Sync data from external storage](storage). 
 
 
 ## Webhooks
 
-You can use webhooks to integration third-party applications. For more information, see [Set up webhooks in Label Studio](webhooks) and our [integrations directory](https://labelstud.io/integrations/).
+You can use webhooks to integration third-party applications. For more information, see [Set up webhooks in MLTL Annotate](webhooks) and our [integrations directory](https://labelstud.io/integrations/).
 
 ## Danger Zone
 
@@ -955,5 +955,5 @@ From here, you can access actions that result in data loss, and should be used w
     If the Data Manager is not loading, dropping all Data Manager tabs can help.
 * **Delete Project**
 
-    Deleting a project permanently removes all tasks, annotations, and project data from Label Studio.
+    Deleting a project permanently removes all tasks, annotations, and project data from MLTL Annotate.
 

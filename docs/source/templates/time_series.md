@@ -5,7 +5,7 @@ category: Time Series Analysis
 cat: time-series-analysis
 order: 601
 meta_title: Time Series Data Labeling Template
-meta_description: Template for labeling multivariate and simple time series data with Label Studio for your machine learning and data science projects.
+meta_description: Template for labeling multivariate and simple time series data with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/time-series-forecasting.png" alt="" class="gif-border" width="552px" height="408px" />
@@ -55,7 +55,7 @@ Use the [TimeSeries](/tags/timeseries.html) object tag to display time series da
     <Channel column="sensortwo" />
 </TimeSeries>
 ```
-The `valueType="url"` parameter means that Label Studio expects links to CSV files in JSON-formatted tasks. The `timeColumn` parameter specifies the column in your dataset to use as the X-axis for time. If you don't specify a `timeColumn`, Label Studio uses incremental integer values as the X-axis: `0, 1, 2, ...`.
+The `valueType="url"` parameter means that MLTL Annotate expects links to CSV files in JSON-formatted tasks. The `timeColumn` parameter specifies the column in your dataset to use as the X-axis for time. If you don't specify a `timeColumn`, MLTL Annotate uses incremental integer values as the X-axis: `0, 1, 2, ...`.
 
 ### Input data
 Example CSV file input for the labeling configuration looks as follows:
@@ -74,7 +74,7 @@ time,sensorone,sensortwo
 
 ## Input formats
 
-Label Studio supports several input types for time series:
+MLTL Annotate supports several input types for time series:
 
 - CSV with or without a header
 - TSV with or without a header
@@ -91,7 +91,7 @@ time,sensorone,sensortwo
 0.2,1.64,5.85
  ```
 
-Then, create a JSON file that references a URL for the CSV file to upload to Label Studio:
+Then, create a JSON file that references a URL for the CSV file to upload to MLTL Annotate:
 ```json
 [ { "data": { "csv_url": "http://example.com/path/to/file.csv" } } ]
 ```
@@ -121,11 +121,11 @@ The main difference for the headless CSV/TSV usage is another way to name `<Chan
 
 ### JSON
 
-All tasks in Label Studio are stored in JSON and this is the native format for Label Studio. 
+All tasks in MLTL Annotate are stored in JSON and this is the native format for MLTL Annotate. 
 
 - `valueType="url"`
 
-  When you use `valueType="url"` for TimeSeries tag and import a CSV file, Label Studio automatically creates a JSON task with the body like this example: 
+  When you use `valueType="url"` for TimeSeries tag and import a CSV file, MLTL Annotate automatically creates a JSON task with the body like this example: 
   
   ```json
   {
@@ -135,7 +135,7 @@ All tasks in Label Studio are stored in JSON and this is the native format for L
 
 - `valueType="json"`
   
-  You can also use Label Studio JSON format directly by creating and import JSON structured like the following example, where each key specifies the time and channels: 
+  You can also use MLTL Annotate JSON format directly by creating and import JSON structured like the following example, where each key specifies the time and channels: 
 
   ```json
   {
@@ -155,7 +155,7 @@ All tasks in Label Studio are stored in JSON and this is the native format for L
 
 ## Output format example
 
-Annotators add labels to time series tasks. Label Studio represents each completed annotation with a JSON structure. Each annotation has a `result` field that looks like the following example for time series labeling projects:
+Annotators add labels to time series tasks. MLTL Annotate represents each completed annotation with a JSON structure. Each annotation has a `result` field that looks like the following example for time series labeling projects:
 
 ```json
 {

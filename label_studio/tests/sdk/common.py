@@ -1,4 +1,4 @@
-# source: https://labelstud.io/guide/tasks.html#Basic-Label-Studio-JSON-format
+# source: https://docs.mltl.us/guide/tasks.html#Basic-Label-Studio-JSON-format
 LABEL_CONFIG_AND_TASKS = {
     'label_config': """
     <View>

@@ -27,7 +27,7 @@ There are two approaches to adding a model provider API key.
     * Custom
 
 !!! note
-        If you are restricting network access to your resource, you may need to whitelist HumanSignal IP addresses ([IP ranges on SaaS](saas#Outbound-Connections-IP-Addresses)) when configuring network security.
+        If you are restricting network access to your resource, you may need to whitelist MLTL IP addresses ([IP ranges on SaaS](saas#Outbound-Connections-IP-Addresses)) when configuring network security.
 
 
 Once a model is added via the API key, anyone in the organization who has access to the Prompts feature can select the associated models when executing their prompt. 

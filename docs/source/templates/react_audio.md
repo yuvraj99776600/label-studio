@@ -20,13 +20,13 @@ The example labeling configuration creates a split-screen interface with:
 ![Screenshot](/images/templates-misc/react-audio.png)
 
 !!! error Enterprise
-    This template and the `ReactCode` tag can only be used in Label Studio Enterprise.
+    This template and the `ReactCode` tag can only be used in MLTL Annotate.
 
     For more information, see [Programmable & Embeddable Interfaces](https://humansignal.com/programmable-ui/). 
 
 ## Labeling configuration
 
-This example uses three main Label Studio components working together:
+This example uses three main MLTL Annotate components working together:
 
 1. **Audio Tags** (`<Audio>`) - Display two audio players that can be synchronized using the spacebar hotkey. Each player is linked to its respective speaker's audio file.
 
@@ -42,7 +42,7 @@ This example uses three main Label Studio components working together:
    - Undo changes with a history system
    - Synchronize scrolling between the transcript view and editor
 
-The transcript data is stored as an array of segment objects, each containing `speaker`, `start`, `end`, and `text` fields. The `ReactCode` component manages this data structure and persists changes through Label Studio's region API.
+The transcript data is stored as an array of segment objects, each containing `speaker`, `start`, `end`, and `text` fields. The `ReactCode` component manages this data structure and persists changes through MLTL Annotate's region API.
 
 {% details <b>Click to expand</b> %}
 ```xml

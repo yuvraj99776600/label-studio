@@ -239,7 +239,7 @@ export const LabelStudio = {
         }
         expect(win.LabelStudio.instances.size).to.be.equal(1);
         cy.get(".lsf-editor").should("be.visible");
-        cy.log("Label Studio initialized");
+        cy.log("MLTL Annotate initialized");
       });
     });
   },

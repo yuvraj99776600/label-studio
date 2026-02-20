@@ -10,9 +10,9 @@ section: "Create & Manage Projects"
 
 ---
 
-Label and annotate your data with the open source data labeling tool, Label Studio. After you [set up your project](setup_project.html) and [labeling interface](setup.html) and [import your data](tasks.html), you can start labeling and annotating your data.
+Label and annotate your data with the open source data labeling tool, MLTL Annotate. After you [set up your project](setup_project.html) and [labeling interface](setup.html) and [import your data](tasks.html), you can start labeling and annotating your data.
 
-1. Open a project in Label Studio and optionally [filter or sort the data](manage_data.html#Filter-or-sort-project-data).    
+1. Open a project in MLTL Annotate and optionally [filter or sort the data](manage_data.html#Filter-or-sort-project-data).    
 2. Click **Label All Tasks** to [start labeling](#Start-labeling).
 3. Use [keyboard shortcuts](#Use-keyboard-shortcuts-to-label-regions-faster) or your mouse to label the data and submit your annotations.
 4. Follow the project instructions for labeling and deciding whether to skip tasks. 
@@ -111,11 +111,11 @@ If they are not done with their annotation, then they can simply check to make s
 
 ## Label with collaborators
 
-In both Label Studio and Label Studio Enterprise, you can label tasks with collaborators. Tasks are locked while someone performs annotations so that you don't accidentally overwrite the annotations of another annotator. After the other annotator finishes with the task, it can appear in your queue for labeling if the minimum annotations per task is set to more than one. By default, tasks only need to be annotated by one annotator. 
+In both MLTL Annotate and MLTL Annotate, you can label tasks with collaborators. Tasks are locked while someone performs annotations so that you don't accidentally overwrite the annotations of another annotator. After the other annotator finishes with the task, it can appear in your queue for labeling if the minimum annotations per task is set to more than one. By default, tasks only need to be annotated by one annotator. 
 
 <div class="enterprise-only">
 
-If you're using Label Studio Enterprise and want more than one annotator to annotate tasks, <a href="setup_project.html">update the project settings</a>. After you update the minimum annotations required per task, annotators can use the Label Stream workflow to label their tasks.  
+If you're using MLTL Annotate and want more than one annotator to annotate tasks, <a href="setup_project.html">update the project settings</a>. After you update the minimum annotations required per task, annotators can use the Label Stream workflow to label their tasks.  
 
 </div>
 

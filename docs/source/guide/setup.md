@@ -9,18 +9,18 @@ meta_description: Customize your data labeling and annotation interface with tem
 section: "Create & Manage Projects"
 ---
 
-All labeling activities in Label Studio occur in the context of a project. After you [create a project](setup_project.html#Create-a-project) and [import data](tasks.html), set up the labeling interface and labeling configuration for your project. This setup process is essential to your labeling project.
+All labeling activities in MLTL Annotate occur in the context of a project. After you [create a project](setup_project.html#Create-a-project) and [import data](tasks.html), set up the labeling interface and labeling configuration for your project. This setup process is essential to your labeling project.
 
 !!! error Enterprise
     Does your project need a fully customized interface? 
-    The UI engine on Label Studio Enterprise makes it possible to create programmable and embeddable interfaces for AI and agents. [Learn more](https://humansignal.com/programmable-ui/).
+    The UI engine on MLTL Annotate makes it possible to create programmable and embeddable interfaces for AI and agents. [Learn more](https://humansignal.com/programmable-ui/).
 
 ## Set up the labeling interface for your project
 
-Configure the labels and task type for annotators using the templates included with Label Studio or by defining your own combination of tags to set up the labeling interface for your project.
+Configure the labels and task type for annotators using the templates included with MLTL Annotate or by defining your own combination of tags to set up the labeling interface for your project.
 
 1. Select a template from the [available templates](/templates) or customize one.
-2. Label Studio automatically selects the field to label based on your data. If needed, modify the selected field.
+2. MLTL Annotate automatically selects the field to label based on your data. If needed, modify the selected field.
 3. Add label names on new lines.
 4. (Optional) Choose new colors for the labels by clicking the label name and choosing a new color using the color selector.
 5. Configure additional settings relevant to the labeling interface functionality. For example, when labeling text you might have the option to **Select text by words**.
@@ -29,7 +29,7 @@ Configure the labels and task type for annotators using the templates included w
 <div class="opensource-only">
 
 !!! error enterprise
-    Label Studio Enterprise has the option include plugins as part of your labeling interface. Plugins allow you to use Javascript to extend your interface and customize annotator workflows. For more information, see [Plugins](https://docs.humansignal.com/guide/plugins).
+    MLTL Annotate has the option include plugins as part of your labeling interface. Plugins allow you to use Javascript to extend your interface and customize annotator workflows. For more information, see [Plugins](https://docs.mltl.us/guide/plugins).
 
 </div>
 
@@ -50,7 +50,7 @@ You can make changes to the labeling interface and configuration in the project 
     * You cannot remove labels or change the type of labeling being performed unless you delete any existing annotations that are using those labels.
     * If you make changes to the labeling configuration, any tabs that you might have created in the Data Manager are removed.
 
-1. In Label Studio, open the project you want to modify.
+1. In MLTL Annotate, open the project you want to modify.
 2. Click **Settings**.
 3. Click **Labeling Interface**.
 4. Browse templates, update the available labels, or use the `Code` option to further customize the interface using [tags](/tags).
@@ -70,9 +70,9 @@ To accept a suggestion, you can click to select it, or press the Tab key while t
 
 ## Customize a template
 
-You can customize a [labeling config template](/templates) or use a custom configuration that you create from scratch using [tags](/tags). If you create a custom configuration that might be useful to other Label Studio users, consider [contributing the configuration as a template](https://github.com/HumanSignal/label-studio/tree/develop/label_studio/annotation_templates).
+You can customize a [labeling config template](/templates) or use a custom configuration that you create from scratch using [tags](/tags). If you create a custom configuration that might be useful to other MLTL Annotate users, consider [contributing the configuration as a template](https://github.com/yuvraj99776600/label-studio/tree/develop/label_studio/annotation_templates).
 
-The labeling configuration for a project is an XML file that contains three types of tags specific to Label Studio.
+The labeling configuration for a project is an XML file that contains three types of tags specific to MLTL Annotate.
 
 | Tag type | When to use                                                                            |
 | -------- | -------------------------------------------------------------------------------------- |
@@ -116,7 +116,7 @@ If you want to customize this example, such as to allow labelers to select both 
 
 ### Add a labeling config from the command line
 
-You can define the labeling configuration in a `config.xml` file and initialize a specific project in Label Studio with that file.
+You can define the labeling configuration in a `config.xml` file and initialize a specific project in MLTL Annotate with that file.
 
 ```bash
 label-studio my_new_project start --label-config config.xml

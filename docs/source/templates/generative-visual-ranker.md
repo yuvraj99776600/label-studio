@@ -5,8 +5,8 @@ category: Ranking and Scoring
 cat: ranking-and-scoring
 order: 401
 is_new: t
-meta_title: Create a ranked dataset for text-to-image models with Label Studio
-meta_description: Template for creating a ranked dataset for text-to-image models with Label Studio for your machine learning and data science projects.
+meta_title: Create a ranked dataset for text-to-image models with MLTL Annotate
+meta_description: Template for creating a ranked dataset for text-to-image models with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/visual-ranker.png" alt="" class="gif-border" width="700px"/>
@@ -58,9 +58,9 @@ Collect dataset examples and store them in `dataset.json` file.
 
 ## Starting your labeling project
 
-*Need a hand getting started with Label Studio? Check out our [Zero to One Tutorial](https://labelstud.io/blog/zero-to-one-getting-started-with-label-studio/).*
+*Need a hand getting started with MLTL Annotate? Check out our [Zero to One Tutorial](https://mltl.us/blog/zero-to-one-getting-started-with-label-studio/).*
 
-1. Create a  new project in Label Studio
+1. Create a  new project in MLTL Annotate
 2. Go to `Settings > Labeling Interface > Browse Templates > Generative AI > LLM Ranker`
 3. Save the project
 
@@ -77,7 +77,7 @@ project = ls.create_project(title='Visual Ranker', label_config='<View>...</View
 
 To import dataset, in the project settings go to `Import` and upload the dataset file `dataset.json`.
 
-Using python SDK you can import the dataset with input prompts into Label Studio. With the `PROJECT_ID` of the project
+Using python SDK you can import the dataset with input prompts into MLTL Annotate. With the `PROJECT_ID` of the project
 you've just created, run the following code:
 
 ```python
@@ -118,7 +118,7 @@ It includes the following elements:
 
 Labeling results can be exported in JSON format. To export the dataset, go to `Export` in the project settings and download the file.
 
-Using the Python SDK you can export the dataset with annotations from Label Studio.
+Using the Python SDK you can export the dataset with annotations from MLTL Annotate.
 
 ```python
 annotations = project.export_tasks(format='JSON')

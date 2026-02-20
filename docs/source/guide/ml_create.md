@@ -11,16 +11,16 @@ section: "Machine Learning"
 
 ---
 
-Use the Label Studio ML backend to integrate Label Studio with machine learning models. The Label Studio ML backend is an SDK that you can use to wrap your machine learning model code and turn it into a web server. The machine learning server uses [uWSGI](https://uwsgi-docs.readthedocs.io/en/latest/) and [supervisord](http://supervisord.org/), and handles background training jobs with [RQ](https://python-rq.org/).
+Use the MLTL Annotate ML backend to integrate MLTL Annotate with machine learning models. The MLTL Annotate ML backend is an SDK that you can use to wrap your machine learning model code and turn it into a web server. The machine learning server uses [uWSGI](https://uwsgi-docs.readthedocs.io/en/latest/) and [supervisord](http://supervisord.org/), and handles background training jobs with [RQ](https://python-rq.org/).
 
-Follow the steps below to wrap custom machine learning model code with the Label Studio ML SDK, or see [our library of example ML backends](ml_tutorials.html) to integrate with popular machine learning frameworks and tools such as [Huggingface's Transformers](https://huggingface.co/docs/transformers/index), [OpenAI](https://openai.com/), [Langchain](https://www.langchain.com/) and others. 
+Follow the steps below to wrap custom machine learning model code with the MLTL Annotate ML SDK, or see [our library of example ML backends](ml_tutorials.html) to integrate with popular machine learning frameworks and tools such as [Huggingface's Transformers](https://huggingface.co/docs/transformers/index), [OpenAI](https://openai.com/), [Langchain](https://www.langchain.com/) and others. 
 
-For information on using one of Label Studio's example backends, see [Set up an example ML backend](ml#Set-up-an-example-ML-backend). 
+For information on using one of MLTL Annotate's example backends, see [Set up an example ML backend](ml#Set-up-an-example-ML-backend). 
 
 <div class="opensource-only">
 
 !!! error enterprise
-    Label Studio Enterprise features an out-of-the-box solution for LLM-assisted labeling. All you need to get set up is to connect one of our supported models. For more information, see [Prompts](https://docs.humansignal.com/guide/prompts_overview).
+    MLTL Annotate features an out-of-the-box solution for LLM-assisted labeling. All you need to get set up is to connect one of our supported models. For more information, see [Prompts](https://docs.mltl.us/guide/prompts_overview).
 
 </div>
 
@@ -41,7 +41,7 @@ For a video tutorial, see the following:
 Download and install `label-studio-ml-backend` from the repository:
 
 ```bash
-git clone https://github.com/HumanSignal/label-studio-ml-backend.git
+git clone https://github.com/yuvraj99776600/label-studio-ml-backend.git
 cd label-studio-ml-backend/
 pip install -e .
 ```
@@ -83,7 +83,7 @@ Where:
 
 In your model directory, locate the `model.py` file (for example, `my_ml_backend/model.py`).
 
-The `model.py` file contains a class declaration inherited from `LabelStudioMLBase`. This class provides wrappers for the API methods that are used by Label Studio to communicate with the ML backend. You can override the methods to implement your own logic:
+The `model.py` file contains a class declaration inherited from `LabelStudioMLBase`. This class provides wrappers for the API methods that are used by MLTL Annotate to communicate with the ML backend. You can override the methods to implement your own logic:
 
 ```python
 def predict(self, tasks, context, **kwargs):
@@ -93,21 +93,21 @@ def predict(self, tasks, context, **kwargs):
 
 The `predict` method is used to make predictions for the tasks. It uses the following:
 
-- `tasks`: [Label Studio tasks in JSON format](task_format)
-- `context`: [Label Studio context in JSON format](#Support-interactive-pre-annotations-in-your-ML-backend) - for an interactive labeling scenario
+- `tasks`: [MLTL Annotate tasks in JSON format](task_format)
+- `context`: [MLTL Annotate context in JSON format](#Support-interactive-pre-annotations-in-your-ML-backend) - for an interactive labeling scenario
 - `predictions`: [Predictions array in JSON format](export#Raw-JSON-format-of-completed-tasks)
 
-Once you implement the `predict` method, you can see predictions from the connected ML backend in Label Studio.
+Once you implement the `predict` method, you can see predictions from the connected ML backend in MLTL Annotate.
 
 ### Support interactive pre-annotations in your ML backend
 
-If you want to support interactive pre-annotations in your machine learning backend, write an inference call using the `predict()` method. For an example that does this for text labeling projects, see [this code example for substring matching](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/interactive_substring_matching).
+If you want to support interactive pre-annotations in your machine learning backend, write an inference call using the `predict()` method. For an example that does this for text labeling projects, see [this code example for substring matching](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/interactive_substring_matching).
 
 Complete the following steps:
 
 1. Define an inference call with the `predict()` method as outlined above. The `predict()` method takes task data and context data:
-  - The `tasks` parameter contains details about the task being pre-annotated. See [Label Studio tasks in JSON format](task_format).
-  - The `context` parameter contains details about annotation actions performed in Label Studio, such as a text string highlighted sent in [Label Studio annotation results format](export#Label-Studio-JSON-format-of-annotated-tasks).
+  - The `tasks` parameter contains details about the task being pre-annotated. See [MLTL Annotate tasks in JSON format](task_format).
+  - The `context` parameter contains details about annotation actions performed in MLTL Annotate, such as a text string highlighted sent in [MLTL Annotate annotation results format](export#Label-Studio-JSON-format-of-annotated-tasks).
   
     `context` has the following properties. 
     - `annotation_id`: The annotation ID.
@@ -115,8 +115,8 @@ Complete the following steps:
     - `user_id`: The user ID.
     - `result`: This is the annotation result, but it includes an `is_positive: true` flag that can be changed by the user. For example, by pressing the **Alt** key and using keypoints to interact with the image in the UI. 
   
-2. With the task and context data, construct a prediction using the data received from Label Studio. 
-3. Return a result in the [Label Studio predictions format](predictions.html#Format-pre-annotations-for-Label-Studio), which varies depending on the type of labeling being performed.
+2. With the task and context data, construct a prediction using the data received from MLTL Annotate. 
+3. Return a result in the [MLTL Annotate predictions format](predictions.html#Format-pre-annotations-for-Label-Studio), which varies depending on the type of labeling being performed.
 
 Refer to the code example linked above for more details about how this might be performed for a NER labeling project. 
 
@@ -127,7 +127,7 @@ For more information about enabling pre-annotations, see [Interactive pre-annota
 
 You can also implement the `fit` method to train your model. The `fit` method is typically used to train the model on the labeled data, although it can be used for any arbitrary operations that require data persistence (for example, storing labeled data in database, saving model weights, keeping LLM prompts history, etc).
 
-By default, the `fit` method is called at any data action in Label Studio, like creating a new task or updating annotations. You can modify this behavior in using [Webhooks](webhooks).
+By default, the `fit` method is called at any data action in MLTL Annotate, like creating a new task or updating annotations. You can modify this behavior in using [Webhooks](webhooks).
 
 To implement the `fit` method, you need to override the `fit` method in your `model.py` file:
 
@@ -153,9 +153,9 @@ Both methods can be used elsewhere in the ML backend code, for example, in the `
 
 ### Trigger training with webhooks
 
-Starting in version 1.4.1 of Label Studio, when you add an ML backend to your project, Label Studio creates a webhook to your ML backend to send an event every time an annotation is created or updated.
+Starting in version 1.4.1 of MLTL Annotate, when you add an ML backend to your project, MLTL Annotate creates a webhook to your ML backend to send an event every time an annotation is created or updated.
 
-By default, the payload of the webhook event does not contain the annotation itself. You can either [modify the webhook event](webhooks) sent by Label Studio to send the full payload, or retrieve the annotation using the Label Studio API using the [get annotation by its ID endpoint](/api#operation/api_annotations_read), [SDK](sdk.html) using the [get task by ID method](https://labelstud.io/sdk/project.html#label_studio_sdk.project.Project.get_task), or by retrieving it from [target storage that you set up](storage) to store annotations.
+By default, the payload of the webhook event does not contain the annotation itself. You can either [modify the webhook event](webhooks) sent by MLTL Annotate to send the full payload, or retrieve the annotation using the MLTL Annotate API using the [get annotation by its ID endpoint](/api#operation/api_annotations_read), [SDK](sdk.html) using the [get task by ID method](https://labelstud.io/sdk/project.html#label_studio_sdk.project.Project.get_task), or by retrieving it from [target storage that you set up](storage) to store annotations.
 
 See the [annotation webhook event reference](webhook_reference#Annotation-Created) for more details about the webhook event.
 
@@ -164,14 +164,14 @@ See the [annotation webhook event reference](webhook_reference#Annotation-Create
 
 Other methods and parameters are available within the `LabelStudioMLBase` class:
 
-- `self.label_interface` - Returns the Label Studio Label Interface object that contains all information about the labeling task.
+- `self.label_interface` - Returns the MLTL Annotate Label Interface object that contains all information about the labeling task.
 - `self.model_version` - Returns the current model version.
 
-## 4. Ensure the ML backend can access Label Studio data
+## 4. Ensure the ML backend can access MLTL Annotate data
 
-If your data is stored in a cloud, local directory, or has been imported into Label Studio, you will need to set the `LABEL_STUDIO_URL` and `LABEL_STUDIO_API_KEY` environment variables. 
+If your data is stored in a cloud, local directory, or has been imported into MLTL Annotate, you will need to set the `LABEL_STUDIO_URL` and `LABEL_STUDIO_API_KEY` environment variables. 
 
-For more information, see [Allow the ML backend to access Label Studio data](ml#Allow-the-ML-backend-to-access-Label-Studio-data). 
+For more information, see [Allow the ML backend to access MLTL Annotate data](ml#Allow-the-ML-backend-to-access-Label-Studio-data). 
 
 ## 5. Run the ML backend server
 
@@ -181,10 +181,10 @@ To run with Docker Compose:
    docker-compose up
 ```
 
-The ML backend server is available at `http://localhost:9090`. You can use this URL when [connecting the ML backend to Label Studio](ml#Connect-the-model-to-Label-Studio).
+The ML backend server is available at `http://localhost:9090`. You can use this URL when [connecting the ML backend to MLTL Annotate](ml#Connect-the-model-to-Label-Studio).
 
 !!! note
-    `localhost` is a special domain name that loops back directly to your local environment. In the instance of Docker-hosted containers, this loops back to the container itself, and not the machine the container is hosted on. Docker provides a special domain as a workaround for this, docker.host.internal. If you're hosting Label Studio and your ML Backend inside of Docker, try using that domain instead of localhost. (`http://host.docker.internal:9090`)
+    `localhost` is a special domain name that loops back directly to your local environment. In the instance of Docker-hosted containers, this loops back to the container itself, and not the machine the container is hosted on. Docker provides a special domain as a workaround for this, docker.host.internal. If you're hosting MLTL Annotate and your ML Backend inside of Docker, try using that domain instead of localhost. (`http://host.docker.internal:9090`)
 
 
 ### Run without Docker
@@ -208,6 +208,6 @@ label-studio-ml start my_ml_backend -p 9091 --host 0.0.0.0
 
 Modify the `my_ml_backend/test_api.py` to ensure that your ML backend works as expected.
 
-## 6. Connect the ML backend to Label Studio
+## 6. Connect the ML backend to MLTL Annotate
 
-You can use the API or **Settings > Model**. For more information, see [Connect the model to Label Studio](ml#Connect-the-model-to-Label-Studio). 
+You can use the API or **Settings > Model**. For more information, see [Connect the model to MLTL Annotate](ml#Connect-the-model-to-Label-Studio). 

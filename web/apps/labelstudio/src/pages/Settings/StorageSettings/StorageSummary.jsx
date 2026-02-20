@@ -58,7 +58,7 @@ export const StorageSummary = ({ target, storage, className, storageTypes = [] }
             <div>
               <>
                 <a
-                  href="https://labelstud.io/guide/storage.html#Troubleshooting"
+                  href="https://docs.mltl.us/guide/storage.html#Troubleshooting"
                   target="_blank"
                   rel="noreferrer noopener"
                   aria-label="Learn more about cloud storage troubleshooting"

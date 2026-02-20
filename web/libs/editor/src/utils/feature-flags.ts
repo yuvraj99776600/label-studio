@@ -75,7 +75,7 @@ export const FF_LSDV_4583 = "fflag_feat_front_lsdv_4583_multi_image_segmentation
 export const FF_LEAD_TIME = "fflag_fix_front_lsdv_4600_lead_time_27072023_short";
 
 /**
- * Fixes memory leaks in label studio frontend relative to mobx-state-tree and react usage
+ * Fixes memory leaks in MLTL Annotate frontend relative to mobx-state-tree and react usage
  *
  * @link https://app.launchdarkly.com/default/production/features/fflag_fix_front_lsdv_4620_memory_leaks_100723_short
  */

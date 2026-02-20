@@ -1,27 +1,27 @@
-# Contribute to the Label Studio documentation
+# Contribute to the MLTL Annotate documentation
 
-Thank you for investing your time in contributing to our project! Any contribution you make will be reflected on the Label Studio documentation site at https://labelstud.io/guide/, or https://labelstud.io/templates/ if you [contribute a template](#Contribute-a-template).
+Thank you for investing your time in contributing to our project! Any contribution you make will be reflected on the MLTL Annotate documentation site at https://docs.mltl.us/guide/, or https://labelstud.io/templates/ if you [contribute a template](#Contribute-a-template).
 
 ## Before you start
 
-We value input from each member of the community, and we ask that you follow our [code of conduct](https://github.com/HumanSignal/label-studio/blob/develop/CODE_OF_CONDUCT.md). We are a small team, but we try to respond to issues and pull requests within 2 business days. 
+We value input from each member of the community, and we ask that you follow our [code of conduct](https://github.com/yuvraj99776600/label-studio/blob/develop/CODE_OF_CONDUCT.md). We are a small team, but we try to respond to issues and pull requests within 2 business days. 
 
-For changes that you contribute to any of the Label Studio repositories, please do the following:
-- Review the general [contributor guidelines](https://github.com/HumanSignal/label-studio/blob/develop/CONTRIBUTING.md).
+For changes that you contribute to any of the MLTL Annotate repositories, please do the following:
+- Review the general [contributor guidelines](https://github.com/yuvraj99776600/label-studio/blob/develop/CONTRIBUTING.md).
 - Create issues for any major changes and enhancements that you want to make. 
 - Keep pull requests specific to one issue. Shorter pull requests are preferred and are easier to review. 
 
 ## Contribute updates to the documentation 
 
-Some types of documentation that you might want to contribute to Label Studio:
+Some types of documentation that you might want to contribute to MLTL Annotate:
 - Small fix: Fix a typo or a broken link. 
-- Add a section: Add a new section to an existing topic. For example, improve the [troubleshooting guidance for ML backends](https://labelstud.io/guide/ml_troubleshooting.html) based on an issue that you encountered.
-- Refactor: Rewrite a topic to make it clearer. For example, improve the guidance for [creating custom webhook events](https://labelstud.io/guide/webhook_create.html).
+- Add a section: Add a new section to an existing topic. For example, improve the [troubleshooting guidance for ML backends](https://docs.mltl.us/guide/ml_troubleshooting.html) based on an issue that you encountered.
+- Refactor: Rewrite a topic to make it clearer. For example, improve the guidance for [creating custom webhook events](https://docs.mltl.us/guide/webhook_create.html).
 - Add new: Add a new topic, such as [a new template](#Contribute-a-template) or a new ML tutorial. If you want to add something else, please open an issue and discuss it with the team.
 
 ## Contribute a template
 
-All Label Studio templates are specific to a machine learning use case, such as Natural Language Processing, Computer Vision, Conversational AI, and others. 
+All MLTL Annotate templates are specific to a machine learning use case, such as Natural Language Processing, Computer Vision, Conversational AI, and others. 
 
 We welcome contributions of new templates and enhancements to existing templates. Before you make a contribution, you might want to file a feature request issue about your proposed template to discuss it before you put in the work of a pull request.
 
@@ -43,7 +43,7 @@ category: Ranking and Scoring
 cat: ranking-and-scoring
 order: 502
 meta_title: Document Retrieval Data Labeling Template
-meta_description: Template for annotating documents for document retrieval tasks with Label Studio for your machine learning and data science projects.
+meta_description: Template for annotating documents for document retrieval tasks with MLTL Annotate for your machine learning and data science projects.
 ---
 ```
 3. Add information about your template. Include 1-2 sentences introducing the machine learning use case for the template and how the template actually works. For example:

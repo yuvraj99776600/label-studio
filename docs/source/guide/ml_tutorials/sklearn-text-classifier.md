@@ -5,7 +5,7 @@ hide_menu: true
 tier: all
 order: 20
 meta_title: Text Classification with Scikit-Learn Tutorial
-meta_description: Label Studio tutorial for text classification using Scikit-Learn and Label Studio.
+meta_description: MLTL Annotate tutorial for text classification using Scikit-Learn and MLTL Annotate.
 section: "Machine learning"
 parent: "ml_tutorials"
 parent_enterprise: "ml_tutorials"
@@ -13,7 +13,7 @@ parent_page_extension: "html"
 ---
 
 
-This tutorial explains the basics of using a Machine Learning (ML) backend with Label Studio using a simple text classification model powered by the [scikit-learn](https://scikit-learn.org/stable/) library.
+This tutorial explains the basics of using a Machine Learning (ML) backend with MLTL Annotate using a simple text classification model powered by the [scikit-learn](https://scikit-learn.org/stable/) library.
 
 Follow this tutorial with a text classification project, where the labeling interface uses the `<Choices>` control tag with the `<Text>` object tag. The following is an example label config that you can use:
 
@@ -32,11 +32,11 @@ Follow this tutorial with a text classification project, where the labeling inte
 ### Create a model script
 
 
-If you create an ML backend using [Label Studio's ML SDK](/guide/ml_create.html), make sure your ML backend script does the following:
+If you create an ML backend using [MLTL Annotate's ML SDK](/guide/ml_create.html), make sure your ML backend script does the following:
 
 - Inherit the created model class from `label_studio_ml.LabelStudioMLBase`
 - Override the 2 methods:
-    - `predict()`, which takes [input tasks](/guide/tasks.html#Basic-Label-Studio-JSON-format) and outputs [predictions](/guide/predictions.html) in the Label Studio JSON format.
+    - `predict()`, which takes [input tasks](/guide/tasks.html#Basic-Label-Studio-JSON-format) and outputs [predictions](/guide/predictions.html) in the MLTL Annotate JSON format.
     - `fit()`, which receives [annotations](/guide/export.html#Label-Studio-JSON-format-of-annotated-tasks) iterable and returns a dictionary with created links and resources. This dictionary is used later to load models with the `self.train_output` field.
 
 
@@ -168,7 +168,7 @@ class SimpleTextClassifier(LabelStudioMLBase):
 
 ### Create ML backend configs & scripts
 
-Label Studio can automatically create all necessary configs and scripts needed to run ML backend from your newly created model.
+MLTL Annotate can automatically create all necessary configs and scripts needed to run ML backend from your newly created model.
 
 Call your ML backend `my_backend` and from the command line, initialize the ML backend directory `./my_backend`:
 
@@ -209,9 +209,9 @@ docker-compose up
 
 You can explore runtime logs in `my_backend/logs/uwsgi.log` and RQ training logs in `my_backend/logs/rq.log`
 
-### Using ML backend with Label Studio
+### Using ML backend with MLTL Annotate
 
-Initialize and start a new Label Studio project connecting to the running ML backend:
+Initialize and start a new MLTL Annotate project connecting to the running ML backend:
 
 ```bash
 label-studio start my_project --init --ml-backends http://localhost:9090
@@ -219,7 +219,7 @@ label-studio start my_project --init --ml-backends http://localhost:9090
 
 #### Getting predictions
 
-You should see model predictions in a labeling interface. See [Set up machine learning with Label Studio](/guide/ml.html).
+You should see model predictions in a labeling interface. See [Set up machine learning with MLTL Annotate](/guide/ml.html).
 
 #### Model training
 

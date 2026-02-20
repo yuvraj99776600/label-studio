@@ -1,12 +1,12 @@
 ---
-title: TimelineLabels ML Backend for Label Studio
+title: TimelineLabels ML Backend for MLTL Annotate
 type: guide
 tier: all
 order: 51
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: TimelineLabels ML Backend for Label Studio
-meta_description: Tutorial on how to use an example ML backend for Label Studio with TimelineLabels
+meta_title: TimelineLabels ML Backend for MLTL Annotate
+meta_description: Tutorial on how to use an example ML backend for MLTL Annotate with TimelineLabels
 categories:
     - Computer Vision
     - Video Classification
@@ -15,10 +15,10 @@ categories:
 image: "/guide/ml_tutorials/yolo-video-classification.png"
 ---
 
-# TimelineLabels Model for Temporal Video Multi-Label Classification in Label Studio
+# TimelineLabels Model for Temporal Video Multi-Label Classification in MLTL Annotate
 
 This documentation provides a clear and comprehensive guide on how to use the TimelineLabels model 
-for temporal multi-label classification of video data in Label Studio. 
+for temporal multi-label classification of video data in MLTL Annotate. 
 
 By integrating an LSTM neural network on top of YOLO's classification capabilities — 
 specifically utilizing features from YOLO's last layer — the model handles temporal labeling tasks. 
@@ -30,13 +30,13 @@ In trainable mode, you'll begin by annotating a few samples by hand. Each time y
 <iframe width="560" height="315" src="https://www.youtube.com/embed/UyaecID1iG8?si=RHPYDfYgIWea1Odq" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 <br/>
 
-**Tip:** If you're looking for a more advanced approach to temporal classification, check out the [VideoMAE model](https://huggingface.co/docs/transformers/en/model_doc/videomae). While we don't provide an example backend for VideoMAE, you can [integrate it as your own ML backend](https://labelstud.io/guide/ml_create). 
+**Tip:** If you're looking for a more advanced approach to temporal classification, check out the [VideoMAE model](https://huggingface.co/docs/transformers/en/model_doc/videomae). While we don't provide an example backend for VideoMAE, you can [integrate it as your own ML backend](https://docs.mltl.us/guide/ml_create). 
 
 ## Installation and quickstart
 
-Before you begin, you need to install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend/blob/master/README.md#quickstart). 
+Before you begin, you need to install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend/blob/master/README.md#quickstart). 
 
-This tutorial uses the [YOLO example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/yolo). See the [main README](https://github.com/HumanSignal/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README.md#quick-start) for detailed instructions on setting up the YOLO-models family in Label Studio.
+This tutorial uses the [YOLO example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/yolo). See the [main README](https://github.com/yuvraj99776600/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README.md#quick-start) for detailed instructions on setting up the YOLO-models family in MLTL Annotate.
 
 
 ## Labeling configuration
@@ -75,7 +75,7 @@ This tutorial uses the [YOLO example](https://github.com/HumanSignal/label-studi
 | `model_classifier_f1_threshold`       | float  | 0.95    | F1 score threshold for early stopping during training. Set to prevent overfitting.                                                                |
 | `model_classifier_accuracy_threshold` | float  | 1.00    | Accuracy threshold for early stopping during training. Set to prevent overfitting.                                                                |
 | `model_score_threshold`               | float  | 0.5     | Minimum confidence threshold for predictions. Labels with confidence below this threshold will be disregarded.                                    |
-| `model_path`                          | string | None    | Path to the custom YOLO model. See more in the section [Your own custom models](https://github.com/HumanSignal/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README.md#your-own-custom-yolo-models)                                                                      |
+| `model_path`                          | string | None    | Path to the custom YOLO model. See more in the section [Your own custom models](https://github.com/yuvraj99776600/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README.md#your-own-custom-yolo-models)                                                                      |
 
 **Note:** You can customize the neural network parameters directly in the labeling configuration by adjusting the attributes in the `<TimelineLabels>` tag.
 
@@ -151,7 +151,7 @@ and it generates predictions for each frame in the video.
 
 #### Custom YOLO models for feature extraction
 
-You can load your own YOLO models using the steps described in the [main README](https://github.com/HumanSignal/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README.md#your-own-custom-yolo-models).
+You can load your own YOLO models using the steps described in the [main README](https://github.com/yuvraj99776600/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README.md#your-own-custom-yolo-models).
 However, it should have similar architecture as `yolov8-cls` models. See `utils/neural_nets.py::cached_feature_extraction()` for more details.
 
 #### Cache folder 
@@ -213,14 +213,14 @@ The cache is used for incremental training on the fly and prediction speedup.
      1. Navigate to the `yolo` folder in this repository in your terminal.
      2. Update your `docker-compose.yml` file.
      3. Execute `docker compose up` to run the backend. 
-     4. Connect this backend to your Label Studio project in the project settings. Make sure that **Interactive Preannotations** is OFF (this is the default). 
+     4. Connect this backend to your MLTL Annotate project in the project settings. Make sure that **Interactive Preannotations** is OFF (this is the default). 
 
 ### Annotation and training
 
 1. **Annotate videos**:
 
    - Upload football videos to the project.
-   - Use the [`<TimelineLabels>` control tag](https://labelstud.io/tags/timelinelabels) to label time intervals where the ball is visible in the frame.
+   - Use the [`<TimelineLabels>` control tag](https://docs.mltl.us/tags/timelinelabels) to label time intervals where the ball is visible in the frame.
 
 2. **Model training**:
 
@@ -288,7 +288,7 @@ See `tests/test_timeline_labels.py::test_convert_probs_to_timelinelabels()` for 
 
 ## For developers
 
-This guide provides an in-depth look at the architecture and code flow of the TimelineLabels ML backend for Label Studio. It includes class inheritance diagrams and method call flowcharts to help developers understand how the components interact. Additionally, it offers explanations of key methods and classes, highlighting starting points and their roles in the overall workflow.
+This guide provides an in-depth look at the architecture and code flow of the TimelineLabels ML backend for MLTL Annotate. It includes class inheritance diagrams and method call flowcharts to help developers understand how the components interact. Additionally, it offers explanations of key methods and classes, highlighting starting points and their roles in the overall workflow.
 
 ### Class inheritance diagram
 
@@ -307,7 +307,7 @@ classDiagram
     BaseNN <|-- MultiLabelLSTM
 ```
 
-- **`ControlModel`**: Base class for control tags in Label Studio.
+- **`ControlModel`**: Base class for control tags in MLTL Annotate.
 - **`TimelineLabelsModel`**: Inherits from `ControlModel` and implements specific functionality for the `<TimelineLabels>` tag.
 - **`torch.nn.Module`**: Base class for all neural network modules in PyTorch.
 - **`BaseNN`**: Custom base class for neural networks, inherits from `torch.nn.Module`.
@@ -510,14 +510,14 @@ The `MultiLabelLSTM` class inherits from `BaseNN` and implements an LSTM neural 
 
 **Data Conversion Functions**:
 
-- **`convert_probs_to_timelinelabels(probs, label_map, threshold)`**: Converts probability outputs to timeline labels suitable for Label Studio.
+- **`convert_probs_to_timelinelabels(probs, label_map, threshold)`**: Converts probability outputs to timeline labels suitable for MLTL Annotate.
 
 - **`convert_timelinelabels_to_probs(regions, label_map, max_frame)`**: Converts annotated regions back into a sequence of probabilities for training.
 
 ## Conclusion
 
-The TimelineLabels ML backend integrates seamlessly with Label Studio to provide temporal multi-label classification capabilities for video data. The architecture leverages pre-trained YOLO models for feature extraction and enhances them with an LSTM neural network for capturing temporal dependencies.
+The TimelineLabels ML backend integrates seamlessly with MLTL Annotate to provide temporal multi-label classification capabilities for video data. The architecture leverages pre-trained YOLO models for feature extraction and enhances them with an LSTM neural network for capturing temporal dependencies.
 
 Understanding the class hierarchies and method flows is crucial for developers looking to extend or modify the backend. By following the starting points and execution flows outlined in this guide, developers can navigate the codebase more effectively and implement custom features or optimizations.
 
-**Note**: For further development or contributions, please refer to the [`README_DEVELOP.md`](https://github.com/HumanSignal/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README_DEVELOP.md) file, which provides additional guidelines and architectural details.
+**Note**: For further development or contributions, please refer to the [`README_DEVELOP.md`](https://github.com/yuvraj99776600/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README_DEVELOP.md) file, which provides additional guidelines and architectural details.

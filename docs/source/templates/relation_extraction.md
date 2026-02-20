@@ -5,7 +5,7 @@ category: Natural Language Processing
 cat: natural-language-processing
 order: 215
 meta_title: Relation Extraction Data Labeling Template
-meta_description: Template for extracting relations in natural language processing text tasks with Label Studio for your machine learning and data science projects.
+meta_description: Template for extracting relations in natural language processing text tasks with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/relation-extraction.png" alt="" class="gif-border" width="552px" height="408px" />

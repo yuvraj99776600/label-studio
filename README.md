@@ -1,6 +1,6 @@
 # MLTL Annotate
 
-A white-labeled data annotation platform built on [Label Studio](https://github.com/HumanSignal/label-studio) (Apache 2.0).
+A white-labeled data annotation platform built on [MLTL Annotate](https://github.com/yuvraj99776600/label-studio) (Apache 2.0).
 
 ## Overview
 
@@ -49,4 +49,4 @@ volumes:
 
 ## License
 
-This project is based on Label Studio, licensed under the [Apache License 2.0](LICENSE).
+This project is based on MLTL Annotate, licensed under the [Apache License 2.0](LICENSE).

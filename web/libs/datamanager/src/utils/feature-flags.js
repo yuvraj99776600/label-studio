@@ -22,7 +22,7 @@ export const FF_DEV_3873 = "fflag_feat_front_dev_3873_labeling_ui_improvements_s
 export const FF_LOPS_E_3 = "fflag_feat_all_lops_e_3_datasets_short";
 
 /**
- * Fixes memory leaks in label studio frontend relative to mobx-state-tree and react usage
+ * Fixes memory leaks in MLTL Annotate frontend relative to mobx-state-tree and react usage
  *
  * @link https://app.launchdarkly.com/default/production/features/fflag_fix_front_lsdv_4620_memory_leaks_100723_short
  */

@@ -1,11 +1,11 @@
 ---
-title: Integrate WatsonX with Label Studio
+title: Integrate WatsonX with MLTL Annotate
 type: guide
 tier: all
 order: 15
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: Integrate WatsonX with Label Studio
+meta_title: Integrate WatsonX with MLTL Annotate
 categories:
     - Generative AI
     - Large Language Model
@@ -13,27 +13,27 @@ categories:
 image: "/guide/ml_tutorials/watsonx.png"
 ---
 
-# Integrate WatsonX to Label Studio
+# Integrate WatsonX to MLTL Annotate
 
 WatsonX offers a suite of machine learning tools, including access to many LLMs, prompt
-refinement interfaces, and datastores via WatsonX.data. When you integrate WatsonX with Label Studio, you get 
+refinement interfaces, and datastores via WatsonX.data. When you integrate WatsonX with MLTL Annotate, you get 
 access to these models and can automatically keep your annotated data up to date in your WatsonX.data tables. 
 
 To run the integration, you'll need to pull this repo and host it locally or in the cloud. Then, you can link the model 
-to your Label Studio project under the `models` section in the settings. To use the WatsonX.data integration, 
+to your MLTL Annotate project under the `models` section in the settings. To use the WatsonX.data integration, 
 set up a webhook in settings under `webhooks` by using the following structure for the link: 
 `<link to your hosted container>/data/upload` and set the triggers to `ANNOTATION_CREATED` and `ANNOTATION_UPDATED`. For more
-on webhooks, see [our documentation](https://labelstud.io/guide/webhooks)
+on webhooks, see [our documentation](https://docs.mltl.us/guide/webhooks)
 
 See the configuration notes at the bottom for details on how to set up your environment variables to get the system to work.
 
-For a video demonstration, see [Integrating Label Studio with IBM WatsonX](https://www.youtube.com/watch?v=9iP2yO4Geqc).
+For a video demonstration, see [Integrating MLTL Annotate with IBM WatsonX](https://www.youtube.com/watch?v=9iP2yO4Geqc).
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`watsonx_llm` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/watsonx_llm). 
+This tutorial uses the [`watsonx_llm` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/watsonx_llm). 
 
 ## Setting up your label_config
 For this project, we recommend you start with the labeling config as defined below, but you can always edit it or expand it to
@@ -111,7 +111,7 @@ $ curl http://localhost:9090/
 {"status":"UP"}
 ```
 
-3. Create a project in Label Studio. Then from the **Model** page in the project settings, [connect the model](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
+3. Create a project in MLTL Annotate. Then from the **Model** page in the project settings, [connect the model](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
 
 
 ## Building from source (advanced)
@@ -149,17 +149,17 @@ The following common parameters are available:
 - `WORKERS` - Specify the number of workers for the model server.
 - `THREADS` - Specify the number of threads for the model server.
 
-The following parameters allow you to link the WatsonX models to Label Studio:
+The following parameters allow you to link the WatsonX models to MLTL Annotate:
 
-- `LABEL_STUDIO_URL` - Specify the URL of your Label Studio instance. Note that this might need to be `http://host.docker.internal:8080` if you are running Label Studio on another Docker container.
-- `LABEL_STUDIO_API_KEY`- Specify the API key for authenticating your Label Studio instance. You can find this by logging into Label Studio and and [going to the **Account & Settings** page](https://labelstud.io/guide/user_account#Access-token).
+- `LABEL_STUDIO_URL` - Specify the URL of your MLTL Annotate instance. Note that this might need to be `http://host.docker.internal:8080` if you are running MLTL Annotate on another Docker container.
+- `LABEL_STUDIO_API_KEY`- Specify the API key for authenticating your MLTL Annotate instance. You can find this by logging into MLTL Annotate and and [going to the **Account & Settings** page](https://docs.mltl.us/guide/user_account#Access-token).
 - `WATSONX_API_KEY`- Specify the API key for authenticating into WatsonX. You can generate this by following the instructions at [here](https://www.ibm.com/docs/en/watsonx/watsonxdata/1.0.x?topic=started-generating-api-keys)
 - `WATSONX_PROJECT_ID`- Specify the ID of your WatsonX project from which you will run the model. Must have WML capabilities. You can find this in the `General` section of your project, which is accessible by clicking on the project from the homepage of WatsonX.
 - `WATSONX_MODELTYPE`- Specify the name of the WatsonX model you'd like to use. A full list can be found in [IBM's documentation](https://ibm.github.io/watsonx-ai-python-sdk/fm_model.html#TextModels:~:text=CODELLAMA_34B_INSTRUCT_HF)
 - `DEFAULT_PROMPT` - If you want the model to automatically predict on new data samples, you'll need to provide a default prompt or the location to a default prompt file. 
 - `USE_INTERNAL_PROMPT` - If using a default prompt, set to 0. Otherwise, set to 1.  
 
-The following parameters allow you to use the webhook connection to transfer data from Label Studio to WatsonX.data:
+The following parameters allow you to use the webhook connection to transfer data from MLTL Annotate to WatsonX.data:
 
 - `WATSONX_ENG_USERNAME`- MUST be `ibmlhapikey` for the integration to work.
 

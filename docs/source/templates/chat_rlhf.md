@@ -14,7 +14,7 @@ Bring production chats into this template to learn why your agent succeeds or fa
 Import conversations, review what users liked to codify wins, examine disliked cases to surface gaps, and randomly sample chats to see real behavior. Tag issues like relevance, correctness, safety, and tone—then turn patterns into concrete fixes and fine‑tuning data.
 
 !!! error Enterprise
-    This template requires Label Studio Enterprise or Starter Cloud. 
+    This template requires MLTL Annotate or Starter Cloud. 
 
     For Community users, see our [Conversation AI templates](gallery_conversational_ai) or the [Multi-Turn Chat Evaluation template](multi_turn_chat). 
 
@@ -162,7 +162,7 @@ For example, this `View` tag uses a combination of inline styles and `className`
 The CSS rules for the `.chat` class are defined with the `<Style>` block.
 
 !!!info Tip
-    `.htx-chat` is a special Label Studio class that allows you to control the height of the chat portion of the interface. 
+    `.htx-chat` is a special MLTL Annotate class that allows you to control the height of the chat portion of the interface. 
 
 For more information, see the [Style tag](/tags/style).
 

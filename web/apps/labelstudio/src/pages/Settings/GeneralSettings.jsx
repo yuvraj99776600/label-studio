@@ -45,7 +45,7 @@ export const GeneralSettings = () => {
                     <a
                       target="_blank"
                       href={createURL(
-                        "https://docs.humansignal.com/guide/manage_projects#Create-workspaces-to-organize-projects",
+                        "https://docs.mltl.us/guide/manage_projects#Create-workspaces-to-organize-projects",
                         {
                           experiment: "project_settings_tip",
                           treatment: "simplify_project_management",
@@ -91,7 +91,7 @@ export const GeneralSettings = () => {
                         Tasks are chosen according to model uncertainty score (active learning mode).{" "}
                         <a
                           target="_blank"
-                          href={createURL("https://docs.humansignal.com/guide/active_learning", {
+                          href={createURL("https://docs.mltl.us/guide/active_learning", {
                             experiment: "project_settings_workspace",
                             treatment: "workspaces",
                           })}

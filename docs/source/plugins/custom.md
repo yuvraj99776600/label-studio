@@ -11,7 +11,7 @@ tier: enterprise
 
 You can modify the plugin examples that we provide or build your own custom plugins. 
 
-Plugins are authored in JavaScript and are project-specific. They are limited to specific tasks and the annotation workflow and cannot, for example, be used to create new pages or otherwise extend the core functionality of Label Studio. 
+Plugins are authored in JavaScript and are project-specific. They are limited to specific tasks and the annotation workflow and cannot, for example, be used to create new pages or otherwise extend the core functionality of MLTL Annotate. 
 
 !!! note
     Plugins are not available unless enabled. There are [important security considerations](/guide/plugins#Security-notes-constraints-and-limitations) to understand before requesting access.  
@@ -47,9 +47,9 @@ Note the following:
 * You can check the Network tab (plugin information is returned with the `/project/:id` API call).
 * If necessary, you can add [`debugger`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger) to your script to have a convenient breakpoint to debug the plugin using your web browser’s developer tools. 
 
-## Label Studio Interface (LSI)
+## MLTL Annotate Interface (LSI)
 
-The Label Studio Interface (LSI) is a helper object that is designed to be used with plugins. 
+The MLTL Annotate Interface (LSI) is a helper object that is designed to be used with plugins. 
 
 LSI simplifies access to some data and can perform special actions that only make sense within the framework of plugins.
 
@@ -73,7 +73,7 @@ console.log("Plotly is ready");
 
 ##### `LSI.on(eventName, handler)`
 
-Subscription to listen to events related to the Label Studio Frontend. Handlers attached/subscribed using this method will be unsubscribed when switching to another annotation. Any handlers inside this method should be secured manually.
+Subscription to listen to events related to the MLTL Annotate Frontend. Handlers attached/subscribed using this method will be unsubscribed when switching to another annotation. Any handlers inside this method should be secured manually.
 
 For a list of all available events, see our [Frontend reference](/guide/frontend_reference#Available-events).
 
@@ -112,7 +112,7 @@ The following implementation details may be useful when creating your own plugin
 !!! note
     While these details are relatively stable, we make no guarantees that they will not change in the future. 
 
-For more information on how annotations are stored and formatted, see [How Label Studio saves results in annotations](/guide/task_format#How-Label-Studio-saves-results-in-annotations). 
+For more information on how annotations are stored and formatted, see [How MLTL Annotate saves results in annotations](/guide/task_format#How-Label-Studio-saves-results-in-annotations). 
 
 ### Regions
 

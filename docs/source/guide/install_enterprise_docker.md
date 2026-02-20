@@ -1,50 +1,50 @@
 ---
-title: Install Label Studio Enterprise On-premises using Docker Compose
+title: Install MLTL Annotate On-premises using Docker Compose
 short: Install using Docker
 type: guide
 tier: enterprise
 order: 0
 order_enterprise: 75
-meta_title: Install Label Studio Enterprise on-premises using Docker
-meta_description: Install, back up, and upgrade Label Studio Enterprise with Docker to create machine learning and data science projects on-premises.
+meta_title: Install MLTL Annotate on-premises using Docker
+meta_description: Install, back up, and upgrade MLTL Annotate with Docker to create machine learning and data science projects on-premises.
 section: "Install & Setup"
 parent_enterprise: "install_enterprise"
 ---
 
-Install Label Studio Enterprise on-premises if you need to meet strong privacy regulations, legal requirements, or want to manage a custom installation on your own infrastructure using Docker or public cloud. If you want to use a different installation method:
-- You can use Kubernetes and Helm to deploy Label Studio Enterprise in the cloud. See [Deploy Label Studio Enterprise on Kubernetes](install_enterprise_k8s.html).
-- You can run Label Studio Enterprise in an airgapped environment, and no data leaves your infrastructure. See [Install Label Studio Enterprise without public internet access](install_k8s_airgapped).
+Install MLTL Annotate on-premises if you need to meet strong privacy regulations, legal requirements, or want to manage a custom installation on your own infrastructure using Docker or public cloud. If you want to use a different installation method:
+- You can use Kubernetes and Helm to deploy MLTL Annotate in the cloud. See [Deploy MLTL Annotate on Kubernetes](install_enterprise_k8s.html).
+- You can run MLTL Annotate in an airgapped environment, and no data leaves your infrastructure. See [Install MLTL Annotate without public internet access](install_k8s_airgapped).
 
-See [Secure Label Studio](security.html) for more details about security and hardening for Label Studio Enterprise.
-
-!!! note
-    Docker deployments are more suitable for proof-of-concept builds and small projects. For production environments and larger deployments, we strongly recommend using Kubernetes. Kubernetes deployments provide better scalability, reliability, and access to advanced features such as Prompts. See [Deploy Label Studio Enterprise on Kubernetes](install_enterprise_k8s.html) for more information.
-
-To install Label Studio Community Edition, see [Install Label Studio](https://labelstud.io/guide/install). This page is specific to the Enterprise version of Label Studio.
+See [Secure MLTL Annotate](security.html) for more details about security and hardening for MLTL Annotate.
 
 !!! note
-    On-prem deployments of Label Studio Enterprise are not supported for Academic licenses.  
+    Docker deployments are more suitable for proof-of-concept builds and small projects. For production environments and larger deployments, we strongly recommend using Kubernetes. Kubernetes deployments provide better scalability, reliability, and access to advanced features such as Prompts. See [Deploy MLTL Annotate on Kubernetes](install_enterprise_k8s.html) for more information.
+
+To install MLTL Annotate Community Edition, see [Install MLTL Annotate](https://docs.mltl.us/guide/install). This page is specific to the Enterprise version of MLTL Annotate.
+
+!!! note
+    On-prem deployments of MLTL Annotate are not supported for Academic licenses.  
 
 {% insertmd includes/deploy.md %}
 
-## Install Label Studio Enterprise using Docker
+## Install MLTL Annotate using Docker
 
 1. Log in to a Docker registry.
 2. Add the license file.
 3. Start the server using Docker Compose.
 
 ### Prerequisites
-Make sure you have an authorization token to retrieve Docker images and a current license file. If you are a Label Studio Enterprise customer and do not have access, [email support](mailto:support@humansignal.com) or open a ticket through our [support portal](https://support.humansignal.com/) to receive an authorization token and a copy of your license file.
+Make sure you have an authorization token to retrieve Docker images and a current license file. If you are a MLTL Annotate customer and do not have access, [email support](mailto:support@mltl.us) or open a ticket through our [support portal](https://mltl.us/support/) to receive an authorization token and a copy of your license file.
 
 Make sure [Docker Compose](https://docs.docker.com/compose/install/) is installed on your system.
 
-After you install Label Studio Enterprise, the app is automatically connected to the following running services:
+After you install MLTL Annotate, the app is automatically connected to the following running services:
 - PostgresSQL (versions >=13)
 - Redis (version >=6.0)
 
 ### Log in to a Docker registry
 
-You must be authorized to access Label Studio Enterprise images. 
+You must be authorized to access MLTL Annotate images. 
 
 Set up the Docker login to retrieve the latest Docker image:
 ```bash
@@ -56,7 +56,7 @@ When prompted to enter the password, enter the token. If login succeeds, a `~/.d
     If you have default registries specified when logging into Docker, you might need to explicitly specify the registry: `docker login --username heartexlabs docker.io`.
 
 ### Add the license file 
-After you retrieve the latest Label Studio Enterprise image, add the license file. You can't start the Docker image without a license file. 
+After you retrieve the latest MLTL Annotate image, add the license file. You can't start the Docker image without a license file. 
 
 1. Create a working directory called `label-studio-enterprise` and place the license file in it.
 ```bash
@@ -67,7 +67,7 @@ cd label-studio-enterprise
 
 ### Start using Docker Compose
 
-To run Label Studio Enterprise in production, start it using [Docker compose](https://docs.docker.com/compose/). This configuration lets you connect Label Studio to external databases and services.
+To run MLTL Annotate in production, start it using [Docker compose](https://docs.docker.com/compose/). This configuration lets you connect MLTL Annotate to external databases and services.
 
 1. Create a file, `label-studio-enterprise/env.list` with the required environment variables:
 ```
@@ -229,7 +229,7 @@ docker-compose up
 
 ### Get the Docker image version
 
-To check the version of the Label Studio Enterprise Docker image, use the [`docker ps`](https://docs.docker.com/engine/reference/commandline/ps/) command on the host. 
+To check the version of the MLTL Annotate Docker image, use the [`docker ps`](https://docs.docker.com/engine/reference/commandline/ps/) command on the host. 
 
 From the command line, run the following as root or using `sudo` and review the output:
 ```bash

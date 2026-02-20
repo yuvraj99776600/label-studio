@@ -7,7 +7,7 @@ hide_menu: false
 order: 0
 order_enterprise: 361
 meta_title: Model providers
-meta_description: How to set up model providers for AI features in Label Studio. 
+meta_description: How to set up model providers for AI features in MLTL Annotate. 
 section: "Manage Your Organization"
 parent_enterprise: "admin_settings"
 date: 2025-02-18 12:03:59
@@ -19,7 +19,7 @@ For example, if you want to interact with an LLM when using the [`<Chat>` tag](/
 
 
 !!! note
-    These models are not used with the Label Studio [AI Assistant](ask_ai). 
+    These models are not used with the MLTL Annotate [AI Assistant](ask_ai). 
 
 ## About adding model providers
 
@@ -31,7 +31,7 @@ However, only users with access to the organization settings (Owner and Admins) 
 
 ### Whitelisting network access
 
-If you are restricting network access to your resource, you may need to whitelist HumanSignal IP addresses ([IP ranges on SaaS](saas#Outbound-Connections-IP-Addresses)) when configuring network security.
+If you are restricting network access to your resource, you may need to whitelist MLTL IP addresses ([IP ranges on SaaS](saas#Outbound-Connections-IP-Addresses)) when configuring network security.
 
 ### Approaches
 

@@ -5,7 +5,7 @@ category: Structured Data Parsing
 cat: structured-data-parsing
 order: 510
 meta_title: PDF Classification Data Labeling Template
-meta_description: Template for classifying PDF data with Label Studio for your machine learning and data science projects.
+meta_description: Template for classifying PDF data with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/pdf-classification.png" alt="" class="gif-border" width="552px" height="408px" />
@@ -63,11 +63,11 @@ Use the [Pdf](/tags/pdf.html) tag to render an inline version of the PDF data:
 
 ### Input data
 
-Label Studio does not support labeling PDF-formatted files directly. You should use the `embed` tag inside of your data for pdf loading:
+MLTL Annotate does not support labeling PDF-formatted files directly. You should use the `embed` tag inside of your data for pdf loading:
 
 ```
 {
-    "pdf": "<embed src='https://app.heartex.ai/static/samples/sample.pdf' width='100%' height='600px'/>"
+    "pdf": "<embed src='https://app.mltl.ai/static/samples/sample.pdf' width='100%' height='600px'/>"
 }
 ```
 

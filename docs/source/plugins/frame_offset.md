@@ -37,7 +37,7 @@ The plugin ensures the videos are synced, with one player showing one frame forw
  */
 
 async function initMultiFrameVideoView() {
-	// Wait for the Label Studio Interface to be ready
+	// Wait for the MLTL Annotate Interface to be ready
 	await LSI;
 
 	// Get references to the video objects by their names

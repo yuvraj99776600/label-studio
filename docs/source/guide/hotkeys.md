@@ -5,7 +5,7 @@ tier: all
 type: guide
 order: 138
 order_enterprise: 138
-meta_title: Hotkeys in Label Studio
+meta_title: Hotkeys in MLTL Annotate
 section: "Create & Manage Projects"
 parent: "labeling"
 parent_enterprise: "labeling"
@@ -31,13 +31,13 @@ You can easily customize global hotkeys on from the [**Account & Settings > Hotk
 
 ## Customize global hotkeys using environment variables
 
-If you want to change the hotkeys used for specific actions, set the `EDITOR_KEYMAP` environment variable with valid JSON in your `.env` file or when starting Label Studio. For example, to change the keyboard shortcut used to submit an annotation to `shift` + `s`, set the environment variable as follows:
+If you want to change the hotkeys used for specific actions, set the `EDITOR_KEYMAP` environment variable with valid JSON in your `.env` file or when starting MLTL Annotate. For example, to change the keyboard shortcut used to submit an annotation to `shift` + `s`, set the environment variable as follows:
 ```
 EDITOR_KEYMAP='{"annotation:submit":{"key": "shift+s","description": "My Custom Submit Hotkey!"}}'
 ```
-This overwrites the existing hotkey mapping with your custom mapping. See [more about how to set environment variables](https://labelstud.io/guide/start#Set-environment-variables). 
+This overwrites the existing hotkey mapping with your custom mapping. See [more about how to set environment variables](https://docs.mltl.us/guide/start#Set-environment-variables). 
 
-Refer to the full list of customizable hotkeys in the [`keymap.json` file](https://github.com/HumanSignal/label-studio/blob/develop/web/libs/editor/src/core/settings/keymap.json) to update a different hotkey combination. 
+Refer to the full list of customizable hotkeys in the [`keymap.json` file](https://github.com/yuvraj99776600/label-studio/blob/develop/web/libs/editor/src/core/settings/keymap.json) to update a different hotkey combination. 
 
 You cannot use this environment variable to remove an existing or add a new keyboard shortcut. 
 

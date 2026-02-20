@@ -28,7 +28,7 @@ def signup(client):
     csrftoken = response.cookies['csrftoken']
     r = client.post(
         '/user/signup',
-        {'email': f'{username}@heartex.com', 'password': 'password'},
+        {'email': f'{username}@mltl.com', 'password': 'password'},
         headers={'X-CSRFToken': csrftoken},
         catch_response=True,
     )

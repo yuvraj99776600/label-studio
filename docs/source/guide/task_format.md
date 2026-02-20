@@ -1,12 +1,12 @@
 ---
-title: Label Studio Task Format
+title: MLTL Annotate Task Format
 short: Format data for import 
 type: guide
 tier: all
 order: 160
 order_enterprise: 160
-meta_title: Label Studio Task Format
-meta_description: Label Studio documentation for exporting data labeling annotations to use in machine learning models and data science projects.
+meta_title: MLTL Annotate Task Format
+meta_description: MLTL Annotate documentation for exporting data labeling annotations to use in machine learning models and data science projects.
 section: "Import & Export"
 parent: "tasks"
 parent_enterprise: "tasks"

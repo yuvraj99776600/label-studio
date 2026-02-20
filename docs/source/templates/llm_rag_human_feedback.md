@@ -19,7 +19,7 @@ In this example, you will create a labeling interface that aims to evaluate:
 - Answer relevancy
 - Answer faithfulness
 
-For a tutorial on how to use this template with the Label Studio SDK, see [Evaluate LLM Responses](https://api.labelstud.io/tutorials/tutorials/evaluate-llm-responses). 
+For a tutorial on how to use this template with the MLTL Annotate SDK, see [Evaluate LLM Responses](https://api.labelstud.io/tutorials/tutorials/evaluate-llm-responses). 
 
 ## Configure the labeling interface
 
@@ -135,11 +135,11 @@ In this example, you are including the prompt, the response, and the documents u
 [
   {
     "data": {
-      "question": "Can I use Label Studio for LLM evaluation?",
-      "answer": "Yes, you can use Label Studio for LLM evaluation.",
+      "question": "Can I use MLTL Annotate for LLM evaluation?",
+      "answer": "Yes, you can use MLTL Annotate for LLM evaluation.",
       "similar_docs": [
-        {"id": 0, "body": "Label Studio is a data labeling tool."},
-        {"id": 1, "body": "Label Studio is a data labeling tool for AI projects."}
+        {"id": 0, "body": "MLTL Annotate is a data labeling tool."},
+        {"id": 1, "body": "MLTL Annotate is a data labeling tool for AI projects."}
       ]
     }
   }
@@ -164,7 +164,7 @@ from llama_index.core.callbacks import CallbackManager, LlamaDebugHandler, CBEve
 
 reader = GitHubRepositoryIssuesReader(
 github_client=GitHubIssuesClient(),
-owner="HumanSignal",
+owner="MLTL",
 repo="label-studio",
 )
 
@@ -186,7 +186,7 @@ storage_context = StorageContext.from_defaults(persist_dir=PERSIST_DIR)
 index = load_index_from_storage(storage_context, callback_manager=callback_manager)
 
 query_engine = index.as_query_engine()
-question = "Can I use Label Studio for LLM evaluation?"
+question = "Can I use MLTL Annotate for LLM evaluation?"
 answer = query_engine.query(query)
 
 # accessing the list of top retrieved documents from callback
@@ -195,7 +195,7 @@ retrieved_nodes = list(event_pairs[0][1].payload.values())[0]
 retrieved_documents = [node.text for node in retrieved_nodes]
 ```
 
-Now you can use the SDK to construct a task that can be directly imported into Label Studio project given the labeling configuration described above:
+Now you can use the SDK to construct a task that can be directly imported into MLTL Annotate project given the labeling configuration described above:
 
 ```python
 task = {

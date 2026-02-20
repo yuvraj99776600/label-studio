@@ -60,7 +60,7 @@ class MLBackendSerializer(serializers.ModelSerializer):
                 message = (
                     f"Can't connect to ML backend {attrs['url']}, health check failed. "
                     'Make sure it is up and your firewall is properly configured. '
-                    f'<a href="https://labelstud.io/guide/ml.html">Learn more</a> '
+                    f'<a href="https://docs.mltl.us/guide/ml.html">Learn more</a> '
                     f'about how to set up an ML backend. Additional info: {healthcheck_response.error_message}'
                 )
 

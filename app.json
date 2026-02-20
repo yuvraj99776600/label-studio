@@ -1,13 +1,13 @@
 {
-  "name": "Label Studio",
+  "name": "MLTL Annotate",
   "description": "Multi-type data labeling, annotation and exploration tool",
   "keywords": [
     "data annotation",
     "data labeling"
   ],
-  "website": "https://labelstud.io",
-  "repository": "https://github.com/HumanSignal/label-studio",
-  "logo": "https://raw.githubusercontent.com/HumanSignal/label-studio/refs/heads/develop/images/heartex_icon_opossum_green.svg",
+  "website": "https://mltl.us",
+  "repository": "https://github.com/yuvraj99776600/label-studio",
+  "logo": "https://raw.githubusercontent.com/yuvraj99776600/label-studio/refs/heads/develop/images/mltl_icon_opossum_green.svg",
   "stack": "container",
   "env": {
     "DISABLE_SIGNUP_WITHOUT_LINK": {

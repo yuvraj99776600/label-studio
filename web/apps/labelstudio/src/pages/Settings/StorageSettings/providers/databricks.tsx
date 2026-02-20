@@ -19,9 +19,9 @@ const databricksProvider: ProviderConfig = {
           <IconSpark />
           <AlertTitle>Enterprise Feature</AlertTitle>
           <AlertDescription>
-            Databricks Files (UC Volumes) is available in Label Studio Enterprise.{" "}
+            Databricks Files (UC Volumes) is available in MLTL Annotate.{" "}
             <a
-              href="https://docs.humansignal.com/guide/storage.html#Databricks-Files-UC-Volumes"
+              href="https://docs.mltl.us/guide/storage.html#Databricks-Files-UC-Volumes"
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:no-underline"

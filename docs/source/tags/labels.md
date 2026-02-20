@@ -3,7 +3,7 @@ title: Labels
 type: tags
 order: 412
 meta_title: Labels Tag for Labeling Regions
-meta_description: Customize Label Studio by using the Labels tag to provide a set of labels for labeling regions in tasks for machine learning and data science projects.
+meta_description: Customize MLTL Annotate by using the Labels tag to provide a set of labels for labeling regions in tasks for machine learning and data science projects.
 ---
 
 The `Labels` tag provides a set of labels for labeling regions in tasks for machine learning and data science projects. Use the `Labels` tag to create a set of labels that can be assigned to identified region and specify the values of labels to assign to regions.

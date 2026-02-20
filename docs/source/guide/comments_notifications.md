@@ -6,12 +6,12 @@ tier: enterprise
 section: "Review & Measure Quality"
 order: 0
 order_enterprise: 306
-meta_title: Comment in Label Studio Enterprise
+meta_title: Comment in MLTL Annotate
 meta_description: The comments and notifications features define how annotators, reviewers and administrators communicate and receive updates on projects and tasks.
 ---
 
 
-Comments are a Label Studio Enterprise feature that allows communication between reviewers and annotators:
+Comments are a MLTL Annotate feature that allows communication between reviewers and annotators:
 
 <div class="noheader rowheader">
 

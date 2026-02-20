@@ -5,7 +5,7 @@ category: Audio/Speech Processing
 cat: audio-speech-processing
 order: 320
 meta_title: Voice Activity Detection Data Labeling Template
-meta_description: Template for detecting voice activity in an audio clip with Label Studio for your machine learning and data science projects.
+meta_description: Template for detecting voice activity in an audio clip with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates-misc/voice-activity-detection.png" alt="" class="gif-border" width="600px" height="498px" />

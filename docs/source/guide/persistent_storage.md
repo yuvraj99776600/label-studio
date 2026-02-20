@@ -4,26 +4,26 @@ type: guide
 tier: all
 order: 87
 order_enterprise: 87
-meta_title: Set up persistent storage with Label Studio
-meta_description: Configure persistent storage with Label Studio hosted in the cloud to store uploaded data such as task data, user images, and more.
+meta_title: Set up persistent storage with MLTL Annotate
+meta_description: Configure persistent storage with MLTL Annotate hosted in the cloud to store uploaded data such as task data, user images, and more.
 section: "Install & Setup"
 ---
 
-If you host Label Studio in the cloud, you want to set up persistent storage for uploaded task data, user images, and more in the same cloud service as your deployment.
+If you host MLTL Annotate in the cloud, you want to set up persistent storage for uploaded task data, user images, and more in the same cloud service as your deployment.
 
 !!! note
-    By default, Label Studio leaves the serving of uploaded media to nginx, so to have persistent storage work correctly, you need nginx alongside Label Studio. This is the recommended configuration as it helps offload the Label Studio server.
+    By default, MLTL Annotate leaves the serving of uploaded media to nginx, so to have persistent storage work correctly, you need nginx alongside MLTL Annotate. This is the recommended configuration as it helps offload the MLTL Annotate server.
 
-    However, if you are using a basic setup without nginx, you can set `USE_NGINX_FOR_UPLOADS=false` and `USE_NGINX_FOR_EXPORT_DOWNLOADS=false`. In this case, all serving will be handled by Label Studio. This configuration is not recommended because it will overload the uwsgi workers and can lead to a total Label Studio outage if users attempt to work with large files.
+    However, if you are using a basic setup without nginx, you can set `USE_NGINX_FOR_UPLOADS=false` and `USE_NGINX_FOR_EXPORT_DOWNLOADS=false`. In this case, all serving will be handled by MLTL Annotate. This configuration is not recommended because it will overload the uwsgi workers and can lead to a total MLTL Annotate outage if users attempt to work with large files.
 
 Follow the steps relevant for your deployment. If you use Docker Compose, select the cloud service you want to use as persistent storage:
-* [Set up Amazon S3](#Set-up-Amazon-S3) for Label Studio deployments in Amazon Web Services (AWS).
-* [Set up Google Cloud Storage (GCS)](#Set-up-Google-Cloud-Storage) for Label Studio deployments in Google Cloud Platform.
-* [Set up Microsoft Azure Storage](#Set-up-Microsoft-Azure-Storage) for Label Studio deployments in Microsoft Azure.
+* [Set up Amazon S3](#Set-up-Amazon-S3) for MLTL Annotate deployments in Amazon Web Services (AWS).
+* [Set up Google Cloud Storage (GCS)](#Set-up-Google-Cloud-Storage) for MLTL Annotate deployments in Google Cloud Platform.
+* [Set up Microsoft Azure Storage](#Set-up-Microsoft-Azure-Storage) for MLTL Annotate deployments in Microsoft Azure.
 
 ## Set up Amazon S3
 
-Set up Amazon S3 as the persistent storage for Label Studio hosted in AWS or using Docker Compose.
+Set up Amazon S3 as the persistent storage for MLTL Annotate hosted in AWS or using Docker Compose.
 
 ### Create an S3 bucket
 
@@ -65,7 +65,7 @@ Set up Cross-Origin Resource Sharing (CORS) access to your bucket. See [Configur
 ```
 
 ### Configure the S3 bucket
-After you create an S3 bucket, set up the necessary IAM permissions to grant Label Studio access to your bucket. There are four ways that you can manage access to your S3 bucket:
+After you create an S3 bucket, set up the necessary IAM permissions to grant MLTL Annotate access to your bucket. There are four ways that you can manage access to your S3 bucket:
 - Set up an **IAM role** with an OIDC provider (**recommended**).
 - Use **access keys**.
 - Set up an **IAM role** without an OIDC provider.
@@ -222,7 +222,7 @@ global:
 To create an IAM role without using OIDC in EKS, follow these steps.
 
 1. In the AWS console UI, go to **EKS > Clusters > `YOUR_CLUSTER_NAME` > Node Group**.
-2. Select the name of `YOUR_NODE_GROUP` with Label Studio deployed.
+2. Select the name of `YOUR_NODE_GROUP` with MLTL Annotate deployed.
 3. On the **Details** page, locate and select the option for Node IAM Role ARN and choose to **Attach existing policies directly**.
 3. Select **Create policy** and attach the following policy, replacing `<YOUR_S3_BUCKET>` with the name of your bucket:
 ```json
@@ -318,11 +318,11 @@ STORAGE_AWS_FOLDER=""
 
 ## Set up Google Cloud Storage
 
-Set up Google Cloud Storage (GCS) as the persistent storage for Label Studio hosted in Google Cloud Platform (GCP) or Docker Compose.
+Set up Google Cloud Storage (GCS) as the persistent storage for MLTL Annotate hosted in Google Cloud Platform (GCP) or Docker Compose.
 
 ### Create a GCS bucket
 
-1. Start by creating a bucket. See [Creating storage buckets](https://cloud.google.com/storage/docs/creating-buckets) in the Google Cloud Storage guide. For example, a bucket called `heartex-example-bucket-123456`.
+1. Start by creating a bucket. See [Creating storage buckets](https://cloud.google.com/storage/docs/creating-buckets) in the Google Cloud Storage guide. For example, a bucket called `mltl-example-bucket-123456`.
 2. When choosing the [access control method for the bucket](https://cloud.google.com/storage/docs/access-control), choose **uniform access control**.
 3. Create an IAM Service Account. See [Creating and managing service accounts](https://cloud.google.com/iam/docs/creating-managing-service-accounts) in the Google Cloud Storage guide.
 4. Select the predefined **Storage Object Admin** IAM role to add to the service account so that the account can create, access, and delete objects in the bucket.
@@ -331,7 +331,7 @@ Set up Google Cloud Storage (GCS) as the persistent storage for Label Studio hos
       - Condition type: `Name`
       - Operator: `Starts with`
       - Value: `projects/_/buckets/heartex-example-bucket-123456`
-    - Or, **use a Common Expression Language** (CEL) to specify an IAM condition. For example, set the following: `resource.name.startsWith('projects/_/buckets/heartex-example-bucket-123456')`. See [CEL for Conditions in Overview of IAM Conditions](https://cloud.google.com/iam/docs/conditions-overview#cel) in the Google Cloud Storage guide.
+    - Or, **use a Common Expression Language** (CEL) to specify an IAM condition. For example, set the following: `resource.name.startsWith('projects/_/buckets/mltl-example-bucket-123456')`. See [CEL for Conditions in Overview of IAM Conditions](https://cloud.google.com/iam/docs/conditions-overview#cel) in the Google Cloud Storage guide.
 
 ### Configure CORS for the GCS bucket
 
@@ -357,9 +357,9 @@ gsutil cors set cors-config.json gs://YOUR_BUCKET_NAME
 
 ### Configure the GCS bucket
 
-You can connect Label Studio to your GCS bucket using **Workload Identity** or **Access keys**.
+You can connect MLTL Annotate to your GCS bucket using **Workload Identity** or **Access keys**.
 
-After you create a bucket and set up IAM permissions, connect Label Studio to your GCS bucket. There are three ways that you can connect to your bucket:
+After you create a bucket and set up IAM permissions, connect MLTL Annotate to your GCS bucket. There are three ways that you can connect to your bucket:
 - Use Workload Identity to allow workloads in GKE to access your GCS bucket by impersonating the service account you created (**recommended**).
 - Create a service account key to use the service account outside Google Cloud.
 - Create a service account key to use with Docker Compose.
@@ -377,7 +377,7 @@ APP_SA="serviceAccount:<GCP_PROJECT_ID>.svc.id.goog[<K8S_NAMESPACE>/<HELM_RELEAS
 WORKER_SA="serviceAccount:<GCP_PROJECT_ID>.svc.id.goog[<K8S_NAMESPACE>/<HELM_RELEASE_NAME>-lse-rqworker]"
 ```
 
-2. Create an IAM policy binding between the Kubernetes service account on your cluster and the GCS service account you created, allowing the K8s service account for the Label Studio app and the related rqworkers to impersonate the other service account. From the command line, run the following:
+2. Create an IAM policy binding between the Kubernetes service account on your cluster and the GCS service account you created, allowing the K8s service account for the MLTL Annotate app and the related rqworkers to impersonate the other service account. From the command line, run the following:
 ```shell
 gcloud iam service-accounts add-iam-policy-binding ${GCP_SA} \
     --role roles/iam.workloadIdentityUser \
@@ -465,7 +465,7 @@ STORAGE_TYPE=gcs
 STORAGE_GCS_BUCKET_NAME="<YOUR_BUCKET_NAME>"
 STORAGE_GCS_PROJECT_ID="<YOUR_PROJECT_ID>"
 STORAGE_GCS_FOLDER=""
-GOOGLE_APPLICATION_CREDENTIALS="/opt/heartex/secrets/key.json"
+GOOGLE_APPLICATION_CREDENTIALS="/opt/mltl/secrets/key.json"
 ```
 
 3. Place the downloaded JSON file from step 1 in the same directory as your `env.list` file.
@@ -481,7 +481,7 @@ GOOGLE_APPLICATION_CREDENTIALS="/opt/heartex/secrets/key.json"
 
 ## Set up Microsoft Azure Storage
 
-Create a Microsoft Azure Storage container to use as persistent storage with Label Studio.
+Create a Microsoft Azure Storage container to use as persistent storage with MLTL Annotate.
 
 ### Create a Storage container
 
@@ -522,7 +522,7 @@ Set up CORS access to your bucket. See [Configuring cross-origin resource sharin
 
 ### Configure the Azure container
 
-You can connect Label Studio to your Azure container using account keys in Kubernetes or account keys in Docker Compose. Choose the option relevant to your Label Studio deployment.
+You can connect MLTL Annotate to your Azure container using account keys in Kubernetes or account keys in Docker Compose. Choose the option relevant to your MLTL Annotate deployment.
 
 <div class="code-tabs">
   <div data-name="Kubernetes">

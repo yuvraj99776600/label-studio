@@ -36,7 +36,7 @@ stages:
       data:
         project: '{project_pk}'
         title: My Testing ML backend
-        url: https://test.heartex.mlbackend.com:9090
+        url: https://test.mltl.mlbackend.com:9090
       method: POST
       url: '{django_live_url}/api/ml'
     response:
@@ -72,7 +72,7 @@ stages:
       headers:
         content-type: application/json
       json:
-        url: https://test.heartex.mlbackend.com:9091
+        url: https://test.mltl.mlbackend.com:9091
       method: PATCH
       url: '{django_live_url}/api/ml/{ml_pk}'
     response:
@@ -121,7 +121,7 @@ stages:
       data:
         project: '{project_pk}'
         title: My Testing ML backend 1
-        url: https://test.heartex.mlbackend.com:9090
+        url: https://test.mltl.mlbackend.com:9090
       method: POST
       url: '{django_live_url}/api/ml'
     response:
@@ -137,7 +137,7 @@ stages:
       data:
         project: '{project_pk}'
         title: My Testing ML backend 2
-        url: https://test.heartex.mlbackend.com:9090
+        url: https://test.mltl.mlbackend.com:9090
       method: POST
       url: '{django_live_url}/api/ml'
     response:
@@ -193,7 +193,7 @@ stages:
       headers:
         content-type: application/json
       json:
-        url: https://test.heartex.mlbackend.com:9091
+        url: https://test.mltl.mlbackend.com:9091
       method: PATCH
       url: '{django_live_url}/api/ml/{ml_pk1}'
     response:
@@ -203,7 +203,7 @@ stages:
       headers:
         content-type: application/json
       json:
-        url: https://test.heartex.mlbackend.com:9091
+        url: https://test.mltl.mlbackend.com:9091
       method: PATCH
       url: '{django_live_url}/api/ml/{ml_pk2}'
     response:

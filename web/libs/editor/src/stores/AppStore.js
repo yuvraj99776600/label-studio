@@ -84,7 +84,7 @@ export default types
     }),
 
     /**
-     * User of Label Studio
+     * User of MLTL Annotate
      */
     user: types.optional(types.maybeNull(types.safeReference(UserExtended)), null),
 
@@ -94,7 +94,7 @@ export default types
     debug: window.HTX_DEBUG === true,
 
     /**
-     * Settings of Label Studio
+     * Settings of MLTL Annotate
      */
     settings: types.optional(Settings, {}),
 
@@ -110,11 +110,11 @@ export default types
     showingSettings: types.optional(types.boolean, false),
     /**
      * Flag
-     * Description of task in Label Studio
+     * Description of task in MLTL Annotate
      */
     showingDescription: types.optional(types.boolean, false),
     /**
-     * Loading of Label Studio
+     * Loading of MLTL Annotate
      */
     isLoading: types.optional(types.boolean, false),
     /**
@@ -122,7 +122,7 @@ export default types
      */
     isSubmitting: false,
     /**
-     * Flag for disable task in Label Studio
+     * Flag for disable task in MLTL Annotate
      */
     noTask: types.optional(types.boolean, false),
     /**

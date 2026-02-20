@@ -9,7 +9,7 @@ const getFileNameFromIcon = (iconName: string): string => {
     // Convert IconCamelCase to kebab-case.svg
     const name = iconName.substring(4); // Remove 'Icon' prefix
 
-    if (name === "HumanSignal") {
+    if (name === "MLTL") {
       return "humansignal.svg";
     }
 
@@ -32,7 +32,7 @@ const getIconCategory = (iconName: string): string => {
 
   if (
     [
-      "HumanSignal",
+      "MLTL",
       "Slack",
       "Github",
       "Mastercard",

@@ -83,7 +83,7 @@ export const EnterpriseUpgradeOverlay = forwardRef<HTMLDivElement, EnterpriseUpg
     {
       title = "Get access to Enterprise Features",
       description = "This feature is available within the Enterprise plan. Contact our sales team to get access to this and more!",
-      learnMoreUrl = "https://docs.humansignal.com",
+      learnMoreUrl = "https://docs.mltl.us",
       primaryButtonLabel = "Contact Sales",
       secondaryButtonLabel = "Learn more",
       showLearnMore = true,

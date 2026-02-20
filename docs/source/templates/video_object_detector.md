@@ -6,7 +6,7 @@ cat: videos
 order: 715
 is_new: t
 meta_title: Video Object Detection Data Labeling Template
-meta_description: Template for detecting objects in videos with Label Studio for your machine learning and data science projects.
+meta_description: Template for detecting objects in videos with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/video-object-tracking.png" alt="" class="gif-border" width="552px" height="408px" />
@@ -17,16 +17,16 @@ Video object tracking is a further extension where detected objects are tracked 
 The illustrated templates provide both manual and automatic ways of tracking objects in videos. In addition to the new video player that supports frame-by-frame video object tracking, the latest release also features a new annotation user interface that is more efficient, ergonomic, and flexible.
 
 <a href="https://app.humansignal.com/b/MTkx"
-  target="_blank" rel="noopener" aria-label="Open in Label Studio" style="all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;border:1px solid rgb(109,135,241);padding:8px 12px;background:rgb(87 108 193);color:white;font-weight:500;font-family:sans-serif;gap:6px;transition:background 0.2s ease;" onmouseover="this.style.background='rgb(97 122 218)'" onmouseout="this.style.background='rgb(87 108 193)'">
+  target="_blank" rel="noopener" aria-label="Open in MLTL Annotate" style="all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;border:1px solid rgb(109,135,241);padding:8px 12px;background:rgb(87 108 193);color:white;font-weight:500;font-family:sans-serif;gap:6px;transition:background 0.2s ease;" onmouseover="this.style.background='rgb(97 122 218)'" onmouseout="this.style.background='rgb(87 108 193)'">
   <svg style="width:20px;height:20px" viewBox="0 0 26 26" fill="none"><path fill="none" d="M3.5 4.5h19v18h-19z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M25.7 7.503h-7.087V5.147H7.588V2.792h11.025V.436H25.7v7.067Zm-18.112 0H5.225v10.994H2.863V7.503H.5V.436h7.088v7.067Zm0 18.061v-7.067H.5v7.067h7.088ZM25.7 18.497v7.067h-7.088v-2.356H7.588v-2.355h11.025v-2.356H25.7Zm-2.363 0V7.503h-2.363v10.994h2.363Z" fill="white"/></svg>
-  <span style="font-size:14px">Open in Label Studio</span>
+  <span style="font-size:14px">Open in MLTL Annotate</span>
   <svg style="width:16px;height:16px" viewBox="0 0 24 24"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" fill="white"/></svg>
 </a>
 
 !!! attention "important"
 
-    1. Video classification and object tracking were available to preview prior to Label Studio version 1.6, but these features are now fully functional and production-ready. 
-    2. In Label Studio Enterprise, the video object tracking is called video labeling for video object detection. 
+    1. Video classification and object tracking were available to preview prior to MLTL Annotate version 1.6, but these features are now fully functional and production-ready. 
+    2. In MLTL Annotate, the video object tracking is called video labeling for video object detection. 
     3. The supported video formats are `mpeg4/H.264 webp` and `webm`. The supported video format also depends on the browser, and any pre-conversions from the customer's side. 
 
 
@@ -187,7 +187,7 @@ You can accomplish this by using the `interpolate_key_frames` parameter and one 
 
 #### Use the API to create an export snapshot with interpolation enabled 
 
-You can use the Label Studio API to create an export snapshot with keyframe interpolation enabled.
+You can use the MLTL Annotate API to create an export snapshot with keyframe interpolation enabled.
 
 **Endpoint:**
 ```
@@ -231,16 +231,16 @@ curl -X POST 'https://your-label-studio-domain.com/api/projects/{project_id}/exp
        -o 'exported_annotations.json'
      ```
 
-#### Use the Label Studio SDK
+#### Use the MLTL Annotate SDK
 
-If you're using the Label Studio SDK, you can create an export with interpolation enabled:
+If you're using the MLTL Annotate SDK, you can create an export with interpolation enabled:
 
 **Python code example:**
 
 ```python
 from label_studio_sdk import Client
 import time
-# Connect to Label Studio
+# Connect to MLTL Annotate
 ls = Client(url='http://localhost:8080', api_key='YOUR_API_KEY')
 # Get your project by ID
 project = ls.get_project(PROJECT_ID)
@@ -272,11 +272,11 @@ print(f'Exported data saved to {export_file_path}')
 **Notes:**
 - Replace `YOUR_API_KEY` with your actual API key.
 - Replace `PROJECT_ID` with your project ID.
-- Ensure that you have installed the latest version of the Label Studio SDK.
+- Ensure that you have installed the latest version of the MLTL Annotate SDK.
 
 #### Use the Command Line Interface (CLI)
 
-You can use the Label Studio CLI to export annotations with interpolated keyframes.
+You can use the MLTL Annotate CLI to export annotations with interpolated keyframes.
 
 **Command:**
 ```bash
@@ -302,7 +302,7 @@ curl -X GET 'https://your-label-studio-domain.com/api/projects/{project_id}/expo
   -o 'exported_annotations.json'
 ```
 
-## Label Studio UI enhancements
+## MLTL Annotate UI enhancements
 
 The video player functionality includes the following UI enhancements:
 1. Dual ‘Region’ and ‘Details’ control panels vs. a single sidebar, allowing annotators to view all pertinent information about the task without scrolling.
@@ -324,7 +324,7 @@ The video player provides the following use cases:
 Video object detection has analytics that are built on top of the video. For example, if you look at a video you will see the bounding boxes that have tracking objects on the video.
 
 ### Enhance images
-In the Label Studio UI, the video interface presents the main video canvas with controls that allows annotators to more precisely label blurry images using the following operations:
+In the MLTL Annotate UI, the video interface presents the main video canvas with controls that allows annotators to more precisely label blurry images using the following operations:
 
 **Zoom in, zoom out, zoom to fit, or zoom to 100%.**
 

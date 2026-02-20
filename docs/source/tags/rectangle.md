@@ -3,7 +3,7 @@ title: Rectangle
 type: tags
 order: 421
 meta_title: Rectangle Tag for Adding Rectangle Bounding Box to Images
-meta_description: Customize Label Studio with the Rectangle tag to add rectangle bounding boxes to images for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the Rectangle tag to add rectangle bounding boxes to images for machine learning and data science projects.
 ---
 
 The `Rectangle` tag is used to add a rectangle (Bounding Box) to an image without selecting a label. This can be useful when you have only one label to assign to a rectangle.

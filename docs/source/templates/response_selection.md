@@ -5,7 +5,7 @@ category: Conversational AI
 cat: conversational-ai
 order: 805
 meta_title: Response Selection Data Labeling Template
-meta_description: Template for selecting relevant responses for conversational AI use cases with Label Studio for your machine learning and data science projects.
+meta_description: Template for selecting relevant responses for conversational AI use cases with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/response-selection.png" alt="" class="gif-border" width="552px" height="408px" />

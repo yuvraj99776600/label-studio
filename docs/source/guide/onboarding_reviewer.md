@@ -1,5 +1,5 @@
 ---
-title: How to Review Tasks in Label Studio
+title: How to Review Tasks in MLTL Annotate
 short: Reviewer onboarding
 type: guide
 tier: enterprise
@@ -34,12 +34,12 @@ Most items that you used as an annotator can also be used for your reviewer work
 
 ## Frequently Asked Questions:
 
-### How do I access Label Studio?
+### How do I access MLTL Annotate?
 
-When you initially receive access to Label Studio, you will receive an email and a link to sign up. 
+When you initially receive access to MLTL Annotate, you will receive an email and a link to sign up. 
 
 To access your company’s projects, use the information you provided at sign up to log in.  
-(Location link may vary depending on whether your team works directly on Label Studio or in your company’s own integrated workspace.)
+(Location link may vary depending on whether your team works directly on MLTL Annotate or in your company’s own integrated workspace.)
 
 ![Screenshot](/images/onboarding/reviewer-0.png)
 

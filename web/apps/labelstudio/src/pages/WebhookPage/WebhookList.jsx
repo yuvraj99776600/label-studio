@@ -105,7 +105,7 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
               variant="primary"
               icon={<IconWebhook />}
               title="Add your first webhook"
-              description="Setup integrations that subscribe to certain events using Webhooks. When an event is triggered, Label Studio sends an HTTP POST request to the configured webhook URL."
+              description="Setup integrations that subscribe to certain events using Webhooks. When an event is triggered, MLTL Annotate sends an HTTP POST request to the configured webhook URL."
               actions={
                 canChangeWebhooks ? (
                   <Button variant="primary" look="filled" onClick={onAddWebhook}>
@@ -121,7 +121,7 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
                 !window.APP_SETTINGS.whitelabel_is_active && (
                   <Typography variant="label" size="small" className="text-primary-link">
                     <a
-                      href="https://docs.humansignal.com/guide/webhooks.html"
+                      href="https://docs.mltl.us/guide/webhooks.html"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 hover:underline"

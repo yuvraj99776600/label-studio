@@ -17,7 +17,7 @@ Each region stores normalized coordinates, rotation, and a page index, making ou
 Ideal for document intelligence, QA on OCR output, and structured data capture workflows. 
 
 !!! error Enterprise
-    This template requires the `OcrLabels` tag, which can only be used in Label Studio Enterprise.
+    This template requires the `OcrLabels` tag, which can only be used in MLTL Annotate.
 
 ![Screenshot](/images/templates-misc/pdf-opossum.png)
 
@@ -48,7 +48,7 @@ Ideal for document intelligence, QA on OCR output, and structured data capture w
 
 * **`Pdf`**
 
-    This will display your PDF natively in Label Studio, allowing you to zoom in and rotate as needed. 
+    This will display your PDF natively in MLTL Annotate, allowing you to zoom in and rotate as needed. 
 
     Support for PDFs up to 100 pages. 
 

@@ -3,7 +3,7 @@ title: Filter
 type: tags
 order: 502
 meta_title: Filter Tag for Filter Search
-meta_description: Customize Label Studio with the Filter tag to filter labels to accelerate labeling for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the Filter tag to filter labels to accelerate labeling for machine learning and data science projects.
 ---
 
 Use the Filter tag to add a filter search for a large number of labels or choices. Use with the Labels tag or Choices tag.

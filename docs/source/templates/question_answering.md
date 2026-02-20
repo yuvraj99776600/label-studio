@@ -5,7 +5,7 @@ category: Natural Language Processing
 cat: natural-language-processing
 order: 230
 meta_title: Question Answering Data Labeling Template
-meta_description: Template for identifying answers to questions in tasks with Label Studio for your machine learning and data science projects.
+meta_description: Template for identifying answers to questions in tasks with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/question-answering.png" alt="" class="gif-border" width="552px" height="408px" />

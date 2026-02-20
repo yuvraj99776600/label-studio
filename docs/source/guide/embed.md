@@ -1,23 +1,23 @@
 ---
-title: Embed Label Studio - Beta 🧪
-short: Embed Label Studio 🧪
+title: Embed MLTL Annotate - Beta 🧪
+short: Embed MLTL Annotate 🧪
 type: guide
 tier: enterprise
 order: 409
 order_enterprise: 409
-meta_title: Embed Label Studio
-meta_description: Overview information for embedding Label Studio Enterprise in an external application.
+meta_title: Embed MLTL Annotate
+meta_description: Overview information for embedding MLTL Annotate in an external application.
 section: "Integrate & Extend"
 ---
 
-Label Studio Embeds allow you to seamlessly integrate annotation and review functionality into your own applications. 
+MLTL Annotate Embeds allow you to seamlessly integrate annotation and review functionality into your own applications. 
 
 !!! note
     This feature is not available to all customers. Contact your [HumanSignal account manager](mailto:sales@humansignal.com) to enable.
 
 Before you begin, ensure you have:
-* Label Studio:
-    * You must have the Owner role in Label Studio.
+* MLTL Annotate:
+    * You must have the Owner role in MLTL Annotate.
     * From **Organization > Settings > Access Token Settings**, ensure that at least one option is enabled.
 
 
@@ -29,22 +29,22 @@ Before you begin, ensure you have:
 
 ## Authorization
 
-At a high level, the embed process is a secure handshake between your app and Label Studio:
+At a high level, the embed process is a secure handshake between your app and MLTL Annotate:
 
 1. A user logs into your external app.
 
 2. Your backend signs a JWT with their `user_email` and `organization_id `using your private key.
 
-3. Your frontend initializes the Label Studio embed with `id`, `url`, and `token`.
+3. Your frontend initializes the MLTL Annotate embed with `id`, `url`, and `token`.
 
-4. Label Studio validates the JWT and issues its own internal token.
+4. MLTL Annotate validates the JWT and issues its own internal token.
 
 
 ```mermaid
 sequenceDiagram
     participant User
     participant YourApp as Your App (Frontend & Backend)
-    participant LSE as Label Studio Enterprise
+    participant LSE as MLTL Annotate
 
     User->>YourApp: Logs in
     YourApp->>YourApp: Backend signs JWT (user_email + organization_id)
@@ -57,9 +57,9 @@ sequenceDiagram
 
 ### Generate a JWT on your server
 
-You must begin by generating a JSON web token (JWT) that authenticates Label Studio. 
+You must begin by generating a JSON web token (JWT) that authenticates MLTL Annotate. 
 
-You will also need to generate a base64-encoded public URL key, which you will add to Label Studio. 
+You will also need to generate a base64-encoded public URL key, which you will add to MLTL Annotate. 
 
 JWT claims required:
 
@@ -74,9 +74,9 @@ JWT claims required:
 
 **Notes:**
 
-* You can find your organization ID from the **Organization** page in Label Studio.   
+* You can find your organization ID from the **Organization** page in MLTL Annotate.   
 * The example below uses RS256 as a verification algorithm, but you can find a full list of supported algorithms from **Organization > Usage & License > Embedding**.   
-* The public key must be stored in Label Studio in base64-url encoded format.
+* The public key must be stored in MLTL Annotate in base64-url encoded format.
 
 ![Screenshot of org id](/images/org-id.png)
 
@@ -100,9 +100,9 @@ const token = jwt.sign(
 console.log(token);
 ```
 
-## Configure embedding in Label Studio
+## Configure embedding in MLTL Annotate
 
-From Label Studio, go to **Organization > Usage & License > Embedding** and complete the following fields:
+From MLTL Annotate, go to **Organization > Usage & License > Embedding** and complete the following fields:
 
 | Field | Description  |
 | :---- | :---- |
@@ -119,7 +119,7 @@ At a minimum, you need to add the **Embed SDK** script to an HTML page in your a
 <script src="https://app.humansignal.com/react-app/embed-sdk.js"></script>
 ```
 
-But to maximize the usability of your embedding, you can also include additional Label Studio elements. See our [Frontend Reference](frontend_reference). 
+But to maximize the usability of your embedding, you can also include additional MLTL Annotate elements. See our [Frontend Reference](frontend_reference). 
 
 Here is an example:
 
@@ -134,7 +134,7 @@ Here is an example:
 		
 		<!-- Implementation Example -->
 		<script>
-				// Initialize the Label Studio Embed SDK 
+				// Initialize the MLTL Annotate Embed SDK 
         const sdk = LabelStudioEmbedSDK.create({
 	        id: "embed-1", // targets the id of the `label-studio-embed` WebComponent that serves as the outlet of the embed
 	        url: "https://app.humansignal.com", // url of the target LabelStudioEnterprise instance
@@ -203,12 +203,12 @@ Here is an example:
 
 **Blank/white screen**
 
-* Domain not listed in **Supported Domains** within Label Studio.  
+* Domain not listed in **Supported Domains** within MLTL Annotate.  
 * Misconfigured/missing public verification key  
 * Misconfigured/missing public verification algorithms  
 * Verification of the external JWT failed to verify one or more of the claims provided (invalid JWT).  
 * Active organization of the user was different than specified in the JWT claims.  
-* Your org has not enabled legacy API tokens or personal [access tokens](https://docs.humansignal.com/guide/access_tokens) (need at least one). 
+* Your org has not enabled legacy API tokens or personal [access tokens](https://docs.mltl.us/guide/access_tokens) (need at least one). 
 * User with the provided `user_email` does not exist on `LabelStudioEnterprise`
 
 **HTTP errors in SDK**

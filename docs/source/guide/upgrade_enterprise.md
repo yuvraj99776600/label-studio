@@ -1,21 +1,21 @@
 ---
-title: Upgrade Label Studio Enterprise
-short: Upgrade Label Studio
+title: Upgrade MLTL Annotate
+short: Upgrade MLTL Annotate
 tier: enterprise
 type: guide
 order: 0
 order_enterprise: 76
-meta_title: Upgrade Label Studio Enterprise
-meta_description: Steps you should take when upgrading Label Studio Enterprise.
+meta_title: Upgrade MLTL Annotate
+meta_description: Steps you should take when upgrading MLTL Annotate.
 section: "Install & Setup"
 parent: "install"
 parent_enterprise: "install_enterprise"
 date: 2023-09-27 10:57:03
 ---
 
-If you are using Label Studio Enterprise Cloud, all upgrades and updates are automatically deployed. 
+If you are using MLTL Annotate Cloud, all upgrades and updates are automatically deployed. 
 
-If you are using the on-premises version of Label Studio, you will need to take additional steps. 
+If you are using the on-premises version of MLTL Annotate, you will need to take additional steps. 
 
 ## Upgrade process overview
 
@@ -29,9 +29,9 @@ If you are using the on-premises version of Label Studio, you will need to take 
 
 ## Upgrade using Helm
 
-If you installed Label Studio Enterprise in a Kubernetes environment, you can upgrade using Helm: 
+If you installed MLTL Annotate in a Kubernetes environment, you can upgrade using Helm: 
 
-1. Determine the latest tag version of Label Studio Enterprise and add/replace the following in your `ls-values.yaml` file: 
+1. Determine the latest tag version of MLTL Annotate and add/replace the following in your `ls-values.yaml` file: 
    ```yaml
    global:
      image:
@@ -54,9 +54,9 @@ If you installed Label Studio Enterprise in a Kubernetes environment, you can up
 
 ## Upgrade using Docker Compose
 
-If you installed Label Studio Enterprise through Docker, you can upgrade using the following steps:
+If you installed MLTL Annotate through Docker, you can upgrade using the following steps:
 
-1. Edit `docker-compose.yaml` to update the Label Studio Enterprise version. 
+1. Edit `docker-compose.yaml` to update the MLTL Annotate version. 
 2. Run Docker:
    
    ```shell

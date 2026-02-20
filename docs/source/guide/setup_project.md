@@ -7,21 +7,21 @@ order: 104
 order_enterprise: 104
 section: "Create & Manage Projects"
 meta_title: Set up your labeling project
-meta_description: Set up data labeling and annotation projects in Label Studio to produce high-quality data for your machine learning and data science projects.
+meta_description: Set up data labeling and annotation projects in MLTL Annotate to produce high-quality data for your machine learning and data science projects.
 ---
 
-All labeling activities in Label Studio occur in the context of a project.
+All labeling activities in MLTL Annotate occur in the context of a project.
 
 ## Project setup workflow
 
 <div class="opensource-only">
 
-After you [start Label Studio](start) and [create an account](signup), create a project to start labeling your data.
+After you [start MLTL Annotate](start) and [create an account](signup), create a project to start labeling your data.
 
 1. **[Create a project](#Create-a-project)**.
-2. **[Import data into Label Studio](tasks)**. 
+2. **[Import data into MLTL Annotate](tasks)**. 
 
-    For small projects, testing, or proof of concept work, you can import local files directly into Label Studio through the UI. You can do this during the project creation workflow. 
+    For small projects, testing, or proof of concept work, you can import local files directly into MLTL Annotate through the UI. You can do this during the project creation workflow. 
     
     However, for larger projects, we recommend setting up cloud storage. You will need to create the project first, and then add storage from the project settings. For more information, see [Sync data from external storage](storage). 
 3. **[Customize your labeling interface](setup)**. 
@@ -37,16 +37,16 @@ After you [start Label Studio](start) and [create an account](signup), create a 
 <div class="enterprise-only">
 
 1. **[Create a project](#Create-a-project)**.
-2. **[Import data into Label Studio](tasks)**. 
+2. **[Import data into MLTL Annotate](tasks)**. 
 
-    For small projects, testing, or proof of concept work, you can import local files directly into Label Studio through the UI. You can do this during the project creation workflow. 
+    For small projects, testing, or proof of concept work, you can import local files directly into MLTL Annotate through the UI. You can do this during the project creation workflow. 
     
     However, for larger projects, we recommend setting up cloud storage. You will need to create the project first, and then add storage from the project settings. For more information, see [Sync data from external storage](storage). 
 3. **[Customize your labeling interface](setup)**. 
 
     We recommend that you begin with a pre-configured template and modify it, but you can also create your own custom template using our [tag library](/tags). 
     
-    If enabled, can start by describing to the Label Studio [AI assistant](ask_ai) what your are looking for and let it generate the XML on your behalf. 
+    If enabled, can start by describing to the MLTL Annotate [AI assistant](ask_ai) what your are looking for and let it generate the XML on your behalf. 
 4. **[Configure project settings](project_settings_lse)**. 
 
     Next, you will want to configure what information annotators and reviewers can see, and how automated you want their workflow to be. 
@@ -68,7 +68,7 @@ After you [start Label Studio](start) and [create an account](signup), create a 
 
 ## Create a project
 
-From Label Studio, click **Create Project** in the upper right. A window opens with three tabs:
+From MLTL Annotate, click **Create Project** in the upper right. A window opens with three tabs:
 
 <dl>
 
@@ -88,9 +88,9 @@ Once complete, you can click **Save** to create the project, or you can complete
 
 <dd>
 
-From here, you can upload files into Label Studio. You can do this now or after the project has been created.
+From here, you can upload files into MLTL Annotate. You can do this now or after the project has been created.
 
-For larger projects, we recommend setting up cloud storage or using a different import method. For more information, see [Get data into Label Studio](tasks) and [Sync data from external storage](storage).
+For larger projects, we recommend setting up cloud storage or using a different import method. For more information, see [Get data into MLTL Annotate](tasks) and [Sync data from external storage](storage).
 
 </dd>
 
@@ -113,7 +113,7 @@ When you're done, click **Save**.
 <div class="opensource-only">
 
 !!! error Enterprise
-    Workspaces are only available for Label Studio Enterprise users. Label Studio Enterprise also includes many additional configuration options for projects, such as role-based access control and workflow automation. For more information, see [Compare Community and Enterprise Features](label_studio_compare). 
+    Workspaces are only available for MLTL Annotate users. MLTL Annotate also includes many additional configuration options for projects, such as role-based access control and workflow automation. For more information, see [Compare Community and Enterprise Features](label_studio_compare). 
 
 </div>
 
@@ -138,13 +138,13 @@ From the Data Manager, click **Settings** in the upper right. You can also acces
 
 For information on all available settings, see [Project settings](project_settings). 
 
-## Where Label Studio stores your project data and configurations
+## Where MLTL Annotate stores your project data and configurations
 
-All labeling activities in Label Studio occur in the context of a project.
+All labeling activities in MLTL Annotate occur in the context of a project.
 
-Starting in version 1.0.0, Label Studio stores your project data and configurations in a SQLite database. You can choose to use PostgreSQL instead. See [Set up database storage](storedata.html).
+Starting in version 1.0.0, MLTL Annotate stores your project data and configurations in a SQLite database. You can choose to use PostgreSQL instead. See [Set up database storage](storedata.html).
 
-In versions of Label Studio earlier than 1.0.0, when you start Label Studio for the first time, it launches from a project directory that Label Studio creates, called `./my_project` by default.
+In versions of MLTL Annotate earlier than 1.0.0, when you start MLTL Annotate for the first time, it launches from a project directory that MLTL Annotate creates, called `./my_project` by default.
 
 `label-studio start ./my_project --init`
 
@@ -154,7 +154,7 @@ In versions of Label Studio earlier than 1.0.0, when you start Label Studio for 
 
 ## Configure high-impact settings
 
-By design, Label Studio is highly customizable and there are numerous configuration options for a project. To configure project settings, open a project and click **Settings** in the upper right. 
+By design, MLTL Annotate is highly customizable and there are numerous configuration options for a project. To configure project settings, open a project and click **Settings** in the upper right. 
 
 To avoid getting overwhelmed, focus on the following settings. They have the most impact on your labeling experience.
 
@@ -225,7 +225,7 @@ For more information, see [Project settings - Members](project_settings_lse#Memb
 
 ## Publish a project 
 
-In Label Studio Enterprise, you can hide projects from annotators so that you can fully configure the project before anyone can start labeling. When you're ready for annotators to start labeling, publish the project.
+In MLTL Annotate, you can hide projects from annotators so that you can fully configure the project before anyone can start labeling. When you're ready for annotators to start labeling, publish the project.
 
 1. Open a project and select **Dashboard** in the upper right.
 2. Click **Publish**. 

@@ -4,25 +4,25 @@ import TaskStore from "../TaskStore";
 test("Task Store with string", () => {
   const initialState = {
     id: 1,
-    data: '{"url": "https://heartex.net"}',
+    data: '{"url": "https://mltl.net"}',
     project: 100,
   };
 
   const taskStore = TaskStore.create(initialState);
 
-  expect(taskStore.dataObj).toEqual({ url: "https://heartex.net" });
+  expect(taskStore.dataObj).toEqual({ url: "https://mltl.net" });
 });
 
 // test("Task Store JSON", () => {
 //   const initialState = {
 //     id: 1,
-//     data: {url: "https://heartex.net"},
+//     data: {url: "https://mltl.net"},
 //     project: 100,
 //   };
 
 //   const taskStore = TaskStore.create(initialState);
 
-//   expect(taskStore.dataObj).toEqual({ url: "https://heartex.net" });
+//   expect(taskStore.dataObj).toEqual({ url: "https://mltl.net" });
 // })
 
 // test("Task Store bad value", () => {

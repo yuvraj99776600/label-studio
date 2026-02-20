@@ -3,7 +3,7 @@ title: Header
 type: tags
 order: 503
 meta_title: Header Tag to Show Headers
-meta_description: Customize Label Studio with the Header tag to display a header for a labeling task for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the Header tag to display a header for a labeling task for machine learning and data science projects.
 ---
 
 The `Header` tag is used to show a header on the labeling interface.

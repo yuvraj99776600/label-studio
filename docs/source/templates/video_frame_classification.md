@@ -78,4 +78,4 @@ Prepare your input data with the video field pointing to your video URL. If you 
 - [TimelineLabels](/tags/timelinelabels.html)
 - [Video](/tags/video.html)
 - [Label](/tags/label.html)
-- [Example of ML Backend for Frame Classification](https://github.com/HumanSignal/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README_TIMELINE_LABELS.md)
+- [Example of ML Backend for Frame Classification](https://github.com/yuvraj99776600/label-studio-ml-backend/blob/master/label_studio_ml/examples/yolo/README_TIMELINE_LABELS.md)

@@ -12,13 +12,13 @@ date: 2025-01-21 10:49:57
 
 <img src="/images/templates/multi-turn-chat.png" alt="" class="gif-border" width="552px" />
 
-This template uses the example available here: [Multi-turn Chat Labeling: Evaluating Virtual Assistant Conversations](https://github.com/HumanSignal/label-studio-examples/blob/main/multi-turn-chat/Readme.md)
+This template uses the example available here: [Multi-turn Chat Labeling: Evaluating Virtual Assistant Conversations](https://github.com/yuvraj99776600/label-studio-examples/blob/main/multi-turn-chat/Readme.md)
 
-You can use this example to evaluate multi-turn chat conversations in Label Studio, identifying areas to enhance your virtual assistant’s performance and user experience.
+You can use this example to evaluate multi-turn chat conversations in MLTL Annotate, identifying areas to enhance your virtual assistant’s performance and user experience.
 
 For this example, you will need the following:
 
-- Label Studio instance
+- MLTL Annotate instance
 - Label Studio SDK (`pip install label-studio-sdk`)
 - Python 3.8+ with pandas
 
@@ -26,7 +26,7 @@ For this example, you will need the following:
 
 In this example, the labeling configuration is dynamically generated. This is necessary because each chat has a different number of turns (questions and responses). 
 
-To build your own template XML, you will need to follow the steps outlined in the following notebook: [**Evaluating Virtual Assistant Conversations.ipynb**](https://github.com/HumanSignal/label-studio-examples/blob/main/multi-turn-chat/Evaluating%20Virtual%20Assistant%20Conversations.ipynb)
+To build your own template XML, you will need to follow the steps outlined in the following notebook: [**Evaluating Virtual Assistant Conversations.ipynb**](https://github.com/yuvraj99776600/label-studio-examples/blob/main/multi-turn-chat/Evaluating%20Virtual%20Assistant%20Conversations.ipynb)
 
 However, here is an example of the labeling configuration for a 5-turn chat:
 

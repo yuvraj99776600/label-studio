@@ -6,19 +6,19 @@ type: guide
 order: 372
 order_enterprise: 0
 meta_title: Manage user accounts
-meta_description: Manage existing user accounts in Label Studio Community edition
+meta_description: Manage existing user accounts in MLTL Annotate Community edition
 section: "Manage Your Organization"
 date: 2024-02-06 16:36:44
 ---
 
 !!! error Enterprise
-    In Label Studio Community Edition, there are relatively limited options available for user management. 
+    In MLTL Annotate Community Edition, there are relatively limited options available for user management. 
     
-    In Label Studio Enterprise, you can set roles for users, restrict their permissions, delete and deactivate users, and view detailed logs of user actions. For more information about the user management capabilities of Label Studio Enterprise, see [User management overview](https://docs.humansignal.com/guide/manage_users) in the Enterprise documentation. To start a free trial, [click here](https://app.heartex.com/user/trial).  
+    In MLTL Annotate, you can set roles for users, restrict their permissions, delete and deactivate users, and view detailed logs of user actions. For more information about the user management capabilities of MLTL Annotate, see [User management overview](https://docs.mltl.us/guide/manage_users) in the Enterprise documentation. To start a free trial, [click here](https://app.mltl.com/user/trial).  
 
 ## Retrieve user info from the command line
 
-You can retrieve information about a user, including the API user token for a user, from the command line after starting Label Studio.
+You can retrieve information about a user, including the API user token for a user, from the command line after starting MLTL Annotate.
 
 From the command line, run the following:
 
@@ -33,14 +33,14 @@ You can see user info, including their API token, as the last line of the respon
 {'id': 1, 'first_name': 'User', 'last_name': 'Somebody', 'username': 'label-studio', 'email': 'example@labelstud.io', 'last_activity': '2021-06-15T19:37:29.594618Z', 'avatar': '/data/avatars/img.jpg', 'initials': 'el', 'phone': '', 'active_organization': 1, 'token': '<api_token>', 'status': 'ok'}
 ```
 
-Users can also retrieve their own tokens from the Label Studio app. For more information, see [Access Tokes](access_tokens). 
+Users can also retrieve their own tokens from the MLTL Annotate app. For more information, see [Access Tokes](access_tokens). 
 
 
-## Review existing accounts in Label Studio
+## Review existing accounts in MLTL Annotate
 
-You can view the organization user list from Label Studio:
+You can view the organization user list from MLTL Annotate:
 
-1. Open Label Studio and click the menu in the upper left. 
+1. Open MLTL Annotate and click the menu in the upper left. 
 2. Select **Organization**. 
 
 Click the user's row to see additional details about their activity, such as when they were last active, which projects they created, and which projects they contributed to. 
@@ -49,7 +49,7 @@ Click the user's row to see additional details about their activity, such as whe
 
 If you forget your password or change passwords regularly for security reasons, you can change it from the command line.
 
-On the server running Label Studio, run the following command. And then when prompted, type the username and the new password:
+On the server running MLTL Annotate, run the following command. And then when prompted, type the username and the new password:
 
 ```bash
 label-studio reset_password

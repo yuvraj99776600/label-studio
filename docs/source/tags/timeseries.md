@@ -3,7 +3,7 @@ title: TimeSeries
 type: tags
 order: 310
 meta_title: Time Series Tags for Time Series Data
-meta_description: Customize Label Studio with the TimeSeries tag to annotate time series data for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the TimeSeries tag to annotate time series data for machine learning and data science projects.
 ---
 
 The `TimeSeries` tag can be used to label time series data. Read more about Time Series Labeling on [the time series template page](../templates/time_series.html).
@@ -39,7 +39,7 @@ Labeling configuration for time series data stored in a CSV loaded from a URL co
 ```
 ### Example
 
-Labeling configuration for time series data stored in the task field `ts` in Label Studio JSON format. The time field is stored as a date in the `timeformat` field and formatted as a full date on the plot (by default).
+Labeling configuration for time series data stored in the task field `ts` in MLTL Annotate JSON format. The time field is stored as a date in the `timeformat` field and formatted as a full date on the plot (by default).
 
 ```html
 <View>
@@ -82,6 +82,6 @@ Labeling configuration for time series data with multiple channels grouped toget
 </View>
 
 <!-- {
-  "timeseries": "https://app.heartex.ai/samples/time-series.csv?time=time&values=velocity%2Cacceleration&tf=%25Y-%25m-%25d+%25H%3A%25M%3A%25S.%25f&type=csv"
+  "timeseries": "https://app.mltl.ai/samples/time-series.csv?time=time&values=velocity%2Cacceleration&tf=%25Y-%25m-%25d+%25H%3A%25M%3A%25S.%25f&type=csv"
 } -->
 ```

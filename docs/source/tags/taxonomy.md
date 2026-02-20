@@ -3,7 +3,7 @@ title: Taxonomy
 type: tags
 order: 426
 meta_title: Taxonomy Tag for Hierarchical Labels
-meta_description: Customize Label Studio with the Taxonomy tag and use hierarchical labels for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the Taxonomy tag and use hierarchical labels for machine learning and data science projects.
 ---
 
 The `Taxonomy` tag is used to create one or more hierarchical classifications, storing both choice selections and their ancestors in the results. Use for nested classification tasks with the `Choice` tag.

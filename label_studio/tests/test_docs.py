@@ -13,7 +13,7 @@
 #     request:
 #       url: "{django_live_url}/user/signup"
 #       data:
-#         email: test_suites_user@heartex.com
+#         email: test_suites_user@mltl.com
 #         password: 12345678
 #       method: POST
 #     response:

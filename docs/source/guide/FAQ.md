@@ -5,4 +5,4 @@ hide_sidebar: true
 meta_title: Troubleshoot labeling issues
 ---
 
-For troubleshooting information, see the [HumanSignal support center](https://support.humansignal.com/hc/en-us). 
+For troubleshooting information, see the [MLTL support center](https://mltl.us/support/hc/en-us). 

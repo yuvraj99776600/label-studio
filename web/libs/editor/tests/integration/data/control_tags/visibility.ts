@@ -241,5 +241,5 @@ export const visibilityTextData = {
 };
 
 export const visibilityImageData = {
-  image: "https://data.heartex.net/open-images/train_0/mini/00155094b7acc33b.jpg",
+  image: "https://data.mltl.net/open-images/train_0/mini/00155094b7acc33b.jpg",
 };

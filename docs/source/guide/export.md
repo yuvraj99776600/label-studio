@@ -1,32 +1,32 @@
 ---
-title: Export annotations and data from Label Studio
+title: Export annotations and data from MLTL Annotate
 short: Export annotations
 type: guide
 tier: all
 order: 166
 order_enterprise: 166
 meta_title: Export Annotations
-meta_description: Label Studio documentation for exporting data labeling annotations to use in machine learning models and data science projects.
+meta_description: MLTL Annotate documentation for exporting data labeling annotations to use in machine learning models and data science projects.
 section: "Import & Export"
 
 ---
 
-At any point in your labeling project, you can export the annotations from Label Studio. 
+At any point in your labeling project, you can export the annotations from MLTL Annotate. 
 
-Label Studio stores your annotations in a raw JSON format in the SQLite database backend, PostgreSQL database backend, or whichever cloud or database storage you specify as target storage. Cloud storage buckets contain one file per labeled task named `task_id.json`. For more information about syncing target storage, see [Cloud storage setup](storage.html).
+MLTL Annotate stores your annotations in a raw JSON format in the SQLite database backend, PostgreSQL database backend, or whichever cloud or database storage you specify as target storage. Cloud storage buckets contain one file per labeled task named `task_id.json`. For more information about syncing target storage, see [Cloud storage setup](storage.html).
 
 Image annotations exported in JSON format use percentages of overall image size, not pixels, to describe the size and location of the bounding boxes. For more information, see [how to convert the image annotation units](#Units-of-image-annotations).
 
 !!! note
-    Some export formats export only the annotations and not the data from the task. For more information, see the [export formats supported by Label Studio](#Export-formats-supported-by-Label-Studio).
+    Some export formats export only the annotations and not the data from the task. For more information, see the [export formats supported by MLTL Annotate](#Export-formats-supported-by-Label-Studio).
 
 {% insertmd includes/annotation_ids.md %}
 
 <div class="opensource-only">
 
-### Export using the UI in Community Edition of Label Studio
+### Export using the UI in Community Edition of MLTL Annotate
 
-Use the following steps to export data and annotations from the Label Studio UI. 
+Use the following steps to export data and annotations from the MLTL Annotate UI. 
 
 1. For a project, click **Export**.
 2. Select an available export format.
@@ -39,13 +39,13 @@ Use the following steps to export data and annotations from the Label Studio UI.
 
 ### Export timeout in Community Edition
 
-Exports from the Community Edition UI are generated **synchronously** as part of the request. Community Edition keeps deployment simple and does not run background export workers by default. Label Studio Enterprise supports background workers for asynchronous snapshot exports, which is better suited for large-scale projects. For large projects, the community's export can take longer than the timeout configured in your reverse proxy or ingress (often around **90 seconds**), which can result in 502/504 errors or an export timeout.
+Exports from the Community Edition UI are generated **synchronously** as part of the request. Community Edition keeps deployment simple and does not run background export workers by default. MLTL Annotate supports background workers for asynchronous snapshot exports, which is better suited for large-scale projects. For large projects, the community's export can take longer than the timeout configured in your reverse proxy or ingress (often around **90 seconds**), which can result in 502/504 errors or an export timeout.
 
 If you hit this limitation, you can still export your data using one of these options:
 
 - **Export snapshots using the SDK**: See how to [export snapshots using the SDK](https://api.labelstud.io/api-reference/api-reference/projects/exports/create).
-- **Export using the console command**: Use the [console command](#Export-using-console-command) to export your project directly from the machine running Label Studio.
-- **Export in the UI at scale**: Label Studio Enterprise includes **background snapshot exports** in the UI for large datasets (see [Export snapshots using the UI](#Export-snapshots-using-the-UI)).
+- **Export using the console command**: Use the [console command](#Export-using-console-command) to export your project directly from the machine running MLTL Annotate.
+- **Export in the UI at scale**: MLTL Annotate includes **background snapshot exports** in the UI for large datasets (see [Export snapshots using the UI](#Export-snapshots-using-the-UI)).
 
 ### Export using console command
 
@@ -69,9 +69,9 @@ DEBUG=1 LOG_LEVEL=DEBUG label-studio export <project-id> <export-format> --expor
 <img src="/images/lse-export-snapshots-ui.png" alt="" class="gif-border" />
 <br>
 
-In Label Studio Enterprise, create a snapshot of your data and annotations. Create a snapshot to export exactly what you want from your data labeling project. This delayed export method makes it easier to export large labeling projects from the Label Studio UI.  
+In MLTL Annotate, create a snapshot of your data and annotations. Create a snapshot to export exactly what you want from your data labeling project. This delayed export method makes it easier to export large labeling projects from the MLTL Annotate UI.  
 
-1. Within a project in the Label Studio UI, click **Export**.
+1. Within a project in the MLTL Annotate UI, click **Export**.
 2. Click **Create New Snapshot**.
 3. **Apply filters from tab ...**: Select **Default** from the drop-down list. 
 4. (Optional) **Snapshot Name**: Enter a snapshot name to make it easier to find in the future. By default, export snapshots are named `PROJECT-NAME-at-YEAR-MM-DD-HH-MM`, where the time is in UTC.
@@ -88,12 +88,12 @@ In Label Studio Enterprise, create a snapshot of your data and annotations. Crea
 
 ### Export using the Easy Export API
 
-You can call the Label Studio API to export annotations. For a small labeling project, call the [export endpoint](https://api.labelstud.io/api-reference/api-reference/projects/exports/download-sync) to export annotations.
+You can call the MLTL Annotate API to export annotations. For a small labeling project, call the [export endpoint](https://api.labelstud.io/api-reference/api-reference/projects/exports/download-sync) to export annotations.
 
 
 #### Export all tasks including tasks without annotations
 
-Label Studio open source exports tasks with annotations only by default. If you want to easily export all tasks including tasks without annotations, you can call  the [Easy Export API](https://api.labelstud.io/api-reference/api-reference/projects/exports/download-sync) with query param `download_all_tasks=true`. For example:
+MLTL Annotate open source exports tasks with annotations only by default. If you want to easily export all tasks including tasks without annotations, you can call  the [Easy Export API](https://api.labelstud.io/api-reference/api-reference/projects/exports/download-sync) with query param `download_all_tasks=true`. For example:
 ```
 curl -X GET https://localhost:8080/api/projects/{id}/export?exportType=JSON&download_all_tasks=true
 ``` 
@@ -109,9 +109,9 @@ For a large labeling project with hundreds of thousands of tasks, do the followi
 3. Using the `id` from the created snapshot as the export primary key, or `export_pk`, make a GET request to [download the export file](https://api.labelstud.io/api-reference/api-reference/projects/exports/download).
 
 
-## Export formats supported by Label Studio
+## Export formats supported by MLTL Annotate
 
-Label Studio supports many common and standard formats for exporting completed labeling tasks. If you don't see a format that works for you, you can contribute one. For more information, see the [Label Studio Converter tool in our SDK repo](https://github.com/HumanSignal/label-studio-sdk/tree/master/src/label_studio_sdk/converter).
+Label Studio supports many common and standard formats for exporting completed labeling tasks. If you don't see a format that works for you, you can contribute one. For more information, see the [Label Studio Converter tool in our SDK repo](https://github.com/yuvraj99776600/label-studio-sdk/tree/master/src/label_studio_sdk/converter).
 
 ### ASR_MANIFEST
 
@@ -305,9 +305,9 @@ A popular XML-formatted task data is used for object detection and image segment
 
 ### spaCy 
 
-Label Studio does not support exporting directly to spaCy binary format, but you can convert annotations exported from Label Studio to a format compatible with spaCy. You must have the spacy python package installed to perform this conversion. 
+MLTL Annotate does not support exporting directly to spaCy binary format, but you can convert annotations exported from MLTL Annotate to a format compatible with spaCy. You must have the spacy python package installed to perform this conversion. 
 
-To transform Label Studio annotations into spaCy binary format, do the following:
+To transform MLTL Annotate annotations into spaCy binary format, do the following:
 1. Export your annotations to CONLL2003 format.
 2. Open the downloaded file and update the first line of the exported file to add `O` on the first line:
 ```
@@ -342,32 +342,32 @@ Export object detection annotations in the YOLOv3 and YOLOv4 format. Supports ob
 {% insertmd includes/image_units.md %}
 
 ## Manually convert JSON annotations to another format
-You can run the [Label Studio converter tool](https://github.com/HumanSignal/label-studio-sdk/tree/master/src/label_studio_sdk/converter) on a directory or file of completed JSON annotations using the command line or Python to convert the completed annotations from Label Studio JSON format into another format. 
+You can run the [Label Studio converter tool](https://github.com/yuvraj99776600/label-studio-sdk/tree/master/src/label_studio_sdk/converter) on a directory or file of completed JSON annotations using the command line or Python to convert the completed annotations from Label Studio JSON format into another format. 
 
 !!! note
-    If you use versions of Label Studio earlier than 1.0.0, then this is the only way to convert your Label Studio JSON format annotations into another labeling format. 
+    If you use versions of MLTL Annotate earlier than 1.0.0, then this is the only way to convert your MLTL Annotate JSON format annotations into another labeling format. 
 
 
-## Access task data (images, audio, texts) outside of Label Studio for ML backends
+## Access task data (images, audio, texts) outside of MLTL Annotate for ML backends
 
-Machine Learning backend uses data from tasks for predictions, and you need to download them on Machine Learning backend side. Label Studio provides tools for downloading of these resources, and they are located in label-studio-tools Python package. If you are using official Label Studio Machine Learning backend, label-studio-tools package is installed automatically with other requirements.
+Machine Learning backend uses data from tasks for predictions, and you need to download them on Machine Learning backend side. MLTL Annotate provides tools for downloading of these resources, and they are located in label-studio-tools Python package. If you are using official MLTL Annotate Machine Learning backend, label-studio-tools package is installed automatically with other requirements.
 
-### Accessing task data from Label Studio instance
+### Accessing task data from MLTL Annotate instance
 
-There are several ways of storing tasks resources (images, audio, texts, etc) in Label Studio:
+There are several ways of storing tasks resources (images, audio, texts, etc) in MLTL Annotate:
 - Cloud storages 
 - External web links 
 - Uploaded files
 - Local files directory
 
-Label Studio stores uploaded files in Project level structure. Each project has it's own folder for files.
+MLTL Annotate stores uploaded files in Project level structure. Each project has it's own folder for files.
 
 You can use `label_studio_tools.core.utils.io.get_local_path` to get task data - it will transform path or URL from task data to local path.
 In case of local path it will return full local path and download resource in case of using `download_resources` parameter.
 
 Provide `Hostname` and `access_token` for accessing external resource.
 
-### Accessing task data outside of Label Studio instance
+### Accessing task data outside of MLTL Annotate instance
 
 You can use `label_studio_tools.core.utils.io.get_local_path` method to get data from outside machine for external links and cloud storages. 
 
@@ -376,7 +376,7 @@ You can use `label_studio_tools.core.utils.io.get_local_path` method to get data
 
 You can get data with `label_studio_tools.core.utils.io.get_local_path` in case if you mount same disk to your machine. If you mount same disk to external box 
 
-Another way of accessing data is to use link from task and ACCESS_TOKEN ([see documentation for authentication](access_tokens)). Concatenate Label Studio hostname and link from task data. Then add access token to your request:
+Another way of accessing data is to use link from task and ACCESS_TOKEN ([see documentation for authentication](access_tokens)). Concatenate MLTL Annotate hostname and link from task data. Then add access token to your request:
 
 ```json
 curl -X GET http://localhost:8080/api/projects/ -H 'Authorization: Token {YOUR_TOKEN}'
@@ -389,14 +389,14 @@ curl -X GET http://localhost:8080/api/projects/ -H 'Authorization: Token {YOUR_T
 - 404 or 403 error code was returned. 
 
 **Answer:**
-First check the network access to your Label Studio instance when you send API requests. You can execute test curl request with sample data. 
+First check the network access to your MLTL Annotate instance when you send API requests. You can execute test curl request with sample data. 
 
 #### Question #2: I tried to access files and received a `FileNotFound` error.
 
 **Answer:**
-1. Check that you have mounted the same disk as your Label Studio instance. Then check your files' existence in Label Studio instance first. 
+1. Check that you have mounted the same disk as your MLTL Annotate instance. Then check your files' existence in MLTL Annotate instance first. 
 
-2. Check `LOCAL_FILES_DOCUMENT_ROOT` environment variable in your Label Studio instance and add it to your accessing data script.
+2. Check `LOCAL_FILES_DOCUMENT_ROOT` environment variable in your MLTL Annotate instance and add it to your accessing data script.
 
 
 #### Question #3: How to modify order of categories for COCO and YOLO exports? 

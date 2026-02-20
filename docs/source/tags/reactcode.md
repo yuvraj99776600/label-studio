@@ -4,17 +4,17 @@ short: ReactCode 🧪
 type: tags
 order: 307
 meta_title: ReactCode tag
-meta_description: Label Studio ReactCode tag for creating highly customized, programmable interfaces.
+meta_description: MLTL Annotate ReactCode tag for creating highly customized, programmable interfaces.
 ---
 
-The `<ReactCode>` tag lets you embed a custom labeling UI inside Label Studio, while still storing outputs as regular Label Studio regions/results. 
+The `<ReactCode>` tag lets you embed a custom labeling UI inside MLTL Annotate, while still storing outputs as regular MLTL Annotate regions/results. 
 
 You can use it to bring an external application that you have already created, or to create new custom annotation interfaces tailored to your specific use case. 
 
-Importantly, this allows you to continue leveraging Label Studio's annotation management, review workflows, and data export capabilities.
+Importantly, this allows you to continue leveraging MLTL Annotate's annotation management, review workflows, and data export capabilities.
 
 !!! error Enterprise
-    This tag is only available for Label Studio Enterprise users. For more information, see [Programmable & Embeddable Interfaces](https://humansignal.com/programmable-ui/).
+    This tag is only available for MLTL Annotate users. For more information, see [Programmable & Embeddable Interfaces](https://humansignal.com/programmable-ui/).
 
 ## Parameters
 
@@ -43,7 +43,7 @@ If you are not using it with control tags, you must make it self-referencing (th
 
 ### Data parameter
 
-With other Label Studio tags, you use the `value` parameter to reference task data. 
+With other MLTL Annotate tags, you use the `value` parameter to reference task data. 
 
 But the `ReactCode` does not have a `value` parameter that you can explicitly set.  Instead, to reference task data, there are two approaches you can take:
 
@@ -146,7 +146,7 @@ You can use:
 
 ## Regions API
 
-Your React component receives these props from Label Studio:
+Your React component receives these props from MLTL Annotate:
 
 - **`React`**: React library with hooks (useState, useEffect, useRef, etc.)
 - **`addRegion`**: Function to create new regions
@@ -231,7 +231,7 @@ function MyComponent({ React, addRegion, regions, data, viewState }) {
 
 ## Output format for regions
 
-Regions created with `ReactCode` follow Label Studio's standard format:
+Regions created with `ReactCode` follow MLTL Annotate's standard format:
 
 ```json
 {
@@ -262,7 +262,7 @@ You can optionally use the `outputs` parameter to define the expected structure 
 ```
 
 !!! note
-    The `outputs` parameter defines the schema for validation and documentation purposes. The actual annotation JSON structure is always the same—your data from `addRegion()` is stored in `value.reactcode`. The `outputs` parameter helps Label Studio understand the expected structure for features like model predictions and data export.
+    The `outputs` parameter defines the schema for validation and documentation purposes. The actual annotation JSON structure is always the same—your data from `addRegion()` is stored in `value.reactcode`. The `outputs` parameter helps MLTL Annotate understand the expected structure for features like model predictions and data export.
 
 ### Supported formats
 
@@ -831,7 +831,7 @@ An interface that displays an image and allows adding metadata annotations:
 
 - Use Tailwind classes (pre-loaded) or inline styles
 - For external CSS, ensure it's loaded via CDN in your component
-- Check that styles aren't being overridden by Label Studio's CSS
+- Check that styles aren't being overridden by MLTL Annotate's CSS
 
 
 

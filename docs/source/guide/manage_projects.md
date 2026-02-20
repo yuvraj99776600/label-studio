@@ -1,11 +1,11 @@
 ---
-title: Manage projects in Label Studio Enterprise
+title: Manage projects in MLTL Annotate
 short: Manage projects
 tier: enterprise
 type: guide
 order: 0
 order_enterprise: 116
-meta_title: Manage projects in Label Studio Enterprise
+meta_title: Manage projects in MLTL Annotate
 meta_description: A description of various project management actions available.
 section: "Create & Manage Projects"
 ---
@@ -106,4 +106,4 @@ Pinned projects are pinned to the top of the Projects page.
 
 To delete a project, open the project settings and select the **Danger Zone** page. From here you can access the **Delete Project** action. 
 
-Deleting a project permanently removes all tasks, annotations, and project data from Label Studio.
+Deleting a project permanently removes all tasks, annotations, and project data from MLTL Annotate.

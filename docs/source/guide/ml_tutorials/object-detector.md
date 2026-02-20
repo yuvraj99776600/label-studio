@@ -5,7 +5,7 @@ hide_menu: true
 tier: all
 order: 40
 meta_title: OpenMMLab Image object detector or MMDetection
-meta_description: Label Studio tutorial for OpenMMLab Image object detector or MMDetection
+meta_description: MLTL Annotate tutorial for OpenMMLab Image object detector or MMDetection
 section: "Machine learning"
 parent: "ml_tutorials"
 parent_enterprise: "ml_tutorials"
@@ -21,7 +21,7 @@ Follow this installation guide and then play around with them, picking the best 
 
 1. [Install the model locally](#Installation).
 
-2. Run Label Studio, then go to the **Machine Learning** page in the project settings. Click **Add Model**, then paste the selected ML backend URL, by default `http://localhost:9090`.
+2. Run MLTL Annotate, then go to the **Machine Learning** page in the project settings. Click **Add Model**, then paste the selected ML backend URL, by default `http://localhost:9090`.
 
 3. On the **Labeling Interface** page, select the `COCO annotation` or `Bbox object detection` template. 
    Optionally, you can modify the label config with the `predicted_values` attribute. It provides a list of COCO labels separated by comma. If the object detector outputs any of these labels, they are translated to the actual label name from the `value` attribute.
@@ -53,11 +53,11 @@ Follow this installation guide and then play around with them, picking the best 
 
 The following sections present the different settings for how to run this ML backend based on a specific use case. 
 
-## Run ML backend on the same machine as Label Studio
+## Run ML backend on the same machine as MLTL Annotate
 
-If you run the ML backend on the same machine as Label Studio, you can upload images directly to Label Studio or specify them as remote URLs. 
+If you run the ML backend on the same machine as MLTL Annotate, you can upload images directly to MLTL Annotate or specify them as remote URLs. 
 
-#### Images are uploaded in Label Studio UI
+#### Images are uploaded in MLTL Annotate UI
    ```bash
    label-studio-ml start coco-detector --with \
    config_file=mmdetection/configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py \
@@ -81,10 +81,10 @@ If you change the default upload folder, for example by setting `LABEL_STUDIO_BA
    checkpoint_file=/absolute/path/to/downloaded/checkpoint.pth
    ```
 
-## Run ML backend server on the different machine as Label Studio
+## Run ML backend server on the different machine as MLTL Annotate
 
-When running the ML backend on a separate server instance and connecting it to Label Studio with a remote hostname URL, you must remember that your ML backend server must get the full image URLs.
-In this case, you must provide the Label Studio hostname before running ML backend:
+When running the ML backend on a separate server instance and connecting it to MLTL Annotate with a remote hostname URL, you must remember that your ML backend server must get the full image URLs.
+In this case, you must provide the MLTL Annotate hostname before running ML backend:
 
    ```bash
    LABEL_STUDIO_HOSTNAME=http://my.label-studio.com:8080 label-studio-ml start coco-detector --with \

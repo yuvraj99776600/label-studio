@@ -74,7 +74,7 @@ _ml_backend_schema = {
         tags=['Machine Learning'],
         summary='Add ML Backend',
         description="""
-    Add an ML backend to a project using the Label Studio UI or by sending a POST request using the following cURL 
+    Add an ML backend to a project using the MLTL Annotate UI or by sending a POST request using the following cURL 
     command:
     ```bash
     curl -X POST -H 'Content-type: application/json' {host}/api/ml -H 'Authorization: Token abc123'\\
@@ -155,7 +155,7 @@ class MLBackendListAPI(generics.ListCreateAPIView):
         tags=['Machine Learning'],
         summary='Update ML Backend',
         description="""
-    Update ML backend parameters using the Label Studio UI or by sending a PATCH request using the following cURL command:
+    Update ML backend parameters using the MLTL Annotate UI or by sending a PATCH request using the following cURL command:
     ```bash
     curl -X PATCH -H 'Content-type: application/json' {host}/api/ml/{{ml_backend_ID}} -H 'Authorization: Token abc123'\\
     --data '{{"url": "http://localhost:9091"}}' 
@@ -240,7 +240,7 @@ class MLBackendDetailAPI(generics.RetrieveUpdateDestroyAPIView):
         After you add an ML backend, call this API with the ML backend ID to start training with 
         already-labeled tasks. 
         
-        Get the ML backend ID by [listing the ML backends for a project](https://labelstud.io/api/#operation/api_ml_list).
+        Get the ML backend ID by [listing the ML backends for a project](https://docs.mltl.us/api/#operation/api_ml_list).
         """,
         parameters=[
             OpenApiParameter(
@@ -369,7 +369,7 @@ class MLBackendPredictTestAPI(APIView):
         description="""
         Send a request to the machine learning backend set up to be used for interactive preannotations to retrieve a
         predicted region based on annotator input. 
-        See [set up machine learning](https://labelstud.io/guide/ml.html#Get-interactive-preannotations) for more.
+        See [set up machine learning](https://docs.mltl.us/guide/ml.html#Get-interactive-preannotations) for more.
         """,
         parameters=[
             OpenApiParameter(

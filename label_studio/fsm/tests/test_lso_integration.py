@@ -1,5 +1,5 @@
 """
-Label Studio Open Source FSM Integration Tests.
+MLTL Annotate Open Source FSM Integration Tests.
 
 Tests the core FSM functionality with real Django models in LSO,
 focusing on coverage of state_manager.py and utils modules.

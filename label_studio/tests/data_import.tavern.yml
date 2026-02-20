@@ -169,7 +169,7 @@ stages:
 - name: stage
   request:
     data:
-      url: https://data.heartex.net/q/fffeaf81f4.json
+      url: https://data.mltl.net/q/fffeaf81f4.json
     headers:
       content-type: application/x-www-form-urlencoded
     method: POST
@@ -179,7 +179,7 @@ stages:
 - name: stage
   request:
     data:
-      url: http://data.heartextest.net/test_1.csv
+      url: http://data.mltltest.net/test_1.csv
     headers:
       content-type: application/x-www-form-urlencoded
     method: POST

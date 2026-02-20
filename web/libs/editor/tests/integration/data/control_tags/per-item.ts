@@ -1,12 +1,12 @@
 export const simpleImageData = {
-  image: "https://data.heartex.net/open-images/train_0/mini/0030019819f25b28.jpg",
+  image: "https://data.mltl.net/open-images/train_0/mini/0030019819f25b28.jpg",
 };
 export const simpleMIGData = {
   images: [
-    "https://data.heartex.net/open-images/train_0/mini/0030019819f25b28.jpg",
-    "https://data.heartex.net/open-images/train_0/mini/00155094b7acc33b.jpg",
-    "https://data.heartex.net/open-images/train_0/mini/00133643bbf063a9.jpg",
-    "https://data.heartex.net/open-images/train_0/mini/0061ec6e9576b520.jpg",
+    "https://data.mltl.net/open-images/train_0/mini/0030019819f25b28.jpg",
+    "https://data.mltl.net/open-images/train_0/mini/00155094b7acc33b.jpg",
+    "https://data.mltl.net/open-images/train_0/mini/00133643bbf063a9.jpg",
+    "https://data.mltl.net/open-images/train_0/mini/0061ec6e9576b520.jpg",
   ],
 };
 

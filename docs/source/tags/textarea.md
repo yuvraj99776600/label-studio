@@ -3,7 +3,7 @@ title: TextArea
 type: tags
 order: 427
 meta_title: Textarea Tag for Text areas
-meta_description: Customize Label Studio with the TextArea tag to support audio transcription, image captioning, and OCR tasks for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the TextArea tag to support audio transcription, image captioning, and OCR tasks for machine learning and data science projects.
 ---
 
 The `TextArea` tag is used to display a text area for user input. Use for transcription, paraphrasing, or captioning tasks.

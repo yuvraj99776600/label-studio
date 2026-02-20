@@ -5,7 +5,7 @@ category: Time Series Analysis
 cat: time-series-analysis
 order: 605
 meta_title: Time Series Classification Data Labeling Template
-meta_description: Template for classifying time series data with Label Studio for your machine learning and data science projects.
+meta_description: Template for classifying time series data with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates-misc/time-series-classification.png" alt="" class="gif-border" width="552px" height="546px" />

@@ -1,5 +1,5 @@
 /**
- * Label Studio ModalPopup wrapper
+ * MLTL Annotate ModalPopup wrapper
  *
  * Re-exports Modal components from @humansignal/ui for backward compatibility
  */

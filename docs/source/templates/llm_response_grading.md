@@ -15,7 +15,7 @@ Sometimes it is useful to assign a grade to the LLM response based on the qualit
 
 In this example, you are grading an LLM's ability to summarize a document. The input data includes the document and the summary, and then you are rating the summary on a scale of 1 through 5. 
 
-For a tutorial on how to use this template with the Label Studio SDK, see [Evaluate LLM Responses](https://api.labelstud.io/tutorials/tutorials/evaluate-llm-responses). 
+For a tutorial on how to use this template with the MLTL Annotate SDK, see [Evaluate LLM Responses](https://api.labelstud.io/tutorials/tutorials/evaluate-llm-responses). 
 
 ## Configure the labeling interface
 

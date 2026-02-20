@@ -5,7 +5,7 @@ category: Ranking and Scoring
 cat: ranking-and-scoring
 order: 425
 meta_title: Content-based Image Retrieval Data Labeling Template
-meta_description: Template for labeling data for content-based image retrieval tasks with Label Studio for your machine learning and data science projects.
+meta_description: Template for labeling data for content-based image retrieval tasks with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/content-based-image-search.png" alt="" class="gif-border" width="552px" height="408px" />

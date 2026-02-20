@@ -39,7 +39,7 @@ def forward(apps, _):
             command = 'label-studio annotations_fill_updated_by'
             logger = logging.getLogger(__name__)
             logger.error(
-                "There are over 100,000 annotations in this label studio instance, please run this "
+                "There are over 100,000 annotations in this MLTL Annotate instance, please run this "
                 f"migration manually using {command}"
             )
             return

@@ -2,11 +2,11 @@
   "projectCreation": [
     {
       "title": "New Storage Connector",
-      "content": "You can connect Label Studio Enterprise to Databricks Unity Catalog (UC) Volumes to import files as tasks and export annotations.",
+      "content": "You can connect MLTL Annotate to Databricks Unity Catalog (UC) Volumes to import files as tasks and export annotations.",
       "closable": true,
       "link": {
         "label": "Learn more",
-        "url": "https://docs.humansignal.com/guide/storage.html#Databricks-Files-UC-Volumes",
+        "url": "https://docs.mltl.us/guide/storage.html#Databricks-Files-UC-Volumes",
         "params": {
           "experiment": "project_creation_tip",
           "treatment": "databricks_uc_live"
@@ -15,7 +15,7 @@
     },
     {
       "title": "Did you know?",
-      "content": "Try Label Studio Starter Cloud, optimized for small teams and projects.",
+      "content": "Try MLTL Annotate Starter Cloud, optimized for small teams and projects.",
       "link": {
         "label": "Learn more",
         "url": "https://humansignal.com/pricing/",
@@ -27,11 +27,11 @@
     },
     {
       "title": "Did you know?",
-      "content": "You can control access to specific projects and workspaces for internal team members and external annotators using Label Studio Enterprise.",
+      "content": "You can control access to specific projects and workspaces for internal team members and external annotators using MLTL Annotate.",
       "closable": true,
       "link": {
         "label": "Learn more",
-        "url": "https://docs.humansignal.com/guide/manage_users#Roles-in-Label-Studio-Enterprise",
+        "url": "https://docs.mltl.us/guide/manage_users#Roles-in-Label-Studio-Enterprise",
         "params": {
           "experiment": "project_creation_tip",
           "treatment": "access_to_projects_live"
@@ -40,7 +40,7 @@
     },
     {
       "title": "Labeling for GenAI",
-      "content": "Label Studio has templates available for supervised LLM fine-tuning, RAG retrieval ranking, RLHF, chatbot evaluation, and more.",
+      "content": "MLTL Annotate has templates available for supervised LLM fine-tuning, RAG retrieval ranking, RLHF, chatbot evaluation, and more.",
       "closable": true,
       "link": {
         "label": "Explore templates",
@@ -55,11 +55,11 @@
   "organizationPage": [
     {
       "title": "It looks like your team is growing!",
-      "content": "Assign roles to your team using Label Studio Enterprise and control access to sensitive data at the project and workspace levels.",
+      "content": "Assign roles to your team using MLTL Annotate and control access to sensitive data at the project and workspace levels.",
       "closable": true,
       "link": {
         "label": "Learn more",
-        "url": "https://docs.humansignal.com/guide/manage_users#Roles-in-Label-Studio-Enterprise",
+        "url": "https://docs.mltl.us/guide/manage_users#Roles-in-Label-Studio-Enterprise",
         "params": {
           "experiment": "organization_page_tip",
           "treatment": "team_growing_live"
@@ -68,11 +68,11 @@
     },
     {
       "title": "Want to simplify and secure logging in?",
-      "content": "Enable Single Sign-On for your team using SAML, SCIM2 or LDAP with Label Studio Enterprise.",
+      "content": "Enable Single Sign-On for your team using SAML, SCIM2 or LDAP with MLTL Annotate.",
       "closable": true,
       "link": {
         "label": "Learn more",
-        "url": "https://docs.humansignal.com/guide/auth_setup",
+        "url": "https://docs.mltl.us/guide/auth_setup",
         "params": {
           "experiment": "organization_page_tip",
           "treatment": "enable_sso_live"
@@ -81,7 +81,7 @@
     },
     {
       "title": "Did you know?",
-      "content": "Label Studio now has a Starter Cloud offering optimized for small teams and projects.",
+      "content": "MLTL Annotate now has a Starter Cloud offering optimized for small teams and projects.",
       "link": {
         "label": "Learn more",
         "url": "https://humansignal.com/pricing/",
@@ -93,7 +93,7 @@
     },
     {
       "title": "Share knowledge with the community",
-      "content": "Have questions or a tip to share with other Label Studio users? Join the community slack channel for the latest updates. ",
+      "content": "Have questions or a tip to share with other MLTL Annotate users? Join the community slack channel for the latest updates. ",
       "closable": true,
       "link": {
         "label": "Join the community",
@@ -106,7 +106,7 @@
     },
     {
       "title": "Did you know?",
-      "content": "Label Studio supports multiple points of integration with cloud storage, machine learning models, and popular tools to automate your machine learning pipeline.",
+      "content": "MLTL Annotate supports multiple points of integration with cloud storage, machine learning models, and popular tools to automate your machine learning pipeline.",
       "closable": true,
       "link": {
         "label": "Check out the integrations directory",
@@ -119,7 +119,7 @@
     },
     {
       "title": "Need Compliance?",
-      "content": "Label Studio Enterprise is fully SOC 2 and HIPAA compliant. Want more control? Deploy it On-Premises for maximum flexibility.",
+      "content": "MLTL Annotate is fully SOC 2 and HIPAA compliant. Want more control? Deploy it On-Premises for maximum flexibility.",
       "closable": true,
       "link": {
         "label": "Contact us",
@@ -133,8 +133,8 @@
   ],
   "projectSettings": [
     {
-      "title": "Apply your AWS spend to Label Studio Enterprise",
-      "content": "Label Studio Enterprise is now available on the AWS Marketplace so you can use your committed spend to streamline data labeling workflows.",
+      "title": "Apply your AWS spend to MLTL Annotate",
+      "content": "MLTL Annotate is now available on the AWS Marketplace so you can use your committed spend to streamline data labeling workflows.",
       "closable": true,
       "link": {
         "label": "Learn more",
@@ -151,7 +151,7 @@
       "closable": true,
       "link": {
         "label": "Learn more",
-        "url": "https://docs.humansignal.com/guide/prompts_overview#Auto-labeling-with-Prompts",
+        "url": "https://docs.mltl.us/guide/prompts_overview#Auto-labeling-with-Prompts",
         "params": {
           "experiment": "project_settings_tip",
           "treatment": "auto_labeling_live"
@@ -160,7 +160,7 @@
     },
     {
       "title": "Did you know?",
-      "content": "Try Label Studio Starter Cloud, optimized for small teams and projects.",
+      "content": "Try MLTL Annotate Starter Cloud, optimized for small teams and projects.",
       "closable": true,
       "link": {
         "label": "Learn more",
@@ -190,7 +190,7 @@
       "closable": true,
       "link": {
         "label": "Learn more",
-        "url": "https://labelstud.io/guide/ml",
+        "url": "https://docs.mltl.us/guide/ml",
         "params": {
           "experiment": "project_settings_tip",
           "treatment": "connect_ml_models_live"
@@ -199,7 +199,7 @@
     },
     {
       "title": "Native PDF support is coming!",
-      "content": "Label Studio Enterprise provides native PDF support.",
+      "content": "MLTL Annotate provides native PDF support.",
       "closable": true,
       "link": {
         "label": "Request early access",
@@ -214,7 +214,7 @@
   "authPage": [
     {
       "title": "Live Event Dec 10th",
-      "description": "Join the Label Studio product team for a fast-paced tour of this year's biggest releases",
+      "description": "Join the MLTL Annotate product team for a fast-paced tour of this year's biggest releases",
       "link": {
         "label": "December 10, 2025 9am PST",
         "url": "https://humansignal.com/webinars/label-studio-wrapped-2025/",
@@ -229,7 +229,7 @@
       "description": "Use LLMs to instantly pre-label thousands of tasks with accurate predictions.",
       "link": {
         "label": "Learn more",
-        "url": "https://docs.humansignal.com/guide/prompts_overview",
+        "url": "https://docs.mltl.us/guide/prompts_overview",
         "params": {
           "experiment": "login_revamp",
           "treatment": "prompts_auto_labeling_live"
@@ -238,7 +238,7 @@
     },
     {
       "title": "Behind the benchmark",
-      "description": "Learn how Legalbenchmarks.ai built and scaled a benchmark for practical contract drafting tasks using LLM-as-a-judge and human review in Label Studio Enterprise.",
+      "description": "Learn how Legalbenchmarks.ai built and scaled a benchmark for practical contract drafting tasks using LLM-as-a-judge and human review in MLTL Annotate.",
       "link": {
         "label": "Learn more",
         "url": "https://humansignal.com/blog/how-legalbenchmarks-ai-built-a-domain-specific-ai-benchmark/",
@@ -250,7 +250,7 @@
     },
     {
       "title": "New Enterprise Feature!",
-      "description": "Chat conversations are now a native data type for creating and evaluating chat-based AI experiences in Label Studio.",
+      "description": "Chat conversations are now a native data type for creating and evaluating chat-based AI experiences in MLTL Annotate.",
       "link": {
         "label": "Learn more",
         "url": "https://humansignal.com/blog/introducing-chat-4-use-cases-to-ship-a-high-quality-chatbot/",
@@ -262,7 +262,7 @@
     },
     {
       "title": "Did you know?",
-      "description": "Try Label Studio Starter Cloud, optimized for small teams and projects.",
+      "description": "Try MLTL Annotate Starter Cloud, optimized for small teams and projects.",
       "link": {
         "label": "Learn more",
         "url": "https://humansignal.com/pricing/",
@@ -274,7 +274,7 @@
     },
     {
       "title": "Did you know?",
-      "description": "There's an Enterprise version of Label Studio packed with more features and automation to label data faster while ensuring the highest quality.",
+      "description": "There's an Enterprise version of MLTL Annotate packed with more features and automation to label data faster while ensuring the highest quality.",
       "link": {
         "label": "Learn more",
         "url": "https://humansignal.com/goenterprise/",

@@ -1,8 +1,8 @@
-url: https://docs.humansignal.com/
+url: https://docs.mltl.us/
 
 theme_config:
   tier: enterprise
-  root_domain: "heartex.com"
+  root_domain: "mltl.com"
 
 # Deployment
 deploy:

@@ -5,7 +5,7 @@ category: Computer Vision
 cat: computer-vision
 order: 140
 meta_title: Multi-Image Classification Data Labeling Template
-meta_description: Template for classifying multiple images at once with Label Studio for your machine learning and data science projects.
+meta_description: Template for classifying multiple images at once with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates-misc/multi-image-classification.png" alt="" class="gif-border" width="552px" height="389px" />
@@ -74,7 +74,7 @@ Within that first [View](/tags/view.html) tag, the [Image](/tags/image.html) obj
 ```xml
 <Image name="img-left" value="$image1"/>
 ```
-The `value` parameter specifies a JSON key of `"image1"` in the Label Studio JSON task that must be imported with URLs to both images. 
+The `value` parameter specifies a JSON key of `"image1"` in the MLTL Annotate JSON task that must be imported with URLs to both images. 
 
 The [Choices](/tags/choices.html) control tag displays classification options that apply to the image on the left, specified with the `toName` parameter. The `choice` parameter indicates that annotators can select multiple choices:
 ```xml
@@ -94,7 +94,7 @@ Within this [View](/tags/view.html) tag, the [Image](/tags/image.html) object ta
 ```xml
 <Image name="img-right" value="$image2"/>
 ```
-The `value` parameter specifies a JSON key of `"image2"` in the Label Studio JSON task that must be imported with URLs to both images. 
+The `value` parameter specifies a JSON key of `"image2"` in the MLTL Annotate JSON task that must be imported with URLs to both images. 
 
 The [Choices](/tags/choices.html) control tag displays classification options that apply to the image on the right, specified with the `toName` parameter:
 ```xml

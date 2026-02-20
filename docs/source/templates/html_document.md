@@ -5,7 +5,7 @@ category: Structured Data Parsing
 cat: structured-data-parsing
 order: 515
 meta_title: HTML Entity Resolution Data Labeling Template
-meta_description: Template for performing HTML document entity resolution with Label Studio for your machine learning and data science projects.
+meta_description: Template for performing HTML document entity resolution with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <br/><img src="/images/templates/html-entity-recognition.png" alt="" class="gif-border" width="552px" height="408px" />

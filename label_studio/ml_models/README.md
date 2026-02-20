@@ -1,10 +1,10 @@
 # ML Models
 
-Currently supporting a feature in [Label Studio Enterprise](https://github.com/HumanSignal/label-studio-enterprise).
+Currently supporting a feature in [MLTL Annotate](https://github.com/yuvraj99776600/label-studio-enterprise).
 
 ## ModelInterface
 
-Defines a "type signature" for the inputs and outputs for an LLM call as related to a Label Studio project.
+Defines a "type signature" for the inputs and outputs for an LLM call as related to a MLTL Annotate project.
 
 ## ModelVersion
 

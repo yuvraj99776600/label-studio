@@ -6,7 +6,7 @@ cat: llm-fine-tuning
 order: 903
 is_new: t
 meta_title: Create dataset for supervised LLM fine-tuning
-meta_description: Template for creating dataset for supervised LLM fine-tuning with Label Studio for your machine learning and data science projects.
+meta_description: Template for creating dataset for supervised LLM fine-tuning with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/generative-supervised-llm.png" alt="" class="gif-border" width="700px"/>
@@ -16,9 +16,9 @@ This template is designed for you to get started with the process of supervised 
 The goal of supervised LLM fine-tuning is to optimize your large language model (LLM) to generate responses given user-defined prompts which are more context specific than the original foundation model.
 
 <a href="https://app.humansignal.com/b/MTk1"
-  target="_blank" rel="noopener" aria-label="Open in Label Studio" style="all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;border:1px solid rgb(109,135,241);padding:8px 12px;background:rgb(87 108 193);color:white;font-weight:500;font-family:sans-serif;gap:6px;transition:background 0.2s ease;" onmouseover="this.style.background='rgb(97 122 218)'" onmouseout="this.style.background='rgb(87 108 193)'">
+  target="_blank" rel="noopener" aria-label="Open in MLTL Annotate" style="all:unset;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;border:1px solid rgb(109,135,241);padding:8px 12px;background:rgb(87 108 193);color:white;font-weight:500;font-family:sans-serif;gap:6px;transition:background 0.2s ease;" onmouseover="this.style.background='rgb(97 122 218)'" onmouseout="this.style.background='rgb(87 108 193)'">
   <svg style="width:20px;height:20px" viewBox="0 0 26 26" fill="none"><path fill="none" d="M3.5 4.5h19v18h-19z"/><path fill-rule="evenodd" clip-rule="evenodd" d="M25.7 7.503h-7.087V5.147H7.588V2.792h11.025V.436H25.7v7.067Zm-18.112 0H5.225v10.994H2.863V7.503H.5V.436h7.088v7.067Zm0 18.061v-7.067H.5v7.067h7.088ZM25.7 18.497v7.067h-7.088v-2.356H7.588v-2.355h11.025v-2.356H25.7Zm-2.363 0V7.503h-2.363v10.994h2.363Z" fill="white"/></svg>
-  <span style="font-size:14px">Open in Label Studio</span>
+  <span style="font-size:14px">Open in MLTL Annotate</span>
   <svg style="width:16px;height:16px" viewBox="0 0 24 24"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" fill="white"/></svg>
 </a>
 
@@ -76,13 +76,13 @@ Start your project with collecting initial set of prompts:
 ]
 ```
 
-Each JSON item will be rendered as a separate task in Label Studio to complete the response.
+Each JSON item will be rendered as a separate task in MLTL Annotate to complete the response.
 
 ## Starting your labeling project
 
-*Need a hand getting started with Label Studio? Check out our [Zero to One Tutorial](https://labelstud.io/blog/zero-to-one-getting-started-with-label-studio/).*
+*Need a hand getting started with MLTL Annotate? Check out our [Zero to One Tutorial](https://mltl.us/blog/zero-to-one-getting-started-with-label-studio/).*
 
-1. Create new project in Label Studio
+1. Create new project in MLTL Annotate
 2. Go to **Settings > Labeling Interface > Browse Templates > Generative AI > Supervised LLM Fine-tuning**
 3. Save
 Alternatively, you can create a new project by using our Python SDK:
@@ -96,7 +96,7 @@ project = ls.create_project(title='Chatbot Model Assessment', label_config='<Vie
 
 ## Import the dataset
 
-Using the Python SDK you can import the dataset with input prompts into Label Studio. With the `PROJECT_ID` of the project
+Using the Python SDK you can import the dataset with input prompts into MLTL Annotate. With the `PROJECT_ID` of the project
 you've just created, run the following code:
 
 ```python
@@ -115,7 +115,7 @@ Then you can start annotating the dataset by creating the responses.
 There have to be from hundreds to thousands of tasks labeled to get your LLM being fine-tuned, depending on the
 complexity of your problem statement.
 
-After you've labeled enough tasks, you can export the dataset in the following raw Label Studio JSON format:
+After you've labeled enough tasks, you can export the dataset in the following raw MLTL Annotate JSON format:
 
 ```json
 [

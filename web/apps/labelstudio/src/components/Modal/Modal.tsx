@@ -1,5 +1,5 @@
 /**
- * Label Studio Modal wrapper
+ * MLTL Annotate Modal wrapper
  *
  * This file provides backward compatibility by wrapping @humansignal/ui Modal
  * with LS-specific providers automatically injected.

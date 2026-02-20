@@ -5,7 +5,7 @@ category: Conversational AI
 cat: conversational-ai
 order: 801
 meta_title: Response Generation Data Labeling Template
-meta_description: Template for generating responses in natural language understanding use cases with Label Studio for your machine learning and data science projects.
+meta_description: Template for generating responses in natural language understanding use cases with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/response-generation.png" alt="" class="gif-border" width="552px" height="408px" />

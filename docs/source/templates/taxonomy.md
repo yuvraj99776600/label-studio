@@ -5,7 +5,7 @@ category: Natural Language Processing
 cat: natural-language-processing
 order: 210
 meta_title: Taxonomy Data Labeling Template
-meta_description: Template for classifying a taxonomy or hierarchy with Label Studio for your machine learning and data science projects.
+meta_description: Template for classifying a taxonomy or hierarchy with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/taxonomy.png" alt="" class="gif-border" width="552px" height="408px" />
@@ -101,7 +101,7 @@ The remote taxonomy must use JSON with items in the following format:
 
 ### Securing the taxonomy
 
-The `apiUrl` must be accessible to Label Studio. You can accomplish this in several ways:
+The `apiUrl` must be accessible to MLTL Annotate. You can accomplish this in several ways:
 * The URL is public. 
 * The URL is hosted on a local server. 
 * The URL includes the username and password, for example `http://username:password@example.com/`. 
@@ -114,7 +114,7 @@ The `apiUrl` must be accessible to Label Studio. You can accomplish this in seve
 1. Save your taxonomy in a separate bucket from your task data. 
 
     If you are unable to use a separate bucket for your taxonomy, see the workaround below. 
-2. [Follow these instructions](/guide/storage) to set up cloud storage for Label Studio. This should be a separate connection from your other storage connections.
+2. [Follow these instructions](/guide/storage) to set up cloud storage for MLTL Annotate. This should be a separate connection from your other storage connections.
 
     <div class="admonition note"><p class="admonition-title">note</p><p>Do not sync this storage connection. If you do, you will need to delete the task that is automatically created when syncing the taxonomy.</p></div>
 
@@ -122,7 +122,7 @@ The `apiUrl` must be accessible to Label Studio. You can accomplish this in seve
 
 
 !!! warning Note on setting up cloud storage
-    If you perform a sync operation on a storage connection that contains your taxonomy, then the entire taxonomy will be pulled into Label Studio as a task. The result may be severely degraded Label Studio performance, depending on the size of your taxonomy. This can present a problem when you are using cloud storage synchronization to populate Label Studio tasks. 
+    If you perform a sync operation on a storage connection that contains your taxonomy, then the entire taxonomy will be pulled into MLTL Annotate as a task. The result may be severely degraded MLTL Annotate performance, depending on the size of your taxonomy. This can present a problem when you are using cloud storage synchronization to populate MLTL Annotate tasks. 
     
     There are several workarounds for this issue:
     - After syncing, simply delete the task. 

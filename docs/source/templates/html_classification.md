@@ -5,7 +5,7 @@ category: Structured Data Parsing
 cat: structured-data-parsing
 order: 520
 meta_title: HTML Classification Data Labeling Template
-meta_description: Template for classifying HTML documents with Label Studio for your machine learning and data science projects.
+meta_description: Template for classifying HTML documents with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates-misc/html-classification.png" alt="" class="gif-border" width="552px" height="352px" />
@@ -60,7 +60,7 @@ Styling on the [View](/tags/view.html) tag adds a border around the website cont
                padding: 5px">
 ```
 
-The [HyperText](/tags/hypertext.html) object tag displays the website content, specified in the `text` key of Label Studio JSON format or imported as plain text.
+The [HyperText](/tags/hypertext.html) object tag displays the website content, specified in the `text` key of MLTL Annotate JSON format or imported as plain text.
 ```xml
     <HyperText name="web_page" value="$text"/>
 ```

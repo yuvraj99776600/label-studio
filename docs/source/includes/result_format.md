@@ -1,4 +1,4 @@
-## How Label Studio saves results in annotations
+## How MLTL Annotate saves results in annotations
 
 Each annotation result consists of list or items, also called _regions_, stored under `annotation.result` field:
 ```json

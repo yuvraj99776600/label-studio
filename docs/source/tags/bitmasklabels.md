@@ -3,7 +3,7 @@ title: BitmaskLabels
 type: tags
 order: 402
 meta_title: Bitmask Label Tag for Pixel-Wise Image Segmentation Labeling
-meta_description: Customize Label Studio with bitmask pixel-wise label tags for image segmentation labeling for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with bitmask pixel-wise label tags for image segmentation labeling for machine learning and data science projects.
 ---
 
 The `Bitmask` tag is for pixel-wise image segmentation tasks, and is used in the area where you want to apply a mask or use a brush to draw a region on the image.

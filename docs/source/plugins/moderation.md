@@ -24,7 +24,7 @@ In the example below, if a user tries to submit an annotation with the word “h
 
 Note that this is a "soft" block, meaning that the user can dismiss the modal and still proceed. For an example of a "hard" block, see [Validate JSON](json_validation). 
 
-![Screenshot of moderation modal in Label Studio](/images/plugins/moderation.png)
+![Screenshot of moderation modal in MLTL Annotate](/images/plugins/moderation.png)
 
 
 ## Plugin
@@ -38,7 +38,7 @@ Note that this is a "soft" block, meaning that the user can dismiss the modal an
  * prevents submission. This would happen only once, if user clicks Submit again it would
  * work with no errors.
  *
- * The plugin uses Label Studio's beforeSaveAnnotation event which is triggered before
+ * The plugin uses MLTL Annotate's beforeSaveAnnotation event which is triggered before
  * an annotation is saved. Returning false from this event handler prevents the save
  * operation from completing.
  */
@@ -102,7 +102,7 @@ LSI.on("beforeSaveAnnotation", (store, ann) => {
 ```json
 [
   {
-    "audio": "https://data.heartex.net/librispeech/dev-clean/3536/8226/3536-8226-0024.flac.wav"
+    "audio": "https://data.mltl.net/librispeech/dev-clean/3536/8226/3536-8226-0024.flac.wav"
   }
 ]
 ```

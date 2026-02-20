@@ -5,12 +5,12 @@ category: Ranking and Scoring
 cat: ranking-and-scoring
 order: 420
 meta_title: Pairwise Classification Data Labeling Template
-meta_description: Template for performing pairwise classification and comparison tasks with Label Studio for your machine learning and data science projects.
+meta_description: Template for performing pairwise classification and comparison tasks with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/pairwise-classification.png" alt="" class="gif-border" width="552px" height="408px" />
 
-Perform pairwise classification and comparison of different objects with Label Studio using this template.
+Perform pairwise classification and comparison of different objects with MLTL Annotate using this template.
 
 ## Interactive Template Preview
 

@@ -3,7 +3,7 @@ title: KeyPoint
 type: tags
 order: 409
 meta_title: Keypoint Tag for Adding Keypoints to Images
-meta_description: Customize Label Studio with the KeyPoint tag to add key points to images for computer vision machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the KeyPoint tag to add key points to images for computer vision machine learning and data science projects.
 ---
 
 The `KeyPoint` tag is used to add a key point to an image without selecting a label. This can be useful when you have only one label to assign to the key point.

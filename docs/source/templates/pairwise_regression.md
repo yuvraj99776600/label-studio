@@ -5,7 +5,7 @@ category: Ranking and Scoring
 cat: ranking-and-scoring
 order: 415
 meta_title: Pairwise Regression Data Labeling Template
-meta_description: Template for performing pairwise comparison tasks for regression models with Label Studio for your machine learning and data science projects.
+meta_description: Template for performing pairwise comparison tasks for regression models with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/pairwise-regression.png" alt="" class="gif-border" width="552px" height="408px" />

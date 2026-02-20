@@ -71,7 +71,7 @@ class LocalFilesMixin(models.Model):
     def community_auto_hint():
         if settings.VERSION_EDITION == 'Community':
             return (
-                ' Community tip: create a "mydata" or "label-studio-data" directory next to the Label Studio '
+                ' Community tip: create a "mydata" or "label-studio-data" directory next to the MLTL Annotate '
                 'command to auto-enable LOCAL_FILES_DOCUMENT_ROOT when the environment variables are unset.'
             )
         return ''
@@ -102,8 +102,8 @@ class LocalFilesMixin(models.Model):
                 'Serving local files from the host filesystem can be a security risk, so '
                 'LOCAL_FILES_SERVING_ENABLED is disabled by default. '
                 'To enable Local Files storage, set the LOCAL_FILES_SERVING_ENABLED environment '
-                'variable to "true" and restart Label Studio. See '
-                'https://labelstud.io/guide/storage.html#Local-storage for details.'
+                'variable to "true" and restart MLTL Annotate. See '
+                'https://docs.mltl.us/guide/storage.html#Local-storage for details.'
                 '\n\n'
                 f'{self.community_auto_hint()}'
             )

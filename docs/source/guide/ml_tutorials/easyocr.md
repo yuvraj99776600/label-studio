@@ -6,7 +6,7 @@ order: 40
 hide_menu: true
 hide_frontmatter_title: true
 meta_title: EasyOCR model connection for transcribing text in images
-meta_description: The EasyOCR model connection integrates the capabilities of EasyOCR with Label Studio to assist in machine learning labeling tasks involving Optical Character Recognition (OCR).
+meta_description: The EasyOCR model connection integrates the capabilities of EasyOCR with MLTL Annotate to assist in machine learning labeling tasks involving Optical Character Recognition (OCR).
 categories:
     - Computer Vision
     - Optical Character Recognition
@@ -16,21 +16,21 @@ image: "/guide/ml_tutorials/easyocr.png"
 
 # EasyOCR model connection
 
-The [EasyOCR](https://github.com/JaidedAI/EasyOCR) model connection is a powerful tool that integrates the capabilities of EasyOCR with Label Studio. It is designed to assist in machine learning labeling tasks, specifically those involving Optical Character Recognition (OCR). 
+The [EasyOCR](https://github.com/JaidedAI/EasyOCR) model connection is a powerful tool that integrates the capabilities of EasyOCR with MLTL Annotate. It is designed to assist in machine learning labeling tasks, specifically those involving Optical Character Recognition (OCR). 
 
 The primary function of this connection is to recognize and extract text from images, which can be a crucial step in many machine learning workflows. By automating this process, the EasyOCR model connection can significantly increase efficiency, reducing the time and effort required for manual text extraction.
 
-In the context of Label Studio, this connection enhances the platform's labeling capabilities, allowing users to automatically generate labels for text in images. This can be particularly useful in tasks such as data annotation, document digitization, and more.
+In the context of MLTL Annotate, this connection enhances the platform's labeling capabilities, allowing users to automatically generate labels for text in images. This can be particularly useful in tasks such as data annotation, document digitization, and more.
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`easyocr` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/easyocr). 
+This tutorial uses the [`easyocr` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/easyocr). 
 
 ## Labeling configuration
 
-The EasyOCR model connection can be used with the default labeling configuration for OCR in Label Studio. This configuration typically involves defining the types of labels to be used (e.g., text, handwriting, etc.) and the regions of the image where these labels should be applied.
+The EasyOCR model connection can be used with the default labeling configuration for OCR in MLTL Annotate. This configuration typically involves defining the types of labels to be used (e.g., text, handwriting, etc.) and the regions of the image where these labels should be applied.
 
 When setting the labeling configuration, select the **Computer Vision > Optical Character Recognition**. This template is pre-configured for OCR tasks and includes the necessary elements for labeling text in images:
 
@@ -59,7 +59,7 @@ When setting the labeling configuration, select the **Computer Vision > Optical 
 ```
 
 
-> Warning! Please note that the current implementation of the EasyOCR model connection does not support images that are directly uploaded to Label Studio. It is designed to work with images that are hosted publicly on the internet. Therefore, to use this connection, you should ensure that your images are publicly accessible via a URL.
+> Warning! Please note that the current implementation of the EasyOCR model connection does not support images that are directly uploaded to MLTL Annotate. It is designed to work with images that are hosted publicly on the internet. Therefore, to use this connection, you should ensure that your images are publicly accessible via a URL.
 
 
 ## Running with Docker (recommended)
@@ -77,7 +77,7 @@ $ curl http://localhost:9090/
 {"status":"UP"}
 ```
 
-3. Create a project in Label Studio. Then from the **Model** page in the project settings, [connect the model](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
+3. Create a project in MLTL Annotate. Then from the **Model** page in the project settings, [connect the model](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
 
 
 ## Building from source (advanced)
@@ -117,8 +117,8 @@ The EasyOCR model connection offers several configuration options that can be se
 - `LABEL_MAPPINGS_FILE`: Specifies the file with mappings from COCO labels to custom labels.
 - `DEVICE`: Specifies the device to be used (cpu, cuda:0, cuda:1, etc.).
 - `HEIGHT_THS`: Sets the maximum difference in box height. Boxes with very different text size should not be merged.
-- `LABEL_STUDIO_ACCESS_TOKEN`: Specifies the Label Studio access token.
-- `LABEL_STUDIO_HOST`: Specifies the Label Studio host.
+- `LABEL_STUDIO_ACCESS_TOKEN`: Specifies the MLTL Annotate access token.
+- `LABEL_STUDIO_HOST`: Specifies the MLTL Annotate host.
 
 These options allow you to customize the behavior of the EasyOCR model connection to suit your specific needs.
 

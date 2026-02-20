@@ -33,7 +33,7 @@ As an example, if you wanted to configure a Google Storage Bucket with the right
 gsutil cors set gcp_cors_config.json gs://BUCKET-NAME
 ```
 
-Note that in the gcp_cors_config.json example given in this directory that we have set `origin` to `*`, which means all origins can access that data, as well as set `responseHeader` to `*`, which means all HTTP response headers can be accessed. In a real scenario you probably want to think through the security ramifications of this for your own particular Label Studio setup.
+Note that in the gcp_cors_config.json example given in this directory that we have set `origin` to `*`, which means all origins can access that data, as well as set `responseHeader` to `*`, which means all HTTP response headers can be accessed. In a real scenario you probably want to think through the security ramifications of this for your own particular MLTL Annotate setup.
 
 # Start
 

@@ -45,7 +45,7 @@ export const ProjectDashboards: Story = {
     description:
       "Performance analytics are available within the Enterprise plan. Contact our sales team to get access to this and more!",
     feature: "Project Dashboards",
-    learnMoreUrl: "https://docs.humansignal.com/guide/dashboards.html",
+    learnMoreUrl: "https://docs.mltl.us/guide/dashboards.html",
   },
 };
 
@@ -57,7 +57,7 @@ export const SSOAndSecurity: Story = {
     title: "SSO & Advanced Security",
     description: "Enable Single Sign-On, advanced security features, and compliance tools with our Enterprise plan.",
     feature: "SSO & Security Features",
-    learnMoreUrl: "https://docs.humansignal.com/guide/security.html",
+    learnMoreUrl: "https://docs.mltl.us/guide/security.html",
     secondaryButtonLabel: "Learn more",
   },
 };
@@ -70,7 +70,7 @@ export const CustomWorkflows: Story = {
     title: "Advanced Workflows",
     description: "Create custom automation workflows and advanced labeling pipelines with our Enterprise plan.",
     feature: "Advanced Workflows",
-    learnMoreUrl: "https://docs.humansignal.com/guide/workflows.html",
+    learnMoreUrl: "https://docs.mltl.us/guide/workflows.html",
   },
 };
 

@@ -6,7 +6,7 @@ type: guide
 order: 0
 order_enterprise: 137
 meta_title: Bulk Labeling
-meta_description: Bulk labeling in Label Studio
+meta_description: Bulk labeling in MLTL Annotate
 section: "Create & Manage Projects"
 parent: "labeling"
 parent_enterprise: "labeling"

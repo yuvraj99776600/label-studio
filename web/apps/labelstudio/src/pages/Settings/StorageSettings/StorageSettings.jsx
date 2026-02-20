@@ -161,7 +161,7 @@ export const StorageSettings = () => {
               !window.APP_SETTINGS?.whitelabel_is_active && (
                 <Typography variant="label" size="small" className="text-primary-link">
                   <a
-                    href="https://docs.humansignal.com/guide/storage"
+                    href="https://docs.mltl.us/guide/storage"
                     target="_blank"
                     rel="noopener noreferrer"
                     data-testid="storage-help-link"

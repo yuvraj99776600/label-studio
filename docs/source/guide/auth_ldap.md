@@ -1,31 +1,31 @@
 ---
-title: Set up LDAP authentication for Label Studio
+title: Set up LDAP authentication for MLTL Annotate
 short: LDAP
 tier: enterprise
 type: guide
 order: 0
 order_enterprise: 385
-meta_title: LDAP authentication for Label Studio Enterprise
-meta_description: Label Studio Enterprise documentation for setting up LDAP authentication for your data labeling, machine learning, and data science projects.
+meta_title: LDAP authentication for MLTL Annotate
+meta_description: MLTL Annotate documentation for setting up LDAP authentication for your data labeling, machine learning, and data science projects.
 section: "Manage Your Organization"
 parent: "admin_auth"
 parent_enterprise: "admin_auth"
 date: 2024-05-24 09:08:58
 ---
 
-Set up LDAP authentication to manage access to Label Studio.
+Set up LDAP authentication to manage access to MLTL Annotate.
 
 !!! error Enterprise
-    LDAP authentication is only available in Label Studio Enterprise Edition and is only available for on-prem installations. If you're using Label Studio Community Edition, see <a href="https://labelstud.io/guide/label_studio_compare.html">Label Studio Features</a> to learn more.
+    LDAP authentication is only available in MLTL Annotate Edition and is only available for on-prem installations. If you're using Label Studio Community Edition, see <a href="https://docs.mltl.us/guide/label_studio_compare.html">Label Studio Features</a> to learn more.
 
 
-To more easily [manage access to Label Studio Enterprise](manage_users.html), you can map LDAP groups to both `roles` or `workspaces`. 
+To more easily [manage access to MLTL Annotate](manage_users.html), you can map LDAP groups to both `roles` or `workspaces`. 
 
 ## Set up LDAP authentication 
 
-After you set up LDAP authentication, you can no longer use native authentication to log in to the Label Studio UI. Set up LDAP authentication and assign LDAP users to your Label Studio Enterprise organization using environment variables in Docker. 
+After you set up LDAP authentication, you can no longer use native authentication to log in to the MLTL Annotate UI. Set up LDAP authentication and assign LDAP users to your MLTL Annotate organization using environment variables in Docker. 
 
-You can also map specific LDAP groups to specific organization roles and workspaces in Label Studio Enterprise, making it easier to set up and manage role-based access control (RBAC) and project access in Label Studio Enterprise. 
+You can also map specific LDAP groups to specific organization roles and workspaces in MLTL Annotate, making it easier to set up and manage role-based access control (RBAC) and project access in MLTL Annotate. 
 
 You can refer to this example environment variable file for your own LDAP setup:
 
@@ -38,7 +38,7 @@ AUTH_LDAP_SERVER_URI=ldaps://ldap.example.com
 AUTH_LDAP_BIND_DN=uid=user,ou=sysadmins,o=123abc,dc=zexample,dc=com
 AUTH_LDAP_BIND_PASSWORD=password123
 
-# Allow users to use usernames (not only emails) to log into Label Studio
+# Allow users to use usernames (not only emails) to log into MLTL Annotate
 USE_USERNAME_FOR_LOGIN=1
 
 # Simple user search in LDAP groups
@@ -57,7 +57,7 @@ AUTH_LDAP_USER_ATTR_MAP_EMAIL=mail
 # Specify the field to use for AUTH_LDAP_USER_QUERY_FIELD as 'username' 
 AUTH_LDAP_USER_ATTR_MAP_USERNAME=sAMAccountName
 
-# Query the authenticating user in Label Studio, it can be [email|username]
+# Query the authenticating user in MLTL Annotate, it can be [email|username]
 AUTH_LDAP_USER_QUERY_FIELD=email
 
 # Group parameters
@@ -66,7 +66,7 @@ AUTH_LDAP_GROUP_SEARCH_FILTER_STR=(objectClass=groupOfNames)
 AUTH_LDAP_GROUP_TYPE=ou
 ```
 
-If you want to use a recursive scan to search in several LDAP groups to grant access to Label Studio, instead of relying on the simple search used by `AUTH_LDAP_USER_ON_TEMPLATE`, update your environment variables file like the following:
+If you want to use a recursive scan to search in several LDAP groups to grant access to MLTL Annotate, instead of relying on the simple search used by `AUTH_LDAP_USER_ON_TEMPLATE`, update your environment variables file like the following:
 ```bash
 # Leave this parameter empty
 AUTH_LDAP_USER_DN_TEMPLATE=""
@@ -77,7 +77,7 @@ AUTH_LDAP_USER_SEARCH_BASES="ou=guests,dc=domain,dc=com;ou=owners,dc=domain,dc=c
 
 ## User Role Mappings
 
-Map LDAP groups to specific Label Studio Enterprise roles using `;` to specify several groups.
+Map LDAP groups to specific MLTL Annotate roles using `;` to specify several groups.
 
 ```bash
 AUTH_LDAP_ORGANIZATION_ROLE_ADMINISTRATOR=cn=admins,ou=users,o=123abc,dc=example,dc=com 
@@ -91,7 +91,7 @@ AUTH_LDAP_ORGANIZATION_ROLE_DEACTIVATED=cn=deactivated,ou=users,o=123abc,dc=exam
 
 ## Workspace Mappings
 
-Map LDAP groups to specific Label Studio workspaces. Use a JSON format where keys are workspace titles and values are LDAP groups. Split groups with `;` to specify several groups. 
+Map LDAP groups to specific MLTL Annotate workspaces. Use a JSON format where keys are workspace titles and values are LDAP groups. Split groups with `;` to specify several groups. 
 
 ```bash
 AUTH_LDAP_ORGANIZATION_WORKSPACES='{"Workspace 1":"cn=team1,ou=users,o=60cbc901ec2e8e387a3b2d3e,dc=jumpcloud,dc=com","Workspace 2":"cn=team2,ou=users,o=60cbc901ec2e8e387a3b2d3e,dc=jumpcloud,dc=com"}'
@@ -99,7 +99,7 @@ AUTH_LDAP_ORGANIZATION_WORKSPACES='{"Workspace 1":"cn=team1,ou=users,o=60cbc901e
 
 ## Manage user access only with LDAP 
 
-If you want to manage Label Studio roles and workspaces entirely with LDAP, add the following to your environment variable file:
+If you want to manage MLTL Annotate roles and workspaces entirely with LDAP, add the following to your environment variable file:
 
 ```
 MANUAL_PROJECT_MEMBER_MANAGEMENT=0
@@ -107,7 +107,7 @@ MANUAL_WORKSPACE_MANAGEMENT=0
 MANUAL_ROLE_MANAGEMENT=0
 ```
 
-Setting these options disables the Label Studio API and UI options to assign roles and workspaces for specific users within Label Studio and relies entirely on the settings in the environment variable file.
+Setting these options disables the MLTL Annotate API and UI options to assign roles and workspaces for specific users within MLTL Annotate and relies entirely on the settings in the environment variable file.
 
 
 ## Enabling TLS on LDAP/Active Directory

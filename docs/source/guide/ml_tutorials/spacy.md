@@ -5,8 +5,8 @@ tier: all
 order: 70
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: Use spaCy models with Label Studio
-meta_description: Tutorial on how to use Label Studio and spaCy for faster NER and POS labeling 
+meta_title: Use spaCy models with MLTL Annotate
+meta_description: Tutorial on how to use MLTL Annotate and spaCy for faster NER and POS labeling 
 categories:
     - Natural Language Processing
     - Named Entity Recognition
@@ -22,9 +22,9 @@ Current implementation includes the following models:
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`spacy` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/spacy). 
+This tutorial uses the [`spacy` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/spacy). 
 
 ## Quickstart
 
@@ -41,7 +41,7 @@ $ curl http://localhost:9090/health
 {"status":"UP"}
 ```
 
-3. Create a project in Label Studio. Then from the **Model** page in the project settings, [connect the model](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
+3. Create a project in MLTL Annotate. Then from the **Model** page in the project settings, [connect the model](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
 
 ## Usage
 
@@ -67,7 +67,7 @@ This model is compatible with the following labeling configurations:
 </View>
 ```
 
-You can also use the default configuration from the [Named Entity Recognition template](https://labelstud.io/templates/named_entity) provided with Label Studio.
+You can also use the default configuration from the [Named Entity Recognition template](https://labelstud.io/templates/named_entity) provided with MLTL Annotate.
 
 > Note: If your labels are different from the default ones, the text spans will still be highlighted, but you have to manually map the labels to the ones you have in the model. Go to `model.py` and change `_custom_labels_mapping` to map from SpaCy entities to your labels. Check for predefined labels in the official SpaCy documentation, for example for [en_core_web_sm](https://spacy.io/models/en#en_core_web_sm).
 

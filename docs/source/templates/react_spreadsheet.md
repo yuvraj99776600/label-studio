@@ -22,7 +22,7 @@ The labeling interface provides a full-featured spreadsheet experience with capa
 ![Screenshot](/images/templates-misc/react-spreadsheet.png)
 
 !!! error Enterprise
-    This template and the `ReactCode` tag can only be used in Label Studio Enterprise.
+    This template and the `ReactCode` tag can only be used in MLTL Annotate.
 
     For more information, see [Programmable & Embeddable Interfaces](https://humansignal.com/programmable-ui/).
 

@@ -180,7 +180,7 @@ When enabled, new points connect to the active point and not the last added poin
 ### Result parameters
 
 **Kind**: global typedef  
-**Returns**: <code>VectorRegionResult</code> - The serialized vector region data in Label Studio format  
+**Returns**: <code>VectorRegionResult</code> - The serialized vector region data in MLTL Annotate format  
 **Properties**
 
 | Name | Type | Description |

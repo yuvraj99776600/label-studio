@@ -1,17 +1,17 @@
-# Label Studio
+# MLTL Annotate
 
-Label Studio is a complex, NX-managed project divided into three main components:
+MLTL Annotate is a complex, NX-managed project divided into three main components:
 
 ## [Main App (`apps/labelstudio`)][lso]
-This is the primary application that consolidates all frontend framework elements. It's the hub for integrating and managing the different libraries and functionalities of Label Studio.
+This is the primary application that consolidates all frontend framework elements. It's the hub for integrating and managing the different libraries and functionalities of MLTL Annotate.
 
-## [Library - Label Studio Frontend (`libs/editor`)][lsf]
-Label Studio Frontend, developed with React and mobx-state-tree, is a robust frontend library tailored for data annotation. It's designed for seamless integration into your applications, providing a rich set of features for data handling and visualization. Customization and extensibility are core aspects, allowing for tailored annotation experiences.
+## [Library - MLTL Annotate Frontend (`libs/editor`)][lsf]
+MLTL Annotate Frontend, developed with React and mobx-state-tree, is a robust frontend library tailored for data annotation. It's designed for seamless integration into your applications, providing a rich set of features for data handling and visualization. Customization and extensibility are core aspects, allowing for tailored annotation experiences.
 
 ## [Library - Datamanager (`libs/datamanager`)][dm]
-Datamanager is an advanced tool specifically for data exploration within Label Studio. Key features include:
+Datamanager is an advanced tool specifically for data exploration within MLTL Annotate. Key features include:
 
-<img align="right" height="180" src="https://github.com/HumanSignal/label-studio/blob/develop/images/heartex_icon_opossum_green@2x.png?raw=true" />
+<img align="right" height="180" src="https://github.com/yuvraj99776600/label-studio/blob/develop/images/mltl_icon_opossum_green@2x.png?raw=true" />
 
 ## Installation Instructions
 
@@ -19,7 +19,7 @@ Datamanager is an advanced tool specifically for data exploration within Label S
 - Execute `yarn install --frozen-lockfile` to install all necessary dependencies.
 
 2 - **Environment Configuration (Optional for HMR):**
-- If you want to enable Hot Module Replacement (HMR), create an `.env` file in the root Label Studio directory.
+- If you want to enable Hot Module Replacement (HMR), create an `.env` file in the root MLTL Annotate directory.
 - Add the following configuration:
   - `FRONTEND_HMR=true`: Enables Hot Module Replacement in Django.
 
@@ -40,17 +40,17 @@ To start the development server with HMR:
   - Duplicate the `.env.example` file located in the DataManager directory and rename the copy to `.env`.
   - Make your desired changes in this new `.env` file. The key configurations to consider are:
       - `NX_API_GATEWAY`: Set this to your API root. For example, `http://localhost:8080/api/dm`.
-      - `LS_ACCESS_TOKEN`: This is the access token for Label Studio, which can be obtained from your Label Studio account page.
+      - `LS_ACCESS_TOKEN`: This is the access token for MLTL Annotate, which can be obtained from your MLTL Annotate account page.
 - This process allows you to have a customized configuration for DataManager, separate from the default settings in the .env.local files.
 
 ## Usage Instructions
 ### Key Development and Build Commands
-- **Label Studio App:**
-    - `yarn ls:dev`: Build the main Label Studio app with Hot Module Reload for development.
-    - `yarn ls:watch`: Build the main Label Studio app continuously for development.
-    - `yarn ls:e2e`: Run end-to-end tests for the Label Studio app.
-    - `yarn ls:unit`: Run unit tests for the Label Studio app.
-- **Label Studio Frontend (Editor):**
+- **MLTL Annotate App:**
+    - `yarn ls:dev`: Build the main MLTL Annotate app with Hot Module Reload for development.
+    - `yarn ls:watch`: Build the main MLTL Annotate app continuously for development.
+    - `yarn ls:e2e`: Run end-to-end tests for the MLTL Annotate app.
+    - `yarn ls:unit`: Run unit tests for the MLTL Annotate app.
+- **MLTL Annotate Frontend (Editor):**
     - `yarn lsf:watch`: Continuously build the frontend editor.
     - `yarn lsf:serve`: Run the frontend editor standalone.
     - `yarn lsf:e2e`: Run end-to-end tests for the frontend editor.
@@ -81,17 +81,17 @@ If for any reason you need to format or lint using the same `pre-commit` hooks d
 | [label-studio][lso]              | Server part, distributed as a pip package |
 | [label-studio-frontend][lsf]     | Frontend part, written in JavaScript and React, can be embedded into your application |
 | [label-studio-converter][lsc]    | Encode labels into the format of your favorite machine learning library |
-| [label-studio-transformers][lst] | Transformers library connected and configured for use with label studio |
-| [datamanager][dm]                | Data exploration tool for Label Studio |
+| [label-studio-transformers][lst] | Transformers library connected and configured for use with MLTL Annotate |
+| [datamanager][dm]                | Data exploration tool for MLTL Annotate |
 
 ## License
 
-This software is licensed under the [Apache 2.0 LICENSE](../LICENSE) © [HumanSignal](https://www.humansignal.com/). 2020
+This software is licensed under the [Apache 2.0 LICENSE](../LICENSE) © [MLTL](https://www.humansignal.com/). 2020
 
-<img src="https://github.com/HumanSignal/label-studio/blob/develop/images/opossum_looking.png?raw=true" title="Hey everyone!" height="140" width="140" />
+<img src="https://github.com/yuvraj99776600/label-studio/blob/develop/images/opossum_looking.png?raw=true" title="Hey everyone!" height="140" width="140" />
 
-[lsc]: https://github.com/HumanSignal/label-studio-converter
-[lst]: https://github.com/HumanSignal/label-studio-transformers
+[lsc]: https://github.com/yuvraj99776600/label-studio-converter
+[lst]: https://github.com/yuvraj99776600/label-studio-transformers
 
 [lsf]: libs/editor/README.md
 [dm]: libs/datamanager/README.md

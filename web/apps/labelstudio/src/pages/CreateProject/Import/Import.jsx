@@ -447,7 +447,7 @@ export const ImportPage = ({
                           Video
                           <Tooltip title="Video format support depends on your browser. Click to learn more.">
                             <a
-                              href="https://labelstud.io/tags/video#Video-format"
+                              href="https://docs.mltl.us/tags/video#Video-format"
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center"
@@ -474,7 +474,7 @@ export const ImportPage = ({
                         <li>
                           We recommend{" "}
                           <a
-                            href="https://labelstud.io/guide/storage.html"
+                            href="https://docs.mltl.us/guide/storage.html"
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="Cloud Storage documentation (opens in a new tab)"
@@ -483,7 +483,7 @@ export const ImportPage = ({
                           </a>{" "}
                           over direct uploads due to{" "}
                           <a
-                            href="https://labelstud.io/guide/tasks.html#Import-data-from-the-Label-Studio-UI"
+                            href="https://docs.mltl.us/guide/tasks.html#Import-data-from-the-Label-Studio-UI"
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label="Upload limitations documentation (opens in a new tab)"
@@ -506,7 +506,7 @@ export const ImportPage = ({
                         </li>
                         <li>
                           Check the documentation to{" "}
-                          <a target="_blank" href="https://labelstud.io/guide/predictions.html" rel="noreferrer">
+                          <a target="_blank" href="https://docs.mltl.us/guide/predictions.html" rel="noreferrer">
                             import preannotated data
                           </a>
                           .

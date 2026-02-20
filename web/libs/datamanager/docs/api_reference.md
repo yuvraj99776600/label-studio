@@ -133,7 +133,7 @@ Annotations for the current dataset
 
 | Property    | Type             | Description                                               |
 | ----------- | ---------------- | --------------------------------------------------------- |
-| annotations | List<Annotation> | See Label Studio documentation to learn about annotations |
+| annotations | List<Annotation> | See MLTL Annotate documentation to learn about annotations |
 
 
 
@@ -147,7 +147,7 @@ Annotations for the current dataset
 
 | Property    | Type             | Description                                                  |
 | ----------- | ---------------- | ------------------------------------------------------------ |
-| annotations | List<Annotation> | See Label Studio documentation to learn more about annotations |
+| annotations | List<Annotation> | See MLTL Annotate documentation to learn more about annotations |
 
 ##### **POST** `[was_skipped=true]`
 

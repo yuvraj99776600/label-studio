@@ -5,7 +5,7 @@ category: Conversational AI
 cat: conversational-ai
 order: 815
 meta_title: Dialogue Analysis Data Labeling Template
-meta_description: Template for performing dialogue analysis for conversational AI use cases with Label Studio for your machine learning and data science projects.
+meta_description: Template for performing dialogue analysis for conversational AI use cases with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates-misc/dialogue-analysis.png" alt="" class="gif-border" width="600px" height="512px" />
@@ -39,7 +39,7 @@ Use this template to provide a section of dialogue and classify it. Annotators t
 
 All labeling configurations must be wrapped in [View](/tags/view.html) tags.
 
-Use the [HyperText](/tags/hypertext.html) object tag to display dialogue data, imported in Label Studio JSON format using a key of "dialogs":
+Use the [HyperText](/tags/hypertext.html) object tag to display dialogue data, imported in MLTL Annotate JSON format using a key of "dialogs":
 ```xml
 <HyperText name="dialog" value="$dialogs"></HyperText>
 ```

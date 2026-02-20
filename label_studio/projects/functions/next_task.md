@@ -1,6 +1,6 @@
 # Label Stream: Next Task Selection (LSE)
 
-This doc summarizes how Label Studio Enterprise selects the next task for labeling, based on the current code in `label_studio/projects/functions/next_task.py` and LSE-specific logic from `label_studio_enterprise/lse_projects/functions.py`.
+This doc summarizes how MLTL Annotate selects the next task for labeling, based on the current code in `label_studio/projects/functions/next_task.py` and LSE-specific logic from `label_studio_enterprise/lse_projects/functions.py`.
 
 Notes
 - Queue labels shown in the UI (e.g. "Onboarding ground truth queue", "Show overlap first") indicate which strategies were attempted, not always the final source of the selected task.

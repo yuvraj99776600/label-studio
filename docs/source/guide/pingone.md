@@ -4,7 +4,7 @@ short: Ping Federate & Ping Identity & PingOne SAML SSO Setup
 tier: enterprise
 order: 253
 meta_title: Ping Federate & Ping Identity & PingOne SAML SSO Setup Example
-meta_description: Label Studio Enterprise documentation for setting up Ping Federate & Ping Identity & PingOne SAML SSO Setup Example.
+meta_description: MLTL Annotate documentation for setting up Ping Federate & Ping Identity & PingOne SAML SSO Setup Example.
 hide_sidebar: true
 ---
 
@@ -15,7 +15,7 @@ hide_sidebar: true
 1. Click blue circle with the `+` sign.  
 <img src="/images/pingone/setup-1.png" class="gif-border">
 
-2. Select `Manual Enter`, enter URLs from the Label Studio Enterprise SAML SSO page.
+2. Select `Manual Enter`, enter URLs from the MLTL Annotate SAML SSO page.
 <img src="/images/pingone/setup-2.png" class="gif-border">
 
 3. The result
@@ -60,7 +60,7 @@ Expression: ${user.memberOfGroupNames == null ? '': #string.join(user.memberOfGr
     All users should have at least one group, otherwise it will lead to the login error.
      
 
-## Label Studio Enterprise Settings 
+## MLTL Annotate Settings 
 
 You can find LSE SAML SSO settings on the **Organization** page >> **SAML SSO**. You are able to map user roles and workspaces with `Groups` attribute.  
  

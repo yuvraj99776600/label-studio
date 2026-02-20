@@ -6,7 +6,7 @@ type: guide
 order: 0
 order_enterprise: 356
 meta_title: Enhanced search with the command palette
-meta_description: How to use the Label Studio  command palette
+meta_description: How to use the MLTL Annotate  command palette
 section: "Manage Your Organization"
 date: 2025-01-28 16:40:16
 ---
@@ -23,9 +23,9 @@ To open it, click the search icon in the upper right or press `Ctrl+K` (`Cmd+K` 
 
 From here you can:
 
-- Search across your Label Studio org. For example, you can search for projects and workspaces.
+- Search across your MLTL Annotate org. For example, you can search for projects and workspaces.
 - Navigate to pages within the app. 
-- Find quick links to Label Studio documentation and resources, such as the API docs and the changelog. 
+- Find quick links to MLTL Annotate documentation and resources, such as the API docs and the changelog. 
 - When you are in a project, you can search for settings pages or individual settings to quickly jump to them. 
 
 ## Role-aware results 

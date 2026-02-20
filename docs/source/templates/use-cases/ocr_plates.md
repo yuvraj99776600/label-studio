@@ -5,14 +5,14 @@ hide_menu: true
 category: Computer Vision
 cat: computer-vision
 order: 1103
-meta_description: Template for using Label Studio to perform optical character recognition (OCR).
+meta_description: Template for using MLTL Annotate to perform optical character recognition (OCR).
 ---
 
 ![Screenshot of labeling interface](/images/templates-misc/plates.png)
 
 Accurate Optical Character Recognition (OCR) labeled data is essential for AI models tasked with identifying and interpreting license plates, enabling real-time vehicular identification and management in various applications, from law enforcement to automated toll collection. These models must effectively parse a diverse array of license plate formats, layouts, and fonts, necessitating the highest possible accuracy in label quality to ensure robust performance.
 
-However, labeling data for license plate recognition presents significant challenges, including time-intensive manual processes, inconsistent labeling standards due to varying annotator expertise, and the need for domain-specific knowledge to handle edge cases effectively. Label Studio tackles these challenges head-on with its innovative hybrid AI + human-in-the-loop approach that combines AI-assisted pre-labeling to jumpstart the annotation process, significantly reducing labeling time and improving consistency. Our platform also empowers subject matter experts through collaborative tools for real-time feedback and validation, while customizable templates ensure that the labeling interface is tailored specifically to the license plate recognition task, thereby enhancing annotator efficiency and driving scalable workflows. By streamlining the data labeling process, Label Studio not only accelerates project timelines but also maximizes model performance, ensuring your OCR systems are finely tuned for high-stakes applications.
+However, labeling data for license plate recognition presents significant challenges, including time-intensive manual processes, inconsistent labeling standards due to varying annotator expertise, and the need for domain-specific knowledge to handle edge cases effectively. MLTL Annotate tackles these challenges head-on with its innovative hybrid AI + human-in-the-loop approach that combines AI-assisted pre-labeling to jumpstart the annotation process, significantly reducing labeling time and improving consistency. Our platform also empowers subject matter experts through collaborative tools for real-time feedback and validation, while customizable templates ensure that the labeling interface is tailored specifically to the license plate recognition task, thereby enhancing annotator efficiency and driving scalable workflows. By streamlining the data labeling process, MLTL Annotate not only accelerates project timelines but also maximizes model performance, ensuring your OCR systems are finely tuned for high-stakes applications.
 
 ## Labeling configuration
 

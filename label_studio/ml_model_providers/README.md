@@ -1,6 +1,6 @@
 # ML Model Providers
 
-Currently supporting a feature in [Label Studio Enterprise](https://github.com/HumanSignal/label-studio-enterprise).
+Currently supporting a feature in [MLTL Annotate](https://github.com/yuvraj99776600/label-studio-enterprise).
 
 ## ModelProviderConnection
 

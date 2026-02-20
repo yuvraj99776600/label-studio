@@ -6,19 +6,19 @@ tier: all
 order: 416 
 order_enterprise: 416
 meta_title: Frontend Library Reference
-meta_description: Reference documentation for implementing the Label Studio frontend into your own machine learning or data science application workflows.
+meta_description: Reference documentation for implementing the MLTL Annotate frontend into your own machine learning or data science application workflows.
 section: "Integrate & Extend"
 ---
 
-Label Studio frontend (LSF) includes several UI options and callbacks that you can use when implementing the frontend with a custom labeling backend, or when customizing the Label Studio interface.
+MLTL Annotate frontend (LSF) includes several UI options and callbacks that you can use when implementing the frontend with a custom labeling backend, or when customizing the MLTL Annotate interface.
 
 !!! attention
-    As of [Label Studio 1.11.0](https://github.com/HumanSignal/label-studio/releases/tag/1.11.0), the Label Studio frontend has been deprecated as a separate library and is no longer supported as a standalone distribution. For information about using the frontend library within Label Studio, see [the README](https://github.com/HumanSignal/label-studio/blob/develop/web/libs/editor/README.md). 
+    As of [MLTL Annotate 1.11.0](https://github.com/yuvraj99776600/label-studio/releases/tag/1.11.0), the MLTL Annotate frontend has been deprecated as a separate library and is no longer supported as a standalone distribution. For information about using the frontend library within MLTL Annotate, see [the README](https://github.com/yuvraj99776600/label-studio/blob/develop/web/libs/editor/README.md). 
 
 ## Updates to LSF in version 1.0.0
 
 !!! warning
-    LSF version 1.0.0 is not compatible with earlier versions of Label Studio.
+    LSF version 1.0.0 is not compatible with earlier versions of MLTL Annotate.
 
 If you use LSF with a custom backend, you must make changes to the API callbacks that you use as follows:
 
@@ -28,15 +28,15 @@ If you use LSF with a custom backend, you must make changes to the API callbacks
 | onUpdateCompletion            | onUpdateAnnotation        |
 | onDeleteCompletion            | onDeleteAnnotation        |
 
-If you rely on specific formatting of Label Studio completed tasks, [Label Studio's annotation format](export.html#Raw-JSON-format-of-completed-tasks) has also been updated.
+If you rely on specific formatting of MLTL Annotate completed tasks, [MLTL Annotate's annotation format](export.html#Raw-JSON-format-of-completed-tasks) has also been updated.
 
-## Implement the Label Studio Frontend
+## Implement the MLTL Annotate Frontend
 
 ```javascript
 var labelStudio = new LabelStudio("editor", options);
 ```
 
-The following options are recognized when initializing a Label Studio instance version 1.0.0.
+The following options are recognized when initializing a MLTL Annotate instance version 1.0.0.
 
 ## Options
 
@@ -63,9 +63,9 @@ Collection of UI elements to show. Available interfaces:
 - `skip` - Show a button to skip the current task.
 - `controls` - Enable panel with controls (`submit`, `update`, `skip`).
 - `infobar` - A show button for information.
-- `topbar` - A labeling interface that lists the top-level items in the Label Studio UI.
+- `topbar` - A labeling interface that lists the top-level items in the MLTL Annotate UI.
 - `instruction` - A button for the [instructions](#description).
-- `side-column` - Show a column on the left or right side of the Label Studio UI.
+- `side-column` - Show a column on the left or right side of the MLTL Annotate UI.
 - `annotations:history` - A show button for annotation history.
 - `annotations:tabs` - A show button for annotation tabs.
 - `annotations:menu` - A show button for the annotation menu.
@@ -177,7 +177,7 @@ Type data: `string`
 
 ## Event system
 
-LSF has a built-in event system that allows you to listen to events and trigger custom actions. You can subscribe to or unsubscribe from event at any time after the Label Studio instance is initialized.
+LSF has a built-in event system that allows you to listen to events and trigger custom actions. You can subscribe to or unsubscribe from event at any time after the MLTL Annotate instance is initialized.
 
 ### Using events
 
@@ -210,7 +210,7 @@ This events group contains top-level events. Those events are not related to any
 
 ### `labelStudioLoad`
 
-Label Studio instance is loaded. 
+MLTL Annotate instance is loaded. 
 
 !!! warning
     This event does not work in plugins.
@@ -219,7 +219,7 @@ Label Studio instance is loaded.
 
 | Argument      | Type     | Description              |
 | ------------- | -------- | ------------------------ |
-| `labelStudio` | `Object` | Instance of Label Studio |
+| `labelStudio` | `Object` | Instance of MLTL Annotate |
 
 ### `storageInitialized`
 
@@ -232,7 +232,7 @@ The internal storage is initialized.
 
 | Argument      | Type     | Description              |
 | ------------- | -------- | ------------------------ |
-| `labelStudio` | `Object` | Instance of Label Studio |
+| `labelStudio` | `Object` | Instance of MLTL Annotate |
 
 #### Task events
 
@@ -246,7 +246,7 @@ User clicked the "Skip" button.
 
 | Argument      | Type     | Description                                 |
 | ------------- | -------- | ------------------------------------------- |
-| `labelStudio` | `Object` | Instance of Label Studio                    |
+| `labelStudio` | `Object` | Instance of MLTL Annotate                    |
 | `payload`     | `Object` | Additional data sent during the skip action |
 
 ### `unskipTask`
@@ -255,7 +255,7 @@ User clicked the "Cancel Skip" button.
 
 | Argument      | Type     | Description              |
 | ------------- | -------- | ------------------------ |
-| `labelStudio` | `Object` | Instance of Label Studio |
+| `labelStudio` | `Object` | Instance of MLTL Annotate |
 
 ### `nextTask`
 
@@ -263,7 +263,7 @@ User clicked the "Next" (chevron right) button.
 
 | Argument       | Type      | Description                                    |
 | -------------- | --------- | ---------------------------------------------- |
-| `labelStudio`  | `Object`  | Instance of Label Studio                       |
+| `labelStudio`  | `Object`  | Instance of MLTL Annotate                       |
 | `taskId`       | `Number?` | ID of the next task in history                 |
 | `annotationId` | `Number?` | ID of the annotation to select within the task |
 
@@ -273,7 +273,7 @@ User clicked the "Previous" (chevron left) button.
 
 | Argument       | Type      | Description                                    |
 | -------------- | --------- | ---------------------------------------------- |
-| `labelStudio`  | `Object`  | Instance of Label Studio                       |
+| `labelStudio`  | `Object`  | Instance of MLTL Annotate                       |
 | `taskId`       | `Number?` | ID of the previous task in history             |
 | `annotationId` | `Number?` | ID of the annotation to select within the task |
 
@@ -283,7 +283,7 @@ Draft is sent to the server.
 
 | Argument      | Type      | Description                      |
 | ------------- | --------- | -------------------------------- |
-| `labelStudio` | `Object`  | Instance of Label Studio         |
+| `labelStudio` | `Object`  | Instance of MLTL Annotate         |
 | `annotation`  | `Object`  | Current annotation               |
 | `params`      | `Object?` | Extra params sent with the draft |
 
@@ -297,7 +297,7 @@ Returning `false` from this event will prevent saving the annotation.
 
 | Argument         | Type     | Description                                                                                  |
 |------------------|----------|----------------------------------------------------------------------------------------------|
-| `labelStudio`    | `Object` | Instance of Label Studio                                                                     |
+| `labelStudio`    | `Object` | Instance of MLTL Annotate                                                                     |
 | `annotation`     | `Object` | Current annotation                                                                           |
 | `payload`        | `Object` | Additional information                                                                       |
 | `payload.event`  | `string` | Indicates which event is about to be executed (`submitAnnotation`, `updateAnnotation`, etc.) |
@@ -309,7 +309,7 @@ Annotation is submitted.
 
 | Argument      | Type     | Description              |
 | ------------- | -------- | ------------------------ |
-| `labelStudio` | `Object` | Instance of Label Studio |
+| `labelStudio` | `Object` | Instance of MLTL Annotate |
 | `annotation`  | `Object` | Current annotation       |
 
 ### `updateAnnotation`
@@ -318,7 +318,7 @@ Annotation is updated.
 
 | Argument      | Type     | Description              |
 | ------------- | -------- | ------------------------ |
-| `labelStudio` | `Object` | Instance of Label Studio |
+| `labelStudio` | `Object` | Instance of MLTL Annotate |
 | `annotation`  | `Object` | Current annotation       |
 
 ### `selectAnnotation`
@@ -339,7 +339,7 @@ Annotation is deleted.
 
 | Argument      | Type     | Description              |
 | ------------- | -------- | ------------------------ |
-| `labelStudio` | `Object` | Instance of Label Studio |
+| `labelStudio` | `Object` | Instance of MLTL Annotate |
 | `annotation`  | `Object` | Current annotation       |
 
 ### `groundTruth`
@@ -348,8 +348,8 @@ Annotation is set as Ground Truth (the star button clicked).
 
 | Argument         | Type      | Description                      |
 | ---------------- | --------- | -------------------------------- |
-| `store`          | `Object`  | Instance of Label Studio         |
-| `labelStudio`    | `Object`  | Instance of Label Studio         |
+| `store`          | `Object`  | Instance of MLTL Annotate         |
+| `labelStudio`    | `Object`  | Instance of MLTL Annotate         |
 | `params`         | `Object`  |                                  |
 | `params.isDirty` | `Boolean` | `true` if annotation was changed |
 | `params.entity`  | `Object`  | Current annotation               |
@@ -359,7 +359,7 @@ Step in the annotation history is selected.
 
 | Argument      | Type     | Description                 |
 |---------------|----------|-----------------------------|
-| `labelStudio` | `Object` | Instance of Label Studio    |
+| `labelStudio` | `Object` | Instance of MLTL Annotate    |
 | `annotation`  | `Object` | Current annotation          |
 | `historyItem` | `Object` | Current history item        |
 
@@ -391,7 +391,7 @@ Callbacks can be used to execute actions based on user interaction with the inte
 
 Type data: `function`
 
-Called when the `submit` button is pressed. `ls` is label studio instance, `annotation` is the value of the current annotation.
+Called when the `submit` button is pressed. `ls` is MLTL Annotate instance, `annotation` is the value of the current annotation.
 
 #### Example
 
@@ -405,7 +405,7 @@ onSubmitAnnotation: function(ls, annotation) {
 
 Type data: `function`
 
-Called when the `update` button is pressed. `ls` is label studio instance, `annotation` is the value of the current annotation.
+Called when the `update` button is pressed. `ls` is MLTL Annotate instance, `annotation` is the value of the current annotation.
 
 #### Example
 
@@ -419,7 +419,7 @@ onUpdateAnnotation: function(ls, annotation) {
 
 Type data: `function`
 
-Called when the `delete` button is pressed. `ls` is label studio instance, `annotation` is value of current annotation.
+Called when the `delete` button is pressed. `ls` is MLTL Annotate instance, `annotation` is value of current annotation.
 
 #### Example
 
@@ -461,7 +461,7 @@ onEntityDelete: function(region) {
 
 Type data: `function`
 
-Called when the `skip` button is pressed. `ls` is label studio instance.
+Called when the `skip` button is pressed. `ls` is MLTL Annotate instance.
 
 #### Example
 
@@ -475,7 +475,7 @@ onSkipTask: function(ls) {
 
 Type data: `function`
 
-Called when Label Studio has fully loaded and is ready for labeling. `ls` is the label studio instance
+Called when MLTL Annotate has fully loaded and is ready for labeling. `ls` is the MLTL Annotate instance
 
 #### Example
 

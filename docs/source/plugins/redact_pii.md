@@ -37,7 +37,7 @@ This script will then unhide annotator information, but only if the user is in a
 */
 
 /**
- * Fetch currently logged user via the HumanSignal API
+ * Fetch currently logged user via the MLTL API
  */
 async function fetchUserInfo() {
   const whoamiUrl = "https://app.humansignal.com/api/current-user/whoami";

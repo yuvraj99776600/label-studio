@@ -82,19 +82,19 @@ describe("Helper function isStrinJSON", () => {
  */
 describe("Helper function getUrl", () => {
   test("Correct https", () => {
-    expect(getUrl(0, "https://heartex.net testing value")).toBe("https://heartex.net");
+    expect(getUrl(0, "https://mltl.net testing value")).toBe("https://mltl.net");
   });
 
   test("Correct http", () => {
-    expect(getUrl(0, "http://heartex.net testing value")).toBe("http://heartex.net");
+    expect(getUrl(0, "http://mltl.net testing value")).toBe("http://mltl.net");
   });
 
   test("Correct wwww", () => {
-    expect(getUrl(0, "www.heartex.net testing value")).toBe("www.heartex.net");
+    expect(getUrl(0, "www.mltl.net testing value")).toBe("www.mltl.net");
   });
 
   test("Not correct", () => {
-    expect(getUrl(2, "https://heartex.net testing value")).toBe("");
+    expect(getUrl(2, "https://mltl.net testing value")).toBe("");
   });
 });
 

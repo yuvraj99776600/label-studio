@@ -15,7 +15,7 @@ This template demonstrates the synchronization of media streams with the corresp
 <video src="https://htx-pub.s3.us-east-1.amazonaws.com/docs/timeseries-video-audio-sync.mp4" controls style="max-width:800px" />
 
 !!! note
-    **Requirements:** Label Studio >= 1.20
+    **Requirements:** MLTL Annotate >= 1.20
 
 ### Time units and syncing
 
@@ -41,7 +41,7 @@ You may have mismatched lengths in your data. When this occurs:
 !!! attention
     It's extremely important to set `frameRate` for your video. Otherwise, you will get incorrect labeling synchronization between timeseries and video.
   
-We recommend converting your video using these scripts: https://labelstud.io/tags/video#Video-format.
+We recommend converting your video using these scripts: https://docs.mltl.us/tags/video#Video-format.
 
 Also, it is recommended to use integer multiples for sample rates and frame rates in your time series, audio, and videos. This approach simplifies aligning samples and frames and allows for smooth navigation across various media sources. For example, if the video frame rate is _30 frames per second_, having _60 (or 90, 120, ...) samples per second_ for the time series is beneficial.
 
@@ -117,7 +117,7 @@ To specify a time-based time series, use the following format:
 </View>
 
 <!-- {
-  "video": "https://app.heartex.ai/static/samples/opossum_snow.mp4",
+  "video": "https://app.mltl.ai/static/samples/opossum_snow.mp4",
   "accel_data": "https://app.humansignal.com/samples/time-series.csv?time=time&values=accel_x%2Caccel_y&sep=%2C&tf=%H:%M:%S.%f",
   "gyro_data": "https://app.humansignal.com/samples/time-series.csv?time=time&values=gyro_x%2Cgyro_y&sep=%2C&tf=%H:%M:%S.%f"
 }
@@ -212,7 +212,7 @@ To specify an index-based time series, use the following format:
 </View>
 
 <!-- {
-  "video": "https://app.heartex.ai/static/samples/opossum_snow.mp4",
+  "video": "https://app.mltl.ai/static/samples/opossum_snow.mp4",
   "ts": {
       "value": [
         10.7036820361892644,

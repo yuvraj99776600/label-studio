@@ -6,7 +6,7 @@ cat: llm-fine-tuning
 order: 904
 is_new: t
 meta_title: Create Dataset for Human Preferences Collection for RLHF
-meta_description: Template for creating dataset for human preferences collection for RLHF with Label Studio for your machine learning and data science projects.
+meta_description: Template for creating dataset for human preferences collection for RLHF with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/generative-pairwise-human-preference.png" alt="" class="gif-border" width="700px" />
@@ -17,12 +17,12 @@ Through ranking multiple responses based on quality, you can train a reward mode
 
 #### Further Reading and Resources
 
-- [Gathering Human Feedback Tutorial](https://github.com/HumanSignal/RLHF/blob/master/tutorials/RLHF_with_Custom_Datasets.ipynb) A Jupyter Notebook tutorial that will guide you through the step-by-step process of collecting comparison data, establishing human preferences, and incorporating this feedback into the reward model training.
-- [RLHF Resources](https://github.com/HumanSignal/RLHF): A collection of links, tutorials and best practices on how collect data and build an end-to-end Reinforcement Learning from Human Feedback (RLHF) system to fine-tune Generative AI models.
-- [Awesome-Human-in-the-Loop List](https://github.com/HumanSignal/awesome-human-in-the-loop): An awesome list of human in the loop resources and references for retraining models.
+- [Gathering Human Feedback Tutorial](https://github.com/yuvraj99776600/RLHF/blob/master/tutorials/RLHF_with_Custom_Datasets.ipynb) A Jupyter Notebook tutorial that will guide you through the step-by-step process of collecting comparison data, establishing human preferences, and incorporating this feedback into the reward model training.
+- [RLHF Resources](https://github.com/yuvraj99776600/RLHF): A collection of links, tutorials and best practices on how collect data and build an end-to-end Reinforcement Learning from Human Feedback (RLHF) system to fine-tune Generative AI models.
+- [Awesome-Human-in-the-Loop List](https://github.com/yuvraj99776600/awesome-human-in-the-loop): An awesome list of human in the loop resources and references for retraining models.
 - [Talk: Improving Machine Learning from Human Feedback](https://youtu.be/nx_vJpux_Sg) : A talk from PyData Berlin on how to improve machine learning from Human Feedback using RLHF.
 - [Workshop: Getting Started with Reinforcement Learning](https://youtu.be/Oqo8k8SyMX4) : A workshop on how to get started with Reinforcement Learning.
-- [Guide: Five Large Language Models you can Fine-Tune Today](https://labelstud.io/blog/five-large-language-models-you-can-fine-tune-today/)
+- [Guide: Five Large Language Models you can Fine-Tune Today](https://mltl.us/blog/five-large-language-models-you-can-fine-tune-today/)
   
 ## How to collect the dataset
 
@@ -45,17 +45,17 @@ Start with an initial set of prompts and responses, where each item is a JSON ob
 
 Collect examples either by generating them manually, or use your [baseline model to generate multiple alternative hypotheses](https://huggingface.co/blog/how-to-generate).
 
-After your dataset has started to be collected in `dataset.json` file, create a project and upload the dataset to Label Studio.
+After your dataset has started to be collected in `dataset.json` file, create a project and upload the dataset to MLTL Annotate.
 
 ## Starting your labeling project
 
-1. Create new project in Label Studio
+1. Create new project in MLTL Annotate
 2. Go to `Settings > Labeling Interface > Browse Templates > Generative AI > Human Preference collection for RLHF`
 3. Save the project
 
 ## Import the dataset
 
-Using python SDK you can import the dataset with input prompts into Label Studio. With the `PROJECT_ID` of the project
+Using python SDK you can import the dataset with input prompts into MLTL Annotate. With the `PROJECT_ID` of the project
 you've just created, run the following code:
 
 ```python
@@ -174,7 +174,7 @@ Additionally, you can modify `"prompt"`, `$answer1` and `$answer2` in XML commen
 There have to be from hundreds to thousands of tasks labeled to get your LLM being fine-tuned, depending on the
 complexity of your problem statement.
 
-After you've labeled enough tasks, you can export the dataset in the following raw Label Studio JSON format:
+After you've labeled enough tasks, you can export the dataset in the following raw MLTL Annotate JSON format:
 
 ```json
 [

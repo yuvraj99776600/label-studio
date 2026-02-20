@@ -3,7 +3,7 @@ title: Text
 type: tags
 order: 309
 meta_title: Text Tags for Text Objects
-meta_description: Customize Label Studio with the Text tag to annotate text for NLP and NER machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the Text tag to annotate text for NLP and NER machine learning and data science projects.
 ---
 
 The `Text` tag shows text that can be labeled. Use to display any type of text on the labeling interface.
@@ -13,7 +13,7 @@ Every space in the text sample is counted when calculating result offsets, for e
 Use with the following data types: text.
 
 ### How to read my text files in python?
-The Label Studio editor counts `\r\n` as two different symbols, displaying them as `\n\n`, making it look like there is extra margin between lines.
+The MLTL Annotate editor counts `\r\n` as two different symbols, displaying them as `\n\n`, making it look like there is extra margin between lines.
 You should either preprocess your files to replace `\r\n` with `\n` completely, or open files in Python with `newline=''` to avoid converting `\r\n` to `\n`:
 `with open('my-file.txt', encoding='utf-8', newline='') as f: text = f.read()`
 This is especially important when you are doing span NER labeling and need to get the correct offsets:

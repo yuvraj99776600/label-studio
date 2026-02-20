@@ -1,6 +1,6 @@
-## Label Studio JSON format of annotated tasks 
+## MLTL Annotate JSON format of annotated tasks 
 
-When you annotate data, Label Studio stores the output in JSON format. The raw JSON structure of each completed task uses the following example: 
+When you annotate data, MLTL Annotate stores the output in JSON format. The raw JSON structure of each completed task uses the following example: 
 
 ```json
 {
@@ -105,14 +105,14 @@ Review the full list of JSON properties in the [API documentation](api.html).
 | --- | --- | 
 | id | Identifier for the labeling task from the dataset. |
 | data | Data copied from the input data task format. See the documentation for [Task Format](tasks.html#Basic-Label-Studio-JSON-format). |
-| project | Identifier for a specific project in Label Studio. |
+| project | Identifier for a specific project in MLTL Annotate. |
 | annotations | Array containing the labeling results for the task. |
 | annotations.id | Identifier for the completed task. |
 | annotations.lead_time | Time in seconds to label the task. |
 | annotations.result | Array containing the results of the labeling or annotation task. |
 | annotations.updated_at | Timestamp for when the annotation is created or modified. |
 | annotations.completed_at | Timestamp for when the annotation is created or submitted. |
-| annotations.completed_by | User ID of the user that created the annotation. Matches the list order of users on the People page on the Label Studio UI. See [Specifying annotators during import](#specifying-annotators-during-import) for import format options. |
+| annotations.completed_by | User ID of the user that created the annotation. Matches the list order of users on the People page on the MLTL Annotate UI. See [Specifying annotators during import](#specifying-annotators-during-import) for import format options. |
 | annotations.was_cancelled | Boolean. Details about whether or not the annotation was skipped, or cancelled. | 
 | result.id | Identifier for the specific annotation result for this task. Use it to combine together regions from different control tags, e.g. `<Labels>` and `<Rectangle>` |
 | result.parentID | (Optional) Reference to the parent region result.id. It organizes regions into a hierarchical tree in the Region panel |
@@ -127,7 +127,7 @@ Review the full list of JSON properties in the [API documentation](api.html).
 
 ### Specifying annotators during import {#specifying-annotators-during-import}
 
-When importing annotations to Label Studio, you can control which users are assigned as annotators by using the `completed_by` field within the annotation object:
+When importing annotations to MLTL Annotate, you can control which users are assigned as annotators by using the `completed_by` field within the annotation object:
 
 ```json
 // Option 1: No annotator specified (uses importing user)
@@ -153,7 +153,7 @@ When importing annotations to Label Studio, you can control which users are assi
 
 The system will match the email or ID to an existing user in your organization, or fall back to the importing user if configured to allow this.
 
-Note that this applies when importing via the Label Studio UI, the API, or the SDK. 
+Note that this applies when importing via the MLTL Annotate UI, the API, or the SDK. 
 
 <div class="enterprise-only">
 

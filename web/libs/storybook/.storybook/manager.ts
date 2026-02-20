@@ -4,7 +4,7 @@ import { create } from "storybook/theming/create";
 const theme = create({
   base: "dark",
   brandTitle: "MLTL Annotate",
-  brandUrl: "https://labelstud.io",
+  brandUrl: "https://mltl.us",
   brandImage: "logo.svg",
   brandTarget: "_blank",
 });

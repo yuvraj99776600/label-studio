@@ -1,4 +1,4 @@
-# Spark: HumanSignal UI Library
+# Spark: MLTL UI Library
 
 Based on Tailwind and Shadcn. Still WIP with the Design System, so refer to official docs for now:
 

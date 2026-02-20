@@ -57,7 +57,7 @@ Can only be changed on init if Audio3 FF is on.
 For some reason it's set to `false` in lsf-sdk constructor, but `true` in ReviewPage's setTask.
 But is set to `true` in lsf-sdk setLSFTask.
 
-Apparently it was not used anymore after https://github.com/HumanSignal/label-studio-frontend/pull/1166
+Apparently it was not used anymore after https://github.com/yuvraj99776600/label-studio-frontend/pull/1166
 
 ## `userGenerate` and `sentUserGenerate`
 
@@ -96,7 +96,7 @@ They both are only disabled in couple places.
 Also the whole `App.panels` prop is only used in the first, the oldest version.
 
 Apparently, `panels` were used only to add Comments tab and even this tab was moved into AnnotationTab after
-https://github.com/HumanSignal/label-studio-frontend/pull/774. So they are removed along with anything related.
+https://github.com/yuvraj99776600/label-studio-frontend/pull/774. So they are removed along with anything related.
 
 ## `assignTask`
 
@@ -152,7 +152,7 @@ deserializeRelation for every relation
 - one-way data flow
 - describe all possible external things that can affect current view
 
-# Still left to fix after https://github.com/HumanSignal/label-studio-frontend/pull/1640
+# Still left to fix after https://github.com/yuvraj99776600/label-studio-frontend/pull/1640
 
 - Annotation History should be updated with correct annotation when we select it from View All; why not to do the same on usual annotation select? and if we do why do we need special case here?
 
@@ -164,9 +164,9 @@ deserializeRelation for every relation
 # Other improvements
 
 
-https://github.com/HumanSignal/label-studio-frontend/blob/d0dd212bf7b12cb7f4469c9c2aa32dfe166f5abe/src/stores/RegionStore.js#L181-L183
+https://github.com/yuvraj99776600/label-studio-frontend/blob/d0dd212bf7b12cb7f4469c9c2aa32dfe166f5abe/src/stores/RegionStore.js#L181-L183
 could be shifted towards self.selection.selectRegions(regions) and then
-https://github.com/HumanSignal/label-studio-frontend/blob/d0dd212bf7b12cb7f4469c9c2aa32dfe166f5abe/src/stores/RegionStore.js#L45-L47
+https://github.com/yuvraj99776600/label-studio-frontend/blob/d0dd212bf7b12cb7f4469c9c2aa32dfe166f5abe/src/stores/RegionStore.js#L45-L47
 can be changed to usual method called only once.
 
 
@@ -204,4 +204,4 @@ Concerns:
 - fixed bunch of annoying react warnings (non-html props, wrong values, missed refs)
 - started to reorganize our "envs" to get rid of them at some point; for now it's `getRoot()` removed from there
 - removed `SidebarPage` as it was useless, plus removed multi-tabs support from `SidebarTabs` as `panels` were not used; plus that's all only for the old interface which is about to be removed
-- removed `hydrated` as it's not used anymore after https://github.com/HumanSignal/label-studio-frontend/pull/1166
+- removed `hydrated` as it's not used anymore after https://github.com/yuvraj99776600/label-studio-frontend/pull/1166

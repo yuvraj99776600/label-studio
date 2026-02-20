@@ -4,7 +4,7 @@
 | --- | --- | --- | --- |
 | name | <code>string</code> |  | Name of the element |
 | value | <code>string</code> |  | Key used to look up the data, either URLs for your time-series if valueType=url, otherwise expects JSON |
-| [valueType] | <code>url</code> \| <code>json</code> | <code>url</code> | Format of time series data provided. If set to "url" then Label Studio loads value references inside `value` key, otherwise it expects JSON. |
+| [valueType] | <code>url</code> \| <code>json</code> | <code>url</code> | Format of time series data provided. If set to "url" then MLTL Annotate loads value references inside `value` key, otherwise it expects JSON. |
 | [sync] | <code>string</code> |  | Object name to sync with. |
 | [cursorColor] | <code>string</code> |  | Color of the playback cursors used in sync (hex or any SVG-compatible color string) |
 | [timeColumn] | <code>string</code> |  | Column name or index that provides temporal values. If your time series data has no temporal column then one is automatically generated. |

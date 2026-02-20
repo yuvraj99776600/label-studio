@@ -10,13 +10,13 @@ section: "Onboarding"
 
 These onboarding guides will help you get started with your role on the platform.
 
-Label Studio Enterprise supports a collaborative workflow where team members work together to create high-quality training data. The platform is designed around two primary roles:
+MLTL Annotate supports a collaborative workflow where team members work together to create high-quality training data. The platform is designed around two primary roles:
 
 ## For Annotators
 
-If you're new to annotating tasks in Label Studio, start with the **[Annotator onboarding guide](onboarding_annotator)**. This guide covers:
+If you're new to annotating tasks in MLTL Annotate, start with the **[Annotator onboarding guide](onboarding_annotator)**. This guide covers:
 
-* How to access and navigate Label Studio
+* How to access and navigate MLTL Annotate
 * Finding and working on your assigned projects
 * Step-by-step annotation workflows
 * Reviewing your performance analytics

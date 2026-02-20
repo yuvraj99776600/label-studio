@@ -5,7 +5,7 @@ category: Computer Vision
 cat: computer-vision
 order: 130
 meta_title: Image Captioning Data Labeling Template
-meta_description: Template for adding captions to images with Label Studio for your machine learning and data science projects.
+meta_description: Template for adding captions to images with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/image-captioning.png" alt="" class="gif-border" width="552px" height="408px" />

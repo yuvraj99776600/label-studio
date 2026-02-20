@@ -575,7 +575,7 @@ stages:
       content-type: application/json
     json:
       data:
-        image_url: http://test.heartex.com/my_super_image.jpg
+        image_url: http://test.mltl.com/my_super_image.jpg
     method: POST
     url: '{django_live_url}/api/projects/{project_pk}/tasks'
   response:
@@ -677,7 +677,7 @@ stages:
       content-type: application/json
     json:
       data:
-        image_url: http://test.heartex.com/my_super_image.jpg
+        image_url: http://test.mltl.com/my_super_image.jpg
     method: POST
     url: '{django_live_url}/api/projects/{project_pk}/tasks'
   response:
@@ -923,7 +923,7 @@ stages:
       content-type: application/json
     json:
       data:
-        image_url: http://test.heartex.com/my_super_image.jpg
+        image_url: http://test.mltl.com/my_super_image.jpg
     method: POST
     url: '{django_live_url}/api/projects/{project_pk}/tasks'
   response:
@@ -1067,7 +1067,7 @@ stages:
     headers:
       content-type: application/json
     json:
-      - pdf: "<embed src='gs://heartex-test/file.pdf'/>"
+      - pdf: "<embed src='gs://mltl-test/file.pdf'/>"
     method: POST
     url: '{django_live_url}/api/projects/{project_pk}/import'
   response:

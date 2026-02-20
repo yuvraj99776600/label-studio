@@ -5,7 +5,7 @@ category: Audio/Speech Processing
 cat: audio-speech-processing
 order: 340
 meta_title: Intent Classification Data Labeling Template
-meta_description: Template for classifying intent of audio data with Label Studio for your machine learning and data science projects.
+meta_description: Template for classifying intent of audio data with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/intent-classification.png" alt="" class="gif-border" width="552px" height="408px" />

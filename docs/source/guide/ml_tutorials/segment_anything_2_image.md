@@ -5,7 +5,7 @@ tier: all
 order: 15
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: Using SAM2 with Label Studio for Image Annotation
+meta_title: Using SAM2 with MLTL Annotate for Image Annotation
 categories:
     - Computer Vision
     - Image Annotation
@@ -14,28 +14,28 @@ categories:
 image: "/guide/ml_tutorials/sam2-images.png"
 ---
 
-# Using SAM2 with Label Studio for Image Annotation
+# Using SAM2 with MLTL Annotate for Image Annotation
 
 Segment Anything 2, or SAM 2, is a model released by Meta in July 2024. An update to the original Segment Anything Model, 
 SAM 2 provides even better object segmentation for both images and video. In this guide, we'll show you how to use 
-SAM 2 for better image labeling with label studio. 
+SAM 2 for better image labeling with MLTL Annotate. 
 
-Click on the image below to watch our ML Evangelist Micaela Kaplan explain how to link SAM 2 to your Label Studio Project.
+Click on the image below to watch our ML Evangelist Micaela Kaplan explain how to link SAM 2 to your MLTL Annotate Project.
 You'll need to follow the instructions below to stand up an instance of SAM2 before you can link your model! 
 
-[![Connecting SAM2 Model to Label Studio for Image Annotation ](https://img.youtube.com/vi/FTg8P8z4RgY/0.jpg)](https://www.youtube.com/watch?v=FTg8P8z4RgY)
+[![Connecting SAM2 Model to MLTL Annotate for Image Annotation ](https://img.youtube.com/vi/FTg8P8z4RgY/0.jpg)](https://www.youtube.com/watch?v=FTg8P8z4RgY)
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`segment_anything_2_image` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/segment_anything_2_image). 
+This tutorial uses the [`segment_anything_2_image` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/segment_anything_2_image). 
 
 Note that as of 8/1/2024, SAM2 only runs on GPU.
 
 ## Labeling configuration
 
-The current implementation of the Label Studio SAM2 ML backend works using Interactive mode. The user-guided inputs are:
+The current implementation of the MLTL Annotate SAM2 ML backend works using Interactive mode. The user-guided inputs are:
 - `KeypointLabels`
 - `RectangleLabels`
 
@@ -124,7 +124,7 @@ This means all three control tags should be represented in your labeling configu
 1. To run the ML backend without Docker, you have to clone the repository and install all dependencies using pip:
 
 ```bash
-git clone https://github.com/HumanSignal/label-studio-ml-backend.git
+git clone https://github.com/yuvraj99776600/label-studio-ml-backend.git
 cd label-studio-ml-backend
 pip install -e .
 cd label_studio_ml/examples/segment_anything_2_image
@@ -141,7 +141,7 @@ cd ../
 label-studio-ml start ./segment_anything_2_image
 ```
 
-4. Connect running ML backend server to Label Studio: go to your project `Settings -> Machine Learning -> Add Model` and specify `http://localhost:9090` as a URL. Read more in the official [Label Studio documentation](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio).
+4. Connect running ML backend server to MLTL Annotate: go to your project `Settings -> Machine Learning -> Add Model` and specify `http://localhost:9090` as a URL. Read more in the official [MLTL Annotate documentation](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio).
 
 ## Running with Docker (coming soon)
 
@@ -158,7 +158,7 @@ $ curl http://localhost:9090/
 {"status":"UP"}
 ```
 
-3. Connect to the backend from Label Studio running on the same host: go to your project `Settings -> Machine Learning -> Add Model` and specify `http://localhost:9090` as a URL.
+3. Connect to the backend from MLTL Annotate running on the same host: go to your project `Settings -> Machine Learning -> Add Model` and specify `http://localhost:9090` as a URL.
 
 
 ## Configuration

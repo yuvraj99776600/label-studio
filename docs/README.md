@@ -1,4 +1,4 @@
-# Documentation of Label Studio
+# Documentation of MLTL Annotate
 
 ## Use and deploy Hexo
 
@@ -27,7 +27,7 @@ To deploy the docs locally on your machine using Hexo, use the following steps.
 
 ### Prerequisites
 - Install Hexo
-- Clone the Label Studio Github repository 
+- Clone the MLTL Annotate Github repository 
 
 ### Deploy the docs locally
 In the label-studio/docs directory of the cloned repo, do the following:

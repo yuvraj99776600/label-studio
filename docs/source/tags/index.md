@@ -2,11 +2,11 @@
 title: Introduction
 type: tags
 order: 201
-meta_title: Customize the Label Studio User Interface
-meta_description: Customize the Label Studio labeling interface using XML-like tags for data annotation tasks in machine learning and data science projects.
+meta_title: Customize the MLTL Annotate User Interface
+meta_description: Customize the MLTL Annotate labeling interface using XML-like tags for data annotation tasks in machine learning and data science projects.
 ---
 
-You can use XML-like tags in Label Studio to configure the labeling interface. Label Studio uses three different types of tags to manage labeling:
+You can use XML-like tags in MLTL Annotate to configure the labeling interface. MLTL Annotate uses three different types of tags to manage labeling:
 
 - **Object** tags for data types, used to display elements in a task that can be labeled such as [audio](/tags/audio.html), [HTML](/tags/hypertext.html), [images](/tags/image.html), [paragraphs](/tags/paragraphs.html), [text](/tags/text.html), and more.
 - **Control** tags that you can use to annotate the objects. For example, use [labels](/tags/labels.html) for semantic and named entity tasks, [choices](/tags/choices.html) for classification tasks, [textarea](/tags/textarea.html) for transcription tasks, and more.
@@ -19,7 +19,7 @@ When you [set up your labeling interface](/guide/setup.html), you can choose to 
 <div class="opensource-only">
 
 !!! error enterprise
-    Label Studio Enterprise has the option include plugins as part of your labeling interface. Plugins allow you to use Javascript to extend your interface and customize annotator workflows. For more information, see [Plugins](https://docs.humansignal.com/guide/plugins).
+    MLTL Annotate has the option include plugins as part of your labeling interface. Plugins allow you to use Javascript to extend your interface and customize annotator workflows. For more information, see [Plugins](https://docs.mltl.us/guide/plugins).
 
 </div>
 

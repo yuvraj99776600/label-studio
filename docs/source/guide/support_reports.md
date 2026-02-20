@@ -6,12 +6,12 @@ tier: enterprise
 order: 0
 order_enterprise: 360
 meta_title: Support reports
-meta_description: Generate anonymized support reports so the HumanSignal team can diagnose issues, tune performance, and suggest better workflows for your Label Studio deployment.
+meta_description: Generate anonymized support reports so the HumanSignal team can diagnose issues, tune performance, and suggest better workflows for your MLTL Annotate deployment.
 section: "Manage Your Organization"
 parent_enterprise: "admin_settings"
 ---
 
-Support reports give you a safe, low-friction way to tell the HumanSignal team what’s happening inside your Label Studio Enterprise deployment.
+Support reports give you a safe, low-friction way to tell the HumanSignal team what’s happening inside your MLTL Annotate deployment.
 
 These reports bundle together anonymized operational metrics and environment details that our support and product teams use to:
 
@@ -41,7 +41,7 @@ Once completed, you can use the action icons to:
 ![Screenshot of support reports page](/images/admin/support-report-generate.png)
 
 !!! note
-    To download the ZIP file, you need to have at least one project with S3 or S3-compatible storage configured. This is because when generating a support report, Label Studio persists the report artifact using the configured storage backend before it becomes available for download.
+    To download the ZIP file, you need to have at least one project with S3 or S3-compatible storage configured. This is because when generating a support report, MLTL Annotate persists the report artifact using the configured storage backend before it becomes available for download.
     
     If you do not have S3-compatible storage configured, or if the credentials are not valid, you will receive a `botocore.exceptions.ClientError` when you try to download the ZIP file. 
     
@@ -68,7 +68,7 @@ Support reports are designed to be useful for debugging and planning while remai
 - **Environment profile**  
   High-level information about:
   - Deployment type (cloud / on‑prem)
-  - Versions of Label Studio and Label Studio Enterprise
+  - Versions of MLTL Annotate and MLTL Annotate
   - Connected services (databases, storage backends) at the level of types and configuration flags, not credentials
 
 !!! info Tip
@@ -113,7 +113,7 @@ We recommend generating a support report when:
   - Adding new teams or projects
   - Tightening SLAs for labeling turnaround time
 - You want a **health check** on your deployment:
-  - Are we using Label Studio efficiently?
+  - Are we using MLTL Annotate efficiently?
   - Do our workflows align with best practices?
 
 In many cases, attaching a fresh support report to your initial ticket lets us skip several diagnostic steps and go straight to suggested fixes and improvements.

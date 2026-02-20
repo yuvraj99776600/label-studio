@@ -1,23 +1,23 @@
 ---
-title: How to Embed Evaluation Workflows in Your Research Stack with Label Studio
+title: How to Embed Evaluation Workflows in Your Research Stack with MLTL Annotate
 hide_sidebar: true
 order: 999
 open_in_collab: true
 tutorial: true
 community_author: bmartel
 ipynb_repo_path: tutorials/how-to-embed-evaluation-workflows-in-your-research-stack-with-label-studio/how_to_embed_evaluation_workflows_in_your_research_stack_with_Label_Studio.ipynb
-repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-embed-evaluation-workflows-in-your-research-stack-with-label-studio
-report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
+repo_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/tree/main/tutorials/how-to-embed-evaluation-workflows-in-your-research-stack-with-label-studio
+report_bug_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/issues/new
 thumbnail: /images/tutorials/tutorials-eval-flows-research-stack.png
-meta_title: How to Embed Evaluation Workflows in Your Research Stack with Label Studio
-meta_description: Learn how to build an embedded evaluation workflow directly into your jupyer notebook with Label Studio.
+meta_title: How to Embed Evaluation Workflows in Your Research Stack with MLTL Annotate
+meta_description: Learn how to build an embedded evaluation workflow directly into your jupyer notebook with MLTL Annotate.
 is_enterprise: true
 badges: SDK, Embed, Colab
 duration: 10-15 mins
 ---
-## Label Studio Requirements
+## MLTL Annotate Requirements
 
-This tutorial showcases one or more features available only in Label Studio Enterprise. We recommend [connecting with our team](https://humansignal.com/contact-sales/) to request a trial or to enable them in your account.
+This tutorial showcases one or more features available only in MLTL Annotate. We recommend [connecting with our team](https://humansignal.com/contact-sales/) to request a trial or to enable them in your account.
 
 ## The Context-Switching Tax
 
@@ -33,7 +33,7 @@ Over the next 15-20 minutes, you'll build an embedded evaluation workflow that:
 
 1. **Loads real medical Q&A data** from Hugging Face (100 tasks)
 2. **Creates a structured evaluation interface** with custom criteria
-3. **Embeds Label Studio directly in this notebook** for zero-context-switch evaluation
+3. **Embeds MLTL Annotate directly in this notebook** for zero-context-switch evaluation
 4. **Exports to pandas** for instant analysis and visualization
 5. **Generates insights** about model performance across medical specialties
 
@@ -48,7 +48,7 @@ By the end, you'll have a template you can adapt for any evaluation workflow: co
 This tutorial has two parts:
 
 ### 👤 **Part 1: Admin Setup (One-Time, ~5 minutes)**
-Your Label Studio **Owner/Admin** needs to:
+Your MLTL Annotate **Owner/Admin** needs to:
 - Enable embedding for your organization ([request access](https://humansignal.com/contact-sales/))
 - Run Part 1 to generate keys and configure organization
 - **Share the private key** with ML engineers (via secure channel)
@@ -200,7 +200,7 @@ else:
 
 **👋 ML Engineers**: If your admin already configured embedding, **skip to Part 2** below.
 
-**👋 Admins**: This 5-minute setup enables your entire team to embed Label Studio in notebooks.
+**👋 Admins**: This 5-minute setup enables your entire team to embed MLTL Annotate in notebooks.
 
 **👤 ADMIN ONLY - Run Once**: Generate keys and configure your organization for embedding.
 
@@ -307,7 +307,7 @@ try:
             <strong>❌ Configuration failed</strong><br>
             {message}<br><br>
             This usually means you need Owner role permissions.<br>
-            Contact your Label Studio admin to configure embedding.
+            Contact your MLTL Annotate admin to configure embedding.
         </div>
         """))
 
@@ -326,11 +326,11 @@ except Exception as e:
 **This is the main workflow.** Once your admin has configured embedding (Part 1), you can run this section repeatedly for any evaluation project.
 
 **What you need:**
-- Your personal Label Studio API token (not admin required)
-- Access to your Label Studio Enterprise instance
+- Your personal MLTL Annotate API token (not admin required)
+- Access to your MLTL Annotate instance
 - This takes ~15 minutes first time, ~5 minutes for subsequent projects
 
-## Connect to Label Studio
+## Connect to MLTL Annotate
 
 Set your credentials and connect:
 
@@ -388,7 +388,7 @@ if isinstance(EMBED_PRIVATE_KEY, str):
 else:
     private_key_bytes = EMBED_PRIVATE_KEY
 
-# Connect to Label Studio and generate embed token
+# Connect to MLTL Annotate and generate embed token
 try:
     from label_studio_sdk.client import LabelStudio
     ls = LabelStudio(base_url=LABEL_STUDIO_URL, api_key=API_KEY)
@@ -500,7 +500,7 @@ display(HTML(f"""
 
 # 🏷️ Create Project
 
-We will create a Label Studio Enterprise project with a labelling config that will allow us to evaluate the responses.
+We will create a MLTL Annotate project with a labelling config that will allow us to evaluate the responses.
 
 
 ```python
@@ -704,7 +704,7 @@ try:
     display(HTML(f"""
     <div style="padding: 15px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px;">
         <strong>✅ Evaluation project created</strong><br>
-        • <a href="{LABEL_STUDIO_URL}/projects/{project.id}" target="_blank">View in Label Studio →</a><br>
+        • <a href="{LABEL_STUDIO_URL}/projects/{project.id}" target="_blank">View in MLTL Annotate →</a><br>
         • Project ID: {project.id}<br>
         • Task Assignment: {assignment_mode}<br>
         • Task Sampling: Sequential<br>
@@ -786,7 +786,7 @@ display(HTML(f"""
 This is where the magic happens. Instead of opening a browser, logging into a platform, and navigating to your project—you're about to evaluate tasks **right here in this notebook**.
 
 The embedded interface is fully functional:
-- ✅ Submit annotations → instantly saved to Label Studio
+- ✅ Submit annotations → instantly saved to MLTL Annotate
 - ✅ Progress tracking → see how many tasks you've completed
 - ✅ Next task loading → re-run the cell below to fetch your next assigned task
 - ✅ All data stays synced → export to pandas anytime for analysis
@@ -865,13 +865,13 @@ def create_auto_embed(project_id, task_id=None, embed_id="medical-eval-embed", h
         <div style="margin-top: 10px;">
             <a id="{embed_id}-link" href="{LABEL_STUDIO_URL}/projects/{project_id}/data?tab=0&task={task_id}" target="_blank"
                style="display: inline-block; padding: 10px 20px; background: #17a2b8; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">
-                📊 View Task #{task_id} in Label Studio
+                📊 View Task #{task_id} in MLTL Annotate
             </a>
         </div>
     </div>
 
     <script>
-    // Inline Label Studio Embed SDK
+    // Inline MLTL Annotate Embed SDK
     (function() {{
         const status = document.getElementById('{embed_id}-status');
         const taskDisplay = document.getElementById('{embed_id}-task-display');
@@ -1055,7 +1055,7 @@ def create_auto_embed(project_id, task_id=None, embed_id="medical-eval-embed", h
 
 ## Start Evaluating
 
-The interface below loads tasks automatically. Evaluate as many as you'd like - all annotations are saved to Label Studio Enterprise:
+The interface below loads tasks automatically. Evaluate as many as you'd like - all annotations are saved to MLTL Annotate:
 
 
 
@@ -1107,7 +1107,7 @@ After evaluating tasks, let's export the data and perform comprehensive analysis
 
 
 ```python
-# Export annotations using Label Studio Enterprise's native Pandas export
+# Export annotations using MLTL Annotate's native Pandas export
 try:
     df = ls.projects.exports.as_pandas(project.id)
 
@@ -1121,7 +1121,7 @@ try:
     else:
         display(HTML(f"""
         <div style="padding: 15px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px;">
-            <strong>✅ Exported using Label Studio Enterprise's native Pandas export</strong><br>
+            <strong>✅ Exported using MLTL Annotate's native Pandas export</strong><br>
             • {len(df)} rows × {len(df.columns)} columns<br>
             • Direct DataFrame export<br>
             • Ready for analysis
@@ -1146,7 +1146,7 @@ except Exception as e:
 
 This is where embedded evaluation pays off. One line of code exports everything to pandas—no CSV downloads, no manual merging, no data formatting headaches.
 
-Label Studio Enterprise's `.as_pandas()` method handles all the JSON parsing for you. Ratings, recommendations, free-text notes—it's all structured and ready for analysis.
+MLTL Annotate's `.as_pandas()` method handles all the JSON parsing for you. Ratings, recommendations, free-text notes—it's all structured and ready for analysis.
 
 Let's see what patterns emerge from the evaluations:
 
@@ -1155,9 +1155,9 @@ Let's see what patterns emerge from the evaluations:
 ```python
 if 'df' in locals() and len(df) > 0:
     # Helper function to extract rating value from JSON
-    # Ratings come as '[{"rating":5}]' from Label Studio export
+    # Ratings come as '[{"rating":5}]' from MLTL Annotate export
     def extract_rating(json_str):
-        """Extract numeric rating from Label Studio JSON format"""
+        """Extract numeric rating from MLTL Annotate JSON format"""
         try:
             if pd.isna(json_str) or json_str == '':
                 return None
@@ -1323,10 +1323,10 @@ else:
 You now have a production-ready evaluation workflow that runs entirely in your notebook:
 
 **Data in** → Hugging Face dataset (100 medical Q&A pairs)  
-**Evaluate** → Embedded Label Studio with structured criteria  
+**Evaluate** → Embedded MLTL Annotate with structured criteria  
 **Analyze** → One-line pandas export → visualizations → insights
 
-**The key unlock**: Label Studio Enterprise's embed SDK + native pandas export means evaluation data flows seamlessly between human judgment and ML pipelines. No context switching, no manual data wrangling, no broken workflows.
+**The key unlock**: MLTL Annotate's embed SDK + native pandas export means evaluation data flows seamlessly between human judgment and ML pipelines. No context switching, no manual data wrangling, no broken workflows.
 
 ---
 
@@ -1354,10 +1354,10 @@ Evaluate GPT-4 vs Claude vs your fine-tuned model. Side-by-side comparison with 
 Replace the notebook embed with a web app (same SDK code). Add team collaboration, role-based access, review workflows.
 
 **Active Learning Pipelines**  
-Connect your ML model → export low-confidence predictions → embed in notebook → human evaluation → retrain automatically. Check the [Active Learning docs](https://docs.humansignal.com/guide/active_learning).
+Connect your ML model → export low-confidence predictions → embed in notebook → human evaluation → retrain automatically. Check the [Active Learning docs](https://docs.mltl.us/guide/active_learning).
 
 **Real-Time Monitoring**  
-Set up [webhooks](https://docs.humansignal.com/guide/webhooks) to trigger actions when annotations are submitted. Get Slack notifications, update dashboards, flag critical issues.
+Set up [webhooks](https://docs.mltl.us/guide/webhooks) to trigger actions when annotations are submitted. Get Slack notifications, update dashboards, flag critical issues.
 
 **MLOps Integration**  
 - **MLflow**: `mlflow.log_metrics(df.mean().to_dict())` after pandas export
@@ -1369,23 +1369,23 @@ Set up [webhooks](https://docs.humansignal.com/guide/webhooks) to trigger action
 # 📚 Key Resources
 
 **Core Documentation**  
-→ [Embed SDK](https://docs.humansignal.com/guide/embed.html) - Authentication, events, advanced configs  
+→ [Embed SDK](https://docs.mltl.us/guide/embed.html) - Authentication, events, advanced configs  
 → [Python SDK](https://api.labelstud.io/) - Complete API reference  
 
 **Advanced Features**  
-→ [Prompts](https://docs.humansignal.com/guide/prompts_overview) - LLM prompt evaluation  
-→ [Active Learning](https://docs.humansignal.com/guide/active_learning) - Auto-surface informative samples  
-→ [ML Backend Integration](https://docs.humansignal.com/guide/ml) - Bi-directional model sync  
-→ [Inter-Annotator Agreement](https://docs.humansignal.com/guide/stats) - Measure evaluator consistency
+→ [Prompts](https://docs.mltl.us/guide/prompts_overview) - LLM prompt evaluation  
+→ [Active Learning](https://docs.mltl.us/guide/active_learning) - Auto-surface informative samples  
+→ [ML Backend Integration](https://docs.mltl.us/guide/ml) - Bi-directional model sync  
+→ [Inter-Annotator Agreement](https://docs.mltl.us/guide/stats) - Measure evaluator consistency
 
 **Production**  
-→ [Webhooks](https://docs.humansignal.com/guide/webhooks) - Event-driven automation  
-→ [Cloud Storage](https://docs.humansignal.com/guide/storage) - S3/GCS/Azure sync  
-→ [Export Formats](https://docs.humansignal.com/guide/export) - JSON, CSV, COCO, YOLO, etc.
+→ [Webhooks](https://docs.mltl.us/guide/webhooks) - Event-driven automation  
+→ [Cloud Storage](https://docs.mltl.us/guide/storage) - S3/GCS/Azure sync  
+→ [Export Formats](https://docs.mltl.us/guide/export) - JSON, CSV, COCO, YOLO, etc.
 
 **Community**  
 → [Join Slack](https://slack.labelstud.io) - Get help, share use cases  
-→ [GitHub](https://github.com/HumanSignal/label-studio) - Contribute, open issues  
+→ [GitHub](https://github.com/yuvraj99776600/label-studio) - Contribute, open issues  
 → [Contact Sales](mailto:sales@humansignal.com) - Enterprise features & support
 
 ---

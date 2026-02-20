@@ -6,13 +6,13 @@ type: guide
 order: 0
 order_enterprise: 351
 meta_title: Organization management
-meta_description: Brief overview of organization structures in Label Studio Enterprise. 
+meta_description: Brief overview of organization structures in MLTL Annotate. 
 section: "Manage Your Organization"
 date: 2024-02-16 15:44:07
 ---
 
 
-To manage organization membership, use the **Organization** page in Label Studio. Only users with the Owner or Administrator role can access this page:
+To manage organization membership, use the **Organization** page in MLTL Annotate. Only users with the Owner or Administrator role can access this page:
 
 <img style="max-width: 235px" src="/images/admin/org_page.png" alt="Screenshot of org link"/>
 
@@ -24,24 +24,24 @@ For on-prem deployments, use `/user/signup`.
 
 For SaaS deployments, use [`app.humansignal.com/`](https://app.humansignal.com/).
 
-When you sign up for Label Studio Enterprise or Starter Cloud for the first time, an organization associated with your account is automatically created. You become the owner of that organization. People who join Label Studio from an invitation link or with an LDAP or SSO role join an existing organization.
+When you sign up for MLTL Annotate or Starter Cloud for the first time, an organization associated with your account is automatically created. You become the owner of that organization. People who join MLTL Annotate from an invitation link or with an LDAP or SSO role join an existing organization.
 
 !!! note
-    There can only be one Owner per organization. If the user in control of the Owner account leaves, you will need to [open a support ticket](https://support.humansignal.com/hc/en-us/requests/new) to request that this role be reassigned. 
+    There can only be one Owner per organization. If the user in control of the Owner account leaves, you will need to [open a support ticket](https://mltl.us/support/hc/en-us/requests/new) to request that this role be reassigned. 
 
 ## Single or multiple organizations
 
-If permitted by your Label Studio plan, you can create organizations in Label Studio to further separate access to data and projects. For example, you could create separate organizations to separate work and access between completely unrelated departments. If some departments might collaborate with each other on a project, you can use one organization for both and instead use workspaces to organize the projects that they might or might not be collaborating on.
+If permitted by your MLTL Annotate plan, you can create organizations in MLTL Annotate to further separate access to data and projects. For example, you could create separate organizations to separate work and access between completely unrelated departments. If some departments might collaborate with each other on a project, you can use one organization for both and instead use workspaces to organize the projects that they might or might not be collaborating on.
 
 For example, you might set up one of the following possible configurations:
 
 - One organization for your company, with one workspace for the support department and another for the development team, with specific projects in each workspace for different types of customer requests.
 
-  <img style="width:70%" src="/images/LSE/LSE-one-org-many-workspaces.jpg" alt="Diagram showing Label Studio with one organization with multiple workspaces and projects within each workspace."/>
+  <img style="width:70%" src="/images/LSE/LSE-one-org-many-workspaces.jpg" alt="Diagram showing MLTL Annotate with one organization with multiple workspaces and projects within each workspace."/>
 
 - Multiple organizations, such as one for the customer claims department and another for the customer support department, with specific workspaces in each organization for specific types of insurance, such as home insurance claims and auto insurance claims, and specific projects in each workspace for types of claims, such as Accident Claims, Injury Claims, Natural Disaster Claims. The Customer support organization might have workspaces specific to the types of support queues, with projects for specific types of calls received.
 
-  <img style="width:70%" src="/images/LSE/LSE-multiple-orgs-workspaces.jpg" alt="Diagram showing Label Studio with three organizations, each one with multiple workspaces and projects within each workspace."/>
+  <img style="width:70%" src="/images/LSE/LSE-multiple-orgs-workspaces.jpg" alt="Diagram showing MLTL Annotate with three organizations, each one with multiple workspaces and projects within each workspace."/>
 
   When you assign a user role to an organization member, they hold that role for all workspaces and projects for that organization.
 

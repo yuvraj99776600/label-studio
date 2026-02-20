@@ -12,7 +12,7 @@ meta_description: Template for manual chat conversation.
 Simulate multi‑turn chats by playing both user and assistant (or pair with a teammate). Capture tone, style, and persona for fine‑tuning—using human‑written dialogs to avoid the generic “frontier chatbot” voice.
 
 !!! error Enterprise
-    This template requires Label Studio Enterprise or Starter Cloud. 
+    This template requires MLTL Annotate or Starter Cloud. 
 
     For Community users, see our [Conversation AI templates](gallery_conversational_ai) or the [Multi-Turn Chat Evaluation template](multi_turn_chat). 
 

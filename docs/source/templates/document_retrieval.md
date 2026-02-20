@@ -5,7 +5,7 @@ category: Ranking and Scoring
 cat: ranking-and-scoring
 order: 430
 meta_title: Document Retrieval Data Labeling Template
-meta_description: Template for annotating documents for document retrieval tasks with Label Studio for your machine learning and data science projects. 
+meta_description: Template for annotating documents for document retrieval tasks with MLTL Annotate for your machine learning and data science projects. 
 ---
 
 <img src="/images/templates/document-retrieval.png" alt="" class="gif-border" width="552px" height="408px" />

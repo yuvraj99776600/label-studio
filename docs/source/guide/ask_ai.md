@@ -6,12 +6,12 @@ type: guide
 order: 0
 order_enterprise: 356
 meta_title: About AI Assistant 
-meta_description: Information about using the AI features in Label Studio
+meta_description: Information about using the AI features in MLTL Annotate
 section: "Manage Your Organization"
 date: 2025-01-28 16:40:16
 ---
 
-The Label Studio AI Assistant is an OpenAI LLM that has been trained on the Label Studio documentation, codebase, and several other Label Studio resources.
+The MLTL Annotate AI Assistant is an OpenAI LLM that has been trained on the MLTL Annotate documentation, codebase, and several other MLTL Annotate resources.
 
 ## Use AI Assistant for project setup 
 
@@ -24,7 +24,7 @@ You can interact with this as you would a chat, meaning that you can build off y
 
 ## Use AI Assistant for general help
 
-You can also use AI Assistant to ask for troubleshooting and general help with Label Studio.  
+You can also use AI Assistant to ask for troubleshooting and general help with MLTL Annotate.  
 
 ![Screenshot of AI Assistant for labeling configs](/images/admin/ai-ask.png)  
 
@@ -36,12 +36,12 @@ You can also use AI Assistant to ask for troubleshooting and general help with L
 Your organization can enable AI Assistant from the **Organization > Usage & License** page. 
 
 !!! note
-    Only users in the Owner role can modify these settings. For Starter Cloud users, [open a support ticket](mailto:support@humansignal.com) to request disablement. 
+    Only users in the Owner role can modify these settings. For Starter Cloud users, [open a support ticket](mailto:support@mltl.us) to request disablement. 
 
 ![Screenshot of settings](/images/admin/ai-settings.png) 
 
 * **Enable AI Features**--Enable AI Assistant for your labeling interface configuration. 
-* **Enable Ask AI**--Enable the AI Assistant for general Label Studio help. 
+* **Enable Ask AI**--Enable the AI Assistant for general MLTL Annotate help. 
 
 ### What models do you use?
 

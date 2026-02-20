@@ -3,7 +3,7 @@ title: Image
 type: tags
 order: 304
 meta_title: Image Tags for Images
-meta_description: Customize Label Studio with the Image tag to annotate images for computer vision machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the Image tag to annotate images for computer vision machine learning and data science projects.
 ---
 
 The `Image` tag shows an image on the page. Use for all image annotation tasks to display an image on the labeling interface.

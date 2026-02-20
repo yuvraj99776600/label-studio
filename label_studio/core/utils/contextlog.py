@@ -329,7 +329,7 @@ class ContextLog(object):
             pass
         else:
             try:
-                url = 'https://tele.labelstud.io'
+                url = ''  # telemetry disabled for white-label
                 requests.post(url=url, json=payload, timeout=3.0)
             except:  # noqa: E722
                 pass

@@ -5,8 +5,8 @@ category: LLM Fine-tuning
 cat: llm-fine-tuning
 order: 906
 is_new: t
-meta_title: Create a ranked dataset for building a RAG system for LLMs with Label Studio
-meta_description: Create a ranked dataset for building a RAG system for LLMs with Label Studio for your machine learning and data science projects.
+meta_title: Create a ranked dataset for building a RAG system for LLMs with MLTL Annotate
+meta_description: Create a ranked dataset for building a RAG system for LLMs with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/llm-ranker.png" alt="" class="gif-border" width="700px" />
@@ -20,11 +20,11 @@ This enables the following use cases:
 1. Categorize the LLM responses by different types: relevant, irrelevant, biased, offensive, etc.
 2. Compare and rank the quality of the responses from different models.
 3. Rank contextual items for retrieval-augmented generation based chat bots and in-context learning.
-4. Build [the preference model for RLHF](https://github.com/HumanSignal/RLHF)
+4. Build [the preference model for RLHF](https://github.com/yuvraj99776600/RLHF)
 5. Evaluate results of semantic search
 6. [LLM routing](https://betterprogramming.pub/unifying-llm-powered-qa-techniques-with-routing-abstractions-438e2499a0d0)
 
-Looking for a model to get started with the fine-tuning process? Check out [our guide on the Label Studio Blog](https://labelstud.io/blog/five-large-language-models-you-can-fine-tune-today/).
+Looking for a model to get started with the fine-tuning process? Check out [our guide on the MLTL Annotate Blog](https://mltl.us/blog/five-large-language-models-you-can-fine-tune-today/).
 
 ## How to create the dataset
 
@@ -127,9 +127,9 @@ Items can be styled in Style tag by using `.htx-ranker-item` class.
 ## Starting your labeling project
 
 !!! info Tip
-    Need a hand getting started with Label Studio? Check out our [Zero to One Tutorial](https://labelstud.io/blog/zero-to-one-getting-started-with-label-studio/).
+    Need a hand getting started with MLTL Annotate? Check out our [Zero to One Tutorial](https://mltl.us/blog/zero-to-one-getting-started-with-label-studio/).
 
-1. Create new project in Label Studio
+1. Create new project in MLTL Annotate
 2. Go to **Settings > Labeling Interface > Browse Templates > Generative AI > LLM Ranker**.
 3. Save the project
 
@@ -146,7 +146,7 @@ project = ls.create_project(title='LLM Ranker', label_config='<View>...</View>')
 
 To import your dataset, in the project settings go to `Import` and upload the dataset file `dataset.json`.
 
-Using the Python SDK, import the dataset with input prompts into Label Studio using the `PROJECT_ID` of the project you've just created.
+Using the Python SDK, import the dataset with input prompts into MLTL Annotate using the `PROJECT_ID` of the project you've just created.
 
 Run the following code:
 
@@ -187,7 +187,7 @@ Under `"value"` group, you can specify different bucket names. Note `"_"` used a
 
 Labeling results can be exported in JSON format. To export the dataset, go to `Export` in the project settings and download the file.
 
-Using python SDK you can export the dataset with annotations from Label Studio
+Using python SDK you can export the dataset with annotations from MLTL Annotate
 
 ```python
 annotations = project.export_tasks(format='JSON')

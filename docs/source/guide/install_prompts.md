@@ -6,7 +6,7 @@ tier: enterprise
 order: 0
 order_enterprise: 71
 meta_title: Install Prompts
-meta_description: Install Prompts in a Label Studio Enterprise on-prem environment
+meta_description: Install Prompts in a MLTL Annotate on-prem environment
 section: "Install & Setup"
 parent: "install_k8s"
 parent_enterprise: "install_enterprise_k8s"
@@ -17,7 +17,7 @@ Installing Prompts in an on-prem environment requires installing Adala, our data
 You only need to complete these steps if you want to use Prompts. For more information, see our [Prompts overview](prompts_overview).
 
 !!! note
-    Prompts are only supported for Kubernetes deployments. If you are using Docker, you will need to migrate to a Kubernetes deployment to use Prompts. See [Deploy Label Studio Enterprise on Kubernetes](install_enterprise_k8s.html) for more information.
+    Prompts are only supported for Kubernetes deployments. If you are using Docker, you will need to migrate to a Kubernetes deployment to use Prompts. See [Deploy MLTL Annotate on Kubernetes](install_enterprise_k8s.html) for more information.
 
 
 ## Prerequisites
@@ -37,7 +37,7 @@ Before installing, ensure your Kubernetes cluster can provide the following mini
 
 ## 1. Authenticate to Docker Hub and validate access
 
-You will need your Docker Hub username and password. If you do not have them, [request access from the HumanSignal team](mailto:support@humansignal.com).
+You will need your Docker Hub username and password. If you do not have them, [request access from the HumanSignal team](mailto:support@mltl.us).
 
 Log in to DockerHub to access the private OCI repository:
 
@@ -145,12 +145,12 @@ or
 kubectl logs <pod-name> -n prompt
 ```
 
-## 7. Update the Label Studio `values.yaml` file
+## 7. Update the MLTL Annotate `values.yaml` file
 
-You will need to update the `global` section of your Label Studio Enterprise `values.yaml` file to include the following:
+You will need to update the `global` section of your MLTL Annotate `values.yaml` file to include the following:
 
-* Add the Adala endpoint, which will allow Label Studio to connect to Adala. 
-* Add the Prompts feature flag, to enable Prompts visibility within Label Studio. 
+* Add the Adala endpoint, which will allow MLTL Annotate to connect to Adala. 
+* Add the Prompts feature flag, to enable Prompts visibility within MLTL Annotate. 
 
 
 ```yaml
@@ -167,4 +167,4 @@ Note the following for `PROMPTER_ADALA_URL`:
 - `adala-adala-app` is the name of the Adala service automatically created by the Helm release.
 - Port `8000` is the default port where Adala listens.
 
-After updating the values file, redeploy Label Studio to apply the changes.
+After updating the values file, redeploy MLTL Annotate to apply the changes.

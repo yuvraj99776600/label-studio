@@ -20,7 +20,7 @@ tier: enterprise
 
 Use [Plotly](https://plotly.com/) to insert charts and graphs into your labeling interface. Charts are rendered in every annotation opened by a user. 
 
-![Screenshot of Plotly graph in Label Studio](/images/plugins/plotly.png)
+![Screenshot of Plotly graph in MLTL Annotate](/images/plugins/plotly.png)
 
 ## Plugin
 

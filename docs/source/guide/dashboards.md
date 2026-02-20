@@ -5,14 +5,14 @@ tier: enterprise
 type: guide
 order: 0
 order_enterprise: 135
-meta_title: Dashboard in Label Studio
-meta_description: Use Label Studio dashboards to monitor performance and progress.
+meta_title: Dashboard in MLTL Annotate
+meta_description: Use MLTL Annotate dashboards to monitor performance and progress.
 section: "Create & Manage Projects"
 ---
 
-You can use the Label Studio Enterprise dashboards to help visualize your labeling progress across projects and resources. 
+You can use the MLTL Annotate dashboards to help visualize your labeling progress across projects and resources. 
 
-See the following video for a brief overview of the analytics available in Label Studio Enterprise:
+See the following video for a brief overview of the analytics available in MLTL Annotate:
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/mkaLdrF1Pn8?si=jAqTUOyNu0lkw3E-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 

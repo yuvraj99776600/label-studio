@@ -18,7 +18,7 @@ describe("VirtualVideo", () => {
 
     render(
       <VirtualVideo.VirtualVideo
-        src="https://app.heartex.ai/static/samples/opossum_snow.mp4"
+        src="https://app.mltl.ai/static/samples/opossum_snow.mp4"
         canPlayType={canPlayType}
       />,
     );
@@ -51,7 +51,7 @@ describe("VirtualVideo", () => {
 
     render(
       <VirtualVideo.VirtualVideo
-        src="https://app.heartex.ai/static/samples/opossum_snow.mp4"
+        src="https://app.mltl.ai/static/samples/opossum_snow.mp4"
         canPlayType={canPlayType}
       />,
     );
@@ -73,7 +73,7 @@ describe("VirtualVideo", () => {
     });
 
     render(
-      <VirtualVideo.VirtualVideo src="https://app.heartex.ai/static/samples/opossum_snow" canPlayType={canPlayType} />,
+      <VirtualVideo.VirtualVideo src="https://app.mltl.ai/static/samples/opossum_snow" canPlayType={canPlayType} />,
     );
 
     await new Promise((resolve) => setTimeout(resolve, 10));
@@ -86,7 +86,7 @@ describe("VirtualVideo", () => {
 
     render(
       <VirtualVideo.VirtualVideo
-        src="https://app.heartex.ai/static/samples/opossum_snow.avi"
+        src="https://app.mltl.ai/static/samples/opossum_snow.avi"
         canPlayType={canPlayType}
       />,
     );
@@ -109,7 +109,7 @@ describe("VirtualVideo", () => {
 
     render(
       <VirtualVideo.VirtualVideo
-        src="https://app.heartex.ai/static/samples/opossum_snow.avi"
+        src="https://app.mltl.ai/static/samples/opossum_snow.avi"
         canPlayType={canPlayType}
       />,
     );

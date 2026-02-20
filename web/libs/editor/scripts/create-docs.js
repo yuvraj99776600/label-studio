@@ -1,7 +1,7 @@
 /**
  * This file is used to parse JSDoc for every tag and their regions
  * and generate two artifacts out of it:
- * - snippets for tag docs used by `insertmd` in https://labelstud.io/tags/
+ * - snippets for tag docs used by `insertmd` in https://docs.mltl.us/tags/
  *   generated docs are written to `outputDirArg` (1st arg)
  *   only tag params, region params and example result jsons are included
  * - schema.json — a dictionary for auto-complete in config editor

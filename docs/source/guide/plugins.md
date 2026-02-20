@@ -21,7 +21,7 @@ Plugins (previously called "Custom Scripts") are defined in the project settings
     Plugins are not available unless enabled. There are [important security considerations](#Security-notes-constraints-and-limitations) to understand before requesting access. To enable plugins for your organization, contact your account manager or go to **Project > Settings > Labeling Interface** and click **Request Access**. 
 
 !!! error Enterprise
-    Plugins are only available in Label Studio Enterprise. They are not available in Starter Cloud or Community editions. 
+    Plugins are only available in MLTL Annotate. They are not available in Starter Cloud or Community editions. 
 
 ## Plugin examples
 
@@ -29,7 +29,7 @@ We provide out-of-the-box plugins that you can modify and use. You can also buil
 
 For more information, see our [Plugins Gallery](/plugins) and [Customize and Build Your Own Plugins](/plugins/custom).
 
-<a href="https://docs.humansignal.com/plugins/"><img src="/images/plugins/gallery.png" alt="Plugin gallery"></a>
+<a href="https://docs.mltl.us/plugins/"><img src="/images/plugins/gallery.png" alt="Plugin gallery"></a>
 
 ## Use cases
 
@@ -63,7 +63,7 @@ To enable plugins for your organization, you cannot have members that are in mul
 !!! note
     By default, only users who are in the Admin, Owner, or Manager role can access the project settings to view, add, and edit plugins. 
     
-    You can optionally add a restriction so that only users in the Admin or Owner role can add or edit plugins. To request this, contact your account manager or [open a support ticket](mailto:support@humansignal.com).
+    You can optionally add a restriction so that only users in the Admin or Owner role can add or edit plugins. To request this, contact your account manager or [open a support ticket](mailto:support@mltl.us).
 
 
 

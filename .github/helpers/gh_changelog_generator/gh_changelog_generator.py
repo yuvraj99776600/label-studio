@@ -14,7 +14,7 @@ RELEASE_VERSION = os.getenv("RELEASE_VERSION").strip('\"')
 CURRENT_REF = os.getenv("CURRENT_REF").strip('\"')
 PREVIOUS_REF = os.getenv("PREVIOUS_REF").strip('\"')
 
-JIRA_SERVER = os.getenv("JIRA_SERVER", "https://heartex.atlassian.net").strip('\"')
+JIRA_SERVER = os.getenv("JIRA_SERVER", "https://mltl.atlassian.net").strip('\"')
 JIRA_USERNAME = os.getenv("JIRA_USERNAME").strip('\"')
 JIRA_TOKEN = os.getenv("JIRA_TOKEN").strip('\"')
 JIRA_RN_FIELD = os.getenv("JIRA_RN_FIELD", "customfield_10064").strip('\"')

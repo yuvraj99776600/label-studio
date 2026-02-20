@@ -55,7 +55,7 @@ def parse_config(config_string):
 def _fix_choices(config):
     """
     workaround for single choice
-    https://github.com/HumanSignal/label-studio/issues/1259
+    https://github.com/yuvraj99776600/label-studio/issues/1259
     """
     if 'Choices' in config:
         # for single Choices tag in View

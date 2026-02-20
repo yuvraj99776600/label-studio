@@ -5,7 +5,7 @@ tier: all
 type: guide
 order: 139
 order_enterprise: 139
-meta_title: Skipping project tasks in Label Studio
+meta_title: Skipping project tasks in MLTL Annotate
 section: "Create & Manage Projects"
 parent: "labeling"
 parent_enterprise: "labeling"
@@ -25,7 +25,7 @@ If another annotator is also working through the labeling queue, they will see t
 You can see which tasks have been skipped using the **Cancelled** column in the Data Manager. 
 
 !!! error Enterprise
-    Task skipping, and how tasks can be skipped, is highly configurable in Label Studio Enterprise and Starter Cloud. For more information, see [the Enterprise documentation](https://docs.humansignal.com/guide/skip). 
+    Task skipping, and how tasks can be skipped, is highly configurable in MLTL Annotate and Starter Cloud. For more information, see [the Enterprise documentation](https://docs.mltl.us/guide/skip). 
 
 </div>
 

@@ -40,7 +40,7 @@ const WARNING_MESSAGES = {
  * @name Text
  * @param {string} name                                   - name of the element
  * @param {string} value                                  - value of the element
- * @param {url|text} [valueType=url|text]                 – source of the data, check (Data retrieval)[https://labelstud.io/guide/tasks.html] page for more inforamtion
+ * @param {url|text} [valueType=url|text]                 – source of the data, check (Data retrieval)[https://docs.mltl.us/guide/tasks.html] page for more inforamtion
  * @param {boolean} [inline=false]                        - whether to embed html directly to LS or use iframe (only HyperText)
  * @param {boolean} [saveTextResult=true]                 – whether or not to save selected text to the serialized data
  * @param {boolean} [selectionEnabled=true]               - enable or disable selection

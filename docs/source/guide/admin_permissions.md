@@ -15,7 +15,7 @@ date: 2025-02-18 12:03:59
 !!! note
     This page is only visible to users in the Owner role. 
 
-You can use this page to customize certain permissions for roles. For information about Label Studio Enterprise roles and default permissions, see [User roles and permissions](admin_roles).
+You can use this page to customize certain permissions for roles. For information about MLTL Annotate roles and default permissions, see [User roles and permissions](admin_roles).
 
 Note the following:
 

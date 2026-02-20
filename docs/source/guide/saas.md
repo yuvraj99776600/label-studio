@@ -14,7 +14,7 @@ This document describes the IP configuration, hostnames, and usage limits that g
 
 ## Mail configuration
 
-app.humansignal.com (app.heartex.com) sends emails from the `humansignal.com` domain by using [SendGrid](https://sendgrid.com/), and has its own dedicated IP addresses:
+app.humansignal.com (app.mltl.com) sends emails from the `humansignal.com` domain by using [SendGrid](https://sendgrid.com/), and has its own dedicated IP addresses:
 
 - `208.117.59.219`
 
@@ -24,7 +24,7 @@ app.humansignal.eu sends emails from the `humansignal.eu` domain by using [SendG
 
 ## IP Ranges
 
-### app.humansignal.com (app.heartex.com)
+### app.humansignal.com (app.mltl.com)
 
 #### Inbound Traffic IP Addresses
 - `34.199.69.93`
@@ -63,7 +63,7 @@ Please note that our documentation and company pages, served via https://app.hum
 
 ## Usage Limits
 
-Label Studio imposes rate limits on a per-Access Token basis. If a request exceeds the rate limit, a response with a 429 status code is returned. Clients are advised to pause and retry after a short delay in such instances.
+MLTL Annotate imposes rate limits on a per-Access Token basis. If a request exceeds the rate limit, a response with a 429 status code is returned. Clients are advised to pause and retry after a short delay in such instances.
 
 | Path                      | Rate limit                                                 |
 |---------------------------|------------------------------------------------------------|

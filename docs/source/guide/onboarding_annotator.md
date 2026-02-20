@@ -1,5 +1,5 @@
 ---
-title: How to Annotate in Label Studio
+title: How to Annotate in MLTL Annotate
 short: Annotator onboarding
 type: guide
 tier: enterprise
@@ -10,15 +10,15 @@ parent_enterprise: "onboarding"
 section: "Onboarding"
 ---
 
-Welcome to the Label Studio platform!  
+Welcome to the MLTL Annotate platform!  
 
 In this document, we will jump-start your understanding of data annotation.  Every project is used to train models based on its particular use case.  
 
-There are a variety of use cases that can be implemented via Label Studio, including, but not limited to, pre-training, post-training, benchmarking, etc.
+There are a variety of use cases that can be implemented via MLTL Annotate, including, but not limited to, pre-training, post-training, benchmarking, etc.
 
 In essence, every task you annotate is a way to better your team’s model.  Whether you’re a doctorate-holding specialist or a research-savvy generalist, your knowledge and capabilities are needed to train models.
 
-Usually, after you submit your task, Label Studio Enterprise sends off all submitted annotated tasks to reviewers, who verify if there are any errors.  Exact steps vary by team, but most workflows follow a pattern like: annotation → review and quality assurance → production.
+Usually, after you submit your task, MLTL Annotate sends off all submitted annotated tasks to reviewers, who verify if there are any errors.  Exact steps vary by team, but most workflows follow a pattern like: annotation → review and quality assurance → production.
 
 During the quality assurance step, tasks are evaluated and graded. Tasks are graded based on how closely they align with the project’s protocols.
 
@@ -33,7 +33,7 @@ During the quality assurance step, tasks are evaluated and graded. Tasks are gra
   During your onboarding, your team lead should provide you with documentation regarding project workflows and steps.  Depending on the length and scope of your first days, a lead would often walk you through one or two tasks so that you would have some guidance.  Alternatively, you may be presented with video recordings for you to go through the protocols yourself.
 
 * **Proper Account Permissions**  
-  When your Label Studio account is created, your team lead needs to add you to the appropriate projects for you to work on.  Sometimes, you may be added onto more than one, so it is important that you ensure you have access to and are working on your highest priority project.
+  When your MLTL Annotate account is created, your team lead needs to add you to the appropriate projects for you to work on.  Sometimes, you may be added onto more than one, so it is important that you ensure you have access to and are working on your highest priority project.
 
   The following view is how your home dashboard *should* look if you have a project assigned to you. This means your permissions are set and you’re ready to get to work\!
 
@@ -45,11 +45,11 @@ The following view would occur if you are missing the properly activated project
 
 ## Walkthrough:
 
-### How do I access Label Studio?
+### How do I access MLTL Annotate?
 
-When you initially receive access to Label Studio, you will receive an email and a link to sign up. 
+When you initially receive access to MLTL Annotate, you will receive an email and a link to sign up. 
 
-To access your company’s projects, use the information you provided at sign up to log in. (Location link may vary depending on whether your team works directly on Label Studio or in your company’s own integrated workspace.)  
+To access your company’s projects, use the information you provided at sign up to log in. (Location link may vary depending on whether your team works directly on MLTL Annotate or in your company’s own integrated workspace.)  
 
 ![Screenshot](/images/onboarding/annotator-2.png)
 
@@ -84,7 +84,7 @@ Exact standards would be discussed during onboarding.  During that time, your le
 
 3. Annotate the task.  If, for whatever reason, you are unable to complete the task (e.g. not a subject matter expert, etc.,), click the “Skip” button.  If there is no “Skip” available for you, please consult your team lead on what would be best practices here.
 
-4. Follow the protocol given to you by your lead. In this example, the annotator is selecting the car in the image. It’s possible that your project has been configured to allow a pop up of the annotation instructions, right in Label Studio. If this is true, you can see it by clicking on the circle with an i inside of it icon on the bottom of the annotation screen, to the left of the Submit button. 
+4. Follow the protocol given to you by your lead. In this example, the annotator is selecting the car in the image. It’s possible that your project has been configured to allow a pop up of the annotation instructions, right in MLTL Annotate. If this is true, you can see it by clicking on the circle with an i inside of it icon on the bottom of the annotation screen, to the left of the Submit button. 
 
 5. Add or edit information in the side bar under the “Info”tab. You can also leave comments for your Reviewer or team leads in the “Comments” tab..  
    

@@ -370,8 +370,8 @@ def test_views_ordering_task_state():
 @pytest.mark.django_db
 def test_views_filters(filters, ids, business_client, project_id):
     project = Project.objects.get(pk=project_id)
-    ann1 = make_annotator({'email': 'ann1@testheartex.com'}, project)
-    ann2 = make_annotator({'email': 'ann2@testheartex.com'}, project)
+    ann1 = make_annotator({'email': 'ann1@testmltl.com'}, project)
+    ann2 = make_annotator({'email': 'ann2@testmltl.com'}, project)
 
     ann_ids = {
         '$ANN1_ID': ann1.id,

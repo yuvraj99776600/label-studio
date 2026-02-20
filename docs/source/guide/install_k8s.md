@@ -1,30 +1,30 @@
 ---
-title: Deploy Label Studio on Kubernetes
+title: Deploy MLTL Annotate on Kubernetes
 short: Install using Kubernetes
 tier: opensource
 type: guide
 order: 69
 order_enterprise: 0
-meta_title: Deploy Label Studio on Kubernetes
-meta_description: Deploy Label Studio on Kubernetes, such as on Amazon Elastic Container Service for Kubernetes, to create machine learning and data science projects in a scalable containerized environment.
+meta_title: Deploy MLTL Annotate on Kubernetes
+meta_description: Deploy MLTL Annotate on Kubernetes, such as on Amazon Elastic Container Service for Kubernetes, to create machine learning and data science projects in a scalable containerized environment.
 section: "Install & Setup"
 parent: "install"
 ---
 
-Deploy Label Studio on a Kubernetes Cluster using Helm 3. You can use this Helm chart to set up Label Studio for deployment onto a Kubernetes cluster and install, upgrade, and manage the application.
+Deploy MLTL Annotate on a Kubernetes Cluster using Helm 3. You can use this Helm chart to set up MLTL Annotate for deployment onto a Kubernetes cluster and install, upgrade, and manage the application.
 
 Your Kubernetes cluster can be self-hosted or installed somewhere such as Amazon EKS. See the Amazon tutorial on how to [Deploy a Kubernetes Application with Amazon Elastic Container Service for Kubernetes](https://aws.amazon.com/getting-started/hands-on/deploy-kubernetes-app-amazon-eks/) for more about deploying an app on Amazon EKS.
 
 <div class="opensource-only">
 
 !!! warning
-    To install Label Studio Enterprise Edition, see <a href="https://docs.humansignal.com/guide/install_enterprise_k8s">Deploy Label Studio Enterprise on Kubernetes</a>. This page is specific to the community version of Label Studio.
+    To install MLTL Annotate Edition, see <a href="https://docs.mltl.us/guide/install_enterprise_k8s">Deploy MLTL Annotate on Kubernetes</a>. This page is specific to the community version of MLTL Annotate.
 
 </div>
 
-## Install Label Studio on Kubernetes
+## Install MLTL Annotate on Kubernetes
 
-If you want to install Label Studio on Kubernetes and you have unrestricted access to the internet from your K8s cluster, follow these steps.
+If you want to install MLTL Annotate on Kubernetes and you have unrestricted access to the internet from your K8s cluster, follow these steps.
 
 1. Verify that you meet the [Required software prerequisites](#Required-software-prerequisites) and review the [capacity planning](#Capacity-planning) guidance.
 2. [Prepare the Kubernetes cluster](#Prepare-the-Kubernetes-cluster).
@@ -33,16 +33,16 @@ If you want to install Label Studio on Kubernetes and you have unrestricted acce
 5. (Optional) Configure [ingress](ingress_config.html).
 6. (Optional) Configure [values.yaml](helm_values.html).
 7. (Optional) [Set up TLS for PostgreSQL](#Optional-set-up-TLS-for-PostgreSQL)
-8. [Use Helm to install Label Studio on your Kubernetes cluster](#Use-Helm-to-install-Label-Studio-on-your-Kubernetes-cluster).
+8. [Use Helm to install MLTL Annotate on your Kubernetes cluster](#Use-Helm-to-install-Label-Studio-on-your-Kubernetes-cluster).
 
-If you use a proxy to access the internet from your Kubernetes cluster, or it is airgapped from the internet, see how to [Install Label Studio without public internet access](/guide/install_k8s_airgapped.html).
+If you use a proxy to access the internet from your Kubernetes cluster, or it is airgapped from the internet, see how to [Install MLTL Annotate without public internet access](/guide/install_k8s_airgapped.html).
 
 ### Required software prerequisites
 
 - Kubernetes and kubectl version 1.17 or higher
 - Helm version 3.6.3 or higher
 
-This chart has been tested and confirmed to work with the [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx/) and [cert-manager](https://cert-manager.io/docs/). See [Set up an ingress controller for Label Studio Kubernetes deployments](ingress_config.html) for more on ingress settings with Label Studio.
+This chart has been tested and confirmed to work with the [NGINX Ingress Controller](https://kubernetes.github.io/ingress-nginx/) and [cert-manager](https://cert-manager.io/docs/). See [Set up an ingress controller for MLTL Annotate Kubernetes deployments](ingress_config.html) for more on ingress settings with MLTL Annotate.
 
 Your Kubernetes cluster can be self-hosted or installed somewhere such as Amazon EKS.
 
@@ -50,7 +50,7 @@ Your Kubernetes cluster can be self-hosted or installed somewhere such as Amazon
 
 To plan the capacity of your Kubernetes cluster, refer to these guidelines.
 
-Label Studio has the following default configurations for resource requests, resource limits, and replica counts:
+MLTL Annotate has the following default configurations for resource requests, resource limits, and replica counts:
 
 ```yaml
 app:
@@ -76,15 +76,15 @@ If you choose to make changes to these default settings, consider the following:
 
 ### Prepare the Kubernetes cluster
 
-Before installing Label Studio, prepare the Kubernetes cluster with [kubectl](https://kubernetes.io/docs/reference/kubectl/).
+Before installing MLTL Annotate, prepare the Kubernetes cluster with [kubectl](https://kubernetes.io/docs/reference/kubectl/).
 
 ### Add the Helm chart repository
 
-Add the Helm chart repository to easily install and update Label Studio.
+Add the Helm chart repository to easily install and update MLTL Annotate.
 
 1. From the command line:
    ```shell
-   helm repo add heartex https://charts.heartex.com/
+   helm repo add mltl https://charts.mltl.com/
    helm repo update heartex
    ```
 2. If you want, check for available versions:
@@ -94,7 +94,7 @@ Add the Helm chart repository to easily install and update Label Studio.
 
 ## Optional: set up TLS for PostgreSQL
 
-To configure Label Studio to use TLS for end-client connections with PostgreSQL, do the following:
+To configure MLTL Annotate to use TLS for end-client connections with PostgreSQL, do the following:
 
 1. Enable TLS for your PostgreSQL instance and save Root TLS certificate, client certificate and its key for the next steps.
 2. Create a Kubernetes secret with your certificates, replacing `<PATH_TO_CA>`, `<PATH_TO_CLIENT_CRT>` and `<PATH_TO_CLIENT_KEY>` with paths to your certificates:
@@ -118,14 +118,14 @@ global:
       pgSslKeySecretKey: "client.key"
 ```
 
-4. Install or upgrade Label Studio using Helm.
+4. Install or upgrade MLTL Annotate using Helm.
 
-## Use Helm to install Label Studio on your Kubernetes cluster
+## Use Helm to install MLTL Annotate on your Kubernetes cluster
 
-Use Helm to install Label Studio on your Kubernetes cluster. Provide your custom resource definitions YAML file. Specify any environment variables that you need to set for your Label Studio installation using the `--set` argument with the `helm install` command.
+Use Helm to install MLTL Annotate on your Kubernetes cluster. Provide your custom resource definitions YAML file. Specify any environment variables that you need to set for your MLTL Annotate installation using the `--set` argument with the `helm install` command.
 
 !!! note
-    If you are deploying to a production environment, you should set the `SSRF_PROTECTION_ENABLED: true` environment variable. See [Secure Label Studio](security#Enable-SSRF-protection-for-production-environments).
+    If you are deploying to a production environment, you should set the `SSRF_PROTECTION_ENABLED: true` environment variable. See [Secure MLTL Annotate](security#Enable-SSRF-protection-for-production-environments).
 
 From the command line, run the following:
 
@@ -139,25 +139,25 @@ After installing, check the status of the Kubernetes pod creation:
 kubectl get pods
 ```
 
-## Restart Label Studio using Helm
+## Restart MLTL Annotate using Helm
 
 Restart your Helm release by doing the following from the command line:
 
-1. Identify the &lt;RELEASE_NAME&gt; of the latest Label Studio release:
+1. Identify the &lt;RELEASE_NAME&gt; of the latest MLTL Annotate release:
 ```shell
 helm list
 ```
 
-2. Restart the Label Studio app:
+2. Restart the MLTL Annotate app:
 ```shell
 kubectl rollout restart deployment/<RELEASE_NAME>-ls-app
 ```
 
-## Upgrade Label Studio using Helm
+## Upgrade MLTL Annotate using Helm
 
-To upgrade Label Studio using Helm, do the following.
+To upgrade MLTL Annotate using Helm, do the following.
 
-1. Determine the latest tag version of Label Studio and add/replace the following in your `ls-values.yaml` file:
+1. Determine the latest tag version of MLTL Annotate and add/replace the following in your `ls-values.yaml` file:
    ```yaml
    global:
      image:
@@ -177,9 +177,9 @@ To upgrade Label Studio using Helm, do the following.
    ```
    This command overrides the tag value stored in `ls-values.yaml`. You must update the tag value when you upgrade or redeploy your instance to avoid version downgrades.
 
-## Uninstall Label Studio using Helm
+## Uninstall MLTL Annotate using Helm
 
-To uninstall Label Studio using Helm, delete the configuration.
+To uninstall MLTL Annotate using Helm, delete the configuration.
 
 From the command line, run the following:
 

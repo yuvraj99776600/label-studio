@@ -5,7 +5,7 @@ category: Natural Language Processing
 cat: natural-language-processing
 order: 205
 meta_title: Sentiment Analysis Data Labeling Template
-meta_description: Template for classifying the sentiment of text with Label Studio for your machine learning and data science projects.
+meta_description: Template for classifying the sentiment of text with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/text-classification.png" alt="" class="gif-border" width="552px" height="408px" />

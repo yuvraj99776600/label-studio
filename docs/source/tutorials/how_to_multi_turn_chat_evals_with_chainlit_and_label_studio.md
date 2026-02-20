@@ -1,22 +1,22 @@
 ---
-title: "How to Evaluate Multi-Turn AI Conversations with Chainlit and Label Studio"
+title: "How to Evaluate Multi-Turn AI Conversations with Chainlit and MLTL Annotate"
 hide_sidebar: true
 order: 1005
 open_in_collab: true
 tutorial: true
 community_author: wesleylima
 ipynb_repo_path: tutorials/how-to-multi-turn-chat-evals-with-chainlit-and-label-studio/how_to_multi_turn_chat_evals_with_chainlit_and_label_studio.ipynb
-repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-multi-turn-chat-evals-with-chainlit-and-label-studio
-report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
+repo_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/tree/main/tutorials/how-to-multi-turn-chat-evals-with-chainlit-and-label-studio
+report_bug_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/issues/new
 thumbnail: /images/tutorials/tutorials-eval-multi-turn-chainlit.png
-meta_title: "How to Evaluate Multi-Turn AI Conversations with Chainlit and Label Studio"
-meta_description: Learn how to create a Label Studio project for evaluating chatbot conversations using the Chatbot Evaluation template.
+meta_title: "How to Evaluate Multi-Turn AI Conversations with Chainlit and MLTL Annotate"
+meta_description: Learn how to create a MLTL Annotate project for evaluating chatbot conversations using the Chatbot Evaluation template.
 is_enterprise: true
 is_starter_cloud: true
 badges: SDK, Chat, Eval, Chainlit, Colab
 duration: 10-15 mins
 ---
-This notebook demonstrates how to create a Label Studio project for evaluating chatbot conversations using the Chatbot Evaluation template.
+This notebook demonstrates how to create a MLTL Annotate project for evaluating chatbot conversations using the Chatbot Evaluation template.
 
 The allows you to:
 - Review multi-turn conversations
@@ -25,17 +25,17 @@ The allows you to:
 - Assess tone and style
 - Track whether questions were answered
 
-Reference: [Chatbot Evaluation Template](https://docs.humansignal.com/templates/chatbot)
+Reference: [Chatbot Evaluation Template](https://docs.mltl.us/templates/chatbot)
 
-## Label Studio Requirements
+## MLTL Annotate Requirements
 
-This tutorial showcases one or more features available only in Label Studio paid products. We recommend [creating a Starter Cloud trial](https://app.humansignal.com/user/cloud-trial?offer=d9a5&) to follow the tutorial.
+This tutorial showcases one or more features available only in MLTL Annotate paid products. We recommend [creating a Starter Cloud trial](https://app.humansignal.com/user/cloud-trial?offer=d9a5&) to follow the tutorial.
 
 ## Setup and Installation
 
-First, install the Label Studio SDK if you haven't already.
+First, install the MLTL Annotate SDK if you haven't already.
 
-For more information about the SDK, see the [Label Studio Python SDK documentation](https://labelstud.io/guide/sdk).
+For more information about the SDK, see the [MLTL Annotate Python SDK documentation](https://docs.mltl.us/guide/sdk).
 
 
 
@@ -82,7 +82,7 @@ def get_credential(key, default=None):
 Set your environment variables before running:
 
 ```bash
-# URL of your Label Studio instance
+# URL of your MLTL Annotate instance
 export LABEL_STUDIO_URL="https://app.humansignal.com"
 
 # Your API key (find it in Account & Settings > Personal Access Token)
@@ -90,7 +90,7 @@ export LABEL_STUDIO_API_KEY="your-api-key-here"
 ```
 
 **How to get your API key:**
-1. Open Label Studio in your browser
+1. Open MLTL Annotate in your browser
 2. Click on your profile (top-right)
 3. Go to "Account & Settings"
 4. Click "Access Token" (or "Personal Access Token")
@@ -109,19 +109,19 @@ ls_url = os.environ.get('LABEL_STUDIO_URL', 'https://app.humansignal.com')
 if not ls_api_key:
     raise ValueError('❌ Please set LABEL_STUDIO_API_KEY environment variable.')
 
-# Connect to Label Studio
+# Connect to MLTL Annotate
 try:
     ls = LabelStudio(base_url=ls_url, api_key=ls_api_key)
-    print(f'✅ Connected to Label Studio at {ls_url}')
+    print(f'✅ Connected to MLTL Annotate at {ls_url}')
 except Exception as e:
-    raise ConnectionError(f'❌ Failed to connect to Label Studio: {str(e)}')
+    raise ConnectionError(f'❌ Failed to connect to MLTL Annotate: {str(e)}')
 
 ```
 
 ## Define the Chatbot Evaluation Label Config
 
 This is the label config from the [Evaluate Production Conversations for RLHF
-](https://docs.humansignal.com/templates/chat_rlhf) example. It includes:
+](https://docs.mltl.us/templates/chat_rlhf) example. It includes:
 - A chat interface for viewing conversations
 - Overall quality of message rating
 - Additinal comments
@@ -266,7 +266,7 @@ With the label config set, we now use it to create the Chat Evaluation project
 PROJECT_TITLE = "Chatbot Conversation Evaluation"
 PROJECT_DESCRIPTION = "Evaluate multi-turn chatbot conversations for accuracy, clarity, and helpfulness"
 
-# Create the project using Label Studio SDK
+# Create the project using MLTL Annotate SDK
 project = ls.projects.create(
     title=PROJECT_TITLE,
     description=PROJECT_DESCRIPTION,
@@ -295,12 +295,12 @@ print(f"   {project_url}")
 
 ## Part 2: Set Up Chainlit Integration
 
-Now we'll set up a Chainlit chatbot that automatically syncs conversations to Label Studio.
+Now we'll set up a Chainlit chatbot that automatically syncs conversations to MLTL Annotate.
 
 ### What We'll Build
 - A chatbot UI using Chainlit
 - Automatic conversation logging to JSON
-- Auto-sync to Label Studio when users disconnect
+- Auto-sync to MLTL Annotate when users disconnect
 - Support for conversation resumption with versioning
 
 ### Step 1: Install Additional Dependencies
@@ -318,7 +318,7 @@ We need Chainlit for the chat UI and Ollama for a local LLM.
 
 We'll create three Python files:
 1. `conversation_logger.py` - Saves conversations to JSON
-2. `auto_sync.py` - Automatically syncs to Label Studio
+2. `auto_sync.py` - Automatically syncs to MLTL Annotate
 3. `chatbot_ui_auto_sync.py` - Main chatbot application
 
 **Note:** Run these cells to create the files in your working directory.
@@ -383,7 +383,7 @@ class ConversationLogger:
 
 ```python
 %%writefile auto_sync.py
-"""Automatic Label Studio sync helper"""
+"""Automatic MLTL Annotate sync helper"""
 import os
 import json
 from pathlib import Path
@@ -395,7 +395,7 @@ load_dotenv()
 
 
 class LabelStudioSync:
-    """Helper class to push conversations to Label Studio"""
+    """Helper class to push conversations to MLTL Annotate"""
 
     def __init__(
         self,
@@ -427,7 +427,7 @@ class LabelStudioSync:
         return self.client is not None and self.project_id > 0
 
     async def push_conversation(self, conversation_file: Path) -> bool:
-        """Push a single conversation to Label Studio"""
+        """Push a single conversation to MLTL Annotate"""
         if not self.is_enabled():
             return False
 
@@ -436,7 +436,7 @@ class LabelStudioSync:
             with open(conversation_file, 'r') as f:
                 data = json.load(f)
 
-            # Format as Label Studio task
+            # Format as MLTL Annotate task
             task = {
                 'data': {
                     'chat': data['messages'],  # Changed from 'messages' to 'chat' to match label config
@@ -462,12 +462,12 @@ class LabelStudioSync:
             for existing_task in existing:
                 if hasattr(existing_task, 'data') and \
                    existing_task.data.get('session_id') == session_id:
-                    print(f"⏭️  Session {session_id} already in Label Studio")
+                    print(f"⏭️  Session {session_id} already in MLTL Annotate")
                     return False
 
             # Import task
             self.client.projects.import_tasks(id=self.project_id, request=[task])
-            print(f"✅ Auto-synced {session_id} to Label Studio")
+            print(f"✅ Auto-synced {session_id} to MLTL Annotate")
             return True
 
         except Exception as e:
@@ -487,7 +487,7 @@ def get_sync() -> LabelStudioSync:
 
 
 async def auto_push_conversation(conversation_file: Path):
-    """Push a conversation to Label Studio (async wrapper)"""
+    """Push a conversation to MLTL Annotate (async wrapper)"""
     sync = get_sync()
     if sync.is_enabled():
         await sync.push_conversation(conversation_file)
@@ -498,7 +498,7 @@ async def auto_push_conversation(conversation_file: Path):
 ```python
 %%writefile chatbot_ui_auto_sync.py
 """
-Chainlit Chatbot with Automatic Label Studio Sync
+Chainlit Chatbot with Automatic MLTL Annotate Sync
 Handles resumed conversations with versioned tasks
 """
 import os
@@ -717,7 +717,7 @@ async def main(message: cl.Message):
 
 @cl.on_chat_end
 async def on_chat_end():
-    """Auto-push to Label Studio (with versioning for resumes)"""
+    """Auto-push to MLTL Annotate (with versioning for resumes)"""
     messages = cl.user_session.get("messages")
     thread_id = get_or_create_thread_id()
     model = cl.user_session.get("model")
@@ -844,13 +844,13 @@ print(f"   LABEL_STUDIO_URL: {ls_url}")
 print(f"   LABEL_STUDIO_PROJECT_ID: {project_id}")
 print(f"   LABEL_STUDIO_API_KEY: {'*' * 20}... (hidden)")
 print(f"\n🔄 Auto-sync: ENABLED")
-print(f"   Conversations will automatically sync to Label Studio when you close the chat!")
+print(f"   Conversations will automatically sync to MLTL Annotate when you close the chat!")
 
 ```
 
 ### Step 5: Run the Chainlit Chatbot
 
-Now run the chatbot! It will automatically sync conversations to Label Studio.
+Now run the chatbot! It will automatically sync conversations to MLTL Annotate.
 
 **To run from terminal:**
 ```bash
@@ -861,20 +861,20 @@ Then:
 1. Open http://localhost:8087 in your browser
 2. Have a conversation (at least 2 turns)
 3. Close the browser tab
-4. Check Label Studio - your conversation will be there!
+4. Check MLTL Annotate - your conversation will be there!
 
 **Features:**
 - ✅ Automatic conversation capture
-- ✅ Auto-sync to Label Studio on disconnect
+- ✅ Auto-sync to MLTL Annotate on disconnect
 - ✅ Conversation resumption with versioning
 - ✅ Local LLM (free and private!)
 
 **What happens:**
 - Each message auto-saves to `data/conversations/`
-- When you close the chat, it pushes to Label Studio
+- When you close the chat, it pushes to MLTL Annotate
 - If you resume the chat later, it creates a new version (v2, v3, etc.)
 
-**Ready to annotate!** Visit your Label Studio project to start evaluating the conversations.
+**Ready to annotate!** Visit your MLTL Annotate project to start evaluating the conversations.
 
 
 ### Verify Files Created
@@ -909,14 +909,14 @@ print(f"   chainlit run chatbot_ui_auto_sync.py --port 8087")
 
 You've successfully set up:
 
-1. ✅ **Label Studio Project** - Created with chatbot evaluation template
+1. ✅ **MLTL Annotate Project** - Created with chatbot evaluation template
 2. ✅ **Conversation Logger** - Saves chats to JSON automatically
-3. ✅ **Auto-Sync** - Pushes conversations to Label Studio
+3. ✅ **Auto-Sync** - Pushes conversations to MLTL Annotate
 4. ✅ **Chainlit Chatbot** - Full UI with local LLM support
 
 **Complete workflow:**
 ```
-User chats → Auto-save to JSON → Close browser → Auto-push to Label Studio → Ready to annotate!
+User chats → Auto-save to JSON → Close browser → Auto-push to MLTL Annotate → Ready to annotate!
 ```
 
 **Key Features:**
@@ -927,5 +927,5 @@ User chats → Auto-save to JSON → Close browser → Auto-push to Label Studio
 **Next Steps:**
 1. Run the chatbot: `chainlit run chatbot_ui_auto_sync.py --port 8087`
 2. Have some conversations
-3. Annotate them in Label Studio
+3. Annotate them in MLTL Annotate
 4. Export annotations for model training or system prompt adjustment

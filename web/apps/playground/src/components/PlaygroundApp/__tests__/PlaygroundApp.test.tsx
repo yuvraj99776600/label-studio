@@ -810,7 +810,7 @@ describe("PlaygroundApp", () => {
         name: "Advanced config templates: Relations among entities",
         url: "http://localhost/?config=%3CView%3E%3Cbr%3E%20%20%3CHeader%20value%3D%22Note%3A%20To%20manage%20relations%20you%20need%20Label%20Studio%20entity%20panel%20to%20be%20shown%22%20%2F%3E%3Cbr%3E%3Cbr%3E%20%20%3CRelations%3E%3Cbr%3E%20%20%20%20%3CRelation%20value%3D%22Is%20A%22%20%2F%3E%3Cbr%3E%20%20%20%20%3CRelation%20value%3D%22Has%20Function%22%20%2F%3E%3Cbr%3E%20%20%20%20%3CRelation%20value%3D%22Involved%20In%22%20%2F%3E%3Cbr%3E%20%20%20%20%3CRelation%20value%3D%22Related%20To%22%20%2F%3E%3Cbr%3E%20%20%3C%2FRelations%3E%3Cbr%3E%3Cbr%3E%20%20%3CLabels%20name%3D%22label%22%20toName%3D%22text%22%3E%3Cbr%3E%20%20%20%20%3CLabel%20value%3D%22Subject%22%20%2F%3E%3Cbr%3E%20%20%20%20%3CLabel%20value%3D%22Object%22%20%2F%3E%3Cbr%3E%20%20%3C%2FLabels%3E%3Cbr%3E%3Cbr%3E%20%20%3CText%20name%3D%22text%22%20value%3D%22%24text%22%20%2F%3E%3Cbr%3E%3C%2FView%3E%3Cbr%3E",
         expectedConfig: `<View>
-      <Header value=\"Note: To manage relations you need Label Studio entity panel to be shown\" />·
+      <Header value=\"Note: To manage relations you need MLTL Annotate entity panel to be shown\" />·
       <Relations>
         <Relation value=\"Is A\" />
         <Relation value=\"Has Function\" />
@@ -858,7 +858,7 @@ describe("PlaygroundApp", () => {
       },
       {
         name: "Advanced config templates: Video timeline segmentation",
-        url: "http://localhost/?config=%3CView%3E%3Cbr%3E%20%20%3CHeader%20value%3D%22Video%20timeline%20segmentation%20via%20Audio%20sync%20trick%22%2F%3E%3Cbr%3E%20%20%3CHyperText%20name%3D%22video%22%20value%3D%22%24video%22%2F%3E%3Cbr%3E%20%20%3CLabels%20name%3D%22tricks%22%20toName%3D%22audio%22%20choice%3D%22multiple%22%3E%3Cbr%3E%20%20%20%20%3CLabel%20value%3D%22Kickflip%22%20background%3D%22%231BB500%22%20%2F%3E%3Cbr%3E%20%20%20%20%3CLabel%20value%3D%22360%20Flip%22%20background%3D%22%23FFA91D%22%20%2F%3E%3Cbr%3E%20%20%20%20%3CLabel%20value%3D%22Trick%22%20background%3D%22%23358EF3%22%20%2F%3E%3Cbr%3E%20%20%3C%2FLabels%3E%3Cbr%3E%20%20%3CAudio%20name%3D%22audio%22%20value%3D%22%24videoSource%22%20speed%3D%22false%22%2F%3E%3Cbr%3E%3C%2FView%3E%3Cbr%3E%3Cbr%3E%3C!--%3Cbr%3E%20%20It's%20very%20important%20to%20prepare%20task%20data%20correctly%2C%3Cbr%3E%20%20it%20includes%20HyperText%20%24video%20and%3Cbr%3E%20%20it%20must%20be%20like%20this%20example%20below%3A%3Cbr%3E--%3E%3Cbr%3E%3Cbr%3E%3C!--%20%7B%3Cbr%3E%20%22video%22%3A%20%22%3Cvideo%20src%3D'https%3A%2F%2Fapp.heartex.ai%2Fstatic%2Fsamples%2Fopossum_snow.mp4'%20width%3D100%25%20muted%20%2F%3E%3Cimg%20src%20onerror%3D%5C%22%24%3Dn%3D%3Edocument.getElementsByTagName(n)%5B0%5D%3Ba%3D%24('audio')%3Bv%3D%24('video')%3Ba.onseeked%3D()%3D%3E%7Bv.currentTime%3Da.currentTime%7D%3Ba.onplay%3D()%3D%3Ev.play()%3Ba.onpause%3D()%3D%3Ev.pause()%5C%22%20%2F%3E%22%2C%3Cbr%3E%20%22videoSource%22%3A%20%22https%3A%2F%2Fapp.heartex.ai%2Fstatic%2Fsamples%2Fopossum_snow.mp4%22%3Cbr%3E%7D%20--%3E%3Cbr%3E",
+        url: "http://localhost/?config=%3CView%3E%3Cbr%3E%20%20%3CHeader%20value%3D%22Video%20timeline%20segmentation%20via%20Audio%20sync%20trick%22%2F%3E%3Cbr%3E%20%20%3CHyperText%20name%3D%22video%22%20value%3D%22%24video%22%2F%3E%3Cbr%3E%20%20%3CLabels%20name%3D%22tricks%22%20toName%3D%22audio%22%20choice%3D%22multiple%22%3E%3Cbr%3E%20%20%20%20%3CLabel%20value%3D%22Kickflip%22%20background%3D%22%231BB500%22%20%2F%3E%3Cbr%3E%20%20%20%20%3CLabel%20value%3D%22360%20Flip%22%20background%3D%22%23FFA91D%22%20%2F%3E%3Cbr%3E%20%20%20%20%3CLabel%20value%3D%22Trick%22%20background%3D%22%23358EF3%22%20%2F%3E%3Cbr%3E%20%20%3C%2FLabels%3E%3Cbr%3E%20%20%3CAudio%20name%3D%22audio%22%20value%3D%22%24videoSource%22%20speed%3D%22false%22%2F%3E%3Cbr%3E%3C%2FView%3E%3Cbr%3E%3Cbr%3E%3C!--%3Cbr%3E%20%20It's%20very%20important%20to%20prepare%20task%20data%20correctly%2C%3Cbr%3E%20%20it%20includes%20HyperText%20%24video%20and%3Cbr%3E%20%20it%20must%20be%20like%20this%20example%20below%3A%3Cbr%3E--%3E%3Cbr%3E%3Cbr%3E%3C!--%20%7B%3Cbr%3E%20%22video%22%3A%20%22%3Cvideo%20src%3D'https%3A%2F%2Fapp.mltl.ai%2Fstatic%2Fsamples%2Fopossum_snow.mp4'%20width%3D100%25%20muted%20%2F%3E%3Cimg%20src%20onerror%3D%5C%22%24%3Dn%3D%3Edocument.getElementsByTagName(n)%5B0%5D%3Ba%3D%24('audio')%3Bv%3D%24('video')%3Ba.onseeked%3D()%3D%3E%7Bv.currentTime%3Da.currentTime%7D%3Ba.onplay%3D()%3D%3Ev.play()%3Ba.onpause%3D()%3D%3Ev.pause()%5C%22%20%2F%3E%22%2C%3Cbr%3E%20%22videoSource%22%3A%20%22https%3A%2F%2Fapp.mltl.ai%2Fstatic%2Fsamples%2Fopossum_snow.mp4%22%3Cbr%3E%7D%20--%3E%3Cbr%3E",
         expectedConfig: `<View>
       <Header value=\"Video timeline segmentation via Audio sync trick\"/>
       <HyperText name=\"video\" value=\"$video\"/>
@@ -875,8 +875,8 @@ describe("PlaygroundApp", () => {
       it must be like this example below:
     -->·
     <!-- {
-     \"video\": \"<video src='https://app.heartex.ai/static/samples/opossum_snow.mp4' width=100% muted /><img src onerror=\\\"$=n=>document.getElementsByTagName(n)[0];a=$('audio');v=$('video');a.onseeked=()=>{v.currentTime=a.currentTime};a.onplay=()=>v.play();a.onpause=()=>v.pause()\\\" />\",
-     \"videoSource\": \"https://app.heartex.ai/static/samples/opossum_snow.mp4\"
+     \"video\": \"<video src='https://app.mltl.ai/static/samples/opossum_snow.mp4' width=100% muted /><img src onerror=\\\"$=n=>document.getElementsByTagName(n)[0];a=$('audio');v=$('video');a.onseeked=()=>{v.currentTime=a.currentTime};a.onplay=()=>v.play();a.onpause=()=>v.pause()\\\" />\",
+     \"videoSource\": \"https://app.mltl.ai/static/samples/opossum_snow.mp4\"
     } -->`,
       },
       {

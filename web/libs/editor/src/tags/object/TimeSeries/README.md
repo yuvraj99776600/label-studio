@@ -1,6 +1,6 @@
 # TimeSeries Tag – Developer Guide
 
-This document explains how the **TimeSeries** component in Label Studio is built, how its synchronisation with other media works (video / audio), and how the playback cursor logic is implemented.
+This document explains how the **TimeSeries** component in MLTL Annotate is built, how its synchronisation with other media works (video / audio), and how the playback cursor logic is implemented.
 
 > The goal is to give both humans and LLMs enough context to confidently extend or debug the code.
 

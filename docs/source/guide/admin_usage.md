@@ -6,24 +6,24 @@ tier: enterprise
 order: 0
 order_enterprise: 358
 meta_title: Usage & License
-meta_description: Find information about your Label Studio account and configure organization settings.  
+meta_description: Find information about your MLTL Annotate account and configure organization settings.  
 section: "Manage Your Organization"
 parent_enterprise: "admin_settings"
 ---
 
 You can find information about your plan and seat usage on this page. 
 
-## Label Studio Enterprise
+## MLTL Annotate
 
 ### Seats in use
 
 Here you can see the number of seats compared with the number of active users. 
 
-Each organization has a set amount of Label Studio seats in their license. To increase your seats, contact your HumanSignal account representative. 
+Each organization has a set amount of MLTL Annotate seats in their license. To increase your seats, contact your HumanSignal account representative. 
 
 ### License info
 
-This section includes general information about your Label Studio license, such as when it was issued and when it expires. 
+This section includes general information about your MLTL Annotate license, such as when it was issued and when it expires. 
 
 It also includes the following usage information:
 
@@ -69,7 +69,7 @@ SSO is not available if you are in a trial organization or if it is not enabled 
 
 ### Embedding
 
- You can use these fields to set up [Label Studio Embeds](embed#Configure-embedding-in-Label-Studio). 
+ You can use these fields to set up [MLTL Annotate Embeds](embed#Configure-embedding-in-Label-Studio). 
 
 !!! note
     Embedding is not available to all customers. Contact your [HumanSignal account manager](mailto:sales@humansignal.com) to enable.
@@ -88,9 +88,9 @@ The features can be requested and enabled for your license.
 | **Whitelabel** | Whether your organization has whitelabeling enabled. |
 | **Plugins** | Toggle whether your organization has access to plugins. And, if enabled, whether users in the Manager role can create and update them. |
 | **Early Adopter** | Opt-in to new features before they're released to the public. |
-| **Enable Storage Proxy** | Allow Label Studio to [proxy data from cloud storage](storage#Pre-signed-URLs-vs-Storage-proxies). |
+| **Enable Storage Proxy** | Allow MLTL Annotate to [proxy data from cloud storage](storage#Pre-signed-URLs-vs-Storage-proxies). |
 | **Enable AI Features** | Enable [AI Assistant](ask_ai) for your labeling interface configuration. |
-| **Enable Ask AI** | Enable the [AI Assistant](ask_ai) for general Label Studio help. |
+| **Enable Ask AI** | Enable the [AI Assistant](ask_ai) for general MLTL Annotate help. |
 
 ### Email notification settings
 
@@ -108,22 +108,22 @@ Find answers to common questions related to billing.
 
 #### What happens if my plan is inactive?
 
-If your subscription to Label Studio Enterprise expires or is cancelled, you can no longer perform labeling, review annotations, or add new users to your organization. You can log in and export your completed annotations. 
+If your subscription to MLTL Annotate expires or is cancelled, you can no longer perform labeling, review annotations, or add new users to your organization. You can log in and export your completed annotations. 
 
 #### What happens if I have too many active users?
 
-You need to purchase additional seats for your Label Studio Teams subscription if you have more active users than your subscription allows. A user counts as an active user when they are assigned a role. Invited users that have not yet accepted an invitation appear as "Not activated" and do not count toward the seat limit.
+You need to purchase additional seats for your MLTL Annotate Teams subscription if you have more active users than your subscription allows. A user counts as an active user when they are assigned a role. Invited users that have not yet accepted an invitation appear as "Not activated" and do not count toward the seat limit.
 
-## Label Studio Starter Cloud
+## MLTL Annotate Starter Cloud
 
-Label Studio Starter Cloud has the **Usage & Billing** page that shows information about your subscription and how many seats you have in use. 
+MLTL Annotate Starter Cloud has the **Usage & Billing** page that shows information about your subscription and how many seats you have in use. 
 
 !!! note
     Only the Organization owner can access the Usage & Billing page. 
 
 There are two components to the subscription:
 
-* **Base subscription** - This is your access to Label Studio Starter Cloud and includes 1 seat.
+* **Base subscription** - This is your access to MLTL Annotate Starter Cloud and includes 1 seat.
 * **Additional seats** - You can purchase up to 11 additional seats (for a total of 12) on an as-needed basis.
 
 ### Manage seats
@@ -150,16 +150,16 @@ When you remove seats, the cost is prorated and is reflected on your next invoic
 
 As an Owner, go to **Organization > Usage & Billing** and click **Cancel**. 
 
-After cancellation, your account remains active until the end of your paid billing period. During this time, you have full access to the Label Studio Starter Cloud features.
+After cancellation, your account remains active until the end of your paid billing period. During this time, you have full access to the MLTL Annotate Starter Cloud features.
 
 However, after cancellation, you cannot add user seats. If you need more users than your current seat count allows, you must reactivate your subscription.
 
-When the billing period ends, you will retain access to Label Studio and can download your data. However, you will be unable to import new data, annotate existing data, or create new projects.
+When the billing period ends, you will retain access to MLTL Annotate and can download your data. However, you will be unable to import new data, annotate existing data, or create new projects.
 
 #### How do I renew?
 
 If you do not cancel your subscription, it is automatically renewed at the end of the billing period.
 
-#### Can I upgrade to Label Studio Enterprise?
+#### Can I upgrade to MLTL Annotate?
 
-Yes, you can upgrade to Label Studio Enterprise, please contact our sales: sales@humansignal.com.
+Yes, you can upgrade to MLTL Annotate, please contact our sales: sales@humansignal.com.

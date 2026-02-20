@@ -5,7 +5,7 @@ category: Structured Data Parsing
 cat: structured-data-parsing
 order: 501
 meta_title: Freeform Metadata Data Labeling Template
-meta_description: Template for adding freeform content metadata to tasks with Label Studio for your machine learning and data science projects.
+meta_description: Template for adding freeform content metadata to tasks with MLTL Annotate for your machine learning and data science projects.
 ---
 <img src="/images/templates/freeform-metadata.png" alt="" class="gif-border" width="552px" height="408px" />
 

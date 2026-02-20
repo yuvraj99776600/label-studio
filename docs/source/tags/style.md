@@ -3,10 +3,10 @@ title: Style
 type: tags
 order: 505
 meta_title: Style Tag to use CSS Styles
-meta_description: Customize Label Studio with CSS styles to modify the labeling interface for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with CSS styles to modify the labeling interface for machine learning and data science projects.
 ---
 
-The `Style` tag is used in combination with the View tag to apply custom CSS properties to the labeling interface. See the [CSS Reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference) on the MDN page for a full list of available properties that you can reference. You can also adjust default Label Studio CSS classes. Use the browser developer tools to inspect the element on the UI and locate the class name, then specify that class name in the `Style` tag.
+The `Style` tag is used in combination with the View tag to apply custom CSS properties to the labeling interface. See the [CSS Reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference) on the MDN page for a full list of available properties that you can reference. You can also adjust default MLTL Annotate CSS classes. Use the browser developer tools to inspect the element on the UI and locate the class name, then specify that class name in the `Style` tag.
 
 {% insertmd includes/tags/style.md %}
 
@@ -59,7 +59,7 @@ Use CSS styling to wrap a text classification task with a green dotted border wi
 ```
 ### Example
 
-Adjust the default CSS styling in Label Studio to surround each radio button choice with a solid green border
+Adjust the default CSS styling in MLTL Annotate to surround each radio button choice with a solid green border
 
 ```html
 <View>

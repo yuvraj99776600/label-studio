@@ -1,13 +1,13 @@
-# Label Studio App
+# MLTL Annotate App
 
-The Label Studio App is the cornerstone of the frontend aspect of Label Studio. This React-based application is where the magic of frontend development for Label Studio occurs. In this app, developers have the freedom and capability to create new pages and determine how libraries are utilized within the Label Studio environment. It's a purely frontend module, dedicated to crafting and refining the user interface and user experience aspects of Label Studio.
+The MLTL Annotate App is the cornerstone of the frontend aspect of MLTL Annotate. This React-based application is where the magic of frontend development for MLTL Annotate occurs. In this app, developers have the freedom and capability to create new pages and determine how libraries are utilized within the MLTL Annotate environment. It's a purely frontend module, dedicated to crafting and refining the user interface and user experience aspects of MLTL Annotate.
 
 ### Usage Instructions
 
 _Important Note: These scripts must be executed within the web folder or its subfolders. This is crucial for the scripts to function correctly, as they are designed to work within the context of the web directory's structure and dependencies._
 
 - **`yarn ls:watch`: Build LSF continuously**
-    - Automatically builds the Label Studio on every change, providing a real-time development experience.
+    - Automatically builds the MLTL Annotate on every change, providing a real-time development experience.
 - **`yarn ls:e2e`: Execute end-to-end (e2e) tests on LS**
     - Executes comprehensive tests simulating user interactions from start to end, ensuring the frontend's overall functionality and integrity.
 - **`yarn ls:unit`: Run unit tests on LS**
@@ -116,4 +116,4 @@ Now we're done. We can now open the page `/some_root/my_page_path` in the browse
 * `routes` – set of raw routes
 * `exact` – if true, lookup exact path rather than a subscring
 
-<img src="https://github.com/HumanSignal/label-studio/blob/develop/images/opossum_looking.png?raw=true" title="Hey everyone!" height="140" width="140" />
+<img src="https://github.com/yuvraj99776600/label-studio/blob/develop/images/opossum_looking.png?raw=true" title="Hey everyone!" height="140" width="140" />

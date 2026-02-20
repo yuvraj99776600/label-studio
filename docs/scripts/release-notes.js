@@ -33,22 +33,22 @@ hexo.extend.filter.register("after_init", async function () {
   const frontmatter = `---
 NOTE: Don't change release_notes.md manually, it's automatically built from onprem/*.md files on hexo server run!   
 
-title: On-Premises Release Notes for Label Studio Enterprise
+title: On-Premises Release Notes for MLTL Annotate
 short: On-Prem Release Notes
 type: guide
 tier: enterprise
 order: 0
 order_enterprise: 451
 section: "What's New"
-meta_title: On-premises release notes for Label Studio Enterprise
-meta_description: Review new features, enhancements, and bug fixes for on-premises Label Studio Enterprise installations. 
+meta_title: On-premises release notes for MLTL Annotate
+meta_description: Review new features, enhancements, and bug fixes for on-premises MLTL Annotate installations. 
 ---
 
 !!! note 
-    The release notes for Label Studio Community Edition are available from the <a href="https://github.com/HumanSignal/label-studio/releases">Label Studio GitHub repository</a>.
+    The release notes for MLTL Annotate Community Edition are available from the <a href="https://github.com/yuvraj99776600/label-studio/releases">MLTL Annotate GitHub repository</a>.
 
 !!! note 
-    Before upgrading, review the steps outlined in [Upgrade Label Studio Enterprise](upgrade_enterprise) and ensure that you complete the recommended tests after each upgrade. 
+    Before upgrading, review the steps outlined in [Upgrade MLTL Annotate](upgrade_enterprise) and ensure that you complete the recommended tests after each upgrade. 
 
 `;
 

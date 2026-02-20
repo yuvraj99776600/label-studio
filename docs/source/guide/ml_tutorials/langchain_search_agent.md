@@ -18,16 +18,16 @@ image: "/guide/ml_tutorials/langchain.png"
 
 # Langchain search agent
 
-This example demonstrates how to use Label Studio with a custom Machine Learning backend.
+This example demonstrates how to use MLTL Annotate with a custom Machine Learning backend.
 
 It uses a [Langchain](https://www.langchain.com/)-based agent that accepts a text input, searches for Google,
 and returns the answer based on the search results (a.k.a Retrieval Augmented Generation).
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`langchain_search_agent` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/langchain_search_agent). 
+This tutorial uses the [`langchain_search_agent` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/langchain_search_agent). 
 
 ## Prerequisites
 
@@ -97,4 +97,4 @@ $ curl http://localhost:9090/health
 {"status":"UP"}
 ```
 
-3. Create a project in Label Studio. Then from the **Model** page in the project settings, [connect the model](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
+3. Create a project in MLTL Annotate. Then from the **Model** page in the project settings, [connect the model](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.

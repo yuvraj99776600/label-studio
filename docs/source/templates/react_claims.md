@@ -26,7 +26,7 @@ Users can then label each step using custom ontologies (single-select dropdowns 
 ![Screenshot](/images/templates-misc/react-claims.png)
 
 !!! error Enterprise
-    This template and the `ReactCode` tag can only be used in Label Studio Enterprise.
+    This template and the `ReactCode` tag can only be used in MLTL Annotate.
 
     For more information, see [Programmable & Embeddable Interfaces](https://humansignal.com/programmable-ui/).
 
@@ -47,7 +47,7 @@ The example below does the following:
 4. **Labeling System**: Each step can be annotated with:
    - **Single-select dimensions** - Categorical labels (e.g., quality ratings, error types)
    - **Textarea dimensions** - Free-form notes and corrections
-   - Labels are saved as Label Studio regions for export and analysis
+   - Labels are saved as MLTL Annotate regions for export and analysis
 
 5. **Claude API Integration**: Users can interact with the trace via a chat interface that sends the full trace context to Claude, enabling:
    - Asking questions about the agent's behavior
@@ -75,7 +75,7 @@ The example below does the following:
   <ReactCode style="height: calc(100vh - 55px)" name="custom" toName="custom" data="$tree">
     <![CDATA[
     // ============================================================================
-    // AGENTIC LABELING INTERFACE - Label Studio Programmable Interface
+    // AGENTIC LABELING INTERFACE - MLTL Annotate Programmable Interface
     // ============================================================================
     // A comprehensive labeling interface for evaluating AI agent traces with:
     // - Hierarchical tree view of agent steps (thoughts, tool calls, sub-agents, outputs)

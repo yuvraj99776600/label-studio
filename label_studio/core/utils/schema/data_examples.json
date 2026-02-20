@@ -69,7 +69,7 @@
     "$longText": "Sample: This is a sample text for long text task. It can be used for text classification, named entity recognition, etc.",
     "$corefText": "Sample: This is a sample text for coreference resolution and entity linking task.",
     "$pdf": "<embed src='<HOSTNAME>/static/samples/sample.pdf' width='100%' height='600px'/>",
-    "$website": "<iframe src='http://heartex.ai' width='100%' height='600px'/>",
+    "$website": "<iframe src='http://mltl.ai' width='100%' height='600px'/>",
     "$headlessCsv": "<HOSTNAME>/static/samples/sample-task-sin-headless.csv",
     "$humanMachineDialogue": [
       { "author": "Human", "text": "Sample: Hi, Robot!" },
@@ -99,7 +99,7 @@
   "upload": {
     "TextRaw": "Sample: Your text will go here.",
     "TextUrl": "https://htx-pub.s3.amazonaws.com/example.txt",
-    "HyperText": "<a href='https://labelstud.io'>Label Studio</a>",
+    "HyperText": "<a href='https://mltl.us'>MLTL Annotate</a>",
     "Image": "<HOSTNAME>/static/samples/sample.jpg",
     "Audio": "<HOSTNAME>/static/samples/game.wav",
     "AudioPlus": "<HOSTNAME>/static/samples/game.wav",
@@ -120,7 +120,7 @@
     "Video": "<HOSTNAME>/static/samples/opossum_snow.mp4",
     "$longText": "Sample: This is a sample text for long text task. It can be used for text classification, named entity recognition, etc.",
     "$pdf": "<embed src='<HOSTNAME>/static/samples/sample.pdf' width='100%' height='600px'/>",
-    "$website": "<iframe src='https://labelstud.io' width='100%' height='600px'/>",
+    "$website": "<iframe src='https://mltl.us' width='100%' height='600px'/>",
     "$headlessCsv": "<HOSTNAME>/static/samples/sample-task-sin-headless.csv"
   }
 }

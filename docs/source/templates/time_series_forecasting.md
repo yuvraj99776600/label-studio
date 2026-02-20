@@ -5,7 +5,7 @@ category: Time Series Analysis
 cat: time-series-analysis
 order: 610
 meta_title: Time Series Forecasting Data Labeling Template
-meta_description: Template for preparing time series data for forecasting use cases with Label Studio for your machine learning and data science projects.
+meta_description: Template for preparing time series data for forecasting use cases with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/time-series-forecasting.png" alt="" class="gif-border" width="552px" height="408px" />

@@ -1,4 +1,4 @@
-## How Label Studio saves results in annotations
+## How MLTL Annotate saves results in annotations
 
 Each annotation that you create when you label a task contains regions and results.
 

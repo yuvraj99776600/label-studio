@@ -5,7 +5,7 @@ category: Videos
 cat: videos
 order: 701
 meta_title: Video Classification Data Labeling Template
-meta_description: Template for video classification tasks with Label Studio for your machine learning and data science projects.
+meta_description: Template for video classification tasks with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/video-classification.png" alt="" class="gif-border" width="552px" height="408px" />
@@ -38,7 +38,7 @@ Use the Video tag:
 
 All labeling configurations must be wrapped in [View](/tags/view.html) tags.
 
-Use the [Video](/tags/video.html) object tag to display video clips in Label Studio Enterprise:
+Use the [Video](/tags/video.html) object tag to display video clips in MLTL Annotate:
 ```xml
 <Video name="video" value="$video"/>
 ```
@@ -77,7 +77,7 @@ Use the [Choices](/tags/choices.html) control tag to provide a single choice for
 </Choices>
 ```
   
-Use the [HyperText](/tags/hypertext.html) tag to display video clips to annotators in Label Studio:
+Use the [HyperText](/tags/hypertext.html) tag to display video clips to annotators in MLTL Annotate:
 ```xml
 <HyperText name="video" value="$html"></HyperText>
 ```

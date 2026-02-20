@@ -3,7 +3,7 @@ title: PDF
 type: tags
 order: 307
 meta_title: PDF tag for loading PDF documents
-meta_description: Label Studio PDF tag for loading PDF documents for machine learning and data science projects.
+meta_description: MLTL Annotate PDF tag for loading PDF documents for machine learning and data science projects.
 ---
 
 The `Pdf` tag displays a PDF document in the labeling interface. You can use this tag to:
@@ -19,7 +19,7 @@ Supports:
 Use with the following data types: PDF.
 
 !!! error Enterprise
-    You can also use the PDF tag with [Prompts](https://docs.humansignal.com/guide/prompts_overview) to perform auto-labeling work such as PDF summarization, classification, information extraction, and document intelligence. 
+    You can also use the PDF tag with [Prompts](https://docs.mltl.us/guide/prompts_overview) to perform auto-labeling work such as PDF summarization, classification, information extraction, and document intelligence. 
 
 {% insertmd includes/tags/pdf.md %}
 
@@ -49,7 +49,7 @@ Labeling configuration apply document-level classification to PDF documents:
 ## Example: OCR <span class="badge"></span>
 
 !!! error Enterprise
-    Label Studio Enterprise only. 
+    MLTL Annotate only. 
 
     For Community and Starter Cloud users who want to apply labels for OCR tasks, you will need to convert the PDF into images first and then use a labeling configuration similar to the [Multi-Page Document Annotation](/templates/multi-page-document-annotation) template. 
 

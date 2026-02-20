@@ -1,16 +1,16 @@
 ---
-title: "How to Compare Two AI Models with Label Studio"
+title: "How to Compare Two AI Models with MLTL Annotate"
 hide_sidebar: true
 order: 1003
 open_in_collab: true
 tutorial: true
 community_author: nass600
 ipynb_repo_path: tutorials/how-to-compare-two-ai-models-with-label-studio/how_to_compare_two_ai_models_with_label_studio.ipynb
-repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-compare-two-ai-models-with-label-studio
-report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
+repo_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/tree/main/tutorials/how-to-compare-two-ai-models-with-label-studio
+report_bug_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/issues/new
 thumbnail: /images/tutorials/tutorials-compare-ai-models.png
-meta_title: How to Compare Two AI Models with Label Studio
-meta_description: Learn how to compare and evaluate two AI models with the Label Studio SDK.
+meta_title: How to Compare Two AI Models with MLTL Annotate
+meta_description: Learn how to compare and evaluate two AI models with the MLTL Annotate SDK.
 badges: SDK, Agreement, Colab
 duration: 5-10 mins
 ---
@@ -26,15 +26,15 @@ Human evaluation tells you which model wins and crucially where it wins (by doma
 
 ## What you’ll build
 
-- A Label Studio project with a rubric: Winner (A/B/Tie) + Quality (1–5) + Notes
+- A MLTL Annotate project with a rubric: Winner (A/B/Tie) + Quality (1–5) + Notes
 - A small demo dataset you can swap for your own
 - A Colab that creates the project, imports tasks, fetches annotations, and analyzes results
 
-> Works with Label Studio OSS or Enterprise (we’ll call out optional Enterprise features).
+> Works with MLTL Annotate OSS or Enterprise (we’ll call out optional Enterprise features).
 
 ## Prerequisites
 
-- A running Label Studio (OSS or Enterprise) you can reach from Colab or your local Python
+- A running MLTL Annotate (OSS or Enterprise) you can reach from Colab or your local Python
    - LS_URL (e.g., http://localhost:8080 or your team URL)
    - LS_API_KEY (personal token)
 - Python 3.10+ (Colab is fine)
@@ -42,9 +42,9 @@ Human evaluation tells you which model wins and crucially where it wins (by doma
 
 ## 0. Setup
 
-We are going to lean on the Label Studio SDK for the whole project so you will need to have at hand two important pieces of information:
+We are going to lean on the MLTL Annotate SDK for the whole project so you will need to have at hand two important pieces of information:
 
-1. The base url (`LS_URL`) where your Label Studio instance is running.
+1. The base url (`LS_URL`) where your MLTL Annotate instance is running.
 2. An `LS_API_KEY` to authenticate your requests.
 
 
@@ -52,7 +52,7 @@ If Colab can't reach your localhost you can:
 1. Run this notebook locally with Jupyter
 2. Tunnel the connection with services like ngrok or cloudflared ([ngrok example](https://dashboard.ngrok.com/get-started/setup/macos))
 
-You can create a valid `API_KEY` in the Account & Settings menu of your Label Studio UI (top right corner clicking the you user avatar)
+You can create a valid `API_KEY` in the Account & Settings menu of your MLTL Annotate UI (top right corner clicking the you user avatar)
 
 
 ```python
@@ -73,7 +73,7 @@ from label_studio_sdk import LabelStudio
 # For nicer dataframe display in Colab
 pd.set_option('display.max_colwidth', 160)
 
-# Configure Label Studio connection
+# Configure MLTL Annotate connection
 # Note: Colab cannot reach your local http://localhost:8000 unless you tunnel.
 # If testing locally, run this notebook in Jupyter, or expose LS via a tunnel.
 LS_URL = os.getenv("LS_URL", "http://localhost:8080")  # <-- change if needed
@@ -81,18 +81,18 @@ LS_API_KEY = os.getenv("LS_API_KEY", "YOUR_TOKEN")  # <-- set your token
 
 ls = LabelStudio(base_url=LS_URL, api_key=LS_API_KEY)
 user = ls.users.whoami()
-print("Connected to Label Studio as:", user.username)
+print("Connected to MLTL Annotate as:", user.username)
 print("LS_URL:", LS_URL)
 
 ```
 
-## 1. Create the Label Studio project
+## 1. Create the MLTL Annotate project
 
 ### What the project looks like
 
 This project shows: the question, two answers (Model A & B), and a rubric: Winner (A/B/Tie), Overall quality (1–5), and optional Notes.
 
-![Labelling](https://github.com/HumanSignal/awesome-label-studio-tutorials/blob/main/tutorials/how-to-compare-two-ai-models-with-label-studio/how-to-compare-two-ai-models-with-label-studio-files/figure_1.png?raw=true)
+![Labelling](https://github.com/yuvraj99776600/awesome-label-studio-tutorials/blob/main/tutorials/how-to-compare-two-ai-models-with-label-studio/how-to-compare-two-ai-models-with-label-studio-files/figure_1.png?raw=true)
 
 
 ```python
@@ -151,9 +151,9 @@ print("Project created with id:", project.id, "| title:", project.title)
 
 > Enterprise features help you run larger, faster, higher-quality evaluations:
 >
-> - **Automatic assignment & queues**: distribute tasks to annotators  automatically, parallelize throughput, and monitor progress per queue. [Learn more about advance configuration options.](https://docs.humansignal.com/guide/setup_project#Configure-high-impact-settings)
-> - **Overlap & agreement**: collect multiple judgments per item, compute inter-annotator agreement (IAA), and flag disagreements for review. [Learn more about task agreement and labeling consensus.](https://docs.humansignal.com/guide/stats.html)
-> - **Review & consensus**: add a reviewer step that resolves ties/disputes and enforces guidelines. [Learn more about the Reviewer workflow](https://docs.humansignal.com/guide/quality).
+> - **Automatic assignment & queues**: distribute tasks to annotators  automatically, parallelize throughput, and monitor progress per queue. [Learn more about advance configuration options.](https://docs.mltl.us/guide/setup_project#Configure-high-impact-settings)
+> - **Overlap & agreement**: collect multiple judgments per item, compute inter-annotator agreement (IAA), and flag disagreements for review. [Learn more about task agreement and labeling consensus.](https://docs.mltl.us/guide/stats.html)
+> - **Review & consensus**: add a reviewer step that resolves ties/disputes and enforces guidelines. [Learn more about the Reviewer workflow](https://docs.mltl.us/guide/quality).
 > - **Webhooks & automation**: trigger exports or downstream analysis when a batch or project reaches a completion threshold.
 >
 > Outcome: faster time-to-signal, better label quality, and auditability for model decisions.
@@ -247,7 +247,7 @@ df
 
 ```
 
-## 3. Import tasks into Label Studio
+## 3. Import tasks into MLTL Annotate
 
 Use task bulk creation for speed.
 
@@ -263,7 +263,7 @@ print("Imported tasks:", resp)
 
 After importing the tasks you will be able to see them in the LabelStudio UI
 
-![Project Tasks](https://github.com/HumanSignal/awesome-label-studio-tutorials/blob/main/tutorials/how-to-compare-two-ai-models-with-label-studio/how-to-compare-two-ai-models-with-label-studio-files/figure_2.png?raw=true)
+![Project Tasks](https://github.com/yuvraj99776600/awesome-label-studio-tutorials/blob/main/tutorials/how-to-compare-two-ai-models-with-label-studio/how-to-compare-two-ai-models-with-label-studio-files/figure_2.png?raw=true)
 
 
 
@@ -272,7 +272,7 @@ After importing the tasks you will be able to see them in the LabelStudio UI
 - Label all the items (solo or split).
 - Keep decisions concise: Winner (A/B/Tie) + Quality (1–5) + optional notes.
 
-![Labelling](https://github.com/HumanSignal/awesome-label-studio-tutorials/blob/main/tutorials/how-to-compare-two-ai-models-with-label-studio/how-to-compare-two-ai-models-with-label-studio-files/figure_3.png?raw=true)
+![Labelling](https://github.com/yuvraj99776600/awesome-label-studio-tutorials/blob/main/tutorials/how-to-compare-two-ai-models-with-label-studio/how-to-compare-two-ai-models-with-label-studio-files/figure_3.png?raw=true)
 
 
 ## 5. Export annotations & flatten results

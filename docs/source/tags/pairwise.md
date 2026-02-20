@@ -3,7 +3,7 @@ title: Pairwise
 type: tags
 order: 415
 meta_title: Pairwise Tag to Compare Objects
-meta_description: Customize Label Studio with the Pairwise tag for object comparison tasks for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the Pairwise tag for object comparison tasks for machine learning and data science projects.
 ---
 
 The `Pairwise` tag is used to compare two different objects and select one item from the list. If you want annotators to compare two objects and determine whether they are similar or not, use the `Choices` tag.

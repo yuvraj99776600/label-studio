@@ -79,9 +79,9 @@ Some examples include:
 
 This example demonstrates how to set up Prompts to predict image captions.
 
-1. [Create a new label studio project](setup_project) by importing image data via [cloud storage](storage). 
+1. [Create a new MLTL Annotate project](setup_project) by importing image data via [cloud storage](storage). 
 
-    If you’d like to, you can generate a dataset to test the process using [https://data.heartex.net](https://data.heartex.net).
+    If you’d like to, you can generate a dataset to test the process using [https://data.mltl.net](https://data.mltl.net).
 
 !!! note
     Prompts does not currently support image data uploaded as raw images. Only image references (HTTP URIs to images) or images imported via cloud storage are supported. 
@@ -128,7 +128,7 @@ This example demonstrates how to set up Prompts to predict image captions.
 
 This example demonstrates how to set up Prompts to evaluate if the LLM-generated output text is classified as harmful, offensive, or inappropriate.
 
-1. [Create a new label studio project](setup_project) by importing text data of LLM-generated outputs. 
+1. [Create a new MLTL Annotate project](setup_project) by importing text data of LLM-generated outputs. 
 
     For example: you can use the [jigsaw_toxicity](https://huggingface.co/datasets/tasksource/jigsaw_toxicity) dataset as an example. See [the appendix](#Appendix-Generate-dataset) for how you can pre-process and (optionally) downsample this dataset to use with this guide.
 
@@ -270,7 +270,7 @@ Synthetic datasets are datasets artificially generated rather than being collect
 Let’s expand on the Q&A use case above with an example demonstrating how to use Prompts to generate synthetic user prompts for a chatbot RAG system. Given a dataset of chatbot answers, we’ll generate some questions that could return each answer.
  
 
-1. [Create a new label studio project](setup_project) by importing chunks of text that would be meaningful answers from a chatbot.
+1. [Create a new MLTL Annotate project](setup_project) by importing chunks of text that would be meaningful answers from a chatbot.
 
     You can use a preprocessed sample of the [SQuAD](https://huggingface.co/datasets/rajpurkar/squad) dataset as an example. See [the appendix](#Appendix-Preprocess-SQuAD-Q-A-dataset) for how this was generated.
 
@@ -347,7 +347,7 @@ Let’s expand on the Q&A use case above with an example demonstrating how to us
 
 #### Appendix: Preprocess SQuAD Q&A dataset
 
-This downloads the SQuAD dataset from Huggingface and formats it for use in Label Studio.
+This downloads the SQuAD dataset from Huggingface and formats it for use in MLTL Annotate.
 
 ```python
 import pandas as pd

@@ -1,25 +1,25 @@
 ---
 title: Google SAML SSO Setup Example
-short: Google SAML SSO with Label Studio Setup Example
+short: Google SAML SSO with MLTL Annotate Setup Example
 tier: enterprise
 order: 253
-meta_title: Google SAML SSO with Label Studio Setup Example
-meta_description: Label Studio Enterprise documentation for setting up Google as Identity Provider for SAML SSO Setup Example.
+meta_title: Google SAML SSO with MLTL Annotate Setup Example
+meta_description: MLTL Annotate documentation for setting up Google as Identity Provider for SAML SSO Setup Example.
 hide_sidebar: true
 ---
 
-You can set up Label Studio to use Google's IdP for SSO. 
+You can set up MLTL Annotate to use Google's IdP for SSO. 
 
 You will need the following permissions:
 
 * Access to the [Google Admin console](https://admin.google.com/). Your account must have [super administrator privileges](https://support.google.com/a/answer/2405986#super_admin). 
-* Your Label Studio user role must be Owner or Administrator. 
+* Your MLTL Annotate user role must be Owner or Administrator. 
 
 
-## Step 1: Get Label Studio ACS endpoints as a Service Provider (SP)
+## Step 1: Get MLTL Annotate ACS endpoints as a Service Provider (SP)
 
-1. **Access Label Studio SSO settings:**
-   - Log in to Label Studio with an account that has the Owner or Administrator role.
+1. **Access MLTL Annotate SSO settings:**
+   - Log in to MLTL Annotate with an account that has the Owner or Administrator role.
    - Click the menu in the upper left and select **Organization**.
    - Select **SSO & SAML** in the upper right.
 
@@ -63,20 +63,20 @@ You will need the following permissions:
 
 2. **Add a new SAML app:**
    - Select **Add App > Add custom SAML app**.
-   - Enter a name for the app (e.g. "Label Studio") and click **Continue**.
+   - Enter a name for the app (e.g. "MLTL Annotate") and click **Continue**.
 
     <img src="/images/google-saml/2-add-app.png" class="gif-border">
 
 3. **Download IdP metadata:**
-   - When given the option, download the IdP metadata file for your new app. This file contains all the necessary information to configure Label Studio.
+   - When given the option, download the IdP metadata file for your new app. This file contains all the necessary information to configure MLTL Annotate.
 
     <img src="/images/google-saml/3-metadata.png" class="gif-border">
    
 4. **Configure SAML settings:**
    - In the **Service Provider Details** section, enter the following:
-     - **ACS URL**: Paste the ACS URL copied from Label Studio.
+     - **ACS URL**: Paste the ACS URL copied from MLTL Annotate.
      - **Entity ID**: Use the same URL as the ACS URL.
-     - **Start URL**: (Optional) You can leave this blank or use the **Login URL** from Label Studio.
+     - **Start URL**: (Optional) You can leave this blank or use the **Login URL** from MLTL Annotate.
      - **Signed Response**: Leave this unchecked.
    - Click **Continue**.
  
@@ -91,10 +91,10 @@ You will need the following permissions:
 
     <img src="/images/google-saml/6-atrributes-setup.png" class="gif-border">
 
-## Step 4: Complete configuration in Label Studio
+## Step 4: Complete configuration in MLTL Annotate
 
 1. **Upload IdP Metadata:**
-   - Return to the Label Studio SSO & SAML settings page.
+   - Return to the MLTL Annotate SSO & SAML settings page.
    - Scroll to **Add metadata from Identity Provider**.
    - Upload the IdP metadata file you downloaded from Google Admin console.
 
@@ -112,11 +112,11 @@ You will need the following permissions:
 
 1. **Return to the Google Admin console**:
    - From the Google Admin console, go to **Apps** > **Web and mobile apps**.
-   - Select the Label Studio app.
+   - Select the MLTL Annotate app.
 
     <img src="/images/google-saml/12-assign-group-1.png" class="gif-border">
 
-2. **Assign the Label Studio application to the group:**
+2. **Assign the MLTL Annotate application to the group:**
     - Click the **User access** card. 
     - Search for and then assign the group to the app. 
     - Enable the **Service status** toggle. 
@@ -127,16 +127,16 @@ You will need the following permissions:
 ## Step 6: Test the configuration
 
 **Log in using SSO:**
-   - Navigate to the Label Studio login page.
+   - Navigate to the MLTL Annotate login page.
    - Click the **SSO Login** button and enter your company domain if prompted.
-   - You should be redirected to the Google SSO login page. After successful authentication, you will be redirected back to Label Studio.
+   - You should be redirected to the Google SSO login page. After successful authentication, you will be redirected back to MLTL Annotate.
 
 <img src="/images/google-saml/15-lse-sso-login.png" class="gif-border">
 
 ## Additional notes
 
-- If you encounter any issues, verify that the SAML attributes and URLs are correctly configured in both Label Studio and Google Admin Console.
+- If you encounter any issues, verify that the SAML attributes and URLs are correctly configured in both MLTL Annotate and Google Admin Console.
 
 For more detailed information, you can refer to the
-- [Label Studio SSO setup guide](auth_setup)
+- [MLTL Annotate SSO setup guide](auth_setup)
 - [Official Google Docs about SAML](https://support.google.com/a/answer/6087519?hl=en#zippy=%2Cstep-add-the-custom-saml-app)

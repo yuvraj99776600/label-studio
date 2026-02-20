@@ -5,8 +5,8 @@ tier: all
 order: 75
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: Use Flair with Label Studio
-meta_description: Tutorial on how to use Label Studio and Flair for faster NER labeling 
+meta_title: Use Flair with MLTL Annotate
+meta_description: Tutorial on how to use MLTL Annotate and Flair for faster NER labeling 
 categories:
     - Natural Language Processing
     - Named Entity Recognition
@@ -16,13 +16,13 @@ image: "/guide/ml_tutorials/flair.png"
 
 # Flair NER example
 
-This example demonstrates how to use Flair NER model with Label Studio.
+This example demonstrates how to use Flair NER model with MLTL Annotate.
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`flair` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/flair). 
+This tutorial uses the [`flair` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/flair). 
 
 ## Quickstart
 
@@ -39,7 +39,7 @@ $ curl http://localhost:9090/health
 {"status":"UP"}
 ```
 
-3. Create a project in Label Studio. Then from the **Model** page in the project settings, [connect the model](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
+3. Create a project in MLTL Annotate. Then from the **Model** page in the project settings, [connect the model](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
 
 ## Labeling Configuration
 

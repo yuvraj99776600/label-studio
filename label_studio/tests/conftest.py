@@ -404,9 +404,9 @@ def import_from_url():
 @pytest.fixture(autouse=True)
 def ml_backend_1(ml_backend):
     register_ml_backend_mock(
-        ml_backend, url='https://test.heartex.mlbackend.com:9090', setup_model_version='Fri Feb 19 17:10:44 2021'
+        ml_backend, url='https://test.mltl.mlbackend.com:9090', setup_model_version='Fri Feb 19 17:10:44 2021'
     )
-    register_ml_backend_mock(ml_backend, url='https://test.heartex.mlbackend.com:9091', health_connect_timeout=True)
+    register_ml_backend_mock(ml_backend, url='https://test.mltl.mlbackend.com:9091', health_connect_timeout=True)
     register_ml_backend_mock(ml_backend, url='http://localhost:8999', predictions={'results': []})
     yield ml_backend
 
@@ -518,8 +518,8 @@ def setup_project(client, project_template, do_auth=True, legacy_api_tokens_enab
         assert signin(client, email, password).status_code == 302
         # create project
         with requests_mock.Mocker() as m:
-            m.register_uri('POST', re.compile(r'ml\.heartex\.net/\d+/validate'), text=json.dumps({'status': 'ok'}))
-            m.register_uri('GET', re.compile(r'ml\.heartex\.net/\d+/health'), text=json.dumps({'status': 'UP'}))
+            m.register_uri('POST', re.compile(r'ml\.mltl\.net/\d+/validate'), text=json.dumps({'status': 'ok'}))
+            m.register_uri('GET', re.compile(r'ml\.mltl\.net/\d+/health'), text=json.dumps({'status': 'UP'}))
             r = client.post(urls.project_create, data=project_config)
             print('Project create with status code:', r.status_code)
             assert r.status_code == 201, 'Create project result should be redirect to the next page'

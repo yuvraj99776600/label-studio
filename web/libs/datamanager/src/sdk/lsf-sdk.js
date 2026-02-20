@@ -67,7 +67,7 @@ const errorHandlerAllowSpecialErrors = (result) => {
 // Support portal URL constants used to construct error reporting links
 // These are used in showOperationToast() to create support links with request IDs
 // for better error tracking and customer support
-export const SUPPORT_URL = "https://support.humansignal.com/hc/en-us/requests/new";
+export const SUPPORT_URL = "https://mltl.us/support/hc/en-us/requests/new";
 export const SUPPORT_URL_REQUEST_ID_PARAM = "tf_37934448633869"; // request_id field ID in ZD
 
 // Toast ID for overlap reached message - used to dismiss this specific toast

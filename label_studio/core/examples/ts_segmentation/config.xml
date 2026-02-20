@@ -9,9 +9,9 @@ it will be marked as `"instant": true` in the results.
 * To display signal values use `displayFormat` as in <a href="https://github.com/d3/d3-format#locale_format" target="_blank">D3 formats</a>.
 * Read more about Time Series in the documentation:
 
-    * <a href="https://labelstud.io/tags/timeseries.html" target="_blank">TimeSeries tag</a>
-    * <a href="https://labelstud.io/tags/timeserieslabels.html" target="_blank">TimeSeriesLabels tag</a>
-    * <a href="https://labelstud.io/tags/timeseries.html#Channel" target="_blank">Channel tag</a>
+    * <a href="https://docs.mltl.us/tags/timeseries.html" target="_blank">TimeSeries tag</a>
+    * <a href="https://docs.mltl.us/tags/timeserieslabels.html" target="_blank">TimeSeriesLabels tag</a>
+    * <a href="https://docs.mltl.us/tags/timeseries.html#Channel" target="_blank">Channel tag</a>
 -->
 
 <View>

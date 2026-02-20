@@ -19,9 +19,9 @@ const s3sProvider: ProviderConfig = {
           <IconSpark />
           <AlertTitle>Enterprise Feature</AlertTitle>
           <AlertDescription>
-            Amazon S3 with IAM Role is available in Label Studio Enterprise.{" "}
+            Amazon S3 with IAM Role is available in MLTL Annotate.{" "}
             <a
-              href="https://docs.humansignal.com/guide/storage.html#Set-up-an-S3-connection-with-IAM-role-access"
+              href="https://docs.mltl.us/guide/storage.html#Set-up-an-S3-connection-with-IAM-role-access"
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:no-underline"

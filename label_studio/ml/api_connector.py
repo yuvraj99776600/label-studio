@@ -46,7 +46,7 @@ VERSIONS_URL = 'versions'
 class BaseHTTPAPI(object):
     MAX_RETRIES = 2
     HEADERS = {
-        'User-Agent': 'heartex/' + (version or ''),
+        'User-Agent': 'mltl/' + (version or ''),
     }
 
     def __init__(

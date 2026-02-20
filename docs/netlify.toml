@@ -5,14 +5,14 @@ status = 301
 force = true
 
 [[redirects]]
-from = "https://heartex-docs.netlify.app/api/*"
-to = "https://app.heartex.com/docs/api/:splat"
+from = "https://mltl-docs.netlify.app/api/*"
+to = "https://app.mltl.com/docs/api/:splat"
 status = 301
 force = true
 
 [[redirects]]
-from = "https://docs.humansignal.com/api/*"
-to = "https://app.heartex.com/docs/api/:splat"
+from = "https://docs.mltl.us/api/*"
+to = "https://app.mltl.com/docs/api/:splat"
 status = 301
 force = true
 

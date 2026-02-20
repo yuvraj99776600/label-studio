@@ -1,33 +1,33 @@
 ---
 NOTE: Don't change release_notes.md manually, it's automatically built from onprem/*.md files on hexo server run!   
 
-title: On-Premises Release Notes for Label Studio Enterprise
+title: On-Premises Release Notes for MLTL Annotate
 short: On-Prem Release Notes
 type: guide
 tier: enterprise
 order: 0
 order_enterprise: 451
 section: "What's New"
-meta_title: On-premises release notes for Label Studio Enterprise
-meta_description: Review new features, enhancements, and bug fixes for on-premises Label Studio Enterprise installations. 
+meta_title: On-premises release notes for MLTL Annotate
+meta_description: Review new features, enhancements, and bug fixes for on-premises MLTL Annotate installations. 
 ---
 
 !!! note 
-    The release notes for Label Studio Community Edition are available from the <a href="https://github.com/HumanSignal/label-studio/releases">Label Studio GitHub repository</a>.
+    The release notes for MLTL Annotate Community Edition are available from the <a href="https://github.com/yuvraj99776600/label-studio/releases">MLTL Annotate GitHub repository</a>.
 
 !!! note 
-    Before upgrading, review the steps outlined in [Upgrade Label Studio Enterprise](upgrade_enterprise) and ensure that you complete the recommended tests after each upgrade. 
+    Before upgrading, review the steps outlined in [Upgrade MLTL Annotate](upgrade_enterprise) and ensure that you complete the recommended tests after each upgrade. 
 
 <div class="release-note"><button class="release-note-toggle"></button>
 <a name="2260md"></a>
 
-## Label Studio Enterprise 2.26.0
+## MLTL Annotate 2.26.0
 
 <div class="onprem-highlight">Time series sync, new Multichannel tag for time series, spectrograms, playground 2.0, annotation result filtering</div>
 
 *Jul 21, 2025*
 
-Helm Chart version: [1.10.0](https://github.com/HumanSignal/charts/blob/master/heartex/label-studio/Chart.yaml)
+Helm Chart version: [1.10.0](https://github.com/yuvraj99776600/charts/blob/master/mltl/label-studio/Chart.yaml)
 
 ### New features
 
@@ -62,7 +62,7 @@ Spectrograms can provide a deeper level of audio analysis by visualizing frequen
 
 #### Playground 2.0
 
-The [Label Studio Playground](https://labelstud.io/playground/) is an interactive sandbox where you can write or paste your XML labeling configuration and instantly preview it on sample tasks—no local install required.
+The [MLTL Annotate Playground](https://labelstud.io/playground/) is an interactive sandbox where you can write or paste your XML labeling configuration and instantly preview it on sample tasks—no local install required.
 
 The playground has recently been updated and improved, now supporting a wider range of features, including audio labeling. It is also now [a standalone app](https://labelstud.io/playground-app) and automatically stays in sync with the main application.
 
@@ -103,7 +103,7 @@ Users can now receive email notifications for various actions, including when th
 
 #### Support for JSONL and Parquet
 
-Label Studio now supports more flexible JSON data import from cloud storage. When importing data, you can use JSONL format (where each line is a JSON object), and import Parquet files.
+MLTL Annotate now supports more flexible JSON data import from cloud storage. When importing data, you can use JSONL format (where each line is a JSON object), and import Parquet files.
 
 JSONL is the format needed for OpenAI fine-tuning, and the default format from Sagemaker and HuggingFace outputs. Parquet enables smoother data imports and exports for Enterprise-grade systems including Databricks, Snowflake, and AWS feature store,
 
@@ -296,13 +296,13 @@ Owners can configure both the maximum session age (total duration of a session) 
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2250md"></a>
 
-## Label Studio Enterprise 2.25.0
+## MLTL Annotate 2.25.0
 
 <div class="onprem-highlight">Prompts on-prem availability, storage proxies, PDF tag, KeyPointLabels support, multi-task JSON imports for cloud</div>
 
 *Jun 17, 2025*
 
-Helm Chart version: [1.9.15](https://github.com/HumanSignal/charts/blob/master/heartex/label-studio/Chart.yaml)
+Helm Chart version: [1.9.15](https://github.com/yuvraj99776600/charts/blob/master/mltl/label-studio/Chart.yaml)
 
 ### New features
 
@@ -310,13 +310,13 @@ Helm Chart version: [1.9.15](https://github.com/HumanSignal/charts/blob/master/h
 
 You can now configure your on-prem environment to use Prompts! 
 
-Prompts is an interface to easily integrate LLMs into your own Label Studio deployment. Leading teams use it to pre-label data, compare models, and generate synthetic samples.
+Prompts is an interface to easily integrate LLMs into your own MLTL Annotate deployment. Leading teams use it to pre-label data, compare models, and generate synthetic samples.
 
 You can find out more here:
 
 * [Prompts overview](prompts_overview)
 * [Prompts product page](https://humansignal.com/platform/prompts/)
-* [Blog - How to Generate Synthetic Data with Prompts in Label Studio](https://humansignal.com/blog/how-to-generate-synthetic-data-with-prompts-in-label-studio/)
+* [Blog - How to Generate Synthetic Data with Prompts in MLTL Annotate](https://humansignal.com/blog/how-to-generate-synthetic-data-with-prompts-in-label-studio/)
 
 
 Installing Prompts requires license enablement and [additional install steps](install_prompts). Reach out to your CSM to enable a free trial!
@@ -325,13 +325,13 @@ Installing Prompts requires license enablement and [additional install steps](in
 
 #### Storage proxies for cloud files
 
-Label Studio now uses a proxy when accessing media files in connect cloud storages. For more information, see [Pre-signed URLs vs. storage proxies](https://docs.humansignal.com/guide/storage#Pre-signed-URLs-vs-Storage-proxies).
+MLTL Annotate now uses a proxy when accessing media files in connect cloud storages. For more information, see [Pre-signed URLs vs. storage proxies](https://docs.mltl.us/guide/storage#Pre-signed-URLs-vs-Storage-proxies).
 
 Proxy mode is only used when the **Use pre-signed URLs** option is disabled in source storage.
 
 Storage proxies offer secure media access, simplified configuration, and improved performance.
 
-- Keeps data access within Label Studio's network boundary, ideal for on-premise environments
+- Keeps data access within MLTL Annotate's network boundary, ideal for on-premise environments
 - Enforces strict task-level access control, even for cached files
 - Eliminates the need for presigned URLs and CORS configuration
 - Solves performance and reliability issues for large files, videos, and audio
@@ -349,7 +349,7 @@ This also simplifies the process for using PDFs with Prompts for summarization a
 
 #### KeyPointLabels exports for COCO and YOLO
 
-COCO and YOLO export formats now available for `KeyPointLabels`. For more information, see [our docs](https://docs.humansignal.com/guide/export#COCO). 
+COCO and YOLO export formats now available for `KeyPointLabels`. For more information, see [our docs](https://docs.mltl.us/guide/export#COCO). 
 
 #### Multi-task JSON imports for cloud
 
@@ -357,7 +357,7 @@ Previously, if you loaded JSON tasks from source storage, you could only configu
 
 This restriction has been removed, and you can now specify multiple tasks per JSON file as long as all tasks follow the same format.
 
-For more information, see the examples in our [our docs](https://docs.humansignal.com/guide/storage#Off).
+For more information, see the examples in our [our docs](https://docs.mltl.us/guide/storage#Off).
 
 
 #### Miscellaneous
@@ -394,7 +394,7 @@ For more information, see the examples in our [our docs](https://docs.humansigna
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2240md"></a>
 
-## Label Studio Enterprise 2.24.0
+## MLTL Annotate 2.24.0
 
 <div class="onprem-highlight">Dark mode, new home page, annotator evaluation settings, plugins library, and multiple usability enhancements</div>
 
@@ -406,7 +406,7 @@ Helm Chart version: 1.9.10
 
 #### Dark mode
 
-Label Studio can now be used in dark mode.
+MLTL Annotate can now be used in dark mode.
 
 Click your avatar in the upper right to find the toggle for dark mode.
 
@@ -424,9 +424,9 @@ Click your avatar in the upper right to find the toggle for dark mode.
 ![Screenshot of dark mode](/images/releases/2-24-dark-mode2.png)
 
 
-#### New Label Studio Home page
+#### New MLTL Annotate Home page
 
-When you open Label Studio, you will see a new Home page. Here you can find links to your most recent projects, shortcuts to common actions, and links to frequently used resources
+When you open MLTL Annotate, you will see a new Home page. Here you can find links to your most recent projects, shortcuts to common actions, and links to frequently used resources
 
 ![Screenshot of home page](/images/releases/2-24-home.png)
 
@@ -439,7 +439,7 @@ There is a new Annotator Evaluation section under **Settings > Quality**.
 
 When there are ground truth annotations within the project, an annotator will be paused if their ground truth agreement falls below a certain threshold.
 
-For more information, see [**Annotator Evaluation**](https://docs.humansignal.com/guide/project_settings_lse#annotator-eval).
+For more information, see [**Annotator Evaluation**](https://docs.mltl.us/guide/project_settings_lse#annotator-eval).
 
 <img src="/images/releases/2-24-evaluation.png" style="max-width:600px; margin: 0 auto" alt="Screenshot of evaluation settings">
 
@@ -449,7 +449,7 @@ There are a number of new features and changes related to plugins:
 
 - There is a new **Insert Plugins** menu available. From here you can insert a pre-built plugin that you can customize as necessary.
 - When you add a plugin, you will see a new **Testing** panel below the plugin editing field. You can use this to verify what events are triggered, manually trigger events, and modify the sample data as necessary.
-- To accompany the new **Insert Plugins** menu, there is [a new Plugins gallery](https://docs.humansignal.com/plugins/) in the documentation that discusses each option and has information on creating your own custom plugs.
+- To accompany the new **Insert Plugins** menu, there is [a new Plugins gallery](https://docs.mltl.us/plugins/) in the documentation that discusses each option and has information on creating your own custom plugs.
 - There is also a new setting that allows you to restrict access to the Plugins tab to Administrator users. By default, it is also available to Managers. This can be set through the Django admin panel. 
 
 ![Screenshot of plugins](/images/releases/2-24-plugin-menu.png)
@@ -512,15 +512,15 @@ When there are a large number of options in a drop-down menu, you can now search
 
 <img src="/images/releases/2-24-drop-down.png" style="max-width:400px; margin: 0 auto" alt="Screenshot of annotator dashboard button">
 
-#### Label Studio Converter CLI
+#### MLTL Annotate Converter CLI
 
-When you install the Label Studio SDK, you can now use the `label-studio-converter` command from your terminal.
+When you install the MLTL Annotate SDK, you can now use the `label-studio-converter` command from your terminal.
 
 #### Miscellaneous
 
 - Performance enhancements around how membership API requests are made.
 
-- Added a new API call to rotate JWT tokens: [POST api/token/rotate](https://app.heartex.com/api/token/rotate/)
+- Added a new API call to rotate JWT tokens: [POST api/token/rotate](https://app.mltl.com/api/token/rotate/)
 
 
 ### Security
@@ -537,7 +537,7 @@ When you install the Label Studio SDK, you can now use the `label-studio-convert
 
 - By default, CORS is permissive. However, you can now set an environment variable to ensure it is in strict mode. Set **one** of the following:
     - `CORS_ALLOWED_ORIGINS`  
-     A comma-separated list of Origin header values the Label Studio server will receive, e.g. `https://example.org,https://example.net`
+     A comma-separated list of Origin header values the MLTL Annotate server will receive, e.g. `https://example.org,https://example.net`
 
     - `CORS_ALLOWED_ORIGIN_REGEXES`  
       Same as above, except using regex. 
@@ -550,7 +550,7 @@ When you install the Label Studio SDK, you can now use the `label-studio-convert
 
 - Fixed an issue where interacting with the Manage Members modal would sometimes throw an error.
 
-- Fixed an issue where white-labeled Label Studios instances were showing the incorrect logo.
+- Fixed an issue where white-labeled MLTL Annotates instances were showing the incorrect logo.
 
 - Fixed an issue where the `Filter` tag did not work with `Choices` tags.
 
@@ -592,7 +592,7 @@ When you install the Label Studio SDK, you can now use the `label-studio-convert
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2230md"></a>
 
-## Label Studio Enterprise 2.23.0
+## MLTL Annotate 2.23.0
 
 <div class="onprem-highlight">Google Cloud Storage WIF, drag-and-drop for video timelines, multiple security enhancements</div>
 
@@ -606,14 +606,14 @@ Helm Chart version: 1.9.9
 
 When adding project storage, you now have the option to choose Google Cloud Storage WIF.
 
-Unlike the the standard GCS connection using application credentials, this allows Label Studio to request temporary credentials when connecting to your storage.
+Unlike the the standard GCS connection using application credentials, this allows MLTL Annotate to request temporary credentials when connecting to your storage.
 
-For more information, see [Google Cloud Storage with Workload Identity Federation (WIF)](https://docs.humansignal.com/guide/storage#Google-Cloud-Storage-with-Workload-Identity-Federation-WIF).
+For more information, see [Google Cloud Storage with Workload Identity Federation (WIF)](https://docs.mltl.us/guide/storage#Google-Cloud-Storage-with-Workload-Identity-Federation-WIF).
 
 ![Screenshot of WIF](/images/releases/2-23-wif.png)
 
 !!! note
-    While this option is available for on-prem users, the typical way to set up GCS in an on-prem environment is through persistent storage as documented [here](https://docs.humansignal.com/guide/persistent_storage.html#Configure-the-GCS-bucket). 
+    While this option is available for on-prem users, the typical way to set up GCS in an on-prem environment is through persistent storage as documented [here](https://docs.mltl.us/guide/persistent_storage.html#Configure-the-GCS-bucket). 
 
 
 ### Enhancements
@@ -684,7 +684,7 @@ We have renamed "Custom Scripts" to "Plugins." This is reflected in the UI and [
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2221md"></a>
 
-## Label Studio Enterprise 2.22.1
+## MLTL Annotate 2.22.1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -704,7 +704,7 @@ Helm Chart version: 1.9.8
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2220md"></a>
 
-## Label Studio Enterprise 2.22.0
+## MLTL Annotate 2.22.0
 
 <div class="onprem-highlight">Pause annotators, set annotation limits, new API tokens, deep linking for annotation and regions, usability improvements for audio</div>
 
@@ -718,7 +718,7 @@ Helm Chart version: 1.9.6
 
 There is a new action to pause annotators. This is available from the Members dashboard and via the API.
 
-For more information, see [Pause an annotator](https://docs.humansignal.com/guide/quality#Pause-an-annotator).
+For more information, see [Pause an annotator](https://docs.mltl.us/guide/quality#Pause-an-annotator).
 
 ![Screenshot of pause](/images/review/pause.png)
 
@@ -728,7 +728,7 @@ There is a new **Quality > Annotation Limit** section in the project settings.
 
 You can use these fields to set limits on how many tasks each user is able to annotate. Once the limit is reached, their progress will be paused.
 
-For more information, see [Annotation Limit](https://docs.humansignal.com/guide/project_settings_lse#annotation-limit).
+For more information, see [Annotation Limit](https://docs.mltl.us/guide/project_settings_lse#annotation-limit).
 
 ![Screenshot of annotation limits](/images/releases/2-22-annotation-limit.png)
 
@@ -784,7 +784,7 @@ There are three new templates available from the template gallery:
 
 - Added a link to a user’s performance summary from the Annotation Summary table on the Members dashboard.
 
-- The Label Studio URL format has been updated so that you can now link to specific workspaces.
+- The MLTL Annotate URL format has been updated so that you can now link to specific workspaces.
 
 - Improved 4xx and 5xx error page design to include helpful links.
 
@@ -794,7 +794,7 @@ There are three new templates available from the template gallery:
 
 - Error handling improvements.
 
-- UI fixes to ensure consistency in styles across Label Studio.
+- UI fixes to ensure consistency in styles across MLTL Annotate.
 
 ### Security
 
@@ -843,7 +843,7 @@ Made security improvements regarding org membership visibility.
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2210md"></a>
 
-## Label Studio Enterprise 2.21.0
+## MLTL Annotate 2.21.0
 
 <div class="onprem-highlight">Bulk labeling, enable AI features, and multiple labeling and Data Manager enhancements</div>
 
@@ -868,7 +868,7 @@ For more information, see the [Bulk labeling documentation](labeling_bulk) and [
 
 #### Enable AI features
 
-There is a new toggle on the **Billing & Usage** page (only available to users in the Owner role). You can use this to enable [AI features](ask_ai) throughout Label Studio. 
+There is a new toggle on the **Billing & Usage** page (only available to users in the Owner role). You can use this to enable [AI features](ask_ai) throughout MLTL Annotate. 
 
 ![Screenshot of enable AI](/images/releases/2-21-ai-enable.png)
 
@@ -882,7 +882,7 @@ There is a new toggle on the **Billing & Usage** page (only available to users i
 The **Billing & Usage** page (only accessible to users in the Owner role) has several new options:
 
 - **Early Adopter** - Opt in to new features before they're generally available.
-- **Enable AI Features** - Enables AI helper tools within Label Studio. See [AI features](ask_ai).
+- **Enable AI Features** - Enables AI helper tools within MLTL Annotate. See [AI features](ask_ai).
 - **White labeling** - Contact sales about enabling white labeling.
 - **Custom Scripts** - Contact sales to enable custom scripts. See [Custom scripts for projects](scripts).
 
@@ -996,7 +996,7 @@ The following feature flags have been marked stale or deleted, meaning they can 
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2201md"></a>
 
-## Label Studio Enterprise 2.20.1
+## MLTL Annotate 2.20.1
 
 <div class="onprem-highlight">Security-related fixes</div>
 
@@ -1024,7 +1024,7 @@ Helm Chart version: 1.9.2
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2200md"></a>
 
-## Label Studio Enterprise 2.20.0
+## MLTL Annotate 2.20.0
 
 <div class="onprem-highlight">Taxonomy for labeling, new audio hotkey, performance improvements, bug fixes </div>
 
@@ -1046,7 +1046,7 @@ There is a new hotkey available for pausing and starting audio: `ctrl`+`p` (Win
 
 #### Video frame classification template
 
-The video frame classification template is now available in the Label Studio app as well as [the documentation](/templates/video_frame_classification).
+The video frame classification template is now available in the MLTL Annotate app as well as [the documentation](/templates/video_frame_classification).
 
 
 #### Performance improvements
@@ -1061,11 +1061,11 @@ Optimized the API calls made from the frontend within the members management and
 
 ### Breaking changes
 
-This release includes an upgrade to Django 5. As part of this change, Label Studio now requires PostgreSQL version 13+. 
+This release includes an upgrade to Django 5. As part of this change, MLTL Annotate now requires PostgreSQL version 13+. 
 
 ### Bug fixes
 
-- Fixed an issue where the Label Studio version as displayed in the side menu was not formatted properly.
+- Fixed an issue where the MLTL Annotate version as displayed in the side menu was not formatted properly.
   
 - Fixed an issue where the `contextlog` was not reporting the `content_type`.
 
@@ -1094,7 +1094,7 @@ This release includes an upgrade to Django 5. As part of this change, Label Stud
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2191md"></a>
 
-## Label Studio Enterprise 2.19.1
+## MLTL Annotate 2.19.1
 
 <div class="onprem-highlight">Bug fixes </div>
 
@@ -1114,7 +1114,7 @@ Helm Chart version: 1.7.4
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2190md"></a>
 
-## Label Studio Enterprise 2.19.0
+## MLTL Annotate 2.19.0
 
 <div class="onprem-highlight">Paginated multi-image labeling and a new Task Reservation setting </div>
 
@@ -1140,7 +1140,7 @@ To enable this feature, use the `valueList` parameter on the [`<Image> tag`](/ta
 
 There is a new project setting under **Annotation > Task Reservation**.
 
-You can use this setting to determine how many minutes a task can be reserved by a user. You can also use it for projects that have become stalled due to too many reserved tasks. For more information, see [Project settings - Task Reservation](https://docs.humansignal.com/guide/project_settings_lse#lock-tasks).
+You can use this setting to determine how many minutes a task can be reserved by a user. You can also use it for projects that have become stalled due to too many reserved tasks. For more information, see [Project settings - Task Reservation](https://docs.mltl.us/guide/project_settings_lse#lock-tasks).
 
 By default, the task reservation time is set to one day (1440 minutes). This setting is only available when task distribution is set to **Auto**.
 
@@ -1208,7 +1208,7 @@ The following feature flags have been removed:
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2180md"></a>
 
-## Label Studio Enterprise 2.18.0
+## MLTL Annotate 2.18.0
 
 <div class="onprem-highlight">Link comments to fields, export information from the Annotator Performance dashboard </div>
 
@@ -1224,7 +1224,7 @@ You can now link comments to specific regions or fields within an annotation.
 
 This change will help improve clarity between Annotators and Reviewers, enhancing the quality review process.
 
-For more information, see [Comments and notifications](https://docs.humansignal.com/guide/comments_notifications).
+For more information, see [Comments and notifications](https://docs.mltl.us/guide/comments_notifications).
 
 ![Screenshot of comment linking](/images/releases/2-18-comments1.png)
 
@@ -1232,7 +1232,7 @@ For more information, see [Comments and notifications](https://docs.humansignal.
 
 #### Export information from the Annotator Performance dashboard
 
-There is a new **Export** action available from the [Annotator Performance dashboard.](https://docs.humansignal.com/guide/dashboard_annotator)
+There is a new **Export** action available from the [Annotator Performance dashboard.](https://docs.mltl.us/guide/dashboard_annotator)
 
 - **Report** - Download the information in the dashboard as CSV or JSON.
 - **Timeline** - Download a detailed timeline of all the user's annotation actions within the timeframe, including when the began and submitted each annotation.
@@ -1244,13 +1244,13 @@ There is a new **Export** action available from the [Annotator Performance dashb
 
 #### Performance score added to the Annotator Performance dashboard
 
-A **Performance Score** metric has been added to the Annotator Performance dashboard metrics. This reflects the overall performance of annotators in terms of review actions (**Accept**, **Reject**, **Fix+Accept**). For more information, see [Performance summaries](https://docs.humansignal.com/guide/dashboard_annotator#Performance-summaries). 
+A **Performance Score** metric has been added to the Annotator Performance dashboard metrics. This reflects the overall performance of annotators in terms of review actions (**Accept**, **Reject**, **Fix+Accept**). For more information, see [Performance summaries](https://docs.mltl.us/guide/dashboard_annotator#Performance-summaries). 
 
 ![Screenshot of Performance Score metric](/images/releases/2-18-score.png)
 
 #### Edit regions when classifying video frames
 
-We recently introduced the ability to perform [video frame classification](https://docs.humansignal.com/templates/video_frame_classification) with the `<TimelineLabels>` tag.
+We recently introduced the ability to perform [video frame classification](https://docs.mltl.us/templates/video_frame_classification) with the `<TimelineLabels>` tag.
 
 You now have the ability to edit the frame spans you select in the timeline editor, making it easier to control which frames you want to label.
 
@@ -1258,7 +1258,7 @@ You now have the ability to edit the frame spans you select in the timeline edit
 
 #### Improved usability on project settings pages
 
-There are a number of [project settings](https://docs.humansignal.com/guide/project_settings_lse) that are only applicable when auto distribution is enabled for users.
+There are a number of [project settings](https://docs.mltl.us/guide/project_settings_lse) that are only applicable when auto distribution is enabled for users.
 
 To prevent confusion, settings that are not applicable will be hidden when manual distribution is enabled.
 
@@ -1312,7 +1312,7 @@ A new hotkey (**Ctrl + h**) has been added. Use this shortcut to hide all region
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2170md"></a>
 
-## Label Studio Enterprise 2.17.0
+## MLTL Annotate 2.17.0
 
 <div class="onprem-highlight">New reviewer workflow options, streamlined layout for the Projects page, and other UI improvements </div>
 
@@ -1370,7 +1370,7 @@ For more information, see [Project settings - Review](#Review).
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2160md"></a>
 
-## Label Studio Enterprise 2.16.0
+## MLTL Annotate 2.16.0
 
 <div class="onprem-highlight">Video frame classification, user activation through SCIM, and bug fixes </div>
 
@@ -1424,7 +1424,7 @@ For more information, see [New! Video Frame Classification](https://humansignal.
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2150md"></a>
 
-## Label Studio Enterprise 2.15.0
+## MLTL Annotate 2.15.0
 
 <div class="onprem-highlight">Reviewer workflow updates, drag-and-drop tab reordering, usability enhancements for the <b>Show region labels</b> option, and upgrading to Django 4.2 </div>
 
@@ -1439,7 +1439,7 @@ Helm Chart version: 1.6.3
     - The **Explore All Reviews** option is no longer available. This is because the same basic functionality is now available by simply selecting tasks in the Data Manager.
     - When you click **Review All Tasks**, by default you will now be shown tasks in the same order in which the annotator completed their tasks. Previously, you were shown tasks in reverse order from completion.
 
-   For more information, see [Improvements to HumanSignal Reviewer Workflow](https://humansignal.com/blog/improvements-to-humansignal-reviewer-workflow/). 
+   For more information, see [Improvements to MLTL Reviewer Workflow](https://humansignal.com/blog/improvements-to-humansignal-reviewer-workflow/). 
 
 * You can now reorder tabs in the Data Manager by dragging and dropping them.
 
@@ -1535,7 +1535,7 @@ The following feature flags have been removed:
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2140post1md"></a>
 
-## Label Studio Enterprise 2.14.0.post1
+## MLTL Annotate 2.14.0.post1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -1554,9 +1554,9 @@ Helm Chart version: 1.6.3
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2140md"></a>
 
-## Label Studio Enterprise 2.14.0
+## MLTL Annotate 2.14.0
 
-<div class="onprem-highlight">Refreshed interface for the HumanSignal platform and bug fixes</div>
+<div class="onprem-highlight">Refreshed interface for the MLTL platform and bug fixes</div>
 
 *Jul 30, 2024*
 
@@ -1564,9 +1564,9 @@ Helm Chart version: 1.6.0
 
 ### New features
 
-#### Refreshed Label Studio interface
+#### Refreshed MLTL Annotate interface
 
-This release includes a new UI with updated colors and fonts, giving it a sleek new look while maintaining the same intuitive navigation you're familiar with. All Label Studio tools, features, and settings are still in the same place, ensuring a smooth transition.
+This release includes a new UI with updated colors and fonts, giving it a sleek new look while maintaining the same intuitive navigation you're familiar with. All MLTL Annotate tools, features, and settings are still in the same place, ensuring a smooth transition.
 
 ![Screenshot of new UI](/images/releases/2-14-UI-login.png)
 
@@ -1606,7 +1606,7 @@ This release includes a new UI with updated colors and fonts, giving it a sleek 
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2130post1md"></a>
 
-## Label Studio Enterprise 2.13.0.post1
+## MLTL Annotate 2.13.0.post1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -1624,7 +1624,7 @@ Helm Chart version: 1.6.3
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2130md"></a>
 
-## Label Studio Enterprise 2.13.0
+## MLTL Annotate 2.13.0
 
 <div class="onprem-highlight">Annotator performance dashboards, potential breaking change for Google Cloud Storage users, feature flag changes</div>
 
@@ -1657,11 +1657,11 @@ Improved performance on the Projects list page due to improvement on the API lev
 
 - Fixed an issue with Google Cloud Storage when the connection has the **Use pre-signed URLs** option disabled. In these situations, Google was sending pre-signed URLs with the format `https://storage.googleapis.com` rather than sending BLOBs.
 
-    With this fix, Google Cloud Storage will begin returning BLOBs/base64 encoded data when **Use pre-signed URLs** is off. This means that Label Studio will start reading data from Google Cloud Storage buckets, which can result in large amounts of data being sent to your Label Studio instance - potentially affecting performance.
+    With this fix, Google Cloud Storage will begin returning BLOBs/base64 encoded data when **Use pre-signed URLs** is off. This means that MLTL Annotate will start reading data from Google Cloud Storage buckets, which can result in large amounts of data being sent to your MLTL Annotate instance - potentially affecting performance.
 
 ### Feature flag changes
 
-- As part of an ongoing effort to streamline our codebase, we have identified a number of seldom-used feature flags. We have marked these feature flags as `stale`, meaning they can no longer be enabled by users. For a full list of all affected feature flags, see https://github.com/HumanSignal/label-studio/pull/5971
+- As part of an ongoing effort to streamline our codebase, we have identified a number of seldom-used feature flags. We have marked these feature flags as `stale`, meaning they can no longer be enabled by users. For a full list of all affected feature flags, see https://github.com/yuvraj99776600/label-studio/pull/5971
 
 ### Bug fixes
 
@@ -1679,9 +1679,9 @@ Improved performance on the Projects list page due to improvement on the API lev
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2120md"></a>
 
-## Label Studio Enterprise 2.12.0
+## MLTL Annotate 2.12.0
 
-<div class="onprem-highlight">New experimental Cache Labels action in the Data Manager, annotation history in snapshots, new setting to restrict local imports into Label Studio, and changes to how the Hide Storage Settings for Manager environment variable works. </div>
+<div class="onprem-highlight">New experimental Cache Labels action in the Data Manager, annotation history in snapshots, new setting to restrict local imports into MLTL Annotate, and changes to how the Hide Storage Settings for Manager environment variable works. </div>
 
 *Jun 04, 2024*
 
@@ -1696,7 +1696,7 @@ Helm Chart version: 1.4.8
 - When you create a new snapshot, you will now have the option to include annotation history:
 
     ![Screenshot of the snapshot dialog](/images/releases/2_12_snapshot.png)
-- There is a new setting that can restrict users from uploading data directly to Label Studio, forcing them to only use cloud storage. If you would like to enable this setting, set the `DISABLE_PROJECT_IMPORTS` environment variable to `True`.
+- There is a new setting that can restrict users from uploading data directly to MLTL Annotate, forcing them to only use cloud storage. If you would like to enable this setting, set the `DISABLE_PROJECT_IMPORTS` environment variable to `True`.
 - For organizations with the  `HIDE_STORAGE_SETTINGS_FOR_MANAGER` environment variable set to `True`, Managers will now be able to sync data from external storage as necessary rather than request assistance from an Admin user.
 
 ### Security
@@ -1745,7 +1745,7 @@ Helm Chart version: 1.4.8
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2111post2md"></a>
 
-## Label Studio Enterprise 2.11.1.post2
+## MLTL Annotate 2.11.1.post2
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -1764,7 +1764,7 @@ Helm Chart version: 1.4.8
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2111post1md"></a>
 
-## Label Studio Enterprise 2.11.1.post1
+## MLTL Annotate 2.11.1.post1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -1783,7 +1783,7 @@ Helm Chart version: 1.4.6
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2111md"></a>
 
-## Label Studio Enterprise 2.11.1
+## MLTL Annotate 2.11.1
 
 <div class="onprem-highlight">Improved machine learning & LLM integrations, action to remove duplicated tasks, Redis ACL support, and other enhancements and bug fixes</div>
 
@@ -1795,7 +1795,7 @@ Helm Chart version: 1.4.4
 
 #### Improved machine learning & LLM integrations
 
-This release streamlines the way ML models and LLMs are connected to Label Studio with a focus on security and simplified user experience. 
+This release streamlines the way ML models and LLMs are connected to MLTL Annotate with a focus on security and simplified user experience. 
 
 Using the powerful ML backend integration, users can add models and customize automated workflows for:
 
@@ -1803,7 +1803,7 @@ Using the powerful ML backend integration, users can add models and customize au
 - **Interactive labeling**: An automated process that applies initial labels to data, which are then refined through manual review, enhancing the efficiency and accuracy of data annotation for machine learning models.
 - **Model evaluation and fine-tuning**: Used in models like the Segment Anything Model (SAM), involves a human-in-the-loop approach where the model provides initial predictions or annotations, and a human annotator interacts directly with these predictions to correct or refine them.
 
-Label Studio Enterprise users can add custom models, or reference a [new examples library](https://github.com/HumanSignal/label-studio-ml-backend/tree/master) to connect popular models, including Segment Anything, OpenAI, Grounding DINO, select Hugging Face models, Tesseract, and more.
+MLTL Annotate users can add custom models, or reference a [new examples library](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master) to connect popular models, including Segment Anything, OpenAI, Grounding DINO, select Hugging Face models, Tesseract, and more.
 
 Updates to the ML backend integration in this release include:
 
@@ -1815,7 +1815,7 @@ Updates to the ML backend integration in this release include:
     - Removed obsolete settings that are no longer compatible (for example, auto-updating version).
     - Fixed various usability issues related to the annotation experience with a model connected.
 
-For more information, see [Integrate Label Studio into your machine learning pipeline](ml).
+For more information, see [Integrate MLTL Annotate into your machine learning pipeline](ml).
 
 ![Screenshot of the new ML backend screens](/images/releases/2-11-0-ml-backend2.png)
 
@@ -1883,7 +1883,7 @@ When you use this action, annotations from duplicated tasks are consolidated int
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2110post1md"></a>
 
-## Label Studio Enterprise 2.11.0.post1
+## MLTL Annotate 2.11.0.post1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -1902,7 +1902,7 @@ Helm Chart version: 1.4.4
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2110md"></a>
 
-## Label Studio Enterprise 2.11.0
+## MLTL Annotate 2.11.0
 
 <div class="onprem-highlight">New ability to configure project-level roles, setting to hide the Cloud Storage page from Manager roles, other enhancements and bug fixes </div>
 
@@ -1946,7 +1946,7 @@ For more information, see [Project-level roles](#Project-level-roles).
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2101post2md"></a>
 
-## Label Studio Enterprise 2.10.1.post2
+## MLTL Annotate 2.10.1.post2
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -1965,7 +1965,7 @@ Helm Chart version: 1.4.0
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2101post1md"></a>
 
-## Label Studio Enterprise 2.10.1.post1
+## MLTL Annotate 2.10.1.post1
 
 <div class="onprem-highlight">Security-related fixes</div>
 
@@ -1984,7 +1984,7 @@ Helm Chart version: 1.4.0
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2101md"></a>
 
-## Label Studio Enterprise 2.10.1
+## MLTL Annotate 2.10.1
 
 <div class="onprem-highlight">New <b>Reset Cache</b> action for projects, security update for activity logs, various bug fixes</div>
 
@@ -2026,7 +2026,7 @@ Fixed an issue where sensitive information was available in activity logs.
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2100md"></a>
 
-## Label Studio Enterprise 2.10.0
+## MLTL Annotate 2.10.0
 
 <div class="onprem-highlight">Granular API-level control over annotation history, UI enhancements for performance and user experience, security updates, bug fixes</div>
 
@@ -2038,7 +2038,7 @@ Helm chart version:  1.4.0
 
 - More granular API-level controls: 
 
-    - Implemented datetime filtering to the per-project annotation history API to support analytics queries and reporting.  Now you can filter [`/api/projects/{id}/annotation-history`](https://app.heartex.com/docs/api/#tag/Annotation-History/operation/api_projects_annotation-history_list) by `created_at_from` and `created_at_to`.
+    - Implemented datetime filtering to the per-project annotation history API to support analytics queries and reporting.  Now you can filter [`/api/projects/{id}/annotation-history`](https://app.mltl.com/docs/api/#tag/Annotation-History/operation/api_projects_annotation-history_list) by `created_at_from` and `created_at_to`.
 
 - Made several updates to the UI to improve performance and user experience, including:
 
@@ -2053,7 +2053,7 @@ Helm chart version:  1.4.0
 
 - Implemented comprehensive HTML sanitization to safeguard against vulnerabilities and ensure a secure user experience.
 
-- This release includes several measures to increase SSRF protection, which address [`CVE-2023-47116`](https://github.com/HumanSignal/label-studio/security/advisories/GHSA-p59w-9gqw-wj8r):
+- This release includes several measures to increase SSRF protection, which address [`CVE-2023-47116`](https://github.com/yuvraj99776600/label-studio/security/advisories/GHSA-p59w-9gqw-wj8r):
     - When `SSRF_PROTECTION_ENABLED` is set to `true` (note that it defaults to `false`), our new default is to ban [all IPs within reserved blocks](https://en.wikipedia.org/wiki/Reserved_IP_addresses), for both IPv4 and IPv6.
     - We are introducing two new environment variables, to be used in conjunction with `SSRF_PROTECTION_ENABLED=true`:
         - `USER_ADDITIONAL_BANNED_SUBNETS` — Use this to specify additional IP addresses or CIDR blocks to ban from server-side requests (e.g. the URL-based file uploader).
@@ -2075,7 +2075,7 @@ Helm chart version:  1.4.0
 
 - Fixed an issue where users were not shown a confirmation message after clicking **Submit and exit** in the label stream.
 
-- Fixed an issue where Label Studio crashed when configuring multiple hotkeys using the `hotkey=","` format.
+- Fixed an issue where MLTL Annotate crashed when configuring multiple hotkeys using the `hotkey=","` format.
 
 - Fixed an issue where annotation drafts were not saving when switching to view all mode.
 
@@ -2119,7 +2119,7 @@ Helm chart version:  1.4.0
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="290-2md"></a>
 
-## Label Studio Enterprise 2.9.0-2
+## MLTL Annotate 2.9.0-2
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -2138,7 +2138,7 @@ Helm chart version: 1.3.3
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="290-1md"></a>
 
-## Label Studio Enterprise 2.9.0-1
+## MLTL Annotate 2.9.0-1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -2157,7 +2157,7 @@ Helm chart version: 1.3.3
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="290md"></a>
 
-## Label Studio Enterprise 2.9.0
+## MLTL Annotate 2.9.0
 
 <div class="onprem-highlight">Improved webhook performance and various UI improvements</div>
 
@@ -2179,7 +2179,7 @@ Helm chart version: 1.3.3
 ### Security
 
 - Fixed an issue with HTML sanitization to address a vulnerability identified by CodeQL.
-- Addressed [`CVE-2024-23633`](https://github.com/HumanSignal/label-studio/security/advisories/GHSA-fq23-g58m-799r) by setting a `sandbox` CSP header on the `/data/upload/` endpoint. 
+- Addressed [`CVE-2024-23633`](https://github.com/yuvraj99776600/label-studio/security/advisories/GHSA-fq23-g58m-799r) by setting a `sandbox` CSP header on the `/data/upload/` endpoint. 
 
 ### Bug fixes
 
@@ -2187,7 +2187,7 @@ Helm chart version: 1.3.3
 
 - Fixed an issue where, when labeling tasks, hiding a region would create a draft and display the **Fix and Accept** action, even if no other changes had been made.
 
-- Fixed an issue where credential validation was failing in the Label Studio interface for cloud storages configured using SDK.
+- Fixed an issue where credential validation was failing in the MLTL Annotate interface for cloud storages configured using SDK.
 
 
 
@@ -2197,7 +2197,7 @@ Helm chart version: 1.3.3
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="280md"></a>
 
-## Label Studio Enterprise 2.8.0
+## MLTL Annotate 2.8.0
 
 <div class="onprem-highlight">Improved member list filtering from the Organization page, collapsible Ranker items, various UI improvements</div>
 
@@ -2215,11 +2215,11 @@ Helm chart version: 1.3.2
 
     ![Animated gif of Ranker in action](/images/releases/2-8-0-ranker2.gif)
 
-- Added a new `disable_reviewer_annotator_tokens`setting for organization licenses. When set to `true`, token authorization is disabled for users in the Reviewer and Annotator role. This will help maintain organization security by preventing users from accessing Label Studio via the API.
+- Added a new `disable_reviewer_annotator_tokens`setting for organization licenses. When set to `true`, token authorization is disabled for users in the Reviewer and Annotator role. This will help maintain organization security by preventing users from accessing MLTL Annotate via the API.
 
-- Updated the font and spacing for the **Submit and Exit** button to match Label Studio UI styling guidelines.
+- Updated the font and spacing for the **Submit and Exit** button to match MLTL Annotate UI styling guidelines.
 
-- Updated text on the SAML and SCIM settings pages to match Label Studio UI styling guidelines.
+- Updated text on the SAML and SCIM settings pages to match MLTL Annotate UI styling guidelines.
 
 - Improved error message clarity when configuring SCIM.
 
@@ -2233,7 +2233,7 @@ Helm chart version: 1.3.2
 
 - Patched an ORM leak vulnerability. 
 
-- Due to an XSS vulnerability, we previously added a requirement that users must log in to view the Label Studio API doc reference and Swagger. You can now view the [API docs](https://app.heartex.com/docs/api/) without logging in. However, the Swagger version is still only available to logged in users. 
+- Due to an XSS vulnerability, we previously added a requirement that users must log in to view the MLTL Annotate API doc reference and Swagger. You can now view the [API docs](https://app.mltl.com/docs/api/) without logging in. However, the Swagger version is still only available to logged in users. 
 
 
 ### Bug fixes
@@ -2272,7 +2272,7 @@ Helm chart version: 1.3.2
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="270-1md"></a>
 
-## Label Studio Enterprise 2.7.0-1
+## MLTL Annotate 2.7.0-1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -2288,7 +2288,7 @@ Helm chart version: 1.3.2
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="270md"></a>
 
-## Label Studio Enterprise 2.7.0
+## MLTL Annotate 2.7.0
 
 <div class="onprem-highlight">External taxonomy, group visibility in label distribution charts, soft delete users</div>
 
@@ -2306,9 +2306,9 @@ This feature provides multiple benefits, including:
 
 - **Performance** - Significant performance improvements for large taxonomies.
 - **Usability and standardization** - With JSON formatting and the ability to manage taxonomies in your editor of choice, external taxonomies are easier to organize and update.
-- **Security** - You can now securely store taxonomies outside of Label Studio.
+- **Security** - You can now securely store taxonomies outside of MLTL Annotate.
 
-Fore more information, see [Quickly Load and Manage Large-Scale Taxonomies From External Sources](https://humansignal.com/blog/new-quickly-load-and-manage-large-scale-taxonomies-from-external-sources/), the [Taxonomy template](https://docs.humansignal.com/templates/taxonomy), and [Taxonomy tag](https://docs.humansignal.com/tags/taxonomy). 
+Fore more information, see [Quickly Load and Manage Large-Scale Taxonomies From External Sources](https://humansignal.com/blog/new-quickly-load-and-manage-large-scale-taxonomies-from-external-sources/), the [Taxonomy template](https://docs.mltl.us/templates/taxonomy), and [Taxonomy tag](https://docs.mltl.us/tags/taxonomy). 
 
 ![Animated gif showing taxonomy in action](/images/releases/2-7-0-taxonomy.gif)
 
@@ -2347,7 +2347,7 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 
 - Fixed an SSRF DNS rebinding issue.
 - Fixed an XSS vulnerability on certain error pages.
-- Fixed an XSS vulnerability related to file extensions for avatars. This change addresses [`CVE-2023-47115`](https://github.com/HumanSignal/label-studio/security/advisories/GHSA-q68h-xwq5-mm7x).
+- Fixed an XSS vulnerability related to file extensions for avatars. This change addresses [`CVE-2023-47115`](https://github.com/yuvraj99776600/label-studio/security/advisories/GHSA-q68h-xwq5-mm7x).
 
 ### Bug fixes
 
@@ -2370,7 +2370,7 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="260-2md"></a>
 
-## Label Studio Enterprise 2.6.0-2
+## MLTL Annotate 2.6.0-2
 
 <div class="onprem-highlight">Improved label and review stream counter</div>
 
@@ -2387,7 +2387,7 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="260-1md"></a>
 
-## Label Studio Enterprise 2.6.0-1
+## MLTL Annotate 2.6.0-1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -2404,7 +2404,7 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="260md"></a>
 
-## Label Studio Enterprise 2.6.0
+## MLTL Annotate 2.6.0
 
 <div class="onprem-highlight">New <code>snap</code> parameter for KeyPoint, KeyPointLabels, Polygon, and PolygonLabels tags, improved usability when reviewing video in Outliner </div>
 
@@ -2412,12 +2412,12 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 
 ### Enhancements
 
-- The [Keypoint](https://labelstud.io/tags/keypoint), [KeyPointLabels](https://docs.humansignal.com/tags/keypointlabels), [Polygon](https://docs.humansignal.com/tags/polygon), and [PolygonLabels](https://docs.humansignal.com/tags/polygonlabels) tags all support a new `snap` parameter for use in Image Segmentation labeling. When `snap="pixel"` is enabled, the (x, y) coordinates of each point are rounded to the pixel size. This enhancement will help ensure precise and uniform coordinates within images. For polygons, points are snapped to the pixel edge. For example, given a polygon point with the coordinates (0.25, 0.25), your resultant coordinates would snap to the edge of the pixel at (0,0). For keypoints, points are snapped to the pixel center.  For example, given a keypoint with the coordinates (0.25, 0.25), your resultant coordinates would snap to the center of the pixel at (0.5,0.5).
+- The [Keypoint](https://docs.mltl.us/tags/keypoint), [KeyPointLabels](https://docs.mltl.us/tags/keypointlabels), [Polygon](https://docs.mltl.us/tags/polygon), and [PolygonLabels](https://docs.mltl.us/tags/polygonlabels) tags all support a new `snap` parameter for use in Image Segmentation labeling. When `snap="pixel"` is enabled, the (x, y) coordinates of each point are rounded to the pixel size. This enhancement will help ensure precise and uniform coordinates within images. For polygons, points are snapped to the pixel edge. For example, given a polygon point with the coordinates (0.25, 0.25), your resultant coordinates would snap to the edge of the pixel at (0,0). For keypoints, points are snapped to the pixel center.  For example, given a keypoint with the coordinates (0.25, 0.25), your resultant coordinates would snap to the center of the pixel at (0.5,0.5).
 - When reviewing video in Outliner, if you click on a marked region, the video playback will automatically jump to the selected region. Previously, users had to manually scroll to the starting point. This change will make it easier to quickly view and edit video segments.
 
 ### Breaking changes
 
-- This release adds a deployment-wide `VERIFY_SSL_CERTS` setting that defaults to `true`. Customers who are loading data (e.g. uploading tasks) from https URLs without verifiable SSL certificates must set `VERIFY_SSL_CERTS` to `false` in their environment variables before deploying Label Studio 2.6.0+.
+- This release adds a deployment-wide `VERIFY_SSL_CERTS` setting that defaults to `true`. Customers who are loading data (e.g. uploading tasks) from https URLs without verifiable SSL certificates must set `VERIFY_SSL_CERTS` to `false` in their environment variables before deploying MLTL Annotate 2.6.0+.
 - Add `WINDOWS_SQLITE_BINARY_HOST_PREFIX` environment variable to support hosting SQLite binaries on a server other than [sqlite.org](http://sqlite.org/), for Windows deployments running Python 3.8 only.
 
 ### Bug fixes
@@ -2445,7 +2445,7 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="250-1md"></a>
 
-## Label Studio Enterprise 2.5.0-1
+## MLTL Annotate 2.5.0-1
 
 <div class="onprem-highlight">Security fix</div>
 
@@ -2461,7 +2461,7 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="250md"></a>
 
-## Label Studio Enterprise 2.5.0
+## MLTL Annotate 2.5.0
 
 <div class="onprem-highlight">Project-level roles for SAML/SCIM, ability to pause annotation sessions</div>
 
@@ -2469,11 +2469,11 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 
 ### New features
 
-- Project-level roles are now available and configurable through SAML or SCIM.  By mapping user groups to project roles, you'll have more granular access controls for your data and you can simplify permissions management for internal teams and annotators. For more information, see [the HumanSignal blog](https://humansignal.com/blog/manage-and-restrict-access-to-your-data-at-a-more-granular-level-with-project-based-roles/) and [the related documentation](https://docs.humansignal.com/guide/scim_setup#Set-up-group-mapping). 
+- Project-level roles are now available and configurable through SAML or SCIM.  By mapping user groups to project roles, you'll have more granular access controls for your data and you can simplify permissions management for internal teams and annotators. For more information, see [the MLTL blog](https://humansignal.com/blog/manage-and-restrict-access-to-your-data-at-a-more-granular-level-with-project-based-roles/) and [the related documentation](https://docs.mltl.us/guide/scim_setup#Set-up-group-mapping). 
 
     ![Screenshot of SCIM mapping for project roles](/images/releases/2-5-0-project-roles.png)
 
-- Users can now pause their annotation session so that they can take a break from annotating without it affecting their lead time scores. They can do this by selecting **Submit and Exit** or **Update and Exit**. Their work is automatically saved as a draft. For more information, see [Exit a labeling flow](https://docs.humansignal.com/guide/labeling#Exiting-a-labeling-flow). 
+- Users can now pause their annotation session so that they can take a break from annotating without it affecting their lead time scores. They can do this by selecting **Submit and Exit** or **Update and Exit**. Their work is automatically saved as a draft. For more information, see [Exit a labeling flow](https://docs.mltl.us/guide/labeling#Exiting-a-labeling-flow). 
 
     ![Screenshot of the Save and Exit option when labeling](/images/releases/2-5-0-submit-and-exit.png)
 
@@ -2485,7 +2485,7 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 ### Bug fixes
 
 - Fixed an issue where attempting to access AWS target storage resulted in a 403 error. This was fixed by allowing prefix-level bucket access. 
-- Fixed an issue where an XSS vulnerability meant that a user’s cookies could be exposed when viewing our API documentation. As a result, users must now be logged in when visiting the Label Studio Enterprise [API docs page](https://app.heartex.com/docs/api/) or the [Swagger page](https://app.heartex.com/swagger). 
+- Fixed an issue where an XSS vulnerability meant that a user’s cookies could be exposed when viewing our API documentation. As a result, users must now be logged in when visiting the MLTL Annotate [API docs page](https://app.mltl.com/docs/api/) or the [Swagger page](https://app.mltl.com/swagger). 
 - Fixed an issue where users’ changes to the Labeling Interface Settings were not being saved. 
 - Fixed a performance issue when using mouse clicks to interact with OCR regions that have large numbers (>50) of bounding boxes. 
 - Fixed an issue where Admin users who were assigned the Reviewer role in a project (using the SCIM project-role mapping) were seeing their own annotations in the review stream for the project. 
@@ -2500,7 +2500,7 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2410md"></a>
 
-## Label Studio Enterprise 2.4.10
+## MLTL Annotate 2.4.10
 
 <div class="onprem-highlight">Contextual scrolling for audio and video, search field on the Projects page, autocomplete prompt when editing the labeling configuration</div>
 
@@ -2511,11 +2511,11 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 
 - Contextual scrolling allows you to sync your text transcripts with their corresponding audio or video. When enabled, the text transcript automatically scrolls to the new listening point as the media plays. This is now the default mode for the Conversation Analysis template.
     
-    For more information, see the [Contextual Scrolling template documentation](https://docs.humansignal.com/templates/contextual_scrolling).
+    For more information, see the [Contextual Scrolling template documentation](https://docs.mltl.us/templates/contextual_scrolling).
 
     ![Screenshot of an audio file with contextual scrolling](/images/releases/2-4-10-scrolling.png)
     
-- There is a new search field on the Projects page. You can use this field to search project titles. It can also be used with the project filters. For more information, see [Search projects](https://docs.humansignal.com/guide/manage_projects#Search-projects). 
+- There is a new search field on the Projects page. You can use this field to search project titles. It can also be used with the project filters. For more information, see [Search projects](https://docs.mltl.us/guide/manage_projects#Search-projects). 
 
     ![Screenshot of the search field on the Projects page](/images/releases/2-4-10-search.png)
 
@@ -2523,7 +2523,7 @@ For more information, see [Introducing Label Distribution Charts for Label Group
 
     ![Screenshot of the autocomplete feature in action](/images/releases/2-4-10-autocomplete.png)
     
-- You can now use the API to filter [projects by title](https://app.heartex.com/docs/api/#tag/Projects/operation/api_projects_list). 
+- You can now use the API to filter [projects by title](https://app.mltl.com/docs/api/#tag/Projects/operation/api_projects_list). 
 - There is a new **Drafts** column available in the Data Manager. You can also filter and sort by this column.
     
     ![Screenshot of the Drafts column in the Data Manager](/images/releases/2-4-10-drafts.png)
@@ -2548,7 +2548,7 @@ This release addresses a vulnerability regarding how SECRET_KEY is set.
 
 - The SECRET_KEY is now configurable through an environment variable. **Users are strongly encouraged to set SECRET_KEY to a random secret of their choosing.** A fallback SECRET_KEY is specified by default, but will be removed in a future version.
 - Older versions also included a vulnerability in which the secret key could be leaked via identity provider callbacks. This release patches that vulnerability.
-- **Helm Chart update**: Version 1.2.0 is now available. This version includes automatic generation of a random SECRET_KEY, which also populates a Kubernetes secret. No manual setting required. [See the full changelog here](https://github.com/HumanSignal/charts/blob/master/heartex/label-studio/CHANGELOG.md). 
+- **Helm Chart update**: Version 1.2.0 is now available. This version includes automatic generation of a random SECRET_KEY, which also populates a Kubernetes secret. No manual setting required. [See the full changelog here](https://github.com/yuvraj99776600/charts/blob/master/mltl/label-studio/CHANGELOG.md). 
 
 ### Bug fixes
 
@@ -2596,7 +2596,7 @@ This release addresses a vulnerability regarding how SECRET_KEY is set.
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="249-7md"></a>
 
-## Label Studio Enterprise 2.4.9-7
+## MLTL Annotate 2.4.9-7
 
 <div class="onprem-highlight">Bug fixes</div>
 
@@ -2606,7 +2606,7 @@ This release addresses a vulnerability regarding how SECRET_KEY is set.
 - Fixed double encoding issue with file-proxy urls
 
 ### Security
-- GH 4483 (in Label Studio repo) made existing SSRF defenses more robust
+- GH 4483 (in MLTL Annotate repo) made existing SSRF defenses more robust
 
 
 
@@ -2616,7 +2616,7 @@ This release addresses a vulnerability regarding how SECRET_KEY is set.
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="249-6md"></a>
 
-## Label Studio Enterprise 2.4.9-6
+## MLTL Annotate 2.4.9-6
 
 <div class="onprem-highlight">Bug fixes</div>
 
@@ -2634,7 +2634,7 @@ This release addresses a vulnerability regarding how SECRET_KEY is set.
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="249-5md"></a>
 
-## Label Studio Enterprise 2.4.9-5
+## MLTL Annotate 2.4.9-5
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -2651,7 +2651,7 @@ This release addresses a vulnerability regarding how SECRET_KEY is set.
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="249-4md"></a>
 
-## Label Studio Enterprise 2.4.9-4
+## MLTL Annotate 2.4.9-4
 
 <div class="onprem-highlight">Draft column in the Data Manager</div>
 
@@ -2675,7 +2675,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="249-2md"></a>
 
-## Label Studio Enterprise 2.4.9-2
+## MLTL Annotate 2.4.9-2
 
 <div class="onprem-highlight">New workspace actions, per-image classifications</div>
 
@@ -2718,7 +2718,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="248-1md"></a>
 
-## Label Studio Enterprise 2.4.8-1
+## MLTL Annotate 2.4.8-1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -2735,7 +2735,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="248md"></a>
 
-## Label Studio Enterprise 2.4.8
+## MLTL Annotate 2.4.8
 
 <div class="onprem-highlight">Enhanced UI for panels and tabs, new Ranker tag, new Outliner filter, async imports</div>
 
@@ -2750,7 +2750,7 @@ Add Draft Column to the Data Manager
 - Make imports asynchronously to ensure stability on the server requests
 
 ### Enhancements
-- Add Generative AI templates to Label Studio
+- Add Generative AI templates to MLTL Annotate
 - Remove export and conversion files from storage when related export snapshot is deleted
 - Optimize requests made for pre-signing cloud storage urls
 - Add labeling config templates for Ranker tag
@@ -2846,7 +2846,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="247md"></a>
 
-## Label Studio Enterprise 2.4.7
+## MLTL Annotate 2.4.7
 
 <div class="onprem-highlight">Updated content for empty project pages, UI changes for async export conversion</div>
 
@@ -2873,7 +2873,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="246-1md"></a>
 
-## Label Studio Enterprise 2.4.6-1
+## MLTL Annotate 2.4.6-1
 
 <div class="onprem-highlight">Bug fix</div>
 
@@ -2890,7 +2890,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="246md"></a>
 
-## Label Studio Enterprise 2.4.6
+## MLTL Annotate 2.4.6
 
 <div class="onprem-highlight">Data Manager actions for reviewers, better placement for annotation instructions, allow email lists when inviting users</div>
 
@@ -2916,7 +2916,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="245md"></a>
 
-## Label Studio Enterprise 2.4.5
+## MLTL Annotate 2.4.5
 
 <div class="onprem-highlight">Performance optimization for projects API, storage link resolver for nested task data fields</div>
 
@@ -2947,7 +2947,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="244md"></a>
 
-## Label Studio Enterprise 2.4.4
+## MLTL Annotate 2.4.4
 <div class="onprem-highlight"><code>skipDuplicates</code> parameter for TextArea, audio v3 Web Audio alternative decoder option, S3 custom endpoint for persistent storage </div>
 
 ### New features
@@ -2978,7 +2978,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="243md"></a>
 
-## Label Studio Enterprise 2.4.3
+## MLTL Annotate 2.4.3
 
 <div class="onprem-highlight">New <code>splitchannels</code> option on audio configs, keyboard shortcuts for the Data Manager, restore locked annotations</div>
 
@@ -3014,7 +3014,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="242md"></a>
 
-## Label Studio Enterprise 2.4.2
+## MLTL Annotate 2.4.2
 
 <div class="onprem-highlight">Label placement change for regions, YOLO support for PolygonLabels</div>
 
@@ -3061,7 +3061,7 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="241md"></a>
 
-## Label Studio Enterprise 2.4.1
+## MLTL Annotate 2.4.1
 <div class="onprem-highlight">Improved logging, API for project annotation history</div>
 
 ### New features and enhancements 
@@ -3100,11 +3100,11 @@ Add Draft Column to the Data Manager
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="240md"></a>
 
-## Label Studio Enterprise 2.4.0
+## MLTL Annotate 2.4.0
 
 <div class="onprem-highlight">Audio player enhancements, comments and notifications improvements, support for numpad hotkeys</div>
 
-This section highlights the new features and enhancements, and bug fixes in Label Studio Enterprise 2.4.
+This section highlights the new features and enhancements, and bug fixes in MLTL Annotate 2.4.
 
 ### New features and enhancements 
 - The [Comments and Notifications](/guide/comments_notifications.html) feature allows you to discuss task issues and other problems during labeling and reviewing processes.
@@ -3187,28 +3187,28 @@ This section highlights the new features and enhancements, and bug fixes in Labe
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="231md"></a>
 
-## Label Studio Enterprise 2.3.1
+## MLTL Annotate 2.3.1
 
 <div class="onprem-highlight">New helm chart, multiple usability enhancements, including new Data Manager columns and the ability to duplicate projects</div>
 
-This section highlights the breaking changes, new features and enhancements, and bug fixes in Label Studio Enterprise 2.3.1.
+This section highlights the breaking changes, new features and enhancements, and bug fixes in MLTL Annotate 2.3.1.
 
 ### New helm chart
 
-A common chart for LS and LSE has been released and is available as of LSE version 2.3.x. The chart can be accessed at the following repository: https://github.com/HumanSignal/charts/tree/master/heartex/label-studio.
+A common chart for LS and LSE has been released and is available as of LSE version 2.3.x. The chart can be accessed at the following repository: https://github.com/yuvraj99776600/charts/tree/master/mltl/label-studio.
 
 #### Migration Process
 
-The migration process can be performed without any downtime. The steps required to carry out the migration are documented in the migration guide, available at: https://github.com/HumanSignal/charts/blob/master/heartex/label-studio/FAQs.md#label-studio-enterprise-upgrade-from-decommissioned-label-studio-enterprise-helm-chart.
+The migration process can be performed without any downtime. The steps required to carry out the migration are documented in the migration guide, available at: https://github.com/yuvraj99776600/charts/blob/master/mltl/label-studio/FAQs.md#label-studio-enterprise-upgrade-from-decommissioned-label-studio-enterprise-helm-chart.
 
 ### Breaking changes
-Label Studio Enterprise 2.3.1 includes the following breaking change:
+MLTL Annotate 2.3.1 includes the following breaking change:
 
 -  This release moves Nginx to a sidecar container.
 -  After the announcement in LSE 2.2.9, Minio was still supported. Now, this release finally decommissions MinIO as a service.
 
 ### New features and enhancements 
-Label Studio Enterprise 2.3.1 introduces the following new features and enhancements.
+MLTL Annotate 2.3.1 introduces the following new features and enhancements.
 
 - Allows annotators and reviewers to filter the view of transcriptions by author name.
 - Improve project list performance by hydrating counters in a second request.
@@ -3258,7 +3258,7 @@ Label Studio Enterprise 2.3.1 introduces the following new features and enhancem
 - The region navigation now works in scrolling (list) mode.
 
 ### Bug fixes
-Label Studio 2.3.1 includes the following bug fixes:
+MLTL Annotate 2.3.1 includes the following bug fixes:
 
 - Fixed an issue where unfinished polygons should save as draft and remain in open state if left unclosed.
 - Retained history on initial load of annotation review stream.
@@ -3447,7 +3447,7 @@ Label Studio 2.3.1 includes the following bug fixes:
 - Added edit/delete comment functionality.
 - Addressed the issue when the dynamic `Choices` was saved with the incorrect/empty value.
 - Updated swagger docs for `AllStorage` APIs.
-- Added example output for `HyperTextLabels` in the Label Studio documentation suite.
+- Added example output for `HyperTextLabels` in the MLTL Annotate documentation suite.
 
 
 
@@ -3455,14 +3455,14 @@ Label Studio 2.3.1 includes the following bug fixes:
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="2210md"></a>
 
-## Label Studio Enterprise 2.2.10
+## MLTL Annotate 2.2.10
 
 <div class="onprem-highlight">Bug fixes</div>
 
-This section highlights the bug fixes in Label Studio Enterprise 2.2.10.
+This section highlights the bug fixes in MLTL Annotate 2.2.10.
 
 ### Bug fixes
-Label Studio 2.2.10 includes the following bug fixes:
+MLTL Annotate 2.2.10 includes the following bug fixes:
 
 #### Backend
 - Per label score for `Choices` was calculated when `no Choice` was selected.
@@ -3479,19 +3479,19 @@ Label Studio 2.2.10 includes the following bug fixes:
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="229md"></a>
 
-## Label Studio Enterprise 2.2.9
+## MLTL Annotate 2.2.9
 
 <div class="onprem-highlight">Dynamic Labels template, Comments column in the Data Manager, decommissioning MinIO</div>
 
-This section highlights the breaking changes, new features and enhancements, and bug fixes in Label Studio Enterprise 2.2.9. 
+This section highlights the breaking changes, new features and enhancements, and bug fixes in MLTL Annotate 2.2.9. 
 
 ### Breaking changes
-Label Studio Enterprise 2.2.9 includes the following breaking change:
+MLTL Annotate 2.2.9 includes the following breaking change:
 
 - This release decommissions MinIO as a service.
 
 ### New features and enhancements 
-Label Studio Enterprise 2.2.9 introduces the following new features and enhancements.
+MLTL Annotate 2.2.9 introduces the following new features and enhancements.
 
 #### Backend
 - This release provides proxy support for content-range HTTP responses.
@@ -3505,7 +3505,7 @@ Label Studio Enterprise 2.2.9 introduces the following new features and enhancem
 - This release introduces [Dynamic Labels templates](https://labelstud.io/templates/gallery_dynamic_labels.html#main). You can now show labels dynamically as a task input, either as a prediction from the model or from a database lookup. With a broader set of options, dynamic labeling saves time and increases the consistency of labeling the objects. 
 
 ### Bug fixes
-Label Studio 2.2.9 includes the following bug fixes:
+MLTL Annotate 2.2.9 includes the following bug fixes:
 
 #### Backend
 - Optimized dashboard-members API performance for reviews.
@@ -3558,14 +3558,14 @@ Label Studio 2.2.9 includes the following bug fixes:
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="228md"></a>
 
-## Label Studio Enterprise 2.2.8
+## MLTL Annotate 2.2.8
 
 <div class="onprem-highlight">Comment visibility, SCIM enhancements, Redis SSL support, notification center, drafts in Annotation History, new history types</div>
 
-This section highlights the breaking changes, new features and enhancements, and bug fixes in Label Studio Enterprise 2.2.8. 
+This section highlights the breaking changes, new features and enhancements, and bug fixes in MLTL Annotate 2.2.8. 
 
 ### New features and enhancements
-Label Studio Enterprise 2.2.8 introduces the following new features and enhancements.
+MLTL Annotate 2.2.8 introduces the following new features and enhancements.
 
 - This release displays comments in **DM** to reviewers.
 - Support for [Redis Secure Sockets Layer (SSL)](#Secure-access-to-Redis-storage).
@@ -3578,7 +3578,7 @@ Label Studio Enterprise 2.2.8 introduces the following new features and enhancem
 - Add the ability to pass a comment to APIs on skip.
 
 ### Bugfixes
-Label Studio 2.2.8 includes the following bug fixes:
+MLTL Annotate 2.2.8 includes the following bug fixes:
 
 - Per label score for Choices was calculated when no Choice was selected (hotfix-7).
 - Fixed Rotating bounding box bugs (hotfix-4)
@@ -3638,16 +3638,16 @@ Label Studio 2.2.8 includes the following bug fixes:
 </div><div class="release-note"><button class="release-note-toggle"></button>
 <a name="220md"></a>
 
-## Label Studio Enterprise 2.2.0
+## MLTL Annotate 2.2.0
 
 <div class="onprem-highlight">SCIM 2.0 support, rotating bounding boxes, 'Last updated by' column in the Data Manager, ability to navigate to the previous task </div>
 
-This section highlights the new features and enhancements in Label Studio Enterprise 2.2.0.
+This section highlights the new features and enhancements in MLTL Annotate 2.2.0.
 
 ### New features and enhancements 
-Label Studio Enterprise 2.2.0 introduces the following new features and enhancements.
+MLTL Annotate 2.2.0 introduces the following new features and enhancements.
 
-- Label Studio Enterprise 2.2.0 introduces the System for Cross-domain Identity Management (SCIM) version 2.0 standard. System for Cross-domain Identity Management (SCIM) is a popular protocol to manage access for services and applications across an organization. Use the [SCIM guide](scim_setup.html) to set up SCIM integration to manage access to Label Studio Enterprise in your organization.
+- MLTL Annotate 2.2.0 introduces the System for Cross-domain Identity Management (SCIM) version 2.0 standard. System for Cross-domain Identity Management (SCIM) is a popular protocol to manage access for services and applications across an organization. Use the [SCIM guide](scim_setup.html) to set up SCIM integration to manage access to MLTL Annotate in your organization.
 
 
    <i>Check the following video tutorial about SCIM and Okta setup.</i>

@@ -5,13 +5,13 @@ tier: enterprise
 type: guide
 order: 0
 order_enterprise: 383
-meta_title: Identity and access options for Label Studio Enterprise
-meta_description: Overview of identity and access options available in Label Studio Enterprise
+meta_title: Identity and access options for MLTL Annotate
+meta_description: Overview of identity and access options available in MLTL Annotate
 section: "Manage Your Organization"
 date: 2025-09-21 09:08:58
 ---
 
-Label Studio Enterprise provides enterprise-grade identity and access management to centralize authentication, automate user lifecycle, and control access across organizations, workspaces, and projects.
+MLTL Annotate provides enterprise-grade identity and access management to centralize authentication, automate user lifecycle, and control access across organizations, workspaces, and projects.
 
 
 
@@ -24,12 +24,12 @@ Label Studio Enterprise provides enterprise-grade identity and access management
 
 On-prem only.
 
-Authenticate against your directory (e.g., AD/LDAP) in self-hosted environments while keeping roles managed in Label Studio.
+Authenticate against your directory (e.g., AD/LDAP) in self-hosted environments while keeping roles managed in MLTL Annotate.
 
 - Login with enterprise directory credentials
-- Keep RBAC and project/workspace permissions in Label Studio
+- Keep RBAC and project/workspace permissions in MLTL Annotate
 
-See [Set up LDAP authentication for Label Studio](auth_ldap).
+See [Set up LDAP authentication for MLTL Annotate](auth_ldap).
 
 ## SSO (SAML 2.0)
 
@@ -39,7 +39,7 @@ Authenticate users via your IdP (Okta, Google SAML, Azure AD/Microsoft Entra, Pi
 - Single sign-on across your tools
 - Enterprise security policies enforced at IdP
 
-See [Set up SSO authentication for Label Studio](auth_setup) and our [SAML API docs](https://api.labelstud.io/api-reference/api-reference/sso/saml/get).
+See [Set up SSO authentication for MLTL Annotate](auth_setup) and our [SAML API docs](https://api.labelstud.io/api-reference/api-reference/sso/saml/get).
 
 ## SCIM 2.0
 
@@ -50,4 +50,4 @@ Automate provisioning/deprovisioning and group-to-role mappings. Supports Create
 - Push Groups for workspace and project membership
 - Map groups to organization roles and project-level roles 
 
-See and [Set up SCIM2 for Label Studio](scim_setup) our [SCIM API docs](https://api.labelstud.io/api-reference/api-reference/sso/scim/get).
+See and [Set up SCIM2 for MLTL Annotate](scim_setup) our [SCIM API docs](https://api.labelstud.io/api-reference/api-reference/sso/scim/get).

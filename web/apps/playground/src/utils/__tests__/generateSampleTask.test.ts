@@ -33,7 +33,7 @@ describe("generateSampleTaskFromConfig", () => {
     `;
     const result = await generateSampleTaskFromConfig(config);
     expect(result.data).toHaveProperty("image");
-    expect(result.data.image).toBe("https://app.heartex.ai/static/samples/sample.jpg");
+    expect(result.data.image).toBe("https://app.mltl.ai/static/samples/sample.jpg");
   });
 
   it("should generate sample data for audio config", async () => {
@@ -147,11 +147,11 @@ describe("generateSampleTaskFromConfig", () => {
       -->
 
       <!-- {
-      "videoSource": "https://app.heartex.ai/static/samples/opossum_snow_alt.mp4"
+      "videoSource": "https://app.mltl.ai/static/samples/opossum_snow_alt.mp4"
       } -->
     `;
     const result = await generateSampleTaskFromConfig(config);
     expect(result.data).toHaveProperty("videoSource");
-    expect(result.data.videoSource).toBe("https://app.heartex.ai/static/samples/opossum_snow_alt.mp4");
+    expect(result.data.videoSource).toBe("https://app.mltl.ai/static/samples/opossum_snow_alt.mp4");
   });
 });

@@ -1,24 +1,24 @@
 ---
-title: How to Debug Agents with LangSmith and Label Studio
+title: How to Debug Agents with LangSmith and MLTL Annotate
 hide_sidebar: true
 order: 1000
 open_in_collab: true
 tutorial: true
 community_author: niklub
 ipynb_repo_path: tutorials/how-to-debug-agents-with-LangSmith-and-Label-Studio/how_to_debug_agents_with_LangSmith_and_Label_Studio.ipynb
-repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-debug-agents-with-LangSmith-and-Label-Studio
-report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
+repo_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/tree/main/tutorials/how-to-debug-agents-with-LangSmith-and-Label-Studio
+report_bug_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/issues/new
 thumbnail: /images/tutorials/tutorials-debug-agents-langsmith.png
-meta_title: How to Debug Agents with LangSmith and Label Studio
-meta_description: Learn how LangSmith and Label Studio can work together to debug and evaluate AI Agents.
+meta_title: How to Debug Agents with LangSmith and MLTL Annotate
+meta_description: Learn how LangSmith and MLTL Annotate can work together to debug and evaluate AI Agents.
 is_enterprise: true
 is_starter_cloud: true
 badges: SDK, LangSmith, Eval, Agents, Colab
 duration: 10-15 mins
 ---
-## 0. Label Studio Requirements
+## 0. MLTL Annotate Requirements
 
-After section 5, this tutorial showcases one or more features available only in Label Studio paid products. We recommend [creating a Starter Cloud trial](https://app.humansignal.com/user/cloud-trial?offer=d9a5&) to follow the tutorial.
+After section 5, this tutorial showcases one or more features available only in MLTL Annotate paid products. We recommend [creating a Starter Cloud trial](https://app.humansignal.com/user/cloud-trial?offer=d9a5&) to follow the tutorial.
 
 
 ## 1. Installation & Setup
@@ -41,9 +41,9 @@ LANGSMITH_API_KEY=your_langsmith_api_key
 LANGSMITH_PROJECT=your_project_name
 LANGSMITH_TRACING=true
 
-# Label Studio Configuration  
-# Get your API key from Label Studio settings: https://docs.humansignal.com/
-LABEL_STUDIO_URL=https://app.humansignal.com  # or your Label Studio instance URL
+# MLTL Annotate Configuration  
+# Get your API key from MLTL Annotate settings: https://docs.mltl.us/
+LABEL_STUDIO_URL=https://app.humansignal.com  # or your MLTL Annotate instance URL
 LABEL_STUDIO_API_KEY=your_label_studio_api_key
 
 # OpenAI Configuration (for the agent)
@@ -53,14 +53,14 @@ OPENAI_API_KEY=your_openai_api_key
 **LangSmith Setup**: Visit [LangSmith Documentation](https://docs.langchain.com/langsmith/home)
 to create an account, get your API key, and set up a project for tracing.
 
-**Label Studio Setup**: Visit [Label Studio Documentation](https://docs.humansignal.com/)
+**MLTL Annotate Setup**: Visit [MLTL Annotate Documentation](https://docs.mltl.us/)
 for installation instructions and how to generate an API token from your account settings.
 
 # Two Ways to Look at Your Data in Agentic Apps
 
  | 👁️ AI Engineer | 👁️ AI Domain Expert |
 |-------------|------------------|
-| <img src="https://hs-sandbox-pub.s3.us-east-1.amazonaws.com/blogs-draft/smith-trace.jpg" alt="Langsmith trace view for AI engineers" /> | <img src="https://hs-sandbox-pub.s3.us-east-1.amazonaws.com/blogs-draft/ls-trace.jpg" alt="Label Studio trace view for domain experts" /> |
+| <img src="https://hs-sandbox-pub.s3.us-east-1.amazonaws.com/blogs-draft/smith-trace.jpg" alt="Langsmith trace view for AI engineers" /> | <img src="https://hs-sandbox-pub.s3.us-east-1.amazonaws.com/blogs-draft/ls-trace.jpg" alt="MLTL Annotate trace view for domain experts" /> |
 
 
 ## Problem: Where Did My Agent Fail?
@@ -93,8 +93,8 @@ This tutorial demonstrates a complementary pipeline design for AI agent evaluati
 - Captures detailed execution traces, timing, and system-level metrics
 - Provides immediate feedback during development cycles
 
-**Step 2: Expert-Centric Evaluation in Label Studio**
-- Import traces from observability tools into Label Studio for human evaluation
+**Step 2: Expert-Centric Evaluation in MLTL Annotate**
+- Import traces from observability tools into MLTL Annotate for human evaluation
 - Expert-centric, multi-user collaborative platform designed for domain specialists
 - Detailed UI for systematic assessment of each step in agentic workflows
 - Enables domain experts (SMEs) to identify and annotate failure modes
@@ -104,7 +104,7 @@ This tutorial demonstrates a complementary pipeline design for AI agent evaluati
 
 **Pipeline Benefits:**
 - Engineers get technical observability while domain experts get intuitive evaluation tools
-- Traces flow seamlessly from development (observability) to evaluation (Label Studio)
+- Traces flow seamlessly from development (observability) to evaluation (MLTL Annotate)
 - Combines technical metrics with human domain expertise for comprehensive assessment
 - Note: While we use Langsmith as our demo observability tool, this approach works with any trace collection system
 
@@ -511,7 +511,7 @@ for i, question in enumerate(questions, 1):
 Now that we've generated several agent interactions, we'll:
 1. Connect to LangSmith and [query Agent traces](https://docs.langchain.com/langsmith/export-traces)
 2. Filter for relevant run types (AgentExecutor, LLM, Tool, Retriever)
-3. Convert traces to [Label Studio format with predictions](https://docs.humansignal.com/guide/predictions)
+3. Convert traces to [MLTL Annotate format with predictions](https://docs.mltl.us/guide/predictions)
 
 
 ```python
@@ -555,7 +555,7 @@ print(f"  Total runs: {len(runs)}")
 
 ### 4. Handler Functions for Different Run Types
 
-These functions convert different types of Langsmith runs into Label Studio's
+These functions convert different types of Langsmith runs into MLTL Annotate's
 chat message format. Each run type has specific data structures that need to be
 transformed appropriately.
 
@@ -681,34 +681,34 @@ print("✓ Handler functions defined")
     ✓ Handler functions defined
 
 
-### 5. Convert Traces to Label Studio Format
+### 5. Convert Traces to MLTL Annotate Format
 
-This function transforms Langsmith traces into Label Studio's task format.
+This function transforms Langsmith traces into MLTL Annotate's task format.
 The `mode="predictions"` parameter creates pre-annotations that annotators
 can review and modify, speeding up the evaluation process.
 
 ### Key Features:
 - Preserves chronological order of agent interactions
 - Maintains timestamps for temporal analysis
-- Structures data to match [Label Studio's Chat interface](https://labelstud.io/tags/chat)
+- Structures data to match [MLTL Annotate's Chat interface](https://docs.mltl.us/tags/chat)
 - Creates predictions for each message (except the initial user query)
 
 
 ```python
 def convert_trace_to_messages(trace_id, trace_runs, mode="input", from_name="chat"):
     """
-    Converts a trace (list of runs) to Label Studio format.
+    Converts a trace (list of runs) to MLTL Annotate format.
 
     Args:
         trace_id: Unique identifier for the trace
         trace_runs: List of run dictionaries from a single trace
         mode: Either "input" or "predictions"
               - "input": Returns simple message list
-              - "predictions": Returns Label Studio task format with predictions
-        from_name: The from_name field for Label Studio predictions
+              - "predictions": Returns MLTL Annotate task format with predictions
+        from_name: The from_name field for MLTL Annotate predictions
 
     Returns:
-        Dict with trace_id and either messages or Label Studio task structure
+        Dict with trace_id and either messages or MLTL Annotate task structure
     """
     messages = []
     agent_executor_run = None
@@ -784,7 +784,7 @@ def convert_trace_to_messages(trace_id, trace_runs, mode="input", from_name="cha
             clean_messages.append(clean_msg)
         return {"trace_id": str(trace_id_str), "messages": clean_messages}
 
-    # Mode is "predictions" - convert to Label Studio format
+    # Mode is "predictions" - convert to MLTL Annotate format
     if mode == "predictions":
         # Separate first user message from remaining messages
         first_user_message = None
@@ -875,21 +875,21 @@ def convert_trace_to_messages(trace_id, trace_runs, mode="input", from_name="cha
     return {"trace_id": str(trace_id_str), "messages": messages}
 
 
-# Convert all traces to Label Studio format
+# Convert all traces to MLTL Annotate format
 tasks = []
 for trace_id, trace_data in traces.items():
     task = convert_trace_to_messages(trace_id, trace_data, mode="predictions")
     tasks.append(task)
 
-print(f"✓ Converted {len(tasks)} traces to Label Studio format")
+print(f"✓ Converted {len(tasks)} traces to MLTL Annotate format")
 ```
 
-    ✓ Converted 24 traces to Label Studio format
+    ✓ Converted 24 traces to MLTL Annotate format
 
 
 ## 6. Evaluate Traces
 
-To run evaluation on the collected agent traces, use [Label Studio XML configuration](https://docs.humansignal.com/guide/setup) to provide a specialized UI with:
+To run evaluation on the collected agent traces, use [MLTL Annotate XML configuration](https://docs.mltl.us/guide/setup) to provide a specialized UI with:
 
 - **Chat Display**: Shows the full conversation with all agent interactions
 - **Message-Level Annotation**: Click any message to annotate specific errors
@@ -976,9 +976,9 @@ print("✓ Label configuration defined")
     ✓ Label configuration defined
 
 
-### 7. Push Tasks to Label Studio
+### 7. Push Tasks to MLTL Annotate
 
-Now we'll create or update the Label Studio project and import all our traces.
+Now we'll create or update the MLTL Annotate project and import all our traces.
 The import process:
 
 1. **Check for existing project**: If a project with the same name exists, we'll use it
@@ -986,9 +986,9 @@ The import process:
 3. **Import tasks**: Upload all traces with predictions as pre-annotations
 4. **Generate labeling link**: Provide direct access to the annotation interface
 
-### Understanding Label Studio Import
+### Understanding MLTL Annotate Import
 
-When we import tasks with `predictions`, Label Studio creates pre-annotations
+When we import tasks with `predictions`, MLTL Annotate creates pre-annotations
 that appear in the labeling interface. This is powerful because:
 
 - **Speeds up annotation**: Annotators see the full conversation immediately
@@ -1000,7 +1000,7 @@ that appear in the labeling interface. This is powerful because:
 ```python
 from label_studio_sdk.client import LabelStudio
 
-# Initialize Label Studio client
+# Initialize MLTL Annotate client
 ls = LabelStudio(
     base_url=os.getenv("LABEL_STUDIO_URL"),
     api_key=os.getenv("LABEL_STUDIO_API_KEY")
@@ -1028,7 +1028,7 @@ if project.label_config.strip() == '<View></View>' or not project.label_config.s
 
 # Import tasks
 resp = ls.projects.import_tasks(project_id, request=tasks)
-print(f"\n✓ Successfully imported {len(tasks)} tasks to Label Studio")
+print(f"\n✓ Successfully imported {len(tasks)} tasks to MLTL Annotate")
 print(f'Go to: {os.getenv("LABEL_STUDIO_URL").rstrip("/")}/projects/{project_id}/data')
 
 # Save tasks to file
@@ -1038,7 +1038,7 @@ with open('tasks.json', mode='w') as f:
 
     Using existing project: pr-another-pamphlet-4
     
-    ✓ Successfully imported 24 tasks to Label Studio
+    ✓ Successfully imported 24 tasks to MLTL Annotate
     Go to: https://app.humansignal.com/projects/193998/data
 
 
@@ -1064,11 +1064,11 @@ Your traces are now ready for evaluation! The labeling interface provides:
 
 #### Next Steps with Collected Data:
 
-1. **Generate Reports**: [Analyze failure modes across all traces](https://docs.humansignal.com/guide/quality)
-2. **Design Prompts**: [Use annotated examples to improve agent instructions](https://docs.humansignal.com/guide/prompts_overview)
-3. **LLM-as-a-Judge**: [Create evaluation prompts based on SME feedback](https://docs.humansignal.com/guide/prompts_predictions)
-4. **Quality Metrics**: [Track error rates over time as you iterate](https://docs.humansignal.com/guide/dashboards)
-5. **Dataset Creation**: [Build high-quality datasets for fine-tuning](https://docs.humansignal.com/guide/ml)
+1. **Generate Reports**: [Analyze failure modes across all traces](https://docs.mltl.us/guide/quality)
+2. **Design Prompts**: [Use annotated examples to improve agent instructions](https://docs.mltl.us/guide/prompts_overview)
+3. **LLM-as-a-Judge**: [Create evaluation prompts based on SME feedback](https://docs.mltl.us/guide/prompts_predictions)
+4. **Quality Metrics**: [Track error rates over time as you iterate](https://docs.mltl.us/guide/dashboards)
+5. **Dataset Creation**: [Build high-quality datasets for fine-tuning](https://docs.mltl.us/guide/ml)
 
 
 ```python
@@ -1106,22 +1106,22 @@ print("\n" + "="*80)
 
 This tutorial demonstrated the complete workflow from agent execution to expert evaluation:
 
-1. ✓ Set up environment with LangSmith and Label Studio
+1. ✓ Set up environment with LangSmith and MLTL Annotate
 2. ✓ Ran a ReAct agent with Arxiv search capabilities
 3. ✓ Collected traces automatically via LangSmith
-4. ✓ Transformed traces into Label Studio's annotation format
+4. ✓ Transformed traces into MLTL Annotate's annotation format
 5. ✓ Configured a specialized chat UI for failure mode analysis
 6. ✓ Imported tasks with pre-annotations
 7. ✓ Generated access link for SME annotation
 
 ### Key Takeaway
 
-While LangSmith excels at technical debugging during development, Label Studio
+While LangSmith excels at technical debugging during development, MLTL Annotate
 provides the collaborative, expert-driven evaluation framework necessary for
 production AI systems. The combination creates a powerful workflow:
 
 - **Development**: Engineers use LangSmith for debugging
-- **Evaluation**: SMEs use Label Studio for quality assessment
+- **Evaluation**: SMEs use MLTL Annotate for quality assessment
 - **Iteration**: Insights from both feed back into agent improvements
 
 Happy evaluating! 🚀
@@ -1130,7 +1130,7 @@ Happy evaluating! 🚀
 ## References
 
 - [LangSmith](https://www.langchain.com/langsmith)
-- [Label Studio](https://docs.humansignal.com/guide/)
+- [MLTL Annotate](https://docs.mltl.us/guide/)
 - [Evals FAQ](https://hamel.dev/blog/posts/evals-faq/)
 - Video tutorials about AI evals workflows:
   - [AI Evaluation Best Practices](https://www.youtube.com/watch?v=52IGjsxdqfI)

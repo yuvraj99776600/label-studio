@@ -6,10 +6,10 @@ deploy:
   type: aws-s3
   region: us-east-1
   bucket: labelstud.io
-title: Label Studio
+title: MLTL Annotate
 subtitle: Data labeling, annotation and exploration tool
 description: >-
-  Label Studio is a multi-type data labeling and annotation tool with
+  MLTL Annotate is a multi-type data labeling and annotation tool with
   standardized output format
 keywords: >-
   computer-vision, deep-learning, image-annotation, annotation-tool, annotation,

@@ -6,7 +6,7 @@ order: 30
 hide_menu: true
 hide_frontmatter_title: true
 meta_title: Interactive substring matching for NER tasks
-meta_description: Use the interactive substring matching model for labeling NER tasks in Label Studio
+meta_description: Use the interactive substring matching model for labeling NER tasks in MLTL Annotate
 categories:
     - Natural Language Processing
     - Named Entity Recognition
@@ -20,13 +20,13 @@ The Machine Learning (ML) backend is designed to enhance the efficiency of auto-
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`interactive_substring_matching` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/interactive_substring_matching). 
+This tutorial uses the [`interactive_substring_matching` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/interactive_substring_matching). 
 
 ## Recommended labeling config
 
-This ML backend works with the default NER template from Label Studio. You can find this by selecting Label Studio's pre-built NER template when configuring the labeling interface. It is available under **Natural Language Processing > Named Entity Recognition**.
+This ML backend works with the default NER template from MLTL Annotate. You can find this by selecting MLTL Annotate's pre-built NER template when configuring the labeling interface. It is available under **Natural Language Processing > Named Entity Recognition**.
 
 Here is an example of a labeling configuration that can be used with this ML backend:
 
@@ -57,7 +57,7 @@ $ curl http://localhost:9090/
 {"status":"UP"}
 ```
 
-3. Create a project in Label Studio. Then from the **Model** page in the project settings, [connect the model](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
+3. Create a project in MLTL Annotate. Then from the **Model** page in the project settings, [connect the model](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
 
 
 ## Building from source (advanced)

@@ -14,7 +14,7 @@ Run live, interactive chats with any OpenAI‑compatible LLM (including your own
 While this template focuses on conversation-level evaluation, you can modify it to perform per-message evaluations. For examples, see our [other chat templates](gallery_chat). 
 
 !!! error Enterprise
-    This template requires Label Studio Enterprise. 
+    This template requires MLTL Annotate. 
 
     Starter Cloud users can use the `Chat` tag, but have limited access to LLM integration. Instead, you can conduct a manual chat or import messages as predictions. See the [Chat tag documentation](/tags/chat.html#Prediction-format). 
 
@@ -134,7 +134,7 @@ For example, this `View` tag uses a combination of inline styles and `className`
 The CSS rules for the `.chat` class are defined with the `<Style>` block.
 
 !!!info Tip
-    `.htx-chat` is a special Label Studio class that allows you to control the height of the chat portion of the interface. 
+    `.htx-chat` is a special MLTL Annotate class that allows you to control the height of the chat portion of the interface. 
 
 For more information, see the [Style tag](/tags/style).
 

@@ -5,23 +5,23 @@ tier: opensource
 type: guide
 order: 50
 order_enterprise: 0
-meta_title: Quick start guide for Label Studio
-meta_description: Quick start guide for installing Label Studio and creating a new project. 
+meta_title: Quick start guide for MLTL Annotate
+meta_description: Quick start guide for installing MLTL Annotate and creating a new project. 
 section: "Install & Setup"
 date: 2023-11-27 13:34:32
 ---
 
-1. Install Label Studio:
+1. Install MLTL Annotate:
 ```bash
 pip install label-studio
 ```
 
-2. Start Label Studio
+2. Start MLTL Annotate
 ```bash
 label-studio start
 ```
 
-1. Open Label Studio at `http://localhost:8080`.
+1. Open MLTL Annotate at `http://localhost:8080`.
 2. Sign up with an email address and password that you create.
 3. Click **Create** to create a project and start labeling data.
 4. Name the project and optionally enter a description and select a color.
@@ -32,6 +32,6 @@ label-studio start
 You're ready to start [labeling and annotating your data](labeling.html)!
 
 !!! info Tip
-    For a quickstart tutorial that includes demo data, see [Zero to One: Getting Started with Label Studio](https://labelstud.io/blog/zero-to-one-getting-started-with-label-studio/). 
+    For a quickstart tutorial that includes demo data, see [Zero to One: Getting Started with MLTL Annotate](https://mltl.us/blog/zero-to-one-getting-started-with-label-studio/). 
 
 

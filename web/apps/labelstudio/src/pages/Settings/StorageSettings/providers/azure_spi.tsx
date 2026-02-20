@@ -20,9 +20,9 @@ const azureSpiProvider: ProviderConfig = {
           <IconSpark />
           <AlertTitle>Enterprise Feature</AlertTitle>
           <AlertDescription>
-            Azure Blob Storage with Service Principal is available in Label Studio Enterprise.{" "}
+            Azure Blob Storage with Service Principal is available in MLTL Annotate.{" "}
             <a
-              href="https://docs.humansignal.com/guide/storage.html#Azure-Blob-Storage-with-Service-Principal-authentication"
+              href="https://docs.mltl.us/guide/storage.html#Azure-Blob-Storage-with-Service-Principal-authentication"
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:no-underline"

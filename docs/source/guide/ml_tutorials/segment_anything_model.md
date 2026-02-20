@@ -5,8 +5,8 @@ tier: all
 order: 10
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: Interactive annotation in Label Studio with Segment Anything Model (SAM)
-meta_description: Label Studio tutorial for labeling images with MobileSAM or ONNX SAM. 
+meta_title: Interactive annotation in MLTL Annotate with Segment Anything Model (SAM)
+meta_description: MLTL Annotate tutorial for labeling images with MobileSAM or ONNX SAM. 
 categories:
     - Computer Vision
     - Object Detection
@@ -17,19 +17,19 @@ categories:
 image: "/guide/ml_tutorials/segment-anything.png"
 ---
 
-# Interactive annotation in Label Studio with Segment Anything Model
+# Interactive annotation in MLTL Annotate with Segment Anything Model
 
 https://github.com/shondle/label-studio-ml-backend/assets/106922533/42a8a535-167c-404a-96bd-c2e2382df99a
 
-Use Facebook's Segment Anything Model with Label Studio!
+Use Facebook's Segment Anything Model with MLTL Annotate!
 In July 2024, Facebook released an update to the Segement Anything model, called SAM 2. To use this newer model for 
-labeling, see [the segment_anything_2_image repo](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/segment_anything_2_image)
+labeling, see [the segment_anything_2_image repo](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/segment_anything_2_image)
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`segment_anything_model` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/segment_anything_model). 
+This tutorial uses the [`segment_anything_model` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/segment_anything_model). 
 
 ## Quickstart
 
@@ -110,13 +110,13 @@ Each model has different pros and cons. Consider which is best for your project:
 
 ## Setup
 
-The Label Studio SAM backend works best if you have [Local
-Storage](https://labelstud.io/guide/storage.html#Local-storage) enabled for
+The MLTL Annotate SAM backend works best if you have [Local
+Storage](https://docs.mltl.us/guide/storage.html#Local-storage) enabled for
 your project. It is also possible to set up shared local storage, but is not
 recommended. Currently, the backend does not work with cloud storage (S3,
 Azure, GCP).
 
-### Setting up the Label Studio server
+### Setting up the MLTL Annotate server
 
 #### Enabling local storage file serving
 
@@ -127,7 +127,7 @@ LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=<path_to_image_data>
 LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED=true
 ```
 
-For example, if you're launching Label Studio with Docker, you can enable these variables with
+For example, if you're launching MLTL Annotate with Docker, you can enable these variables with
 
 ```
 docker run -it -p 8080:8080 \
@@ -137,11 +137,11 @@ docker run -it -p 8080:8080 \
                heartexlabs/label-studio:latest
 ```
 
-Note the IP address that you are running your Label Studio instance as the
+Note the IP address that you are running your MLTL Annotate instance as the
 `LABEL_STUDIO_HOST`. This will be necessary for setting up the connection to your
 SAM model. 
 
-_Because you are hosting both Label Studio and the ML backend in
+_Because you are hosting both MLTL Annotate and the ML backend in
 Docker containers, the hostname `localhost` will not resolve to the correct
 address._ There are a number of ways to determine your host IP address.  These
 can include calling either `ip a` or `ifconfig` from the command line and
@@ -150,11 +150,11 @@ computer through the system network configuration settings.
 
 #### Obtain your API token
 
-Log into the Label Studio interface (in the example above, at
+Log into the MLTL Annotate interface (in the example above, at
 `http://<LABEL_STUDIO_HOST>:8080`). 
 
 Go to the [**Account & Settings** 
-page](https://labelstud.io/guide/user_account#Access-token), and make a note of the Access Token, which we will use later as
+page](https://docs.mltl.us/guide/user_account#Access-token), and make a note of the Access Token, which we will use later as
 the `LABEL_STUDIO_ACCESS_TOKEN`.
 
 ### Setting up the SAM backend
@@ -178,9 +178,9 @@ through GPU resources to services.
 
 Edit the `docker-compose.yml` file and fill in the values for the
 `LABEL_STUDIO_HOST` and `LABEL_STUDIO_ACCESS_TOKEN` variables for your particular
-installation. Be sure to append the port that Label Studio is running on in
+installation. Be sure to append the port that MLTL Annotate is running on in
 your `LABEL_STUDIO_HOST` variable, for example `http://192.168.1.36:8080` if
-Label Studio is running on port 8080.
+MLTL Annotate is running on port 8080.
 
 Run the command `docker compose up --build` to build the container and run it
 locally.
@@ -219,8 +219,8 @@ pip install -r requirements.txt
 
 You can set the following environment variables to change the behavior of the model.
 
-* `LABEL_STUDIO_HOST` sets the endpoint of the Label Studio host. Must begin with `http://` 
-* `LABEL_STUDIO_ACCESS_TOKEN` sets the API access token for the Label Studio host.
+* `LABEL_STUDIO_HOST` sets the endpoint of the MLTL Annotate host. Must begin with `http://` 
+* `LABEL_STUDIO_ACCESS_TOKEN` sets the API access token for the MLTL Annotate host.
 * `SAM_CHOICE` selects which model to use.
     * `SAM_CHOICE=MobileSAM` to use MobileSAM (default)
     * `SAM_CHOICE=SAM` to use the original SAM model.
@@ -249,9 +249,9 @@ MOBILESAM_CHECKPOINT=path/to/mobile_sam.pt label-studio-ml start segment_anythin
 
 > Note: If you see an error on MacOS, try set the environment variable `KMP_DUPLICATE_LIB_OK=True`
 
-## Set up a project in Label Studio for Segment Anything
+## Set up a project in MLTL Annotate for Segment Anything
 
-Log into your Label Studio instance and perform the following steps.
+Log into your MLTL Annotate instance and perform the following steps.
 
 1. Create a new project.
 2. Under the **Labeling Setup** step when creating the project, or under 
@@ -261,7 +261,7 @@ Log into your Label Studio instance and perform the following steps.
 4. Enter a title for the model, and the URL for the instance of the model you
    just created. 
    
-   If you're running Label Studio in Docker or on another host, you
+   If you're running MLTL Annotate in Docker or on another host, you
    should use the direct IP address of where the model is hosted (`localhost`
    will not work). Be sure to include the port number that the model is hosted on
    (the default is `9090`). For example, if the model is hosted on `192.168.1.36`,

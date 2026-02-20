@@ -1,7 +1,7 @@
 [
   {
     "data": {
-      "url": "https://app.heartex.com/static/samples/game.wav"
+      "url": "https://app.mltl.com/static/samples/game.wav"
     },
     "predictions": [
       {
@@ -23,7 +23,7 @@
   },
   {
     "data": {
-      "url": "https://app.heartex.com/static/samples/game.wav"
+      "url": "https://app.mltl.com/static/samples/game.wav"
     }
   }
 ]

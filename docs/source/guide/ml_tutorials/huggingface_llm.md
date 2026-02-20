@@ -5,8 +5,8 @@ tier: all
 order: 20
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: Label Studio tutorial to run Hugging Face Large Language Model backend
-meta_description: This tutorial explains how to run Hugging Face Large Language model backend in Label Studio. Hugging Face Large Language Model Backend is a machine learning backend designed to work with Label Studio, providing a custom model for text generation.
+meta_title: MLTL Annotate tutorial to run Hugging Face Large Language Model backend
+meta_description: This tutorial explains how to run Hugging Face Large Language model backend in MLTL Annotate. Hugging Face Large Language Model Backend is a machine learning backend designed to work with MLTL Annotate, providing a custom model for text generation.
 categories:
     - Generative AI
     - Large Language Model
@@ -17,19 +17,19 @@ image: "/guide/ml_tutorials/hf-llm.png"
 
 # Hugging Face Large Language Model backend
 
-This machine learning backend is designed to work with Label Studio, providing a custom model for text generation. The model is based on the Hugging Face's transformers library and uses a pre-trained model.
+This machine learning backend is designed to work with MLTL Annotate, providing a custom model for text generation. The model is based on the Hugging Face's transformers library and uses a pre-trained model.
 
 Check [text generation pipelines on Hugging Face](https://huggingface.co/tasks/text-generation) for more details.
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`huggingface_llm` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/huggingface_llm). 
+This tutorial uses the [`huggingface_llm` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/huggingface_llm). 
 
-## Label Studio XML labeling config
+## MLTL Annotate XML labeling config
 
-This ML backend is compatible with a Label Studio labeling configuration that uses a `<TextArea>` tag. Here is an example of a compatible labeling configuration:
+This ML backend is compatible with a MLTL Annotate labeling configuration that uses a `<TextArea>` tag. Here is an example of a compatible labeling configuration:
 
 ```xml
 <View>
@@ -38,7 +38,7 @@ This ML backend is compatible with a Label Studio labeling configuration that us
 </View>
 ```
 
-When you open the task in Label Studio, the text box will show the generated text based on the prompt defined in `<Text>`. Be sure you include some instructions in prompt (for example, _"Summarize the following text: ..."_) to see the meaningful results.
+When you open the task in MLTL Annotate, the text box will show the generated text based on the prompt defined in `<Text>`. Be sure you include some instructions in prompt (for example, _"Summarize the following text: ..."_) to see the meaningful results.
 
 ## Running with Docker (recommended)
 
@@ -55,7 +55,7 @@ $ curl http://localhost:9090/
 {"status":"UP"}
 ```
 
-3. Create a project in Label Studio. Then from the **Model** page in the project settings, [connect the model](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
+3. Create a project in MLTL Annotate. Then from the **Model** page in the project settings, [connect the model](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
 
 
 ## Building from source (advanced)

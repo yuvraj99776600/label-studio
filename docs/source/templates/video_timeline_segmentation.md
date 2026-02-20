@@ -5,7 +5,7 @@ category: Videos
 cat: videos
 order: 710
 meta_title: Video Timeline Segmentation Data Labeling Template
-meta_description: Template for segmenting videos on a timeline with Label Studio for your machine learning and data science projects.
+meta_description: Template for segmenting videos on a timeline with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/video-timeline-segmentation.png" alt="" class="gif-border" width="552px" height="408px" />

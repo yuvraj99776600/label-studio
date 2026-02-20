@@ -29,7 +29,7 @@ For information on getting an Anthropic API key, see [Anthropic - Accessing the 
 
 ### Azure OpenAI
 
-Each Azure OpenAI key is tied to a specific deployment, and each deployment comprises a single OpenAI model. So if you want to use multiple models through Azure, you will need to create a deployment for each model and then add each key to Label Studio. 
+Each Azure OpenAI key is tied to a specific deployment, and each deployment comprises a single OpenAI model. So if you want to use multiple models through Azure, you will need to create a deployment for each model and then add each key to MLTL Annotate. 
 
 For a list of the Azure OpenAI models we support, see [Supported base models](#Supported-base-models). 
 
@@ -40,7 +40,7 @@ To use Azure OpenAI, you must first create the Azure OpenAI resource and then a 
 
 2. From Azure OpenAI Studio, [create a deployment](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource?pivots=web-portal#deploy-a-model). This is a base model endpoint. 
 
-When adding the key to Label Studio, you are asked for the following information:
+When adding the key to MLTL Annotate, you are asked for the following information:
 
 | Field | Description|
 | --- | --- |
@@ -56,11 +56,11 @@ You can find all this information in the **Details** section of the deployment i
 
 Use the Azure AI Foundry model catalog to deploy a model: [AI Foundry docs](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/model-catalog-overview).
 
-Once deployed, navigate to the Details page of the deployed model. The information you will need to set up the connection to Label Studio is under **Endpoint**:
+Once deployed, navigate to the Details page of the deployed model. The information you will need to set up the connection to MLTL Annotate is under **Endpoint**:
 
 ![Screenshot of the AI Foundry endpoint details](/images/prompts/ai-foundry.png)
 
-When adding the key to Label Studio, you are asked for the following information:
+When adding the key to MLTL Annotate, you are asked for the following information:
 
 | Field | Description|
 | --- | --- |
@@ -90,7 +90,7 @@ To add a custom model, enter the following:
 1. Setup [Ollama](https://ollama.com/), e.g. `ollama run llama3.2`
 2. [Verify your local OpenAI-compatible API is working](https://ollama.com/blog/openai-compatibility), e.g. `http://localhost:11434/v1`
 3. Create an externally facing endpoint, e.g. `https://my.openai.endpoint.com/v1` -> `http://localhost:11434/v1`
-4. Add connection to Label Studio:
+4. Add connection to MLTL Annotate:
     - Name: `llama3.2` (must match the model name in Ollama)
     - Endpoint: `https://my.openai.endpoint.com/v1` (note `v1` suffix is required)
     - API key: `ollama` (default)

@@ -5,8 +5,8 @@ tier: all
 order: 50
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: Sklearn Text Classifier model for Label Studio
-meta_description: Tutorial on how to use an example ML backend for Label Studio with Scikit-learn logistic regression
+meta_title: Sklearn Text Classifier model for MLTL Annotate
+meta_description: Tutorial on how to use an example ML backend for MLTL Annotate with Scikit-learn logistic regression
 categories:
     - Natural Language Processing
     - Text Classification
@@ -14,21 +14,21 @@ categories:
 image: "/guide/ml_tutorials/scikit-learn.png"
 ---
 
-# Sklearn Text Classifier model for Label Studio
+# Sklearn Text Classifier model for MLTL Annotate
 
-The Sklearn Text Classifier model is a custom machine learning backend for Label Studio. It uses a [Logistic Regression model from the Scikit-learn](https://scikit-learn.org/) library to classify text data. This model is particularly useful for text classification tasks in Label Studio, providing an efficient way to generate pre-annotations based on the model's predictions.
+The Sklearn Text Classifier model is a custom machine learning backend for MLTL Annotate. It uses a [Logistic Regression model from the Scikit-learn](https://scikit-learn.org/) library to classify text data. This model is particularly useful for text classification tasks in MLTL Annotate, providing an efficient way to generate pre-annotations based on the model's predictions.
 
-The model is trained on the labeled texts collected from Label Studio, and it uses the Label Studio API to fetch the labeled tasks for training. This integration with Label Studio allows for a seamless and efficient labeling workflow, as the model can be retrained and updated as new labeled data becomes available.
+The model is trained on the labeled texts collected from MLTL Annotate, and it uses the MLTL Annotate API to fetch the labeled tasks for training. This integration with MLTL Annotate allows for a seamless and efficient labeling workflow, as the model can be retrained and updated as new labeled data becomes available.
 
 ## Before you begin
 
-Before you begin, you must install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+Before you begin, you must install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`sklearn_text_classifier` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/sklearn_text_classifier). 
+This tutorial uses the [`sklearn_text_classifier` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/sklearn_text_classifier). 
 
 ## Labeling configuration
 
-The Sklearn Text Classifier model is designed to work with the default labeling configuration for text classification in Label Studio. This configuration includes a single `<Choices>` output and a single `<Text>` input. The model retrieves the first occurrence of these tags from the labeling configuration and uses them for its prediction:
+The Sklearn Text Classifier model is designed to work with the default labeling configuration for text classification in MLTL Annotate. This configuration includes a single `<Choices>` output and a single `<Text>` input. The model retrieves the first occurrence of these tags from the labeling configuration and uses them for its prediction:
 
 ```xml
 <View>
@@ -40,7 +40,7 @@ The Sklearn Text Classifier model is designed to work with the default labeling 
 </View>
 ```
 
-> Please note that you must specify the `LABEL_STUDIO_HOST` and `LABEL_STUDIO_API_KEY` environment variables in order to download examples for training the model. These variables should point to your Label Studio instance and its API key, respectively. For more information about finding your Label Studio API key, [see our documentation](https://labelstud.io/guide/user_account#Access-token).
+> Please note that you must specify the `LABEL_STUDIO_HOST` and `LABEL_STUDIO_API_KEY` environment variables in order to download examples for training the model. These variables should point to your MLTL Annotate instance and its API key, respectively. For more information about finding your MLTL Annotate API key, [see our documentation](https://docs.mltl.us/guide/user_account#Access-token).
 
 For training, you must label at least 2 examples with different labels.
 
@@ -59,7 +59,7 @@ $ curl http://localhost:9090/
 {"status":"UP"}
 ```
 
-3. Create a project in Label Studio. Then from the **Model** page in the project settings, [connect the model](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
+3. Create a project in MLTL Annotate. Then from the **Model** page in the project settings, [connect the model](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio). The default URL is `http://localhost:9090`.
 
 
 ## Building from source (advanced)
@@ -93,8 +93,8 @@ Parameters can be set in `docker-compose.yml` before running the container.
 The following common parameters are available:
 
 - `LOGISTIC_REGRESSION_C`: This is the inverse regularization strength for Logistic Regression. It is a float value and can be set via environment variable "LOGISTIC_REGRESSION_C". If not set, it defaults to `10`.
-- `LABEL_STUDIO_HOST`: This is the host URL for Label Studio, used for training. It can be set via the environment variable "LABEL_STUDIO_HOST". If not set, it defaults to `http://localhost:8080`.
-- `LABEL_STUDIO_API_KEY`: This is the API key for Label Studio, used for training. It can be set via environment variable "LABEL_STUDIO_API_KEY". There is no default value for this, so it must be set.
+- `LABEL_STUDIO_HOST`: This is the host URL for MLTL Annotate, used for training. It can be set via the environment variable "LABEL_STUDIO_HOST". If not set, it defaults to `http://localhost:8080`.
+- `LABEL_STUDIO_API_KEY`: This is the API key for MLTL Annotate, used for training. It can be set via environment variable "LABEL_STUDIO_API_KEY". There is no default value for this, so it must be set.
 - `START_TRAINING_EACH_N_UPDATES`: This is the number of updates after which training starts. It is an integer value and can be set via environment variable "START_TRAINING_EACH_N_UPDATES". If not set, it defaults to `10`.
 - `BASIC_AUTH_USER` - Specify the basic auth user for the model server
 - `BASIC_AUTH_PASS` - Specify the basic auth password for the model server

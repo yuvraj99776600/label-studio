@@ -5,17 +5,17 @@ type: guide
 tier: all
 order: 413
 order_enterprise: 413
-meta_title: Label Studio Webhook Event Reference 
-meta_description: Label Studio reference documentation for webhook event fields and payloads sent from Label Studio for integration with your machine learning pipeline. 
+meta_title: MLTL Annotate Webhook Event Reference 
+meta_description: MLTL Annotate reference documentation for webhook event fields and payloads sent from MLTL Annotate for integration with your machine learning pipeline. 
 section: "Integrate & Extend"
 parent: "webhooks"
 parent_enterprise: "webhooks"
 
 ---
 
-Label Studio includes several types of webhook events that trigger when specific actions occur. Refer to the details on this page to determine what information is included in the payload of each webhook event. For details about how to use webhooks and to set up webhooks in Label Studio, see [Set up webhooks in Label Studio](webhooks.html). To create your own webhooks in Label Studio to trigger events when specific actions happen, see [Create custom events for webhooks in Label Studio](webhook_create.html). 
+MLTL Annotate includes several types of webhook events that trigger when specific actions occur. Refer to the details on this page to determine what information is included in the payload of each webhook event. For details about how to use webhooks and to set up webhooks in MLTL Annotate, see [Set up webhooks in MLTL Annotate](webhooks.html). To create your own webhooks in MLTL Annotate to trigger events when specific actions happen, see [Create custom events for webhooks in MLTL Annotate](webhook_create.html). 
 
-Webhooks sent from Label Studio include the following:
+Webhooks sent from MLTL Annotate include the following:
 
 | Key | Details |
 | --- | --- |
@@ -30,13 +30,13 @@ Webhooks sent from Label Studio include the following:
 | ground_truth_number | Total number of annotations marked as ground truth annotations in the project. |
 | skipped_annotations_number | Total number of skipped or cancelled annotations in the project. |
 
-The HTTP POST payloads that Label Studio sends to the configured webhook URLs include the headers that you set up when you [configure the webhook](webhooks.html).
+The HTTP POST payloads that MLTL Annotate sends to the configured webhook URLs include the headers that you set up when you [configure the webhook](webhooks.html).
 
 If the webhook event is in response to a creation or update event, the full details of the created entity are also sent in the payload. See the following event reference tables for additional details. 
 
 ## Task Created
 
-Sent when a task is created in Label Studio. See how to [set up a webhook for this event](webhooks.html). 
+Sent when a task is created in MLTL Annotate. See how to [set up a webhook for this event](webhooks.html). 
 
 ### Webhook payload details
 
@@ -144,7 +144,7 @@ The webhook payload includes the name of the action and some additional task dat
 
 ## Task Deleted
 
-Sent when a task is deleted from Label Studio. See how to [set up a webhook for this event](webhooks.html).
+Sent when a task is deleted from MLTL Annotate. See how to [set up a webhook for this event](webhooks.html).
 
 ### Webhook payload details
 
@@ -233,7 +233,7 @@ Sent when a task is deleted from Label Studio. See how to [set up a webhook for 
 <br/>
 
 ## Annotation Created
-Sent when an annotation is created for a task in Label Studio. See how to [set up a webhook for this event](webhooks.html).
+Sent when an annotation is created for a task in MLTL Annotate. See how to [set up a webhook for this event](webhooks.html).
 
 ### Webhook payload details
 

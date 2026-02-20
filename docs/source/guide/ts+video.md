@@ -8,13 +8,13 @@ meta_title: Time series video audio labeling
 !!! note
     - This feature is not officially supported, experimental, and has a tricky setup way.
     - To use audio instead of video you should replace `.mp4` file to mp3/wav/other browser supported audio format.      
-    - This approach works with Label Studio **1.4.1 and lower**.
+    - This approach works with MLTL Annotate **1.4.1 and lower**.
 
 ## This approach is deprecated
 
 This approach is completely deprecated.
 
-In Label Studio 1.20, we introduced a new way to sync timeseries with video and audio. See more details here:
+In MLTL Annotate 1.20, we introduced a new way to sync timeseries with video and audio. See more details here:
 https://labelstud.io/templates/timeseries_audio_video
 
 
@@ -22,7 +22,7 @@ https://labelstud.io/templates/timeseries_audio_video
 
 You have to host your CSV and MP4 somewhere (or another video formats supporting by browsers). You can use S3 
 or another clouds. If you want to host data from your hard drive, please use 
-[Label Studio Local Storage](http://localhost:4000/guide/storage.html#Local-storage).
+[MLTL Annotate Local Storage](http://localhost:4000/guide/storage.html#Local-storage).
 
 As the result of this step you will have two URLs: one for CSV and one for video. For example, 
 ```

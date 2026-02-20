@@ -3,7 +3,7 @@ title: Markdown
 type: tags
 order: 504
 meta_title: Markdown Tag for Rendering Markdown Text
-meta_description: Customize Label Studio with the Markdown tag to display formatted markdown text content for machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the Markdown tag to display formatted markdown text content for machine learning and data science projects.
 ---
 
 The `Markdown` tag is used to display markdown-formatted text content on the labeling interface. Use this tag to provide rich text instructions, descriptions, or content with formatting support including headers, bold text, lists, links, and more.

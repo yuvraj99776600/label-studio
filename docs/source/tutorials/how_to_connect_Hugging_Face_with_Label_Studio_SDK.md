@@ -1,27 +1,27 @@
 ---
-title: How to Connect Hugging Face with Label Studio SDK
+title: How to Connect Hugging Face with MLTL Annotate SDK
 hide_sidebar: true
 order: 1001
 open_in_collab: true
 tutorial: true
 community_author: yyassi-heartex
 ipynb_repo_path: tutorials/how-to-connect-Hugging-Face-with-Label-Studio-SDK/how_to_connect_Hugging_Face_with_Label_Studio_SDK.ipynb
-repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-connect-Hugging-Face-with-Label-Studio-SDK
-report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
+repo_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/tree/main/tutorials/how-to-connect-Hugging-Face-with-Label-Studio-SDK
+report_bug_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/issues/new
 thumbnail: /images/tutorials/tutorials-hugging-face-ls-sdk.png
-meta_title: How to Connect Hugging Face with Label Studio SDK
-meta_description: Learn how to create a NLP workflow by integrating Hugging Face datasets and models with Label Studio for annotation and active learning.
+meta_title: How to Connect Hugging Face with MLTL Annotate SDK
+meta_description: Learn how to create a NLP workflow by integrating Hugging Face datasets and models with MLTL Annotate for annotation and active learning.
 badges: SDK, Hugging Face, Colab
 duration: 5-10 mins
 ---
-**A Complete Guide to Connecting Hugging Face and Label Studio**
+**A Complete Guide to Connecting Hugging Face and MLTL Annotate**
 
-This tutorial shows you how to create a seamless NLP workflow by integrating Hugging Face datasets and models with Label Studio for annotation and active learning.
+This tutorial shows you how to create a seamless NLP workflow by integrating Hugging Face datasets and models with MLTL Annotate for annotation and active learning.
 
 ## 📚 What You'll Learn:
 
-1. **HF → LS**: Load datasets from Hugging Face into Label Studio for annotation
-2. **LS → HF**: Export labeled data from Label Studio for model training
+1. **HF → LS**: Load datasets from Hugging Face into MLTL Annotate for annotation
+2. **LS → HF**: Export labeled data from MLTL Annotate for model training
 3. **HF → LS**: Connect Hugging Face models as ML backends for pre-annotations and active learning
 
 ## 🎯 Tutorial Use Case:
@@ -29,7 +29,7 @@ This tutorial shows you how to create a seamless NLP workflow by integrating Hug
 We'll build a **Named Entity Recognition (NER)** annotation project using the WikiANN dataset and integrate pre-trained models for intelligent pre-labeling.
 
 ## ✅ Prerequisites:
-- Label Studio instance (local or cloud)
+- MLTL Annotate instance (local or cloud)
 - Hugging Face account with API token (optional for public models)
 - Basic understanding of NLP and NER tasks
 - Python 3.8+
@@ -38,7 +38,7 @@ We'll build a **Named Entity Recognition (NER)** annotation project using the Wi
 
 ## 💡 Why This Integration Matters
 
-Before we dive into the code, let's understand the value of connecting Hugging Face with Label Studio.
+Before we dive into the code, let's understand the value of connecting Hugging Face with MLTL Annotate.
 
 This integration creates a powerful, automated ML workflow that transforms how you build and deploy NLP models.
 
@@ -50,7 +50,7 @@ This integration creates a powerful, automated ML workflow that transforms how y
 - **Focus on hard cases**: Spend time on uncertain predictions, not obvious labels
 
 #### 2. **Seamless Data Pipeline** 🔄
-- **No manual data prep**: Direct import from Hugging Face datasets to Label Studio
+- **No manual data prep**: Direct import from Hugging Face datasets to MLTL Annotate
 - **One-click export**: Labeled data automatically formatted for model training
 - **Zero data loss**: Perfect alignment between annotations and tokenization
 
@@ -68,7 +68,7 @@ This integration creates a powerful, automated ML workflow that transforms how y
 
 **Typical improvements across annotation projects:**
 
-| Metric | Without Integration | With HF + Label Studio | Improvement |
+| Metric | Without Integration | With HF + MLTL Annotate | Improvement |
 |--------|---------------------|------------------------|-------------|
 | Labeling speed | Baseline | 60-80% faster | ⚡ 2-5x speedup |
 | Annotation accuracy | 90-95% | 98%+ | ✅ Fewer errors |
@@ -80,7 +80,7 @@ This integration creates a powerful, automated ML workflow that transforms how y
 
 **Project**: Label 10,000 medical documents for entity extraction
 
-| Step | Traditional Approach | HF + Label Studio | Time Saved |
+| Step | Traditional Approach | HF + MLTL Annotate | Time Saved |
 |------|---------------------|-------------------|------------|
 | Data import | Manual download + formatting (8-10 hrs) | Automated import (5 min) | ~10 hrs |
 | Initial labeling | Label all 10,000 docs (500-600 hrs @ 3 min/doc) | Label 500 docs to bootstrap (25 hrs) | — |
@@ -114,15 +114,15 @@ print("✅ All packages installed successfully!")
 
 ## 🔧 Setup & Authentication
 
-### Step 1: Connect to Label Studio
+### Step 1: Connect to MLTL Annotate
 
 Set your environment variables before running:
 ```bash
-export LABEL_STUDIO_URL="http://localhost:8080"  # or your Label Studio URL
+export LABEL_STUDIO_URL="http://localhost:8080"  # or your MLTL Annotate URL
 export LABEL_STUDIO_API_KEY="your-api-key-here"
 ```
 
-To get your API key: Go to Label Studio → Account & Settings → Personal Access Token
+To get your API key: Go to MLTL Annotate → Account & Settings → Personal Access Token
 
 
 ```python
@@ -136,14 +136,14 @@ ls_url = os.environ.get('LABEL_STUDIO_URL', 'http://localhost:8080')
 if not ls_api_key:
     raise ValueError('❌ Please set LABEL_STUDIO_API_KEY environment variable.')
 
-# Connect to Label Studio
+# Connect to MLTL Annotate
 try:
     ls = Client(url=ls_url, api_key=ls_api_key)
     connection_status = ls.check_connection()
-    print(f'✅ Connected to Label Studio at {ls_url}')
+    print(f'✅ Connected to MLTL Annotate at {ls_url}')
     print(f'   Connection status: {connection_status}')
 except Exception as e:
-    raise ConnectionError(f'❌ Failed to connect to Label Studio: {str(e)}')
+    raise ConnectionError(f'❌ Failed to connect to MLTL Annotate: {str(e)}')
 ```
 
 ### Step 2: Authenticate with Hugging Face
@@ -175,15 +175,15 @@ else:
 
 ---
 
-## 📥 Part 1: Hugging Face → Label Studio (Import Dataset)
+## 📥 Part 1: Hugging Face → MLTL Annotate (Import Dataset)
 
-### Step 3: Create Label Studio Project
+### Step 3: Create MLTL Annotate Project
 
 We'll create a Named Entity Recognition project with labels for Person (PER), Organization (ORG), Location (LOC), and Miscellaneous (MISC) entities.
 
 
 ```python
-# Define Label Studio labeling configuration for NER
+# Define MLTL Annotate labeling configuration for NER
 ner_config = '''
 <View>
   <Text name="text" value="$text"/>
@@ -197,7 +197,7 @@ ner_config = '''
 '''
 
 # Create project (or use existing one)
-project_title = 'Hugging Face + Label Studio NER Tutorial'
+project_title = 'Hugging Face + MLTL Annotate NER Tutorial'
 project = ls.start_project(
     title=project_title,
     label_config=ner_config,
@@ -222,13 +222,13 @@ print('📦 Loading WikiANN dataset from Hugging Face...')
 dataset = load_dataset('wikiann', 'en', split='train[:100]')
 print(f'   Loaded {len(dataset)} examples')
 
-# Convert Hugging Face dataset format to Label Studio task format
+# Convert Hugging Face dataset format to MLTL Annotate task format
 tasks = []
 for idx, row in enumerate(dataset):
     # Join tokens into a single text string
     text = ' '.join(row['tokens'])
 
-    # Create Label Studio task format
+    # Create MLTL Annotate task format
     task = {
         "data": {
             "text": text
@@ -241,8 +241,8 @@ for idx, row in enumerate(dataset):
     }
     tasks.append(task)
 
-# Import tasks into Label Studio using SDK
-print(f'\n📤 Importing {len(tasks)} tasks into Label Studio...')
+# Import tasks into MLTL Annotate using SDK
+print(f'\n📤 Importing {len(tasks)} tasks into MLTL Annotate...')
 project.import_tasks(tasks)
 
 # Verify import
@@ -254,11 +254,11 @@ print(f'   Text: {imported_tasks[0]["data"]["text"][:100]}...')
 
 ---
 
-## 📤 Part 2: Label Studio → Hugging Face (Export & Train)
+## 📤 Part 2: MLTL Annotate → Hugging Face (Export & Train)
 
 ### Step 5: Label Some Data (Manual Step)
 
-**⚠️ Action Required:** Before continuing, go to Label Studio and label a few tasks (at least 10-20 for meaningful training).
+**⚠️ Action Required:** Before continuing, go to MLTL Annotate and label a few tasks (at least 10-20 for meaningful training).
 
 1. Open your project: {ls_url}/projects/{project.id}
 2. Click on tasks and annotate entities (PER, ORG, LOC, MISC)
@@ -268,7 +268,7 @@ Once you've labeled some data, continue to the next cell.
 
 ---
 
-### Step 6: Export Annotations from Label Studio
+### Step 6: Export Annotations from MLTL Annotate
 
 We'll export the labeled data and convert it to Hugging Face format for model training.
 
@@ -279,8 +279,8 @@ We'll export the labeled data and convert it to Hugging Face format for model tr
 from transformers import AutoTokenizer
 from datasets import Dataset
 
-# Export annotations from Label Studio using SDK
-print('📥 Exporting annotations from Label Studio...')
+# Export annotations from MLTL Annotate using SDK
+print('📥 Exporting annotations from MLTL Annotate...')
 ls_data = project.export_tasks(export_type='JSON')  # Already returns a list
 
 # Check how many tasks have annotations
@@ -290,7 +290,7 @@ print(f'   Labeled tasks: {len(labeled_tasks)}')
 
 if len(labeled_tasks) < 5:
     print('\n⚠️  Warning: Very few labeled tasks. Results may not be meaningful.')
-    print('   Consider labeling more data in Label Studio before training.')
+    print('   Consider labeling more data in MLTL Annotate before training.')
 
 # Initialize tokenizer (using BERT for NER)
 print('\n🔤 Loading tokenizer...')
@@ -301,7 +301,7 @@ label_list = ['O', 'B-PER', 'I-PER', 'B-ORG', 'I-ORG', 'B-LOC', 'I-LOC', 'B-MISC
 label_to_id = {label: idx for idx, label in enumerate(label_list)}
 print(f'   Label schema: {label_list}')
 
-# Convert Label Studio annotations to HuggingFace format
+# Convert MLTL Annotate annotations to HuggingFace format
 print('\n🔄 Converting annotations to HuggingFace format...')
 
 texts = [task['data']['text'] for task in ls_data]
@@ -311,7 +311,7 @@ all_labels = []
 for i, task in enumerate(ls_data):
     offsets = tokenized['offset_mapping'][i]
 
-    # Extract entity spans from Label Studio annotations
+    # Extract entity spans from MLTL Annotate annotations
     spans = []
     annotations = task.get('annotations', [])
     if annotations:
@@ -386,7 +386,7 @@ import numpy as np
 # Only train if we have enough labeled data
 if len(labeled_tasks) < 10:
     print('⚠️  Skipping training: Need at least 10 labeled examples.')
-    print('   Label more data in Label Studio, then re-run this cell.')
+    print('   Label more data in MLTL Annotate, then re-run this cell.')
 else:
     print('🚀 Starting model training...')
 
@@ -471,11 +471,11 @@ else:
 
 ---
 
-## 🤖 Part 3: Hugging Face → Label Studio (ML Backend Integration)
+## 🤖 Part 3: Hugging Face → MLTL Annotate (ML Backend Integration)
 
 ### Step 8: Create ML Backend with Hugging Face Model
 
-Now we'll connect a Hugging Face model as an ML backend to provide pre-annotations in Label Studio. This dramatically speeds up the annotation process!
+Now we'll connect a Hugging Face model as an ML backend to provide pre-annotations in MLTL Annotate. This dramatically speeds up the annotation process!
 
 **Benefits:**
 - **Pre-annotations**: Model generates initial predictions for annotators to review
@@ -499,7 +499,7 @@ ner_pipeline = pipeline(
 )
 print('✅ Model loaded successfully!')
 
-# Map Hugging Face labels to our Label Studio labels
+# Map Hugging Face labels to our MLTL Annotate labels
 LABEL_MAPPING = {
     'PER': 'PER',
     'ORG': 'ORG',
@@ -508,13 +508,13 @@ LABEL_MAPPING = {
 }
 
 def create_predictions_for_task(task):
-    """Generate predictions for a single Label Studio task"""
+    """Generate predictions for a single MLTL Annotate task"""
     text = task['data']['text']
 
     # Get predictions from Hugging Face model
     entities = ner_pipeline(text)
 
-    # Convert to Label Studio format
+    # Convert to MLTL Annotate format
     results = []
     for entity in entities:
         # Map label if needed
@@ -553,11 +553,11 @@ for pred in predictions:
 
 ### Step 9: Generate Pre-annotations
 
-Now let's use our Hugging Face model to generate predictions for unlabeled tasks in Label Studio!
+Now let's use our Hugging Face model to generate predictions for unlabeled tasks in MLTL Annotate!
 
 
 ```python
-# Get unlabeled tasks from Label Studio
+# Get unlabeled tasks from MLTL Annotate
 print('📋 Fetching unlabeled tasks...')
 all_tasks = project.get_tasks()
 unlabeled_tasks = [task for task in all_tasks if not task.get('annotations')]
@@ -577,7 +577,7 @@ else:
             # Generate predictions using our HuggingFace model
             results = create_predictions_for_task(task)
 
-            # Create prediction in Label Studio using SDK
+            # Create prediction in MLTL Annotate using SDK
             project.create_prediction(
                 task_id=task['id'],
                 result=results,
@@ -596,7 +596,7 @@ else:
 
     print(f'\n✅ Successfully created {prediction_count} pre-annotations!')
     print(f'\n💡 Next steps:')
-    print(f'   1. Open Label Studio: {ls_url}/projects/{project.id}')
+    print(f'   1. Open MLTL Annotate: {ls_url}/projects/{project.id}')
     print(f'   2. Review and correct the pre-annotations')
     print(f'   3. Submit your annotations')
     print(f'   4. Export and retrain for continuous improvement!')
@@ -607,11 +607,11 @@ else:
 
 ## 🎉 Summary & Next Steps
 
-Congratulations! You've built a complete Hugging Face + Label Studio integration pipeline for Named Entity Recognition!
+Congratulations! You've built a complete Hugging Face + MLTL Annotate integration pipeline for Named Entity Recognition!
 
 ### What You Accomplished:
 
-✅ **HF → LS**: Loaded WikiANN dataset from Hugging Face into Label Studio  
+✅ **HF → LS**: Loaded WikiANN dataset from Hugging Face into MLTL Annotate  
 ✅ **LS → HF**: Exported labeled data and converted to Hugging Face format with token alignment  
 ✅ **HF → LS**: Generated pre-annotations using Hugging Face NER models  
 ✅ **Trained**: Fine-tuned a custom NER model on your labeled data
@@ -619,8 +619,8 @@ Congratulations! You've built a complete Hugging Face + Label Studio integration
 ### The Complete Workflow:
 
 ```
-1. Import data from Hugging Face → Label Studio
-2. Annotate tasks in Label Studio (with ML assistance)
+1. Import data from Hugging Face → MLTL Annotate
+2. Annotate tasks in MLTL Annotate (with ML assistance)
 3. Export annotations → Train/fine-tune Hugging Face model  
 4. Deploy updated model → Generate better predictions
 5. Repeat for continuous improvement! 🔄
@@ -643,13 +643,13 @@ Want to adapt this workflow for other tasks? Check out:
 
 ### Resources:
 
-- 📖 [Label Studio SDK Documentation](https://labelstud.io/sdk/)
+- 📖 [MLTL Annotate SDK Documentation](https://labelstud.io/sdk/)
 - 🤗 [HuggingFace Transformers](https://huggingface.co/docs/transformers)
-- 🎯 [Label Studio ML Backend](https://github.com/HumanSignal/label-studio-ml-backend)
+- 🎯 [MLTL Annotate ML Backend](https://github.com/yuvraj99776600/label-studio-ml-backend)
 
 ### Need Help?
 
-- Label Studio Community: https://slack.labelstudio.heartex.com/
+- MLTL Annotate Community: https://slack.labelstudio.mltl.com/
 - HuggingFace Forums: https://discuss.huggingface.co/
 
 
@@ -659,7 +659,7 @@ Want to adapt this workflow for other tasks? Check out:
 
 For production use, you'll want to deploy your Hugging Face model as a persistent ML backend server. Here's how:
 
-### Option 1: Using Label Studio ML Backend (Recommended for Production)
+### Option 1: Using MLTL Annotate ML Backend (Recommended for Production)
 
 ```bash
 # Install label-studio-ml
@@ -673,7 +673,7 @@ label-studio-ml init my_ner_backend --script label_studio_ml/examples/simple_tex
 label-studio-ml start my_ner_backend --port 9090
 ```
 
-Then connect it in Label Studio:
+Then connect it in MLTL Annotate:
 1. Go to Project Settings → Machine Learning
 2. Click "Add Model"
 3. Enter URL: `http://localhost:9090`

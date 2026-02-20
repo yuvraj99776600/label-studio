@@ -1,49 +1,49 @@
 ---
-title: Import pre-annotated data into Label Studio
+title: Import pre-annotated data into MLTL Annotate
 short: Import pre-annotations
 type: guide
 tier: all
 order: 163
 order_enterprise: 163
-meta_title: Import pre-annotated data into Label Studio
-meta_description: Import predicted labels, predictions, pre-annotations, or pre-labels into Label Studio for your data labeling, machine learning, and data science projects.
+meta_title: Import pre-annotated data into MLTL Annotate
+meta_description: Import predicted labels, predictions, pre-annotations, or pre-labels into MLTL Annotate for your data labeling, machine learning, and data science projects.
 section: "Import & Export"
 parent: "tasks"
 parent_enterprise: "tasks"
 ---
 
-If you have predictions generated for your dataset from a model, either as pre-annotated tasks or pre-labeled tasks, you can import the predictions with your dataset into Label Studio for review and correction. Label Studio automatically displays the pre-annotations that you import on the Labeling page for each task. 
+If you have predictions generated for your dataset from a model, either as pre-annotated tasks or pre-labeled tasks, you can import the predictions with your dataset into MLTL Annotate for review and correction. MLTL Annotate automatically displays the pre-annotations that you import on the Labeling page for each task. 
 
-You can import pre-annotated tasks into Label Studio [using the UI](tasks.html#Import-data-from-the-Label-Studio-UI) or [using the API](/api#operation/projects_import_create). 
+You can import pre-annotated tasks into MLTL Annotate [using the UI](tasks.html#Import-data-from-the-Label-Studio-UI) or [using the API](/api#operation/projects_import_create). 
 
 !!! note 
-    To generate interactive pre-annotations with a machine learning model while labeling, see [Set up machine learning with Label Studio](ml.html).
+    To generate interactive pre-annotations with a machine learning model while labeling, see [Set up machine learning with MLTL Annotate](ml.html).
 
 <div class="opensource-only">
 
 !!! error enterprise
-    Label Studio Enterprise customers have access to a powerful tool called Prompts. With Prompts, you can leverage LLMs to automatically generate predictions for your Label Studio tasks. For more information, see [Prompts](https://docs.humansignal.com/guide/prompts_overview).
+    MLTL Annotate customers have access to a powerful tool called Prompts. With Prompts, you can leverage LLMs to automatically generate predictions for your MLTL Annotate tasks. For more information, see [Prompts](https://docs.mltl.us/guide/prompts_overview).
 
 </div>
 
 <div class="enterprise-only">
 
 !!! info Tip
-    With Prompts, you can leverage LLMs to automatically generate predictions for your Label Studio tasks. For more information, see [Prompts](prompts_overview).
+    With Prompts, you can leverage LLMs to automatically generate predictions for your MLTL Annotate tasks. For more information, see [Prompts](prompts_overview).
 
 </div>
 
 
-## Prepare pre-annotations for Label Studio 
+## Prepare pre-annotations for MLTL Annotate 
 
-To import predicted labels into Label Studio, you must use the [Basic Label Studio JSON format](tasks.html#Basic-Label-Studio-JSON-format) and set up your tasks with the `predictions` JSON key. The Label Studio ML backend also outputs tasks in this format. Check this common video tutorial showing how to convert a submitted annotation to a prediction:
+To import predicted labels into MLTL Annotate, you must use the [Basic MLTL Annotate JSON format](tasks.html#Basic-Label-Studio-JSON-format) and set up your tasks with the `predictions` JSON key. The MLTL Annotate ML backend also outputs tasks in this format. Check this common video tutorial showing how to convert a submitted annotation to a prediction:
 
 <iframe class="video-border" width="100%" height="400vh" src="https://www.youtube.com/embed/CyRe73VD4EE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ### JSON format for pre-annotations
 
-Label Studio JSON format for pre-annotations must contain two sections:
-- A `data` object which references the source of the data that the pre-annotations apply to. This can be a URL to an audio file, a pre-signed cloud storage link to an image, plain text, a reference to a CSV file stored in Label Studio, or something else. See how to [specify the data object](#Specify-the-data-object).
+MLTL Annotate JSON format for pre-annotations must contain two sections:
+- A `data` object which references the source of the data that the pre-annotations apply to. This can be a URL to an audio file, a pre-signed cloud storage link to an image, plain text, a reference to a CSV file stored in MLTL Annotate, or something else. See how to [specify the data object](#Specify-the-data-object).
 - A `predictions` array that contains the pre-annotation results for the different types of labeling. See how to [add results to the predictions array](#Add-results-to-the-predictions-array).
 
 The JSON format for pre-annotations must match the labeling configuration used for your data labeling project. 
@@ -63,7 +63,7 @@ This excerpt specifies `value="$csv"` in the TimeSeries Object tag. As a result,
 [
   {
     "data": {
-      "csv": "https://app.heartex.ai/samples/time-series.csv?time=None&values=first_column"
+      "csv": "https://app.mltl.ai/samples/time-series.csv?time=None&values=first_column"
     },
     "predictions": [ ]
   }
@@ -110,16 +110,16 @@ Refer to the following examples for sample pre-annotation formats:
 - [Brush pre-annotations for segmentation with masks](#Import-brush-segmentation-pre-annotations-in-RLE-format)
 - [OCR pre-annotations with bounding boxes, labels, and text transcriptions](#Import-OCR-pre-annotations)
 
-To format pre-annotations for Label Studio not represented in these examples, refer to the sample results JSON for the relevant object and control tags for your labeling configuration, such as the [Audio tag](/tags/audio.html) for audio classification tasks. Each tag must be represented in the JSON pre-annotations format to render predictions in the Label Studio UI. Not all object and control tags list sample results JSON. 
+To format pre-annotations for MLTL Annotate not represented in these examples, refer to the sample results JSON for the relevant object and control tags for your labeling configuration, such as the [Audio tag](/tags/audio.html) for audio classification tasks. Each tag must be represented in the JSON pre-annotations format to render predictions in the MLTL Annotate UI. Not all object and control tags list sample results JSON. 
 
-You can also use the [Label Studio Playground](/playground) to preview the output JSON for a specific labeling configuration.
+You can also use the [MLTL Annotate Playground](/playground) to preview the output JSON for a specific labeling configuration.
 
 
 ## Import bbox and choice pre-annotations for images
 
 For example, import predicted **bounding box regions (rectangles)** and **choices** for tasks to determine whether an item in an image is an airplane or a car. 
 
-For image pre-annotations, Label Studio expects the x, y, width, and height of image annotations to be provided in percentages of overall image dimension. See [Units for image annotations](predictions.html#Units_for_image_annotations) on this page for more about how to convert formats.
+For image pre-annotations, MLTL Annotate expects the x, y, width, and height of image annotations to be provided in percentages of overall image dimension. See [Units for image annotations](predictions.html#Units_for_image_annotations) on this page for more about how to convert formats.
 
 Use the following labeling configuration: 
 ```xml
@@ -141,7 +141,7 @@ Use the following labeling configuration:
 After you set up an example project, create example tasks that match the following format:
 
 {% details <b>Click to expand the JSON example with predictions</b> %}
-Save this example JSON as a file to import it into Label Studio, for example, `example_prediction_task.json`.
+Save this example JSON as a file to import it into MLTL Annotate, for example, `example_prediction_task.json`.
 
 {% codeblock lang:json %}
 [{
@@ -200,10 +200,10 @@ The prediction score applies to the entire prediction.
 {% enddetails %}
 <br/>
 
-Import pre-annotated tasks into Label Studio [using the UI](tasks.html#Import-data-from-the-Label-Studio-UI) or [using the API](/api#operation/projects_import_create). 
+Import pre-annotated tasks into MLTL Annotate [using the UI](tasks.html#Import-data-from-the-Label-Studio-UI) or [using the API](/api#operation/projects_import_create). 
 
-In the Label Studio UI, the imported prediction for this task looks like the following: 
-<img src="../images/predictions_loaded.png" alt="screenshot of the Label Studio UI showing an image of airplanes with bounding boxes covering each airplane." style="max-width: 600px;" class="gif-border">
+In the MLTL Annotate UI, the imported prediction for this task looks like the following: 
+<img src="../images/predictions_loaded.png" alt="screenshot of the MLTL Annotate UI showing an image of airplanes with bounding boxes covering each airplane." style="max-width: 600px;" class="gif-border">
 
 ## Import pre-annotated rectangle, polygon, ellipse & keypoint regions without labels for images  
 
@@ -230,7 +230,7 @@ Use the following labeling configuration:
 After you set up an example project, create example tasks that match the following format: 
 
 {% details <b>Click to expand the JSON example</b> %}
-Save this example JSON as a file to import it into Label Studio, for example, `example_prediction_task.json`.
+Save this example JSON as a file to import it into MLTL Annotate, for example, `example_prediction_task.json`.
 
 {% codeblock lang:json %}
 [{
@@ -692,18 +692,18 @@ Save this example JSON as a file, for example: `example_preannotated_ner_tasks.j
 {% endcodeblock %}
 {% enddetails %}
 
-Import pre-annotated tasks into Label Studio [using the UI](tasks.html#Import-data-from-the-Label-Studio-UI) or [using the API](/api#operation/projects_import_create). In the Label Studio UI, the imported prediction for the first task looks like the following:
+Import pre-annotated tasks into MLTL Annotate [using the UI](tasks.html#Import-data-from-the-Label-Studio-UI) or [using the API](/api#operation/projects_import_create). In the MLTL Annotate UI, the imported prediction for the first task looks like the following:
 
-<center><img src="../images/predictions_loaded_text.png" alt="screenshot of the Label Studio UI showing the text with highlighted text labels and prediction scores visible." style="max-width: 100%;"></center>
+<center><img src="../images/predictions_loaded_text.png" alt="screenshot of the MLTL Annotate UI showing the text with highlighted text labels and prediction scores visible." style="max-width: 100%;"></center>
 
 You can sort the prediction scores for each labeled region using the **Regions** pane options. 
 
 
 ## Import brush segmentation pre-annotations in RLE format
 
-If you want to import pre-annotations for brush mask image segmentation using the [BrushLabels tag](/tags/brushlabels.html), you must convert the masks to RLE format first. The [Label Studio Converter](https://github.com/HumanSignal/label-studio-converter) package has some helper functions for this. See the following for common conversion cases and guidance.
+If you want to import pre-annotations for brush mask image segmentation using the [BrushLabels tag](/tags/brushlabels.html), you must convert the masks to RLE format first. The [MLTL Annotate Converter](https://github.com/yuvraj99776600/label-studio-converter) package has some helper functions for this. See the following for common conversion cases and guidance.
 
-Install Label Studio Converter:
+Install MLTL Annotate Converter:
 ```
 pip install -U label-studio-converter
 ```
@@ -721,19 +721,19 @@ from label_studio_converter import brush
     ```
   
 - To convert OpenCV contours, use 
-[`brush.contour2rle(contours, contour_id, img_width, img_height)`](https://github.com/HumanSignal/label-studio-converter/blob/master/label_studio_converter/brush.py#L310).
+[`brush.contour2rle(contours, contour_id, img_width, img_height)`](https://github.com/yuvraj99776600/label-studio-converter/blob/master/label_studio_converter/brush.py#L310).
 
 - To convert an image from path (jpg, png. bmp), use 
-[`brush.image2rle(path)`](https://github.com/HumanSignal/label-studio-converter/blob/master/label_studio_converter/brush.py#L343).
+[`brush.image2rle(path)`](https://github.com/yuvraj99776600/label-studio-converter/blob/master/label_studio_converter/brush.py#L343).
 
 - To prepare the pre-annotation, use 
-[`brush.image2annotation(path, label_name, from_name, to_name, ground_truth=False, model_version=None, score=None)`](https://github.com/HumanSignal/label-studio-converter/blob/master/label_studio_converter/brush.py#L361)
+[`brush.image2annotation(path, label_name, from_name, to_name, ground_truth=False, model_version=None, score=None)`](https://github.com/yuvraj99776600/label-studio-converter/blob/master/label_studio_converter/brush.py#L361)
 
-For more assistance, review this [example code creating a Label Studio task with pre-annotations](https://github.com/HumanSignal/label-studio-converter/blob/master/tests/test_brush.py#L11) for brush labels.
+For more assistance, review this [example code creating a MLTL Annotate task with pre-annotations](https://github.com/yuvraj99776600/label-studio-converter/blob/master/tests/test_brush.py#L11) for brush labels.
 
 ## Import OCR pre-annotations 
 
-Import pre-annotations for optical character recognition (OCR), such as output from [tesseract like in this example blog post](https://labelstud.io/blog/improve-ocr-quality-for-receipt-processing-with-tesseract-and-label-studio). 
+Import pre-annotations for optical character recognition (OCR), such as output from [tesseract like in this example blog post](https://mltl.us/blog/improve-ocr-quality-for-receipt-processing-with-tesseract-and-label-studio). 
 
 In this example, import pre-annotations for OCR tasks using the [OCR template](/templates/optical_character_recognition.html):
 
@@ -753,7 +753,7 @@ In this example, import pre-annotations for OCR tasks using the [OCR template](/
 This example JSON contains one task with three results dictionaries, one for each type of tag in the labeling configuration: Rectangle, Labels, and TextArea: 
 
 {% details <b>Click to expand the JSON example</b> %}
-Save this example JSON as a file to import it into Label Studio, for example, `example_prediction_task.json`.
+Save this example JSON as a file to import it into MLTL Annotate, for example, `example_prediction_task.json`.
 
 {% codeblock lang:json %}
 {
@@ -828,10 +828,10 @@ Save this example JSON as a file to import it into Label Studio, for example, `e
 
 This example JSON also includes a prediction score for the task. The IDs for each rectangle result match the label assigned to the region and the text area transcription for the region. 
 
-Import pre-annotated tasks into Label Studio [using the UI](tasks.html#Import-data-from-the-Label-Studio-UI) or [using the API](/api#operation/projects_import_create).
+Import pre-annotated tasks into MLTL Annotate [using the UI](tasks.html#Import-data-from-the-Label-Studio-UI) or [using the API](/api#operation/projects_import_create).
 
 !!! note 
-    The image data in this example task references an uploaded file, identified by the source_filename assigned by Label Studio after uploading the image. The best way to reference image data is using presigned URLs for images stored in cloud storage, or absolute paths to image data stored in local storage and added to Label Studio by [syncing storage](storage.html). 
+    The image data in this example task references an uploaded file, identified by the source_filename assigned by MLTL Annotate after uploading the image. The best way to reference image data is using presigned URLs for images stored in cloud storage, or absolute paths to image data stored in local storage and added to MLTL Annotate by [syncing storage](storage.html). 
 
 
 ### Troubleshooting pre-annotations
@@ -844,6 +844,6 @@ See [Troubleshooting pre-annotations](troubleshooting#Pre-annotations).
 
 <div class="enterprise-only">
 
-See [Troubleshooting ML Backends & Predictions](https://support.humansignal.com/hc/en-us/sections/23627938255117-ML-Backend-Predictions) in the HumanSignal support center.
+See [Troubleshooting ML Backends & Predictions](https://mltl.us/support/hc/en-us/sections/23627938255117-ML-Backend-Predictions) in the MLTL support center.
 
 </div>

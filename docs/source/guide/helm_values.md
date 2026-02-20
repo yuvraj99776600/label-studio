@@ -1,12 +1,12 @@
 ---
-title: Available Helm values for Label Studio Helm Chart
+title: Available Helm values for MLTL Annotate Helm Chart
 short: Available Helm values
 tier: all
 type: guide
 order: 72
 order_enterprise: 74
-meta_title: Available Helm values for Label Studio Helm Chart
-meta_description: For cases when you want to customize your Label Studio Kubernetes deployment, review these available Helm values that you can set in your Helm chart.
+meta_title: Available Helm values for MLTL Annotate Helm Chart
+meta_description: For cases when you want to customize your MLTL Annotate Kubernetes deployment, review these available Helm values that you can set in your Helm chart.
 section: "Install & Setup"
 parent: "install_k8s"
 parent_enterprise: "install_enterprise_k8s"
@@ -40,14 +40,14 @@ parent_enterprise: "install_enterprise_k8s"
 <div class="opensource-only">
 
 Refer to these tables with available Helm chart values for your `values.yaml` file
-when configuring your Label Studio deployment on Kubernetes. See [Deploy Label Studio on Kubernetes](install_k8s) for more.
+when configuring your MLTL Annotate deployment on Kubernetes. See [Deploy MLTL Annotate on Kubernetes](install_k8s) for more.
 
 </div>
 
 <div class="enterprise-only">
 
 Refer to these tables with available Helm chart values for your `values.yaml` file
-when configuring your Label Studio deployment on Kubernetes. See [Deploy Label Studio on Kubernetes](install_enterprise_k8s) for more.
+when configuring your MLTL Annotate deployment on Kubernetes. See [Deploy MLTL Annotate on Kubernetes](install_enterprise_k8s) for more.
 
 </div>
 
@@ -82,7 +82,7 @@ Global parameters for the Helm chart.
 | `global.redisConfig.ssl.redisSslKeyFileSecretKey`                           | Key of an existing secret holding the ssl certificate private key for Redis host                                                    | `""`                       |
 | `global.extraEnvironmentVars`	                                              | Key/value map of an extra Environment variables, for example, `PYTHONUNBUFFERED: 1`                                                 | `{}`                       |
 | `global.extraEnvironmentSecrets`                                            | Key/value map of an extra Secrets                                                                                                   | `{}`                       |
-| `global.persistence.enabled`                                                | Enable persistent storage. [See more about setting up persistent storage](https://labelstud.io/guide/persistent_storage.html)       | `true`                     |
+| `global.persistence.enabled`                                                | Enable persistent storage. [See more about setting up persistent storage](https://docs.mltl.us/guide/persistent_storage.html)       | `true`                     |
 | `global.persistence.type`                                                   | Persistent storage type                                                                                                             | `volume`                   |
 | `global.persistence.config.s3.accessKey`                                    | Access key to use to access AWS S3                                                                                                  | `""`                       |
 | `global.persistence.config.s3.secretKey`                                    | Secret key to use to access AWS S3                                                                                                  | `""`                       |
@@ -125,7 +125,7 @@ Global parameters for the Helm chart.
 
 ## App parameters
 
-Parameters specific to the `app` portion of the Label Studio deployment.
+Parameters specific to the `app` portion of the MLTL Annotate deployment.
 
 | Parameter                                      | Description                                                                                                          | Default                  |
 |------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------|
@@ -215,7 +215,7 @@ Parameters specific to the `app` portion of the Label Studio deployment.
 
 ## Rqworker parameters
 
-Parameters specific to the `rqworkers` service of your Label Studio Enterprise deployment.
+Parameters specific to the `rqworkers` service of your MLTL Annotate deployment.
 
 | Parameter                                        | Description                                                                                     | Default                                |
 |--------------------------------------------------|-------------------------------------------------------------------------------------------------|----------------------------------------|
@@ -275,12 +275,12 @@ Parameters specific to the `rqworkers` service of your Label Studio Enterprise d
 
 <div class="enterprise-only">
 
-## Label Studio Enterprise parameters
+## MLTL Annotate parameters
 
 | Parameter                                 | Description                                                                        | Default   |
 |-------------------------------------------|------------------------------------------------------------------------------------|-----------|
 | `enterprise.enabled`                      | Enable Enterprise features                                                         | `false`   |
-| `enterprise.enterpriseLicense.secretName` | Name of an existing secret holding the Label Studio Enterprise license information | `""`      |
+| `enterprise.enterpriseLicense.secretName` | Name of an existing secret holding the MLTL Annotate license information | `""`      |
 | `enterprise.enterpriseLicense.secretKey`  | Key of an existing secret holding the enterprise license information               | `license` |
 
 </div>
@@ -309,9 +309,9 @@ Parameters specific to the `rqworkers` service of your Label Studio Enterprise d
 
 ## The `global.extraEnvironmentVars` usage
 
-The `global.extraEnvironmentVars` section can be used to configure environment properties of Label Studio.
+The `global.extraEnvironmentVars` section can be used to configure environment properties of MLTL Annotate.
 
-Any key value put under this section translates to environment variables used to control Label Studio's configuration. Every key is upper-cased before setting the environment variable.
+Any key value put under this section translates to environment variables used to control MLTL Annotate's configuration. Every key is upper-cased before setting the environment variable.
 
 An example:
 
@@ -322,6 +322,6 @@ global:
 ```
 
 !!! note
-    If you are deploying to a production environment, you should set `SSRF_PROTECTION_ENABLED: true`. See [Secure Label Studio](security#Enable-SSRF-protection-for-production-environments). 
+    If you are deploying to a production environment, you should set `SSRF_PROTECTION_ENABLED: true`. See [Secure MLTL Annotate](security#Enable-SSRF-protection-for-production-environments). 
 
 

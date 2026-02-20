@@ -23,11 +23,11 @@ import {
 const resources = [
   {
     title: "Documentation",
-    url: "https://labelstud.io/guide/",
+    url: "https://docs.mltl.us/guide/",
   },
   {
     title: "API Documentation",
-    url: "https://labelstud.io/api",
+    url: "https://docs.mltl.us/api",
   },
 ];
 

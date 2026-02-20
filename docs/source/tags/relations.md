@@ -3,7 +3,7 @@ title: Relations
 type: tags
 order: 424
 meta_title: Relations Tag for Multiple Relations
-meta_description: Customize Label Studio by adding labels to relationships between labeled regions for machine learning and data science projects.
+meta_description: Customize MLTL Annotate by adding labels to relationships between labeled regions for machine learning and data science projects.
 ---
 
 The `Relations` tag is used to create label relations between regions. Use to provide many values to apply to the relationship between two labeled regions.

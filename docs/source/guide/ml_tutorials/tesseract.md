@@ -5,8 +5,8 @@ tier: all
 order: 55
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: Interactive bounding boxes OCR in Label Studio with a Tesseract backend
-meta_description: Tutorial for how to use Label Studio and Tesseract to assist with your OCR projects
+meta_title: Interactive bounding boxes OCR in MLTL Annotate with a Tesseract backend
+meta_description: Tutorial for how to use MLTL Annotate and Tesseract to assist with your OCR projects
 categories:
     - Computer Vision
     - Optical Character Recognition
@@ -23,7 +23,7 @@ models.
 Tesseract is used for OCR but minimal adaptation is needed to connect other OCR
 engines or models.
 
-Tested against Label Studio 1.10.1, with basic support for both Label Studio
+Tested against MLTL Annotate 1.10.1, with basic support for both MLTL Annotate
 Local File Storage and S3-compatible storage, with a example data storage with
 MinIO.
 
@@ -34,13 +34,13 @@ Before you begin:
 * Ensure Docker Compose is installed. For MacOS and Windows users,
    we suggest using Docker Desktop. 
 
-You must also install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
+You must also install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart). 
 
-This tutorial uses the [`tesseract` example](https://github.com/HumanSignal/label-studio-ml-backend/tree/master/label_studio_ml/examples/tesseract). 
+This tutorial uses the [`tesseract` example](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/master/label_studio_ml/examples/tesseract). 
 
-### 1. Install Label Studio
+### 1. Install MLTL Annotate
 
-Launch Label Studio. You can follow the guide from the [official documentation](https://labelstud.io/guide/install.html) or use the following commands:
+Launch MLTL Annotate. You can follow the guide from the [official documentation](https://docs.mltl.us/guide/install.html) or use the following commands:
 
    ```
    docker run -it \
@@ -49,7 +49,7 @@ Launch Label Studio. You can follow the guide from the [official documentation](
       heartexlabs/label-studio:latest
    ```
 
-   Optionally, you may enable local file serving in Label Studio
+   Optionally, you may enable local file serving in MLTL Annotate
 
    ```
    docker run -it \
@@ -59,10 +59,10 @@ Launch Label Studio. You can follow the guide from the [official documentation](
       --env LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT=/label-studio/data/images \
       heartexlabs/label-studio:latest
    ```
-   If you're using local file serving, be sure to [get a copy of the API token](https://labelstud.io/guide/user_account#Access-token) from
-   Label Studio to connect the model.
+   If you're using local file serving, be sure to [get a copy of the API token](https://docs.mltl.us/guide/user_account#Access-token) from
+   MLTL Annotate to connect the model.
 
-### 2. Create a Label Studio project
+### 2. Create a MLTL Annotate project
 
 Create a new project for Tesseract OCR. In the project **Settings** set up the **Labeling Interface**.
 
@@ -88,7 +88,7 @@ Create a new project for Tesseract OCR. In the project **Settings** set up the *
 
 ### 3. Install Tesseract OCR
 
-Download the Label Studio Machine Learning backend repository.
+Download the MLTL Annotate Machine Learning backend repository.
    ```
    git clone https://github.com/humansignal/label-studio-ml-backend
    cd label-studio-ml-backend/label_studio_ml/examples/tesseract
@@ -113,7 +113,7 @@ Depending on your data ingestion method, several configurations are possible:
 
 **Local File Storage**
 
-If you opted to use Label Studio Local File Storage, be sure to set the `LABEL_STUDIO_HOST` and `LABEL_STUDIO_ACCESS_TOKEN` variables. 
+If you opted to use MLTL Annotate Local File Storage, be sure to set the `LABEL_STUDIO_HOST` and `LABEL_STUDIO_ACCESS_TOKEN` variables. 
 
 **S3-Compatible Storage (MinIO or AWS S3)**
 
@@ -137,8 +137,8 @@ If you host your images on any other public storage with `http` or `https` acces
 
 ### 5. Upload tasks
 
-   If you're using the Label Studio Local File Storage option, upload images
-   directly to Label Studio using the Label Studio interface.
+   If you're using the MLTL Annotate Local File Storage option, upload images
+   directly to MLTL Annotate using the MLTL Annotate interface.
 
    If you're using MinIO for task storage, log into the MinIO control panel at
    `http://localhost:9001`. Create a new bucket, making a note of the name, and
@@ -150,7 +150,7 @@ If you host your images on any other public storage with `http` or `https` acces
    particular needs. 
    
 
-If using MinIO, go to the [**Cloud storage** page](https://labelstud.io/guide/project_settings#Cloud-storage) in the project settings.
+If using MinIO, go to the [**Cloud storage** page](https://docs.mltl.us/guide/project_settings#Cloud-storage) in the project settings.
 
    Add your source S3 storage by connecting to the S3 Endpoint
    `http://host.docker.internal:9000`, using the bucket name from the previous
@@ -160,7 +160,7 @@ If using MinIO, go to the [**Cloud storage** page](https://labelstud.io/guide/pr
 
 ### 6. Add model in project settings
 
-From the project settings, select the **Model** page and click [**Connect Model**](https://labelstud.io/guide/ml#Connect-the-model-to-Label-Studio).
+From the project settings, select the **Model** page and click [**Connect Model**](https://docs.mltl.us/guide/ml#Connect-the-model-to-Label-Studio).
 
    Add the URL `http://host.docker.internal:9090` and save the model as an ML backend.
 
@@ -173,5 +173,5 @@ Example below:
 ![ls_demo_ocr](https://user-images.githubusercontent.com/17755198/165186574-05f0236f-a5f2-4179-ac90-ef11123927bc.gif)
 
 Reference links: 
-- https://labelstud.io/blog/improve-ocr-quality-for-receipt-processing-with-tesseract-and-label-studio
-- https://labelstud.io/blog/release-130.html
+- https://mltl.us/blog/improve-ocr-quality-for-receipt-processing-with-tesseract-and-label-studio
+- https://mltl.us/blog/release-130.html

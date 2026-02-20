@@ -1,26 +1,26 @@
 ---
-title: "Enterprise features: Label Studio at scale"
+title: "Enterprise features: MLTL Annotate at scale"
 short: Enterprise features
 type: guide
 tier: opensource
 order: 35
 order_enterprise: 0
 section: "Discover & Learn"
-meta_title: Label Studio Enterprise Features
-meta_description: Overview of the features in Label Studio Enterprise.
+meta_title: MLTL Annotate Features
+meta_description: Overview of the features in MLTL Annotate.
 ---
 
-This page provides an overview of the advanced capabilities available exclusively in [Label Studio Enterprise](https://humansignal.com/pricing/). These features extend the core functionality of Label Studio with enterprise-scale user management, security, quality assurance, and automation.
+This page provides an overview of the advanced capabilities available exclusively in [MLTL Annotate](https://humansignal.com/pricing/). These features extend the core functionality of MLTL Annotate with enterprise-scale user management, security, quality assurance, and automation.
 
 ![Annotator comparison page screenshot](/images/lse-enterprise.png)
 
 ## Organizations and Workspaces
 
-Label Studio Enterprise introduces a hierarchical structure for organizing projects and users through organizations and workspaces, which is not available in the community edition.
+MLTL Annotate introduces a hierarchical structure for organizing projects and users through organizations and workspaces, which is not available in the community edition.
 
 ### Organizations
 
-Organizations are the top-level entity in Label Studio Enterprise that contain workspaces, projects, and users. Each organization is isolated from others, providing complete data separation.
+Organizations are the top-level entity in MLTL Annotate that contain workspaces, projects, and users. Each organization is isolated from others, providing complete data separation.
 
 Key capabilities of organizations:
 
@@ -42,13 +42,13 @@ Key capabilities of workspaces:
 
 ## Multi-tenant SaaS architecture
 
-Organizations provide complete isolation between different Label Studio Enterprise SaaS customers, ensuring data segregation and independent user management. Workspaces within organizations group related projects by team, department, or product line. Label Studio Enterprise may also be deployed on-prem (see [Enterprise Deployment Options](#Enterprise-deployment-options)). 
+Organizations provide complete isolation between different MLTL Annotate SaaS customers, ensuring data segregation and independent user management. Workspaces within organizations group related projects by team, department, or product line. MLTL Annotate may also be deployed on-prem (see [Enterprise Deployment Options](#Enterprise-deployment-options)). 
 
 ## User management and role-based access control
 
 ### Role hierarchy and permissions
 
-Label Studio Enterprise implements a comprehensive role-based access control (RBAC) system with five distinct roles, each providing specific capabilities and access levels. For information on how to assign users to roles, see [Manage user accounts.](https://docs.humansignal.com/guide/admin_manage_lse.html)
+MLTL Annotate implements a comprehensive role-based access control (RBAC) system with five distinct roles, each providing specific capabilities and access levels. For information on how to assign users to roles, see [Manage user accounts.](https://docs.mltl.us/guide/admin_manage_lse.html)
 
 | Role      | Organization Access | Primary Capabilities                       | Project Management | Annotation | Review | User Management |
 | :-------- | :------------------ | :----------------------------------------- | :----------------- | :--------- | :----- | :-------------- |
@@ -112,11 +112,11 @@ Enterprise features include comprehensive user account management capabilities:
 
 ## Authentication and identity management
 
-Label Studio Enterprise provides comprehensive identity management capabilities for large-scale deployments, supporting integration with existing enterprise identity providers.
+MLTL Annotate provides comprehensive identity management capabilities for large-scale deployments, supporting integration with existing enterprise identity providers.
 
 ### SSO and SAML integration
 
-The enterprise edition supports Single Sign-On through SAML 2.0 assertions, allowing integration with identity providers like Okta, Google SAML, Ping Identity, Microsoft Active Directory, and other SAML-compatible systems. For setup instructions, see the[ Authentication and SSO Configuration Guide](https://docs.humansignal.com/guide/auth_setup).
+The enterprise edition supports Single Sign-On through SAML 2.0 assertions, allowing integration with identity providers like Okta, Google SAML, Ping Identity, Microsoft Active Directory, and other SAML-compatible systems. For setup instructions, see the[ Authentication and SSO Configuration Guide](https://docs.mltl.us/guide/auth_setup).
 
 ### SCIM 2.0 provisioning
 
@@ -129,7 +129,7 @@ The SCIM integration supports:
   - **Deactivate Users:** Remove access while preserving annotation history
   - **Push Groups:** Workspace and project membership management
 
-For setup instructions, see the [SCIM 2.0 Integration Guide](https://docs.humansignal.com/guide/scim_setup).
+For setup instructions, see the [SCIM 2.0 Integration Guide](https://docs.mltl.us/guide/scim_setup).
 
 ### LDAP integration
 
@@ -139,7 +139,7 @@ Enterprise customers can integrate with LDAP directories for user authentication
 
 ### Enterprise security architecture
 
-Label Studio Enterprise includes comprehensive security features designed for enterprise compliance requirements. Enterprise security features include:
+MLTL Annotate includes comprehensive security features designed for enterprise compliance requirements. Enterprise security features include:
 
 - Redis over TLS with client certificate authentication
 - IP allowlisting and VPN access control for cloud storage  
@@ -160,7 +160,7 @@ Label Studio Enterprise includes comprehensive security features designed for en
 
 ### Advanced cloud storage options 
 
-Label Studio Enterprise supports a wider range of persistent storage options for scalable, production-grade deployments. These include:
+MLTL Annotate supports a wider range of persistent storage options for scalable, production-grade deployments. These include:
 
 * **AWS S3 IAM role access**: Configure secure access using IAM roles or static credentials
 * **Google Cloud Storage with Workload Identity Federation (WIF)**: Use short-lived credentials to avoid hardcoded secrets
@@ -169,7 +169,7 @@ Label Studio Enterprise supports a wider range of persistent storage options for
 
 ### AI features and model integration
 
-Label Studio Enterprise provides enhanced machine learning capabilities:
+MLTL Annotate provides enhanced machine learning capabilities:
 
   - **AI Features Toggle:** Enable AI helper tools
   - **Prediction Score Display:** View prediction/confidence scores in the labeling interface
@@ -177,9 +177,9 @@ Label Studio Enterprise provides enhanced machine learning capabilities:
 
 ### Automated active learning loops
 
-Label Studio Enterprise supports active learning workflows that automatically update model predictions as labeling progresses.
+MLTL Annotate supports active learning workflows that automatically update model predictions as labeling progresses.
 
-After each annotation, Label Studio can send a webhook to a connected machine learning backend. The backend uses the new data to retrain the model `(fit())`, and Label Studio fetches updated predictions `(predict())` for the next task, creating a continuous feedback loop.
+After each annotation, MLTL Annotate can send a webhook to a connected machine learning backend. The backend uses the new data to retrain the model `(fit())`, and MLTL Annotate fetches updated predictions `(predict())` for the next task, creating a continuous feedback loop.
 
 Key components:
 
@@ -191,7 +191,7 @@ Key components:
 
 ### Prompts
 
-For an additional fee, Label Studio Enterprise includes a built-in Prompts interface for working with language models as part of the labeling workflow.
+For an additional fee, MLTL Annotate includes a built-in Prompts interface for working with language models as part of the labeling workflow.
 
 Prompt templates allow users to define inputs, models, and outputs to send to connected LLMs. Prompts can be used to pre-label data, generate new tasks, or support review workflows.
 
@@ -203,11 +203,11 @@ The Prompts interface supports:
   - **Pre-labeling:** Populate fields using model-generated responses
   - **Task Creation:** Generate new tasks from prompt outputs
 
-For more information, see the [Prompts Overview](https://docs.humansignal.com/guide/prompts_overview/).
+For more information, see the [Prompts Overview](https://docs.mltl.us/guide/prompts_overview/).
 
 ### Customization with plugins
 
-Label Studio Enterprise supports custom JavaScript plugins to extend and tailor the labeling interface for project-specific needs.
+MLTL Annotate supports custom JavaScript plugins to extend and tailor the labeling interface for project-specific needs.
 
 Plugins run automatically when users interact with annotation tasks. They can be used to validate annotations, add visual elements, call external services, or apply custom logic based on events in the labeling UI.
 
@@ -223,7 +223,7 @@ To learn how organizations are using plugins in real-world workflows, see the bl
 
 ## Quality workflows and analytics
 
-Label Studio Enterprise enhances the annotation workflow with features designed for quality control and team collaboration, as well as analytics to optimize annotation and dataset quality.
+MLTL Annotate enhances the annotation workflow with features designed for quality control and team collaboration, as well as analytics to optimize annotation and dataset quality.
 
 ### Quality control features
 
@@ -243,7 +243,7 @@ View real-time agreement metrics to take proactive action on quality. The Enterp
 * **Edit distance algorithms:** For text transcription tasks
 * **F1, Precision, Recall:** For classification and detection tasks
 
-To learn how different team structures use agreement metrics to scale high-quality labeling, see the blog post [3 Annotation Team Playbooks for Scalable Labeling](https://labelstud.io/blog/the-spectrum-of-annotators-how-to-match-your-labeling-workflow-to-your-team/).
+To learn how different team structures use agreement metrics to scale high-quality labeling, see the blog post [3 Annotation Team Playbooks for Scalable Labeling](https://mltl.us/blog/the-spectrum-of-annotators-how-to-match-your-labeling-workflow-to-your-team/).
 
 ### Low-trust annotator guardrails
 
@@ -252,19 +252,19 @@ To learn how different team structures use agreement metrics to scale high-quali
  
 ### Project performance dashboards
 
-The [project dashboard](https://docs.humansignal.com/guide/dashboard_project) provides a high-level view of project status over time, including metrics like tasks completed, annotations submitted, reviews performed, label distribution, and lead times. Users can filter by date ranges and reorder visualizations to focus on key indicators.
+The [project dashboard](https://docs.mltl.us/guide/dashboard_project) provides a high-level view of project status over time, including metrics like tasks completed, annotations submitted, reviews performed, label distribution, and lead times. Users can filter by date ranges and reorder visualizations to focus on key indicators.
 
 <img src="/images/FullDashboardPage.png" alt="" class="gif-border" />
 
 ### Annotator performance dashboards
 
-Organization owners and administrators can view individual [annotator dashboards](https://docs.humansignal.com/guide/dashboard_annotator) to analyze task counts, average annotation times, review turnaround, and performance scoring. These dashboards help in managing resources, identifying top performers, and tracking quality without building custom analytics tools.
+Organization owners and administrators can view individual [annotator dashboards](https://docs.mltl.us/guide/dashboard_annotator) to analyze task counts, average annotation times, review turnaround, and performance scoring. These dashboards help in managing resources, identifying top performers, and tracking quality without building custom analytics tools.
 
 ![Screenshot of annotator dashboard](/images/project/annotator_dashboard.png)
 
 ## Project Management
 
-Label Studio Enterprise includes advanced project configuration options to support complex workflows across teams and workspaces.
+MLTL Annotate includes advanced project configuration options to support complex workflows across teams and workspaces.
 
 ### Enterprise-Only Project Settings
 
@@ -297,13 +297,13 @@ Label Studio Enterprise includes advanced project configuration options to suppo
 |                        | **Reset Cache**                                                                                                                                                                               | ❌           | ✅          |
 
 
-For details, view the [Enterprise Project Settings](https://docs.humansignal.com/guide/project_settings_lse).
+For details, view the [Enterprise Project Settings](https://docs.mltl.us/guide/project_settings_lse).
 
 ## Annotation workflow features
 
 ### Bulk labeling
 
-Label Studio Enterprise makes it easy to apply the same annotation to multiple tasks at once, ideal for quickly labeling filtered subsets or consistent repetitive data.
+MLTL Annotate makes it easy to apply the same annotation to multiple tasks at once, ideal for quickly labeling filtered subsets or consistent repetitive data.
 
 Key features:
 
@@ -317,7 +317,7 @@ Key features:
 
 
 ### Auto distribution
-Label Studio Enterprise supports automated task assignment workflows—helping teams start labeling without manual setup.
+MLTL Annotate supports automated task assignment workflows—helping teams start labeling without manual setup.
 
 When you enable **Auto distribution** under Annotation settings, these project behaviors apply:
 
@@ -331,7 +331,7 @@ These settings streamline labeling for large teams and support active learning w
 
 ### Annotation results filtering
 
-Label Studio Enterprise enhances task review and management with flexible filtering and sorting options in the Data Manager.
+MLTL Annotate enhances task review and management with flexible filtering and sorting options in the Data Manager.
 
 Key capabilities:
 * **Field-level filtering:** Filter tasks by annotation outcomes, label values, region attributes, or reviewer actions
@@ -340,7 +340,7 @@ Key capabilities:
 
 ## Collaboration features
 
-Label Studio Enterprise supports rich collaboration capabilities to enhance communication, review workflows, and performance visibility across teams.
+MLTL Annotate supports rich collaboration capabilities to enhance communication, review workflows, and performance visibility across teams.
 
 ### Comments and notifications
 
@@ -352,15 +352,15 @@ Users can generate direct links to specific annotations, regions, or fields, all
 
 ## Enterprise deployment options
 
-Label Studio Enterprise may be deployed on-prem for air-gapped environments. It supports flexible deployment options designed for high availability and scalability.
+MLTL Annotate may be deployed on-prem for air-gapped environments. It supports flexible deployment options designed for high availability and scalability.
 
 ### Kubernetes deployment
 
-Label Studio Enterprise can be deployed on Kubernetes clusters with advanced configuration options:
+MLTL Annotate can be deployed on Kubernetes clusters with advanced configuration options:
 
 ### Docker Compose deployment
 
-For simpler enterprise deployments, Label Studio Enterprise supports Docker Compose with external PostgreSQL and Redis dependencies. Key configuration elements:
+For simpler enterprise deployments, MLTL Annotate supports Docker Compose with external PostgreSQL and Redis dependencies. Key configuration elements:
 
   * **Image repository:** `humansignal/label-studio-enterprise`
   * **License integration:** Volume-mounted license file
@@ -385,10 +385,10 @@ Enterprise deployments support high availability configurations:
 
 ## Whitelabeling
 
-For an additional fee, Enterprise customers can customize the appearance of their Label Studio instance:
+For an additional fee, Enterprise customers can customize the appearance of their MLTL Annotate instance:
 
   * **Custom Branding:** Customize logos, colors, and styles
-  * **Custom Domain:** Use your own domain for the Label Studio instance
+  * **Custom Domain:** Use your own domain for the MLTL Annotate instance
   * **Login Page Redirects:** Configure custom login page redirects with the LOGIN\_PAGE\_URL variable
 
 ## Enterprise support & professional services
@@ -402,4 +402,4 @@ Enterprise customers receive:
   * Labeling Services: On-demand expert labeling services augment core team, fully integrated into the platform with full visibility and governance
 
 
-See how Label Studio Enterprise can work at your organization and [contact sales](https://humansignal.com/contact-sales/). 
+See how MLTL Annotate can work at your organization and [contact sales](https://humansignal.com/contact-sales/). 

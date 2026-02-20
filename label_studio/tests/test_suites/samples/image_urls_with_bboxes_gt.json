@@ -40,7 +40,7 @@
         "predictions": [],
         "agreement": null,
         "data": {
-            "image": "https://pytest.heartex.com/image1.jpg"
+            "image": "https://pytest.mltl.com/image1.jpg"
         },
         "meta": {},
         "created_at": "2022-06-01T14:24:24.055474Z",
@@ -93,7 +93,7 @@
         "predictions": [],
         "agreement": null,
         "data": {
-            "image": "https://pytest.heartex.com/image1.jpg"
+            "image": "https://pytest.mltl.com/image1.jpg"
         },
         "meta": {},
         "created_at": "2022-06-01T14:24:24.055563Z",

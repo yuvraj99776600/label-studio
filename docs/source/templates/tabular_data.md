@@ -5,7 +5,7 @@ category: Structured Data Parsing
 cat: structured-data-parsing
 order: 505
 meta_title: Tabular Data Labeling Template
-meta_description: Template for labeling tabular data with Label Studio for your machine learning and data science projects.
+meta_description: Template for labeling tabular data with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/tabular-data.png" alt="" class="gif-border" width="552px" height="408px" />

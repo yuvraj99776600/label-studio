@@ -7,7 +7,7 @@ import { EnterpriseBadge } from "@humansignal/ui";
 import Registry from "../core/Registry";
 import ControlBase from "./control/Base";
 
-const ENTERPRISE_URL = "https://docs.humansignal.com/guide/label_studio_compare";
+const ENTERPRISE_URL = "https://docs.mltl.us/guide/label_studio_compare";
 
 const CustomInterfaceModel = types.compose(
   "CustomInterfaceModel",

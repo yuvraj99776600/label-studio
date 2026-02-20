@@ -82,7 +82,7 @@ Scenario(
       // export annotation
       const annotation = await LabelStudio.serialize();
 
-      // reload LS with that datalabel studio logo
+      // reload LS with that dataMLTL Annotate logo
       LabelStudio.init({
         ...params,
         annotations: [{ id: "imported", result: annotation }],

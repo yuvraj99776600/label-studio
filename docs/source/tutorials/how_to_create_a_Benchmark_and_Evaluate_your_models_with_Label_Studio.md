@@ -1,30 +1,30 @@
 ---
-title: How to Create an AI Benchmark and Evaluate Your Models with Label Studio
+title: How to Create an AI Benchmark and Evaluate Your Models with MLTL Annotate
 hide_sidebar: true
 order: 1002
 open_in_collab: true
 tutorial: true
 community_author: mcanu
 ipynb_repo_path: tutorials/how-to-create-benchmark-and-evaluate-your-models/how_to_create_a_Benchmark_and_Evaluate_your_models_with_Label_Studio.ipynb
-repo_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/tree/main/tutorials/how-to-create-benchmark-and-evaluate-your-models
-report_bug_url: https://github.com/HumanSignal/awesome-label-studio-tutorials/issues/new
+repo_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/tree/main/tutorials/how-to-create-benchmark-and-evaluate-your-models
+report_bug_url: https://github.com/yuvraj99776600/awesome-label-studio-tutorials/issues/new
 thumbnail: /images/tutorials/tutorials-ai-benchmark-and-eval.png
-meta_title: How to Connect Hugging Face with Label Studio SDK
-meta_description: Learn how to use the Label Studio SDK to create a high-quality benchmark dataset to evaluate multiple AI models
+meta_title: How to Connect Hugging Face with MLTL Annotate SDK
+meta_description: Learn how to use the MLTL Annotate SDK to create a high-quality benchmark dataset to evaluate multiple AI models
 is_enterprise: true
 is_starter_cloud: true
 badges: SDK, Benchmark, Eval, Prompt, Colab
 duration: 5-10 mins
 ---
 Evaluating models is only as good as the benchmark you test them against.  
-In this tutorial, you'll learn how to use **Label Studio** to create a high-quality benchmark dataset, label it with human expertise, and then evaluate multiple AI models against it — all using the **Label Studio SDK**.  
+In this tutorial, you'll learn how to use **MLTL Annotate** to create a high-quality benchmark dataset, label it with human expertise, and then evaluate multiple AI models against it — all using the **MLTL Annotate SDK**.  
 
 By the end, you'll have a reproducible workflow to **measure and compare model performance** on your own data — moving beyond intuition and into measurable, data-driven insights.
 
 
-## Label Studio Requirements
+## MLTL Annotate Requirements
 
-This tutorial showcases one or more features available only in Label Studio paid products. We recommend [creating a Starter Cloud trial](https://app.humansignal.com/user/cloud-trial?offer=d9a5&) to follow the tutorial.
+This tutorial showcases one or more features available only in MLTL Annotate paid products. We recommend [creating a Starter Cloud trial](https://app.humansignal.com/user/cloud-trial?offer=d9a5&) to follow the tutorial.
 
 ## 🧠 What are benchmarks?
 
@@ -34,7 +34,7 @@ Think of it as your *reality check* — it lets you see how well a model really 
 Unlike public leaderboards or off-the-shelf test sets, a **custom benchmark** reflects *your data, your domain, and your definition of success*.  
 For example, if you're detecting phishing emails, your benchmark should include real examples of legitimate and malicious messages relevant to your context.
 
-👉 To learn more about the role of benchmarks in AI evaluation, see [**Why Benchmarks Matter for Evaluating LLMs**](https://labelstud.io/blog/why-benchmarks-matter-for-evaluating-llms/).
+👉 To learn more about the role of benchmarks in AI evaluation, see [**Why Benchmarks Matter for Evaluating LLMs**](https://mltl.us/blog/why-benchmarks-matter-for-evaluating-llms/).
 
 
 ## ⚖️ Why are benchmarks important?
@@ -48,30 +48,30 @@ A good benchmark lets you:
 - ✅ Build trust in your model’s predictions through measurable accuracy  
 
 In other words, benchmarks turn subjective “it looks better” claims into **objective evidence**.  
-For a deeper look at this idea, check out [**How to Build AI Benchmarks That Evolve with Your Models**](https://labelstud.io/blog/how-to-build-ai-benchmarks-that-evolve-with-your-models/).
+For a deeper look at this idea, check out [**How to Build AI Benchmarks That Evolve with Your Models**](https://mltl.us/blog/how-to-build-ai-benchmarks-that-evolve-with-your-models/).
 
 
-## ⚙️ How can I use Label Studio to create my benchmark?
+## ⚙️ How can I use MLTL Annotate to create my benchmark?
 
-Label Studio gives you everything you need to create, manage, and evolve your benchmark — all in one platform.  
+MLTL Annotate gives you everything you need to create, manage, and evolve your benchmark — all in one platform.  
 With it, you can:
 - 📥 **Import and label your data** collaboratively or programmatically  
 - 🧭 **Version and refine** your benchmark as your understanding improves  
 - 🤖 **Run model evaluations** directly using the SDK and built-in prompt management tools  
 
 This makes your benchmarks *living assets* that adapt as your data and models grow.  
-For inspiration, see how others are building domain-specific benchmarks in [**How LegalBenchmarks.AI Built a Domain-Specific AI Benchmark**](https://labelstud.io/blog/how-legalbenchmarks-ai-built-a-domain-specific-ai-benchmark/).
+For inspiration, see how others are building domain-specific benchmarks in [**How LegalBenchmarks.AI Built a Domain-Specific AI Benchmark**](https://mltl.us/blog/how-legalbenchmarks-ai-built-a-domain-specific-ai-benchmark/).
 
 
 ## 🎓 What is this tutorial going to teach me?
 
 In this tutorial, you’ll learn how to:
-1. 🏗️ Create a benchmark project in Label Studio using the SDK  
+1. 🏗️ Create a benchmark project in MLTL Annotate using the SDK  
 2. 📊 Import and label your own dataset  
 3. 💬 Define prompts and model versions to evaluate  
 4. 📉 Run evaluations and visualize results  
 
-We’ll also walk through an example comparing several models on a phishing email classification task — similar to how we evaluated models in [**Evaluating the GPT-5 Series on Custom Benchmarks**](https://labelstud.io/blog/evaluating-the-gpt-5-series-on-custom-benchmarks/).  
+We’ll also walk through an example comparing several models on a phishing email classification task — similar to how we evaluated models in [**Evaluating the GPT-5 Series on Custom Benchmarks**](https://mltl.us/blog/evaluating-the-gpt-5-series-on-custom-benchmarks/).  
 
 By the end, you’ll have a repeatable workflow to **evaluate any model** on **any dataset** — grounded in your own benchmark.
 
@@ -82,31 +82,31 @@ Before diving into the code, let’s make sure you have everything set up to fol
 You’ll only need a few things to get started 👇
 
 ### 🧰 Prerequisites
-> **Note:** This tutorial is available for **Label Studio Enterprise** and **Starter Cloud** users, since it uses features like **Prompts** and **Agreement Metrics** that aren’t available in the open-source version.
+> **Note:** This tutorial is available for **MLTL Annotate** and **Starter Cloud** users, since it uses features like **Prompts** and **Agreement Metrics** that aren’t available in the open-source version.
 
-If you’re using the open-source version of Label Studio, you can still follow along conceptually.  
+If you’re using the open-source version of MLTL Annotate, you can still follow along conceptually.  
 👉 Learn more or request access at [**humansignal.com**](https://humansignal.com/).
 
 You’ll need:
-- A **Label Studio account** on [app.humansignal.com](https://app.humansignal.com/)  
+- A **MLTL Annotate account** on [app.humansignal.com](https://app.humansignal.com/)  
   _(Starter Cloud or Enterprise edition required)_  
 - An **API key** from your user settings (you’ll use it to connect via the SDK)  
 - Access to a **workspace** where you can create projects
 
 
 ### 🧩 What you’ll be using
-We’ll use the **Label Studio SDK** to:
-- Connect to your Label Studio instance  
+We’ll use the **MLTL Annotate SDK** to:
+- Connect to your MLTL Annotate instance  
 - Create a project and import data  
 - Define prompts and model versions  
 - Run model evaluations and visualize the results  
 
-Everything happens programmatically — no need to click around the UI (though you can open your Label Studio anytime to see what’s happening 👀).
+Everything happens programmatically — no need to click around the UI (though you can open your MLTL Annotate anytime to see what’s happening 👀).
 
 Let's dive in 🚀
 
 
-### ⚙️ Install the SDK and connect to Label Studio
+### ⚙️ Install the SDK and connect to MLTL Annotate
 
 Let’s start by installing the SDK, configuring your connection details, and testing the connection.
 
@@ -114,7 +114,7 @@ Let’s start by installing the SDK, configuring your connection details, and te
 
 
 ```python
-# Run this cell to install the Label Studio SDK
+# Run this cell to install the MLTL Annotate SDK
 !pip install label-studio-sdk>=2.0.11
 ```
 
@@ -122,7 +122,7 @@ Let’s start by installing the SDK, configuring your connection details, and te
 ```python
 # Configure your connection details
 
-# URL of your Label Studio instance
+# URL of your MLTL Annotate instance
 LABEL_STUDIO_URL = 'https://app.humansignal.com/'
 
 # Your API key (find it in Account & Settings > Personal Access Token)
@@ -135,7 +135,7 @@ WORKSPACE_ID = 0
 
 
 ```python
-# Check you can connect to Label Studio
+# Check you can connect to MLTL Annotate
 from label_studio_sdk import LabelStudio
 
 ls = LabelStudio(base_url=LABEL_STUDIO_URL, api_key=API_KEY)
@@ -145,12 +145,12 @@ print(f'Connected as {user.email}')
 
 ### Create a Project and Import the Email Dataset
 
-1. We'll start by creating a **Label Studio project** with a labeling configuration that lets us classify each email as either **Phishing** or **Legitimate**.  
+1. We'll start by creating a **MLTL Annotate project** with a labeling configuration that lets us classify each email as either **Phishing** or **Legitimate**.  
    - If **Phishing** is selected, annotators can also choose one or more **phishing types** and **indicators** to describe the attack.
 
 2. Next, we’ll **download a dataset of raw emails** that we’ll use as the benchmark data.
 
-3. Finally, we’ll **import the dataset as tasks into Label Studio**, so we can begin labeling and building our benchmark.
+3. Finally, we’ll **import the dataset as tasks into MLTL Annotate**, so we can begin labeling and building our benchmark.
 
 
 ```python
@@ -220,7 +220,7 @@ raw_emails.head()
 
 
 ```python
-# Import raw emails as tasks to Label Studio
+# Import raw emails as tasks to MLTL Annotate
 ls.projects.import_tasks(project.id, request=raw_emails.to_dict(orient='records'))
 ```
 
@@ -233,19 +233,19 @@ ls.projects.import_tasks(project.id, request=raw_emails.to_dict(orient='records'
 
 ### Label Your Benchmark
 
-Now, if you go to **Label Studio**, you should see your newly imported tasks in the **Data Manager**.  
+Now, if you go to **MLTL Annotate**, you should see your newly imported tasks in the **Data Manager**.  
 
 Click **Label All Tasks** to start labeling your benchmark.  
 These labeled tasks will serve as your **ground truth** — the foundation for evaluating how well different models perform.  
 
 *(You can refer to the screenshots below to follow along.)*
 
-![image](https://github.com/HumanSignal/awesome-label-studio-tutorials/blob/main/tutorials/how-to-create-benchmark-and-evaluate-your-models/how_to_create_a_Benchmark_and_Evaluate_your_models_with_Label_Studio_files/figure_1.png?raw=true)
+![image](https://github.com/yuvraj99776600/awesome-label-studio-tutorials/blob/main/tutorials/how-to-create-benchmark-and-evaluate-your-models/how_to_create_a_Benchmark_and_Evaluate_your_models_with_Label_Studio_files/figure_1.png?raw=true)
 
 #### Set Annotations as Ground Truth
 
 Mark your completed annotations as **ground truth**.  
-This tells Label Studio which annotations to treat as the **source of truth** — enabling more accurate and meaningful **agreement metrics** when comparing model predictions against human labels.
+This tells MLTL Annotate which annotations to treat as the **source of truth** — enabling more accurate and meaningful **agreement metrics** when comparing model predictions against human labels.
 
 
 ```python
@@ -258,18 +258,18 @@ ls.actions.create(id='set_ground_truths', project=project.id, request_options={'
 
 ### Configure Prompts for Model Predictions
 
-**Prompts** let you connect and evaluate different AI models directly from Label Studio — using a shared prompt template to generate consistent predictions.  
+**Prompts** let you connect and evaluate different AI models directly from MLTL Annotate — using a shared prompt template to generate consistent predictions.  
 
 Before running evaluations, go to [app.humansignal.com/prompts](https://app.humansignal.com/prompts) and configure the **API keys** for the models you want to test.  
 You can also add **custom model connections** to evaluate your own or third-party models.  
 
-For more details, see the [Prompts configuration guide](https://docs.humansignal.com/guide/prompts_keys).
+For more details, see the [Prompts configuration guide](https://docs.mltl.us/guide/prompts_keys).
 
-![image](https://github.com/HumanSignal/awesome-label-studio-tutorials/blob/main/tutorials/how-to-create-benchmark-and-evaluate-your-models/how_to_create_a_Benchmark_and_Evaluate_your_models_with_Label_Studio_files/figure_2.png?raw=true)
+![image](https://github.com/yuvraj99776600/awesome-label-studio-tutorials/blob/main/tutorials/how-to-create-benchmark-and-evaluate-your-models/how_to_create_a_Benchmark_and_Evaluate_your_models_with_Label_Studio_files/figure_2.png?raw=true)
 
 ### Create and Run Model Versions with the SDK
 
-Next, we’ll use the **Label Studio SDK** to automate the process of model evaluation.  
+Next, we’ll use the **MLTL Annotate SDK** to automate the process of model evaluation.  
 We’ll create a **prompt** linked to our project, then generate a **model version** for each model we want to test.  
 
 Each model version will run inference on **all tasks in the project**, producing **one prediction per model per task** — ready for comparison against the ground truth.
@@ -410,7 +410,7 @@ display(cost_df)
 
 # 📈 Analyze Results
 
-Now that all model predictions are complete, we can use the **agreement metrics** provided by Label Studio to measure performance.  
+Now that all model predictions are complete, we can use the **agreement metrics** provided by MLTL Annotate to measure performance.  
 
 Let’s start by looking at the **overall agreement** each model achieved against the ground truth annotations.  
 This metric shows the **percentage of agreement** between each model’s predictions and your benchmark labels — giving a quick snapshot of model accuracy.
@@ -447,7 +447,7 @@ gt_agreement_df = gt_agreement_df.sort_values('Agreement (%)', ascending=False)
 ax = gt_agreement_df.plot.bar(x='Model Version', y='Agreement (%)', legend=False, rot=45, color=plt.cm.viridis(gt_agreement_df.index / len(gt_agreement_df)))
 plt.ylabel('Agreement with Ground Truth (%)')
 plt.xlabel('Model Version')
-plt.title('Model Version Agreement with Ground Truth (Label Studio Stats)')
+plt.title('Model Version Agreement with Ground Truth (MLTL Annotate Stats)')
 
 # Add agreement percentages on top of the bars
 for container in ax.containers:
@@ -498,7 +498,7 @@ per_label_df.style.background_gradient(cmap='Pastel1', subset=pd.IndexSlice[per_
 
 ## 🎯 Wrapping Up
 
-Congrats — you’ve just built your own **benchmark** for phishing email classification using **Label Studio**!  
+Congrats — you’ve just built your own **benchmark** for phishing email classification using **MLTL Annotate**!  
 
 With just a few steps, you created a setup that lets you:
 - 🧠 Evaluate how well an LLM classifies phishing vs. legitimate emails  
@@ -516,15 +516,15 @@ They help you:
 Benchmarks aren’t static — they evolve.  
 You can continuously expand this benchmark with new examples or categories as your needs grow.
 
-### 🧩 Why Label Studio
+### 🧩 Why MLTL Annotate
 
-Label Studio makes this process simple and collaborative:
+MLTL Annotate makes this process simple and collaborative:
 - Create, manage, and version **custom benchmarks**  
 - **Evaluate multiple models** on the same dataset  
 - **Visualize metrics and insights** directly from your labeled data  
 - Integrate results into your existing ML pipeline for continuous improvement  
 
-That’s exactly how teams like [*LegalBenchmarks.AI*](https://labelstud.io/blog/how-legalbenchmarks-ai-built-a-domain-specific-ai-benchmark/) build reliable, evolving benchmarks across domains.  
+That’s exactly how teams like [*LegalBenchmarks.AI*](https://mltl.us/blog/how-legalbenchmarks-ai-built-a-domain-specific-ai-benchmark/) build reliable, evolving benchmarks across domains.  
 
 ### 🚀 Next Steps
 
@@ -536,9 +536,9 @@ Keep iterating on what you built today:
 
 ### 📚 Learn More
 
-- [Label Studio Documentation](https://docs.humansignal.com/guide/)  
+- [MLTL Annotate Documentation](https://docs.mltl.us/guide/)  
 - [Label Studio SDK](https://humansignal.github.io/label-studio-sdk/)  
-- [Blog: Why Benchmarks Matter for Evaluating LLMs](https://labelstud.io/blog/why-benchmarks-matter-for-evaluating-llms/)  
-- [Blog: How to Build AI Benchmarks That Evolve with Your Models](https://labelstud.io/blog/how-to-build-ai-benchmarks-that-evolve-with-your-models/)  
-- [Blog: Evaluating the GPT-5 Series on Custom Benchmarks](https://labelstud.io/blog/evaluating-the-gpt-5-series-on-custom-benchmarks/)  
-- [Blog: How LegalBenchmarks.AI Built a Domain-Specific AI Benchmark](https://labelstud.io/blog/how-legalbenchmarks-ai-built-a-domain-specific-ai-benchmark/)
+- [Blog: Why Benchmarks Matter for Evaluating LLMs](https://mltl.us/blog/why-benchmarks-matter-for-evaluating-llms/)  
+- [Blog: How to Build AI Benchmarks That Evolve with Your Models](https://mltl.us/blog/how-to-build-ai-benchmarks-that-evolve-with-your-models/)  
+- [Blog: Evaluating the GPT-5 Series on Custom Benchmarks](https://mltl.us/blog/evaluating-the-gpt-5-series-on-custom-benchmarks/)  
+- [Blog: How LegalBenchmarks.AI Built a Domain-Specific AI Benchmark](https://mltl.us/blog/how-legalbenchmarks-ai-built-a-domain-specific-ai-benchmark/)

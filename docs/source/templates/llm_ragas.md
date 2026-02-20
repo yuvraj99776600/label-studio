@@ -20,12 +20,12 @@ This template uses the [Ragas](https://docs.ragas.io/en/stable/) framework to ev
 
 ## Prerequisites
 
-This template requires an ML backend to work. Follow the instructions outlined in [RAG Quickstart Labeling](https://github.com/HumanSignal/label-studio-ml-backend/tree/agi-builders-workshop-rag/label_studio_ml/examples/rag_quickstart) to connect the ML backend to your project. 
+This template requires an ML backend to work. Follow the instructions outlined in [RAG Quickstart Labeling](https://github.com/yuvraj99776600/label-studio-ml-backend/tree/agi-builders-workshop-rag/label_studio_ml/examples/rag_quickstart) to connect the ML backend to your project. 
 
 You will need an OpenAI API key and a directory with documentation files to use as context. 
 
 !!! info Tip
-    If you are just looking to experiment with this template and the ML backend, you can clone the [Label Studio repository](https://github.com/HumanSignal/label-studio) and use the `label-studio\docs` directory as your context. 
+    If you are just looking to experiment with this template and the ML backend, you can clone the [MLTL Annotate repository](https://github.com/yuvraj99776600/label-studio) and use the `label-studio\docs` directory as your context. 
 
 ## Configure the labeling interface
 
@@ -138,13 +138,13 @@ Using the configuration above, you would want to structure your input data to ha
   {
     "id": 1,
     "data": {
-      "text": "What are the system requirements for Label Studio?"
+      "text": "What are the system requirements for MLTL Annotate?"
     }
   },
   {
     "id": 2,
     "data": {
-      "text": "How do I update Label Studio?"
+      "text": "How do I update MLTL Annotate?"
     }
   }
 ]

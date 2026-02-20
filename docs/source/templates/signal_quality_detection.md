@@ -5,7 +5,7 @@ category: Audio/Speech Processing
 cat: audio-speech-processing
 order: 315
 meta_title: Signal Quality Detection Data Labeling Template
-meta_description: Template for detecting the quality of an audio signal with Label Studio for your machine learning and data science projects.
+meta_description: Template for detecting the quality of an audio signal with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/signal-quality-detection.png" alt="" class="gif-border" width="552px" height="408px" />

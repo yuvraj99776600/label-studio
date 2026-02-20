@@ -6,17 +6,17 @@ type: guide
 order: 0
 order_enterprise: 305
 meta_title: Ground truth annotations
-meta_description: Set ground truth annotations in Label Studio Enterprise. 
+meta_description: Set ground truth annotations in MLTL Annotate. 
 section: "Review & Measure Quality"
 date: 2024-09-30 13:57:28
 ---
 
 A "ground truth" annotation is a verified, high-quality annotation that serves as the correct answer for a specific task. It acts as a benchmark to assess the accuracy of other annotations and the performance of machine learning models.
 
-Label Studio Enterprise compares annotations from annotators and model predictions against the ground truth annotations for a task to calculate an accuracy score between 0 and 1.
+MLTL Annotate compares annotations from annotators and model predictions against the ground truth annotations for a task to calculate an accuracy score between 0 and 1.
 
 !!! error Enterprise
-    Ground truth annotations are only available in Label Studio Enterprise Edition. If you're using Label Studio Community Edition, see [Label Studio Features](https://labelstud.io/guide/label_studio_compare.html) to learn more.
+    Ground truth annotations are only available in MLTL Annotate Edition. If you're using Label Studio Community Edition, see [Label Studio Features](https://docs.mltl.us/guide/label_studio_compare.html) to learn more.
 
 ## Mark an annotation as a ground truth
 

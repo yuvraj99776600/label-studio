@@ -1,18 +1,18 @@
 ---
-title: Time Series Segmenter for Label Studio
+title: Time Series Segmenter for MLTL Annotate
 type: guide
 tier: all
 order: 51
 hide_menu: true
 hide_frontmatter_title: true
-meta_title: Time Series Segmenter for Label Studio
-meta_description: Tutorial demonstrating a minimal ML backend that performs time series segmentation in Label Studio.
+meta_title: Time Series Segmenter for MLTL Annotate
+meta_description: Tutorial demonstrating a minimal ML backend that performs time series segmentation in MLTL Annotate.
 categories:
     - Time Series
     - Segmentation
 image: "/guide/ml_tutorials/timeseries.png"
 ---
-# Time Series Segmenter for Label Studio
+# Time Series Segmenter for MLTL Annotate
 
 This example demonstrates a minimal ML backend that performs time series segmentation.
 It trains a small LSTM neural network on labeled CSV data and predicts segments
@@ -23,7 +23,7 @@ for new tasks. The backend expects the labeling configuration to use
 
 ## Before you begin
 
-1. Install the [Label Studio ML backend](https://github.com/HumanSignal/label-studio-ml-backend?tab=readme-ov-file#quickstart).
+1. Install the [MLTL Annotate ML backend](https://github.com/yuvraj99776600/label-studio-ml-backend?tab=readme-ov-file#quickstart).
 2. Set `LABEL_STUDIO_HOST` and `LABEL_STUDIO_API_KEY` in `docker-compose.yml`
    so the backend can download labeled tasks for training.
 
@@ -85,7 +85,7 @@ Training starts automatically when annotations are created or updated. The model
 
 The model follows these steps during training:
 
-1. **Data Collection**: Fetches all labeled tasks from your Label Studio project
+1. **Data Collection**: Fetches all labeled tasks from your MLTL Annotate project
 2. **Sample Generation**: Converts labeled time ranges into training samples:
    - **Background Class**: Unlabeled time periods are treated as "background" (class 0)
    - **Event Classes**: Your labeled segments (e.g., "Run", "Walk") become classes 1, 2, etc.
@@ -154,7 +154,7 @@ When multiple annotations exist for the same task, the model prioritizes ground 
 
 ## Prediction
 
-The model processes new time series data by applying the trained LSTM classifier with sliding window temporal context. Only meaningful event segments are returned to Label Studio, filtering out background periods automatically.
+The model processes new time series data by applying the trained LSTM classifier with sliding window temporal context. Only meaningful event segments are returned to MLTL Annotate, filtering out background periods automatically.
 
 ### Prediction process
 
@@ -171,7 +171,7 @@ For each task, the model performs these steps:
    - **Event Segmentation**: Only returns segments with actual event labels
    - **Instant Detection**: Automatically sets `instant=true` for point events (start=end, one sample events that you can label using double click) and `instant=false` for ranges
    - **Score Calculation**: Averages prediction confidence per segment
-5. **Result Formatting**: Returns segments in Label Studio JSON format with proper instant field values
+5. **Result Formatting**: Returns segments in MLTL Annotate JSON format with proper instant field values
 
 ### Prediction quality
 
@@ -185,7 +185,7 @@ This approach ensures that predictions focus on actual events rather than forcin
 
 ## Project-specific models
 
-The backend automatically handles multiple Label Studio projects by maintaining separate trained models for each project. This ensures proper isolation and prevents cross-project interference.
+The backend automatically handles multiple MLTL Annotate projects by maintaining separate trained models for each project. This ensures proper isolation and prevents cross-project interference.
 
 ### How project isolation works
 
@@ -219,7 +219,7 @@ This architecture provides several key advantages:
 - Poor annotations in one project won't degrade other projects' models
 
 **Scalability:**
-- Backend can serve multiple Label Studio projects simultaneously
+- Backend can serve multiple MLTL Annotate projects simultaneously
 - Memory management keeps frequently used models cached
 - Inactive project models are loaded on-demand
 
@@ -231,7 +231,7 @@ No additional configuration is required - project isolation works automatically.
 2. **Prediction**: Project ID from task context or request metadata
 3. **Fallback**: Uses default project_id=0 for backward compatibility
 
-This seamless multi-tenant support makes the backend suitable for enterprise Label Studio deployments where multiple teams or clients need isolated ML models.
+This seamless multi-tenant support makes the backend suitable for enterprise MLTL Annotate deployments where multiple teams or clients need isolated ML models.
 
 ## How it works
 
@@ -280,7 +280,7 @@ flowchart TD
 - **Smart Early Stopping**: Dual criteria (balanced accuracy + minimum per-class F1) prevent premature stopping
 - **Ground Truth Priority**: Ensures highest quality annotations are used for training
 - **Overlap Averaging**: Smoother predictions through overlapping window consensus
-- **Project-Specific Models**: Each Label Studio project gets its own trained model for proper multi-tenant isolation
+- **Project-Specific Models**: Each MLTL Annotate project gets its own trained model for proper multi-tenant isolation
 
 ## Customize
 

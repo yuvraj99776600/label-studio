@@ -1,4 +1,4 @@
-# Label Studio Design System
+# MLTL Annotate Design System
 
 ## Table of Contents
 

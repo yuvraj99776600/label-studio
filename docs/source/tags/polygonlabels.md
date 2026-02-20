@@ -3,7 +3,7 @@ title: PolygonLabels
 type: tags
 order: 418
 meta_title: Polygon Label Tag for Labeling Polygons in Images
-meta_description: Customize Label Studio with the PolygonLabels tag and label polygons in images for semantic segmentation machine learning and data science projects.
+meta_description: Customize MLTL Annotate with the PolygonLabels tag and label polygons in images for semantic segmentation machine learning and data science projects.
 ---
 
 The `PolygonLabels` tag is used to create labeled polygons. Use to apply labels to polygons in semantic segmentation tasks.

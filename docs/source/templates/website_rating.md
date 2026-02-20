@@ -5,7 +5,7 @@ category: Ranking and Scoring
 cat: ranking-and-scoring
 order: 410
 meta_title: Website Rating Data Labeling Template
-meta_description: Template for rating website content with Label Studio for your machine learning and data science projects.
+meta_description: Template for rating website content with MLTL Annotate for your machine learning and data science projects.
 ---
 
 For cases when you want to rate the quality of websites, or rate the trustworthiness and classify the content of a website, you can use this template.
@@ -64,18 +64,18 @@ There are two ways to structure input data to use this template:
 - Use links to websites in JSON-formatted files
 
 ### Use HTML files
-**This method is recommended.** Save the website content that you want to rate as HTML files, and import the HTML files into Label Studio. 
+**This method is recommended.** Save the website content that you want to rate as HTML files, and import the HTML files into MLTL Annotate. 
 
 If you use this method, change the `inline` parameter for the HyperText tag to `false`. 
 
 ### Use links to websites
-This method seems simpler, but due to CORS (cross-origin resource sharing) restrictions on websites appearing in HTML iframes, it only works for websites hosted on the same domain as your Label Studio instance. For example, if you want to rate websites hosted on your organization's domain, and Label Studio is hosted on the same domain, you can probably use this option. In most cases, CORS restrictions prevent the website from being visible.  
+This method seems simpler, but due to CORS (cross-origin resource sharing) restrictions on websites appearing in HTML iframes, it only works for websites hosted on the same domain as your MLTL Annotate instance. For example, if you want to rate websites hosted on your organization's domain, and MLTL Annotate is hosted on the same domain, you can probably use this option. In most cases, CORS restrictions prevent the website from being visible.  
 
 If this option will work for you, you can use the following example JSON:
 One task can be formatted like the following:
 ```json
 {
-    "website": "<iframe src='https://heartex.com' width='100%' height='600px'/>"
+    "website": "<iframe src='https://mltl.com' width='100%' height='600px'/>"
 }
 ```
 
@@ -84,7 +84,7 @@ Or multiple tasks like the following:
 [
    {
       "data":{
-         "website": "<iframe src='https://heartex.com' width='100%' height='600px'/>"
+         "website": "<iframe src='https://mltl.com' width='100%' height='600px'/>"
       }
    },
    {
@@ -94,7 +94,7 @@ Or multiple tasks like the following:
    },
    {
       "data":{
-         "website": "<iframe src='https://labelstud.io' width='100%' height='600px'/>"
+         "website": "<iframe src='https://mltl.us' width='100%' height='600px'/>"
       }
    }
 ]

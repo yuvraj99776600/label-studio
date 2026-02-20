@@ -186,7 +186,7 @@ export const JsonViewer: FC<JsonViewerProps> = ({
     ] as any;
   }, [readerViewThreshold]);
 
-  // Custom icons using Label Studio's icon library
+  // Custom icons using MLTL Annotate's icon library
   const customIcons = useMemo(
     () => ({
       copy: <IconCopyOutline width={20} height={20} />,

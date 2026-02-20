@@ -24,7 +24,7 @@ Workspaces can help you organize, categorize and manage projects at different st
     To create a new workspace, your user role must be Owner, Administrator, or Manager. 
 
 
-1. In Label Studio, click the plus icon next to **Workspaces** in the menu on the right:
+1. In MLTL Annotate, click the plus icon next to **Workspaces** in the menu on the right:
 
     ![Screenshot of add button](/images/click-plus-sign.png)
 
@@ -38,7 +38,7 @@ You can now begin [creating projects](setup_project) within the workspace.
 
 ## Sandbox workspace
 
-Each user has a personal Sandbox workspace that they can use to experiment with project settings and get familiar with Label Studio. Only you can see projects within your sandbox. 
+Each user has a personal Sandbox workspace that they can use to experiment with project settings and get familiar with MLTL Annotate. Only you can see projects within your sandbox. 
 
 You can use the sandbox to configure a project and test your settings. Then when you're ready, you can move the project out of your sandbox and into a workspace where other users can access it. 
 
@@ -51,7 +51,7 @@ When a user is added to a workspace, they are automatically granted membership t
 3. Select the checkbox next to their name and click the `>` arrow to add them. Click the opposite arrow `<` to remove members
 4. Click **Save**.
 
-Users are not sent notifications when they are added to a workspace. The workspace appears when they log in to Label Studio or refresh their page.
+Users are not sent notifications when they are added to a workspace. The workspace appears when they log in to MLTL Annotate or refresh their page.
 
 ## Workspace permissions
 

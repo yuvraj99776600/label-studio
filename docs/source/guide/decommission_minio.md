@@ -6,7 +6,7 @@ meta_title: Decommission minio
 
 
 !!! warning
-    Decommissioning Minio is a hazardous action because you may lose all your data uploaded using direct file upload. For more information or support, contact the [Heartex team](support@humansignal.com).
+    Decommissioning Minio is a hazardous action because you may lose all your data uploaded using direct file upload. For more information or support, contact the [Heartex team](support@mltl.us).
 
 To decommission Minio, do the following:
 
@@ -23,7 +23,7 @@ global:
     MINIO_MIGRATION: true
 ```
 
-2. Redeploy a release by following the steps from [Upgrade Label Studio Enterprise](install_enterprise_k8s.html#Upgrade-Label-Studio-using-Helm). 
+2. Redeploy a release by following the steps from [Upgrade MLTL Annotate](install_enterprise_k8s.html#Upgrade-Label-Studio-using-Helm). 
 
 ## Run migration script
 
@@ -48,7 +48,7 @@ JSON_LOG=0 python3 $LSE_DIR/label_studio_enterprise/manage.py minio-migrate
 - Ensure that this data appears in your `bucket/volume` by `project_id/export`.
 
 !!! note 
-    For more information or support, contact the [Heartex team](support@humansignal.com).
+    For more information or support, contact the [Heartex team](support@mltl.us).
 
 ## Completely remove Minio service
 
@@ -60,4 +60,4 @@ minio:
 
 2. Remove `MINIO_MIGRATION: true` from `global.extraEnvironmentVars` section of your `ls-values.yaml` file.
 
-3. Redeploy a release by following steps from [Upgrade Label Studio Enterprise](install_enterprise_k8s.html#Upgrade-Label-Studio-using-Helm).
+3. Redeploy a release by following steps from [Upgrade MLTL Annotate](install_enterprise_k8s.html#Upgrade-Label-Studio-using-Helm).

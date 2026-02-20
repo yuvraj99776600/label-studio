@@ -218,16 +218,16 @@ tutorial_with_cats_and_dogs_image_classifier:
   ml_backend: imageclassifier
 
   upload_tasks:
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/training_set/dogs/dog.1753.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/training_set/dogs/dog.3144.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/training_set/dogs/dog.775.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/training_set/dogs/dog.3622.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/training_set/dogs/dog.1035.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/test_set/cats/cat.4358.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/test_set/cats/cat.4364.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/test_set/cats/cat.4402.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/test_set/cats/cat.4416.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/test_set/cats/cat.4370.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/training_set/dogs/dog.1753.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/training_set/dogs/dog.3144.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/training_set/dogs/dog.775.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/training_set/dogs/dog.3622.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/training_set/dogs/dog.1035.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/test_set/cats/cat.4358.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/test_set/cats/cat.4364.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/test_set/cats/cat.4402.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/test_set/cats/cat.4416.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/test_set/cats/cat.4370.jpg
 
   completions:
     - result:
@@ -292,8 +292,8 @@ tutorial_with_cats_and_dogs_image_classifier:
               - cat
 
   prediction_tasks:
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/training_set/dogs/dog.3953.jpg
-    - image: http://s3.amazonaws.com/heartex-private/cats_n_dogs/test_set/cats/cat.4415.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/training_set/dogs/dog.3953.jpg
+    - image: http://s3.amazonaws.com/mltl-private/cats_n_dogs/test_set/cats/cat.4415.jpg
 
   wait_model: 10
 

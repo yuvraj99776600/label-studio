@@ -1,19 +1,19 @@
 ---
-title: Set up active learning with Label Studio
+title: Set up active learning with MLTL Annotate
 short: Active learning loop
 tier: enterprise
 type: guide
 order: 0
 order_enterprise: 257
-meta_title: Set up an active learning loop with Label Studio
-meta_description: Set up an end-to-end active learning loop with Label Studio using the ML backend SDK and webhooks to perform model training and predictions and labeling.
+meta_title: Set up an active learning loop with MLTL Annotate
+meta_description: Set up an end-to-end active learning loop with MLTL Annotate using the ML backend SDK and webhooks to perform model training and predictions and labeling.
 section: "Machine Learning"
 
 ---
 
-Follow this tutorial to set up an active learning loop with Label Studio. 
+Follow this tutorial to set up an active learning loop with MLTL Annotate. 
 
-Use Label Studio Enterprise Edition to build an automated active learning loop with a machine learning model backend. If you use the open source Community Edition of Label Studio, you can manually sort tasks and retrieve predictions to mimic an active learning process. If you're using Label Studio Community Edition, see how to [manually manage your active learning loop](#Set-up-manual-active-learning).
+Use MLTL Annotate Edition to build an automated active learning loop with a machine learning model backend. If you use the open source Community Edition of MLTL Annotate, you can manually sort tasks and retrieve predictions to mimic an active learning process. If you're using MLTL Annotate Community Edition, see how to [manually manage your active learning loop](#Set-up-manual-active-learning).
 
 
 ## About Active Learning
@@ -24,36 +24,36 @@ In particular, Active Learning algorithms aim to select diverse and informative 
 
 ## Set up an automated active learning loop
 
-Continuously train and review predictions from a connected machine learning model using Label Studio. 
+Continuously train and review predictions from a connected machine learning model using MLTL Annotate. 
 
 <br/><img src="/images/LS-active-learning.png" alt="Diagram of the active learning workflow described in surrounding text" class="gif-border" width="800px" height="472px" />
 
-After a user creates an annotation in Label Studio, the configured webhook sends a message to the machine learning backend with the information about the created annotation. The `fit()` method of the ML backend runs to train the model. When the user moves on to the next labeling task, Label Studio retrieves the latest prediction for the task from the ML backend, which runs the `predict()` method on the task.
+After a user creates an annotation in MLTL Annotate, the configured webhook sends a message to the machine learning backend with the information about the created annotation. The `fit()` method of the ML backend runs to train the model. When the user moves on to the next labeling task, MLTL Annotate retrieves the latest prediction for the task from the ML backend, which runs the `predict()` method on the task.
 
 To set up this active learning, do the following: 
 1. [Set up an ML model as an ML backend for active learning](#Set-up-an-ML-model-as-an-ML-backend-for-active-learning).
-2. [Connect the ML backend for getting predictions to Label Studio](#Connect-the-ML-backend-to-Label-Studio-for-active-learning).
+2. [Connect the ML backend for getting predictions to MLTL Annotate](#Connect-the-ML-backend-to-Label-Studio-for-active-learning).
 3. [Configure webhooks to send a training event to the ML backend (optional)](#Configure-webhooks-to-send-a-training-event-to-the-ML-backend-(optional)). 
 4. [Set up task sampling with prediction scores](#Set-up-task-sampling-with-prediction-scores).
 5. [Label the tasks](#Label-the-tasks). 
 
-As you label tasks, Label Studio sends webhook events to your machine learning backend and prompts it to retrain. As the model retrains, the predictions from the latest model version appear in Label Studio. 
+As you label tasks, MLTL Annotate sends webhook events to your machine learning backend and prompts it to retrain. As the model retrains, the predictions from the latest model version appear in MLTL Annotate. 
 
 ## Set up an ML model as an ML backend for active learning
 
 [Set up an example machine learning model as an ML backend](ml#Set-up-an-example-ML-backend), or [create a custom machine learning model](ml_create).
 
-## Connect the ML backend to Label Studio for active learning
+## Connect the ML backend to MLTL Annotate for active learning
 
-Follow the steps to [connect a model to a Label Studio project](ml#Connect-the-model-to-Label-Studio) and ensure the setting **Start model training on annotation submission** is enabled. This sends a training request to the backend after each annotation submission or update. 
+Follow the steps to [connect a model to a MLTL Annotate project](ml#Connect-the-model-to-Label-Studio) and ensure the setting **Start model training on annotation submission** is enabled. This sends a training request to the backend after each annotation submission or update. 
 
 ## Configure webhooks to send a training event to the ML backend (optional)
 
-By default, Label Studio notifies your ML backend every time an annotation is created or updated so that it can start training in response. 
+By default, MLTL Annotate notifies your ML backend every time an annotation is created or updated so that it can start training in response. 
 
 If you want, you can set up your project to send a webhook event and use that event and payload to drive event-specific training logic in your ML backend. If you want to customize the events and payloads sent to your ML backend, do the following:
 
-1. In the Label Studio UI, open the project that you want to use for active learning.
+1. In the MLTL Annotate UI, open the project that you want to use for active learning.
 2. Click **Settings > Webhooks**.
 3. Click **Add Webhook**. 
 4. Add the following URL as your **Payload URL**: `http://localhost:9090/webhook`
@@ -71,7 +71,7 @@ In order to maximize the training efficiency and effectiveness of your machine l
 
 On the project data manager, select **Label All Tasks** to start labeling.
 
-As your model retrains and a new version is updated in Label Studio, the tasks shown next to annotators are always those with the lowest prediction scores, reflecting those with the lowest model certainty. The predictions for the tasks correspond to the latest model version.
+As your model retrains and a new version is updated in MLTL Annotate, the tasks shown next to annotators are always those with the lowest prediction scores, reflecting those with the lowest model certainty. The predictions for the tasks correspond to the latest model version.
 
 ## Customize your active learning loop
 
@@ -84,7 +84,7 @@ If you want to change the behavior of the active learning loop, you can make man
 
 ### Set up manual active learning 
 
-If you're using Label Studio Community Edition, data annotators can't experience a live active learning loop. You can mimic an active learning experience by doing the following:
+If you're using MLTL Annotate Community Edition, data annotators can't experience a live active learning loop. You can mimic an active learning experience by doing the following:
 1. Manually [retrieve predictions from a model](ml.html#Get-predictions-from-a-model).
 2. [Sort the tasks in the data manager by prediction score](manage_data.html#Example-Sort-by-prediction-score).
 3. Select **Label Tasks As Displayed** when labeling tasks. 

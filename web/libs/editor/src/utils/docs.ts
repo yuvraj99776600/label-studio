@@ -1,11 +1,11 @@
 /**
  * Returns the base URL for documentation depending on deployment type.
- * - Enterprise: https://docs.humansignal.com/
+ * - Enterprise: https://docs.mltl.us/
  * - Open Source: https://labelstud.io/
  */
 export function getDocsBaseUrl(): string {
   if (typeof window !== "undefined" && window.APP_SETTINGS?.billing?.enterprise) {
-    return "https://docs.humansignal.com/";
+    return "https://docs.mltl.us/";
   }
   return "https://labelstud.io/";
 }

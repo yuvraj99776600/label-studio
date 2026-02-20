@@ -5,7 +5,7 @@ category: Time Series Analysis
 cat: time-series-analysis
 order: 620
 meta_title: Change Point Detection Data Labeling Template
-meta_description: Template for labeling change point detection in time series data with Label Studio for your machine learning and data science projects.
+meta_description: Template for labeling change point detection in time series data with MLTL Annotate for your machine learning and data science projects.
 ---
 
 <img src="/images/templates/change-point-detection.png" alt="" class="gif-border" width="552px" height="408px" />

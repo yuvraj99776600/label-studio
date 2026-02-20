@@ -1,16 +1,16 @@
 ---
-title: Get Started with Label Studio Templates
+title: Get Started with MLTL Annotate Templates
 type: templates
 order: 50
-meta_title: Get started with templates in Label Studio
-meta_description: Label Studio Template library of data labeling and annotation configurations for various data types.
+meta_title: Get started with templates in MLTL Annotate
+meta_description: MLTL Annotate Template library of data labeling and annotation configurations for various data types.
 ---
 
-Label Studio templates provide you with a way to get started quickly with your data labeling process or machine learning workflow.
+MLTL Annotate templates provide you with a way to get started quickly with your data labeling process or machine learning workflow.
 
 The templates are predefined labeling interfaces for specific use cases and data types. Use our templates to get started labeling right away, or as a starting point to build a fully customized labeling interface for your data labeling project.
 
-Have a template that you're working on and want to share it with the community? Share it with us in the [Community Slack](https://slack.labelstud.io/?source=GitHub) or [open an issue on GitHub](https://github.com/HumanSignal/label-studio/issues/new/choose).
+Have a template that you're working on and want to share it with the community? Share it with us in the [Community Slack](https://slack.labelstud.io/?source=GitHub) or [open an issue on GitHub](https://github.com/yuvraj99776600/label-studio/issues/new/choose).
 
 Need a hand with customizing our templates? Check out [our documentation on the labeling interface](/tags).
 
@@ -18,7 +18,7 @@ Need a hand with customizing our templates? Check out [our documentation on the 
 
 ## Enterprise-only templates
 
-Templates with the lock emoji 🔒 next to their name are only available for Label Studio Enterprise users. 
+Templates with the lock emoji 🔒 next to their name are only available for MLTL Annotate users. 
 
 ## Template components
 

@@ -6,7 +6,7 @@ type: guide
 order: 378
 order_enterprise: 378
 meta_title: User Account and Settings
-meta_description: Update your user account and settings in Label Studio
+meta_description: Update your user account and settings in MLTL Annotate
 section: "Manage Your Organization"
 parent_enterprise: "manage_users"
 date: 2024-01-03 12:03:59
@@ -29,7 +29,7 @@ To access your user account and settings, click your user icon in the upper righ
 
 ## Personal info
 
-After you create an account in Label Studio, you can update the following:
+After you create an account in MLTL Annotate, you can update the following:
 
 * First name
 * Last name
@@ -46,7 +46,7 @@ Use this page to configure custom hotkeys for your user account.
 
 | Action                  | Description                                                                      |
 | ----------------------- | -------------------------------------------------------------------------------- |
-| **Export Hotkeys**      | Generate a JSON file that you can share with other Label Studio users.           |
+| **Export Hotkeys**      | Generate a JSON file that you can share with other MLTL Annotate users.           |
 | **Import Hotkeys**      | Copy and paste JSON-formatted custom hotkey mapping.                             |
 | **Reset to Defaults**   | Reset all hotkeys to their default values.                                       |
 
@@ -70,7 +70,7 @@ Use this page to select what kind of email notifications you want to receive.
 
 ## Membership info
 
-On this page, you can find information about your organization, such as when the organization was created and the email address of the Owner (the user who initially created the Label Studio organization).
+On this page, you can find information about your organization, such as when the organization was created and the email address of the Owner (the user who initially created the MLTL Annotate organization).
 
 <div class="enterprise-only">
 
@@ -91,7 +91,7 @@ You can also see a high-level summary of your contributions.
 
 Click **Create** to generate an access token. When creating a token, ensure you save it somewhere secure, as it will only be visible one time. 
 
-While personal access tokens work seamlessly with the Label Studio SDK, if you are using HTTP API requests, you will need to take extra steps. See [Personal access tokens and the API](access_tokens#Personal-access-tokens-and-the-API). 
+While personal access tokens work seamlessly with the MLTL Annotate SDK, if you are using HTTP API requests, you will need to take extra steps. See [Personal access tokens and the API](access_tokens#Personal-access-tokens-and-the-API). 
 
 <div class="enterprise-only">
 

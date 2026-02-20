@@ -2,9 +2,9 @@
     {
         "data":
         {
-            "image": "https://data.heartex.net/open-images/train_0/mini/0007efdd465a14b8.jpg",
+            "image": "https://data.mltl.net/open-images/train_0/mini/0007efdd465a14b8.jpg",
             "text": "Calif. wildfires signal the arrival of a planetary fire age https://t.co/Vvo9noqQfA",
-            "audio": "https://data.heartex.net/librispeech/dev-clean/3536/8226/3536-8226-0024.flac.wav"
+            "audio": "https://data.mltl.net/librispeech/dev-clean/3536/8226/3536-8226-0024.flac.wav"
         },
         "annotations":
         [
@@ -69,9 +69,9 @@
     {
         "data":
         {
-            "image": "https://data.heartex.net/open-images/train_0/mini/001a4c5a994c1425.jpg",
+            "image": "https://data.mltl.net/open-images/train_0/mini/001a4c5a994c1425.jpg",
             "text": "The Supreme Court won’t hear a challenge from gun maker Remington to a lawsuit brought by families of victims kille… https://t.co/k8ocrhV7Qj",
-            "audio": "https://data.heartex.net/librispeech/dev-clean/3536/8226/3536-8226-0024.flac.wav"
+            "audio": "https://data.mltl.net/librispeech/dev-clean/3536/8226/3536-8226-0024.flac.wav"
         },
         "annotations":
         [
@@ -136,9 +136,9 @@
     {
         "data":
         {
-            "image": "https://data.heartex.net/open-images/train_0/mini/007dd9372c1d4088.jpg",
+            "image": "https://data.mltl.net/open-images/train_0/mini/007dd9372c1d4088.jpg",
             "text": "HAPPENING NOW: Coverage of Southern California wildfires from Los Angeles ABC station KABC. https://t.co/R1TsTK1qRG https://t.co/tYO1icafiq",
-            "audio": "https://data.heartex.net/librispeech/dev-clean/3536/8226/3536-8226-0009.flac.wav"
+            "audio": "https://data.mltl.net/librispeech/dev-clean/3536/8226/3536-8226-0009.flac.wav"
         },
         "annotations":
         [
