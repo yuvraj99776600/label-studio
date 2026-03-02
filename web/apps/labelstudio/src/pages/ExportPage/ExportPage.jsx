@@ -18,18 +18,10 @@ import { cn } from "../../utils/bem";
 import { isDefined, copyText } from "../../utils/helpers";
 import "./ExportPage.scss";
 
-// Community Edition exports run synchronously in a single HTTP request.
-// Large exports can exceed typical proxy timeouts, so we warn early and link to alternatives.
 const LARGE_EXPORT_TASK_THRESHOLD = 1000;
-const EXPORT_TIMEOUT_DOCS_URL = "https://docs.mltl.us/guide/export.html#Export-timeout-in-Community-Edition";
+const EXPORT_TIMEOUT_DOCS_URL = "https://docs.mltl.us/guide/export.html#Export-timeout";
 const EXPORT_CONSOLE_DOCS_URL = "https://docs.mltl.us/guide/export.html#Export-using-console-command";
-const EXPORT_SNAPSHOT_SDK_URL = "https://api.labelstud.io/api-reference/api-reference/projects/exports/create";
-const ENTERPRISE_URL = "#";
-
-// const formats = {
-//   json: 'JSON',
-//   csv: 'CSV',
-// };
+const EXPORT_SNAPSHOT_SDK_URL = "https://docs.mltl.us/guide/export.html#Export-snapshots-via-SDK";
 
 const downloadFile = (blob, filename) => {
   const link = document.createElement("a");
@@ -57,7 +49,6 @@ export const ExportPage = () => {
   const [projectTaskNumber, setProjectTaskNumber] = useState(null);
   const [exportIssue, setExportIssue] = useState(null);
 
-  /** @type {import('react').RefObject<Form>} */
   const form = useRef();
 
   const proceedExport = async () => {
@@ -82,8 +73,6 @@ export const ExportPage = () => {
         },
       });
 
-      // The API proxy can return `null` for certain network errors; treat it as timeout-like
-      // and show actionable guidance instead of a generic error.
       if (!response) {
         setExportIssue("timeout");
         return;
@@ -91,7 +80,6 @@ export const ExportPage = () => {
 
       if (response.ok) {
         const blob = await response.blob();
-
         downloadFile(blob, response.headers.get("filename"));
         return;
       }
@@ -115,9 +103,7 @@ export const ExportPage = () => {
 
       api
         .callApi("previousExports", {
-          params: {
-            pk: pageParams.id,
-          },
+          params: { pk: pageParams.id },
         })
         .then(({ export_files }) => {
           if (!cancelled) setPreviousExports(export_files.slice(0, 1));
@@ -125,9 +111,7 @@ export const ExportPage = () => {
 
       api
         .callApi("exportFormats", {
-          params: {
-            pk: pageParams.id,
-          },
+          params: { pk: pageParams.id },
         })
         .then((formats) => {
           if (cancelled) return;
@@ -135,8 +119,6 @@ export const ExportPage = () => {
           setCurrentFormat(formats[0]?.name);
         });
 
-      // Fetch project metadata to show a proactive warning for large exports.
-      // This is best-effort and should not trigger global error UI if it fails.
       api
         .callApi("project", {
           params: { pk: pageParams.id },
@@ -158,14 +140,12 @@ export const ExportPage = () => {
       onHide={() => {
         const path = location.pathname.replace(ExportPage.path, "");
         const search = location.search;
-
         history.replace(`${path}${search !== "?" ? search : ""}`);
       }}
       title="Export data"
       style={{ width: 720 }}
       closeOnClickOutside={false}
       allowClose={!downloading}
-      // footer="Read more about supported export formats in the Documentation."
       visible
     >
       <div className={cn("export-page").toClassName()}>
@@ -272,15 +252,10 @@ const ExportLargeProjectWarning = ({ taskCount }) => {
         Large project detected ({taskCount.toLocaleString()} tasks)
       </div>
       <div className={cn("export-page").elem("warning-body").toClassName()}>
-        To avoid potential timeouts during large dataset exports in the Community Edition, use the{" "}
+        To avoid potential timeouts during large dataset exports, use the{" "}
         <a className="no-go" href={EXPORT_TIMEOUT_DOCS_URL} target="_blank" rel="noreferrer">
           CLI/SDK export options
-        </a>{" "}
-        or consider{" "}
-        <a className="no-go" href={ENTERPRISE_URL} target="_blank" rel="noreferrer">
-          Enterprise
-        </a>{" "}
-        for background exports at scale.
+        </a>.
       </div>
     </div>
   );
@@ -303,8 +278,7 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
         <div className={cn("export-page").elem("timeout-title").toClassName()}>Export timed out</div>
       </div>
       <div className={cn("export-page").elem("timeout-body").toClassName()}>
-        This export is processed synchronously in the Community Edition UI and can exceed typical reverse-proxy timeouts
-        (often around 90 seconds) for large datasets.
+        This export can exceed typical reverse-proxy timeouts for large datasets.
       </div>
 
       <div className={cn("export-page").elem("timeout-actions").toClassName()}>
@@ -351,20 +325,7 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
                   export snapshots via the SDK
                   <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
                 </a>{" "}
-                to create and download a snapshot without relying on a single UI request.
-              </div>
-            </div>
-          </li>
-          <li>
-            <div className={cn("export-page").elem("timeout-action-item").toClassName()}>
-              <IconWarningCircleFilled className={cn("export-page").elem("timeout-action-icon").toClassName()} />
-              <div className={cn("export-page").elem("timeout-action-content").toClassName()}>
-                For large-scale exports in the UI, consider{" "}
-                <a className="no-go" href={ENTERPRISE_URL} target="_blank" rel="noreferrer">
-                  MLTL Annotate
-                  <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
-                </a>{" "}
-                since it is designed for large-scale projects and asynchronous exports.
+                to create and download a snapshot.
               </div>
             </div>
           </li>
@@ -374,7 +335,7 @@ const ExportTimeoutGuidance = ({ projectId, exportType }) => {
           <span>
             More details in the documentation:{" "}
             <a className="no-go" href={EXPORT_TIMEOUT_DOCS_URL} target="_blank" rel="noreferrer">
-              Export timeout in Community Edition
+              Export timeout guidance
               <IconExternal className={cn("export-page").elem("timeout-link-icon").toClassName()} />
             </a>
           </span>

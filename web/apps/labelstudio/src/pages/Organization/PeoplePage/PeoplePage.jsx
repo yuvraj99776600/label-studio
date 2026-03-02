@@ -1,11 +1,10 @@
 import { Button } from "@humansignal/ui";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useUpdatePageTitle } from "@humansignal/core";
-import { HeidiTips } from "../../../components/HeidiTips/HeidiTips";
 import { modal } from "../../../components/Modal/Modal";
 import { Space } from "../../../components/Space/Space";
 import { cn } from "../../../utils/bem";
-import { FF_AUTH_TOKENS, FF_LSDV_E_297, isFF } from "../../../utils/feature-flags";
+import { FF_AUTH_TOKENS, isFF } from "../../../utils/feature-flags";
 import "./PeopleInvitation.scss";
 import { PeopleList } from "./PeopleList";
 import "./PeoplePage.scss";
@@ -26,7 +25,6 @@ export const PeoplePage = () => {
   const selectUser = useCallback(
     (user) => {
       setSelectedUser(user);
-
       localStorage.setItem("selectedUser", user?.id);
     },
     [setSelectedUser],
@@ -86,10 +84,8 @@ export const PeoplePage = () => {
           onSelect={(user) => selectUser(user)}
         />
 
-        {selectedUser ? (
+        {selectedUser && (
           <SelectedUser user={selectedUser} onClose={() => selectUser(null)} />
-        ) : (
-          isFF(FF_LSDV_E_297) && <HeidiTips collection="organizationPage" />
         )}
       </div>
       <InviteLink
