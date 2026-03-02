@@ -22,6 +22,121 @@ body {
   min-height: 100vh;
 }
 
+/* =====================================================
+   MLTL GLOBAL ROUNDED EDGES
+   All buttons, modals, sidebars, cards, inputs, dropdowns
+   get soft rounded corners throughout the app.
+   ===================================================== */
+
+/* Buttons */
+button,
+[class*="button"],
+[class*="btn"],
+a[class*="button"] {
+  border-radius: 8px !important;
+}
+
+/* Inputs, textareas, selects */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select,
+[class*="input"],
+[class*="select"],
+[class*="textarea"],
+.ant-input,
+.ant-select-selector {
+  border-radius: 8px !important;
+}
+
+/* Modals */
+[class*="modal"],
+.ant-modal-content,
+.ant-modal .ant-modal-content,
+[class*="dialog"] {
+  border-radius: 12px !important;
+}
+
+/* Cards and panels */
+[class*="card"],
+[class*="panel"],
+[class*="project-card"] {
+  border-radius: 12px !important;
+}
+
+/* Dropdowns and menus */
+[class*="dropdown"],
+[class*="menu"],
+.ant-dropdown,
+.ant-dropdown-menu,
+.ant-popover-inner {
+  border-radius: 10px !important;
+}
+
+/* Tooltips */
+.ant-tooltip-inner {
+  border-radius: 8px !important;
+}
+
+/* Tags and badges */
+[class*="tag"],
+[class*="badge"],
+[class*="chip"] {
+  border-radius: 6px !important;
+}
+
+/* Tabs */
+[class*="tab"][class*="active"],
+.ant-tabs-tab {
+  border-radius: 8px 8px 0 0 !important;
+}
+
+/* Toggle items / segmented controls */
+[class*="toggle-item"],
+[class*="segmented"] {
+  border-radius: 8px !important;
+}
+
+/* Notifications */
+.ant-notification-notice,
+.ant-message-notice-content {
+  border-radius: 10px !important;
+}
+
+/* Sidebar navigation */
+[class*="sidebar"],
+[class*="side-panel"] {
+  border-radius: 0 12px 12px 0 !important;
+}
+
+/* Project list links */
+.projects-page__link {
+  border-radius: 12px !important;
+}
+
+/* Form actions and indicators */
+[class*="form-indicator"] {
+  border-radius: 8px !important;
+}
+
+/* Data manager table header cells */
+[class*="table"] th:first-child {
+  border-top-left-radius: 8px !important;
+}
+[class*="table"] th:last-child {
+  border-top-right-radius: 8px !important;
+}
+
+/* Code editor containers */
+.CodeMirror {
+  border-radius: 8px !important;
+}
+
+/* Avatar/userpic — keep circular */
+[class*="userpic"],
+[class*="avatar"] {
+  border-radius: 50% !important;
+}
+
 .global-error {
   padding: 32px;
 
@@ -48,6 +163,7 @@ body {
     white-space: pre-wrap;
     margin: 16px 0;
     padding: 16px;
+    border-radius: 10px;
   }
 
   &__actions {

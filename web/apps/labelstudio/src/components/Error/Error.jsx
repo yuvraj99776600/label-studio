@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useMemo, useState } from "react";
 import sanitizeHtml from "sanitize-html";
 import { cn } from "../../utils/bem";
-import { absoluteURL, copyText } from "../../utils/helpers";
+import { copyText } from "../../utils/helpers";
 import { Button } from "@humansignal/ui";
 import { Space } from "../Space/Space";
 import "./Error.scss";
@@ -33,12 +33,25 @@ export const ErrorWrapper = ({
   return (
     <div className={cn("error-message").toClassName()}>
       {!minimal && possum !== false && (
-        <img
-          className={cn("error-message").elem("heidi").toClassName()}
-          src={absoluteURL("/static/images/opossum_broken.svg")}
-          height="111"
-          alt="Something went wrong"
-        />
+        <div
+          style={{
+            width: 80,
+            height: 80,
+            borderRadius: "50%",
+            background: "var(--color-negative-surface, #fef2f2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 16px",
+          }}
+        >
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-negative-content, #ef4444)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <title>Error</title>
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        </div>
       )}
 
       {!minimal && title && <div className={cn("error-message").elem("title").toClassName()}>{title}</div>}

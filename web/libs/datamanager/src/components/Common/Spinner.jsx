@@ -1,12 +1,33 @@
 import { inject } from "mobx-react";
 import React from "react";
-import Running from "../../assets/running";
 
 const injector = inject(({ store }) => {
   return {
     SDK: store?.SDK,
   };
 });
+
+/**
+ * Generic CSS spinner — replaces the opossum mascot loader.
+ */
+const DefaultSpinner = ({ size }) => {
+  const spinnerStyle = {
+    width: size,
+    height: size,
+    border: `${Math.max(2, Math.round(size * 0.08))}px solid var(--color-neutral-border, #e5e7eb)`,
+    borderTopColor: `var(--color-primary-content, #617ada)`,
+    borderRadius: "50%",
+    animation: "mltl-spin 0.8s linear infinite",
+    boxSizing: "border-box",
+  };
+
+  return (
+    <>
+      <style>{`@keyframes mltl-spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={spinnerStyle} />
+    </>
+  );
+};
 
 export const Spinner = injector(({ SDK, visible = true, ...props }) => {
   const size = React.useMemo(() => {
@@ -22,34 +43,24 @@ export const Spinner = injector(({ SDK, visible = true, ...props }) => {
     }
   }, [props.size]);
 
-  const source = Running.default;
-
-  const videoStyles = {
-    width: "100%",
-    height: "100%",
-    objectFit: "contain",
-  };
-
   const ExternalSpinner = SDK?.spinner;
 
   return visible ? (
     <div
       {...props}
-      style={{ width: size, height: size }}
-      children={
-        <div style={{ width: "100%", height: "100%" }}>
-          {ExternalSpinner ? (
-            <ExternalSpinner size={size} />
-          ) : (
-            <img
-              src={source.x1}
-              srcSet={[`${source.x1} 1x`, `${source.x2} 2x`].join(",")}
-              style={videoStyles}
-              alt="opossum loader"
-            />
-          )}
-        </div>
-      }
-    />
+      style={{
+        width: size,
+        height: size,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {ExternalSpinner ? (
+        <ExternalSpinner size={size} />
+      ) : (
+        <DefaultSpinner size={size} />
+      )}
+    </div>
   ) : null;
 });

@@ -6,7 +6,6 @@ import { IconCheck, IconEllipsis, IconMinus, IconSparks } from "@humansignal/ico
 import { Userpic, Button, Dropdown, Tooltip } from "@humansignal/ui";
 import { Menu, Pagination } from "../../components";
 import { cn } from "../../utils/bem";
-import { absoluteURL } from "../../utils/helpers";
 import { ProjectStateChip } from "@humansignal/app-common";
 
 const DEFAULT_CARD_COLORS = ["#FFFFFF", "#FDFDFC"];
@@ -38,11 +37,23 @@ export const ProjectsList = ({ projects, currentPage, totalItems, loadNextPage, 
 export const EmptyProjectsList = ({ openModal }) => {
   return (
     <div className={cn("empty-projects-page").toClassName()}>
-      <img
-        alt="Looking for projects"
-        className={cn("empty-projects-page").elem("heidi").toClassName()}
-        src={absoluteURL("/static/images/opossum_looking.png")}
-      />
+      <div
+        style={{
+          width: 80,
+          height: 80,
+          borderRadius: "50%",
+          background: "var(--color-neutral-surface, #f3f4f6)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 16px",
+        }}
+      >
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-content-subtler, #9ca3af)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <title>No projects</title>
+          <path d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V9C21 7.89543 20.1046 7 19 7H13L11 5H5C3.89543 5 3 5.89543 3 7Z" />
+        </svg>
+      </div>
       <h1 className={cn("empty-projects-page").elem("header").toClassName()}>No projects here yet!</h1>
       <p>Create one and start labeling your data.</p>
       <Button onClick={openModal} className="my-8" aria-label="Create new project">
@@ -61,7 +72,7 @@ const ProjectCard = ({ project }) => {
     const textColor =
       color && chr(color).luminance() > 0.3
         ? "var(--color-neutral-inverted-content)"
-        : "var(--color-neutral-inverted-content)"; // Determine text color based on luminance
+        : "var(--color-neutral-inverted-content)";
     return color
       ? {
           "--header-color": color,
